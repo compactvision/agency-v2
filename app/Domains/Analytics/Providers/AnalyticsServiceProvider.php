@@ -21,6 +21,6 @@ class AnalyticsServiceProvider extends ServiceProvider
     {
         Route::middleware('api')
             ->prefix('api')
-            ->group(base_path('app/Domains/Analytics/routes/api.php'));
+            ->group(base_path('app/Domains/Analytics/Routes/api.php'));
     }
 }
