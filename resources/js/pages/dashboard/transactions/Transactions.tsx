@@ -38,7 +38,11 @@ type PageProps = {
 
 // ===== Component =====
 export default function Transactions() {
-  const { auth, paymentRequests, filters } = usePage<PageProps>().props;
+  const { 
+    auth, 
+    paymentRequests = { data: [], meta: { current_page: 1, last_page: 1, total: 0 }, links: [] }, 
+    filters 
+  } = usePage<PageProps>().props;
 
   // Admin?
   const isAdmin = !!auth?.user?.roles?.includes?.('Admin');
@@ -199,7 +203,7 @@ export default function Transactions() {
                   +12%
                 </div>
               </div>
-              <div className="text-2xl font-bold text-slate-900">{paymentRequests.data.length}</div>
+              <div className="text-2xl font-bold text-slate-900">{paymentRequests?.data?.length || 0}</div>
               <div className="text-sm text-slate-600">Total transactions</div>
             </div>
 
@@ -214,7 +218,7 @@ export default function Transactions() {
                 </div>
               </div>
               <div className="text-2xl font-bold text-slate-900">
-                {paymentRequests.data.filter((p) => p.status === 'pending').length}
+                {paymentRequests?.data?.filter((p) => p.status === 'pending').length || 0}
               </div>
               <div className="text-sm text-slate-600">En validation</div>
             </div>
@@ -230,7 +234,7 @@ export default function Transactions() {
                 </div>
               </div>
               <div className="text-2xl font-bold text-slate-900">
-                {paymentRequests.data.filter((p) => p.status === 'cancelled').length}
+                {paymentRequests?.data?.filter((p) => p.status === 'cancelled').length || 0}
               </div>
               <div className="text-sm text-slate-600">Annulées</div>
             </div>
@@ -257,7 +261,7 @@ export default function Transactions() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-amber-200/30">
-                  {paymentRequests.data.map((pay, index) => (
+                  {paymentRequests?.data?.map((pay, index) => (
                     <tr 
                       key={pay.id} 
                       className="hover:bg-amber-50/30 transition-colors"
@@ -332,7 +336,7 @@ export default function Transactions() {
 
               {/* Mobile Cards */}
               <div className="md:hidden">
-                {paymentRequests.data.map((pay, index) => (
+                {paymentRequests?.data?.map((pay, index) => (
                   <div
                     key={pay.id}
                     className="p-4 border-b border-amber-200/30 last:border-b-0"
@@ -393,7 +397,7 @@ export default function Transactions() {
                   </div>
                 ))}
 
-                {paymentRequests.data.length === 0 && (
+                {paymentRequests?.data?.length === 0 && (
                   <div className="text-center py-12">
                     <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-amber-100/50 flex items-center justify-center">
                       <CreditCard size={32} className="text-amber-500" />
@@ -411,7 +415,7 @@ export default function Transactions() {
         <div className="px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-sm text-slate-600">
-              {paymentRequests.data.length > 0 ? (
+              {paymentRequests?.data?.length > 0 ? (
                 <>
                   Affichage de {paymentRequests.data.length} sur {paymentRequests.meta?.total} transactions
                 </>
@@ -421,8 +425,7 @@ export default function Transactions() {
             </div>
             
             <div className="flex items-center gap-2">
-              {paymentRequests.links.map((link, index) => (
-                <button
+              {paymentRequests?.links?.map((link, index) => (
                   key={index}
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     link.active 
