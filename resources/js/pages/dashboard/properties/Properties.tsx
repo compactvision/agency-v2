@@ -1,4 +1,3 @@
-import PropertyDetailsPopup from '@/components/forms/PropertyDetailsPopup';
 import Dashboard from '@/components/layouts/Dashboard/Dashboard';
 import BackButton from '@/components/ui/BackButton';
 import { Link, router, usePage } from '@inertiajs/react';
@@ -24,6 +23,7 @@ import {
     XCircle,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { route } from 'ziggy-js';
 
 type PropertyImage = { url: string };
 type Property = {
@@ -48,10 +48,6 @@ type PaginationLink = { url: string | null; label: string; active: boolean };
 
 export default function Properties() {
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedProperty, setSelectedProperty] = useState<Property | null>(
-        null,
-    );
-    const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
     const [sortBy, setSortBy] = useState('created_at');
     const [sortOrder, setSortOrder] = useState('desc');
@@ -59,12 +55,12 @@ export default function Properties() {
 
     // Refs pour les dropdowns
     const dropdownRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
-    const searchTimeoutRef = useRef<NodeJS.Timeout>();
+    const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
     const {
         auth = { user: { roles: [] } },
-        properties = { data: [], links: [] },
-        favorites = [],
+        properties = { data: [], links: [], meta: { total: 0 } },
+        favorites = 0,
         filters = {},
     } = usePage().props as any;
 
@@ -132,17 +128,10 @@ export default function Properties() {
             {},
             { preserveScroll: true },
         );
-        handleClosePopup();
     };
 
     const handleViewProperty = (property: Property) => {
-        setSelectedProperty(property);
-        setIsPopupOpen(true);
-    };
-
-    const handleClosePopup = () => {
-        setIsPopupOpen(false);
-        setSelectedProperty(null);
+        router.visit(route('dashboard.properties.show', property.id));
     };
 
     const deleteProperty = (id: number) => {
@@ -182,7 +171,7 @@ export default function Properties() {
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('fr-FR', {
             style: 'currency',
-            currency: 'XOF',
+            currency: 'USD',
             minimumFractionDigits: 0,
             maximumFractionDigits: 0,
         }).format(price);
@@ -197,30 +186,51 @@ export default function Properties() {
     };
 
     const getStatusBadge = (property: Property) => {
-        if (!property.is_approved) {
-            return (
-                <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800">
-                    <Clock size={10} className="mr-1" />
-                    En attente
-                </span>
-            );
-        }
+        switch (property.status) {
+            case 'pending_validation':
+                return (
+                    <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800">
+                        <Clock size={10} className="mr-1" />
+                        En attente
+                    </span>
+                );
 
-        if (!property.is_published) {
-            return (
-                <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
-                    <AlertCircle size={10} className="mr-1" />
-                    Brouillon
-                </span>
-            );
-        }
+            case 'draft':
+                return (
+                    <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800">
+                        <Edit3 size={10} className="mr-1" />
+                        Brouillon
+                    </span>
+                );
 
-        return (
-            <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800">
-                <CheckCircle size={10} className="mr-1" />
-                Publié
-            </span>
-        );
+            case 'published':
+                return (
+                    <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800">
+                        <CheckCircle size={10} className="mr-1" />
+                        Publié
+                    </span>
+                );
+
+            case 'rejected':
+                return (
+                    <span className="inline-flex items-center rounded-full border border-red-200 bg-red-100 px-2 py-1 text-xs font-medium text-red-800">
+                        <AlertCircle size={10} className="mr-1" />
+                        Rejeté
+                    </span>
+                );
+
+            case 'archived':
+                return (
+                    <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2 py-1 text-xs font-medium text-slate-800">
+                        <ImageOff size={10} className="mr-1" />
+                        Archivé
+                    </span>
+                );
+
+            default:
+                // Fallback for unknown status or empty
+                return null;
+        }
     };
 
     const isAdmin = auth?.user?.roles?.includes('Admin') ?? false;
@@ -396,8 +406,8 @@ export default function Properties() {
                             </div>
                             <div className="text-2xl font-bold text-slate-900">
                                 {
-                                    properties.data.filter(
-                                        (p) => !p.is_approved,
+                                    (properties?.data || []).filter(
+                                        (p: any) => !p.is_approved,
                                     ).length
                                 }
                             </div>
@@ -417,9 +427,10 @@ export default function Properties() {
                                 </div>
                             </div>
                             <div className="text-2xl font-bold text-slate-900">
-                                {properties.data
+                                {(properties?.data || [])
                                     .reduce(
-                                        (sum, p) => sum + (p.views_count || 0),
+                                        (sum: number, p: any) =>
+                                            sum + (p.views_count || 0),
                                         0,
                                     )
                                     .toLocaleString()}
@@ -454,7 +465,7 @@ export default function Properties() {
                     {viewMode === 'grid' ? (
                         /* Grid View */
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                            {properties.data.length === 0 ? (
+                            {(properties?.data || []).length === 0 ? (
                                 <div className="col-span-full py-16 text-center">
                                     <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-amber-100/50">
                                         <Home
@@ -480,197 +491,202 @@ export default function Properties() {
                                     </Link>
                                 </div>
                             ) : (
-                                properties.data.map((property, index) => (
-                                    <div
-                                        key={property.id}
-                                        className="group relative transform overflow-hidden rounded-2xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/20"
-                                        style={{
-                                            animationDelay: `${index * 0.1}s`,
-                                        }}
-                                    >
-                                        {/* Image */}
-                                        <div className="relative h-48 overflow-hidden">
-                                            {property.images?.[0]?.url ? (
-                                                <img
-                                                    src={`/storage/${property.images[0].url}`}
-                                                    alt={property.title}
-                                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                                />
-                                            ) : (
-                                                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-100 to-amber-200">
-                                                    <ImageOff
-                                                        size={32}
-                                                        className="text-amber-400"
+                                (properties?.data || []).map(
+                                    (property: any, index: number) => (
+                                        <div
+                                            key={property.id}
+                                            className="group relative transform overflow-hidden rounded-2xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/20"
+                                            style={{
+                                                animationDelay: `${index * 0.1}s`,
+                                            }}
+                                        >
+                                            {/* Image */}
+                                            <div className="relative h-48 overflow-hidden">
+                                                {property.images &&
+                                                property.images.length > 0 ? (
+                                                    <img
+                                                        src={`/storage/${property.images[0].path}`}
+                                                        alt={property.title}
+                                                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                                                     />
+                                                ) : (
+                                                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-100 to-amber-200">
+                                                        <ImageOff
+                                                            size={32}
+                                                            className="text-amber-400"
+                                                        />
+                                                    </div>
+                                                )}
+
+                                                {/* Status Badge */}
+                                                <div className="absolute top-3 right-3">
+                                                    {getStatusBadge(property)}
                                                 </div>
-                                            )}
 
-                                            {/* Status Badge */}
-                                            <div className="absolute top-3 right-3">
-                                                {getStatusBadge(property)}
-                                            </div>
-
-                                            {/* Price Badge */}
-                                            <div className="absolute bottom-3 left-3 rounded-lg bg-white/90 px-2 py-1 backdrop-blur-sm">
-                                                <span className="text-sm font-bold text-amber-600">
-                                                    {formatPrice(
-                                                        property.price,
-                                                    )}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {/* Content */}
-                                        <div className="p-4">
-                                            <h3 className="mb-2 font-semibold text-slate-900 transition-colors group-hover:text-amber-700">
-                                                {property.title}
-                                            </h3>
-
-                                            <div className="mb-3 flex items-center gap-4 text-sm text-slate-600">
-                                                <span className="flex items-center">
-                                                    <MapPin
-                                                        size={14}
-                                                        className="mr-1 text-amber-500"
-                                                    />
-                                                    {property.location ||
-                                                        'Non spécifié'}
-                                                </span>
-                                                <span className="flex items-center">
-                                                    <Building
-                                                        size={14}
-                                                        className="mr-1 text-amber-500"
-                                                    />
-                                                    {property.type}
-                                                </span>
-                                            </div>
-
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3 text-sm">
-                                                    <span className="flex items-center text-slate-500">
-                                                        <Eye
-                                                            size={14}
-                                                            className="mr-1"
-                                                        />
-                                                        {property.views_count ||
-                                                            0}
-                                                    </span>
-                                                    <span className="flex items-center text-slate-500">
-                                                        <Calendar
-                                                            size={14}
-                                                            className="mr-1"
-                                                        />
-                                                        {formatDate(
-                                                            property.created_at ||
-                                                                '',
+                                                {/* Price Badge */}
+                                                <div className="absolute bottom-3 left-3 rounded-lg bg-white/90 px-2 py-1 backdrop-blur-sm">
+                                                    <span className="text-sm font-bold text-amber-600">
+                                                        {formatPrice(
+                                                            property.price,
                                                         )}
                                                     </span>
                                                 </div>
+                                            </div>
 
-                                                {/* Actions */}
-                                                <div className="flex items-center gap-2">
-                                                    <button
-                                                        onClick={() =>
-                                                            handleViewProperty(
-                                                                property,
-                                                            )
-                                                        }
-                                                        className="rounded-lg p-2 text-amber-600 transition-colors hover:bg-amber-100"
-                                                        title="Voir détails"
-                                                    >
-                                                        <Eye size={16} />
-                                                    </button>
+                                            {/* Content */}
+                                            <div className="p-4">
+                                                <h3 className="mb-2 font-semibold text-slate-900 transition-colors group-hover:text-amber-700">
+                                                    {property.title}
+                                                </h3>
 
-                                                    <div
-                                                        className="relative"
-                                                        ref={(el) =>
-                                                            (dropdownRefs.current[
-                                                                property.id
-                                                            ] = el)
-                                                        }
-                                                    >
+                                                <div className="mb-3 flex items-center gap-4 text-sm text-slate-600">
+                                                    <span className="flex items-center">
+                                                        <MapPin
+                                                            size={14}
+                                                            className="mr-1 text-amber-500"
+                                                        />
+                                                        {property.location ||
+                                                            'Non spécifié'}
+                                                    </span>
+                                                    <span className="flex items-center">
+                                                        <Building
+                                                            size={14}
+                                                            className="mr-1 text-amber-500"
+                                                        />
+                                                        {property.type}
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-3 text-sm">
+                                                        <span className="flex items-center text-slate-500">
+                                                            <Eye
+                                                                size={14}
+                                                                className="mr-1"
+                                                            />
+                                                            {property.views_count ||
+                                                                0}
+                                                        </span>
+                                                        <span className="flex items-center text-slate-500">
+                                                            <Calendar
+                                                                size={14}
+                                                                className="mr-1"
+                                                            />
+                                                            {formatDate(
+                                                                property.created_at ||
+                                                                    '',
+                                                            )}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Actions */}
+                                                    <div className="flex items-center gap-2">
                                                         <button
-                                                            onClick={(e) =>
-                                                                toggleDropdown(
-                                                                    property.id,
-                                                                    e,
+                                                            onClick={() =>
+                                                                handleViewProperty(
+                                                                    property,
                                                                 )
                                                             }
-                                                            className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100"
-                                                            title="Plus d'options"
+                                                            className="rounded-lg p-2 text-amber-600 transition-colors hover:bg-amber-100"
+                                                            title="Voir détails"
                                                         >
-                                                            <MoreVertical
-                                                                size={16}
-                                                            />
+                                                            <Eye size={16} />
                                                         </button>
 
-                                                        {dropdownOpen ===
-                                                            property.id && (
-                                                            <div className="absolute right-0 bottom-full z-[100] mb-2 w-48 overflow-hidden rounded-xl border border-amber-200/50 bg-white shadow-2xl shadow-amber-500/20">
-                                                                <button
-                                                                    onClick={() =>
-                                                                        handleEditProperty(
-                                                                            property,
-                                                                        )
-                                                                    }
-                                                                    className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-amber-50"
-                                                                >
-                                                                    <Edit3
-                                                                        size={
-                                                                            16
+                                                        <div
+                                                            className="relative"
+                                                            ref={(
+                                                                el: HTMLDivElement | null,
+                                                            ) => {
+                                                                dropdownRefs.current[
+                                                                    property.id
+                                                                ] = el;
+                                                            }}
+                                                        >
+                                                            <button
+                                                                onClick={(e) =>
+                                                                    toggleDropdown(
+                                                                        property.id,
+                                                                        e,
+                                                                    )
+                                                                }
+                                                                className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100"
+                                                                title="Plus d'options"
+                                                            >
+                                                                <MoreVertical
+                                                                    size={16}
+                                                                />
+                                                            </button>
+
+                                                            {dropdownOpen ===
+                                                                property.id && (
+                                                                <div className="absolute right-0 bottom-full z-[100] mb-2 w-48 overflow-hidden rounded-xl border border-amber-200/50 bg-white shadow-2xl shadow-amber-500/20">
+                                                                    <button
+                                                                        onClick={() =>
+                                                                            handleEditProperty(
+                                                                                property,
+                                                                            )
                                                                         }
-                                                                    />
-                                                                    <span>
-                                                                        Modifier
-                                                                    </span>
-                                                                </button>
-                                                                <button
-                                                                    onClick={() =>
-                                                                        handleViewStatistics(
-                                                                            property,
-                                                                        )
-                                                                    }
-                                                                    className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-amber-50"
-                                                                >
-                                                                    <BarChart3
-                                                                        size={
-                                                                            16
+                                                                        className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-amber-50"
+                                                                    >
+                                                                        <Edit3
+                                                                            size={
+                                                                                16
+                                                                            }
+                                                                        />
+                                                                        <span>
+                                                                            Modifier
+                                                                        </span>
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() =>
+                                                                            handleViewStatistics(
+                                                                                property,
+                                                                            )
                                                                         }
-                                                                    />
-                                                                    <span>
-                                                                        Statistiques
-                                                                    </span>
-                                                                </button>
-                                                                <button
-                                                                    onClick={() =>
-                                                                        deleteProperty(
-                                                                            property.id,
-                                                                        )
-                                                                    }
-                                                                    className="flex w-full items-center gap-2 px-4 py-3 text-left text-red-600 transition-colors hover:bg-red-50"
-                                                                >
-                                                                    <Trash2
-                                                                        size={
-                                                                            16
+                                                                        className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-amber-50"
+                                                                    >
+                                                                        <BarChart3
+                                                                            size={
+                                                                                16
+                                                                            }
+                                                                        />
+                                                                        <span>
+                                                                            Statistiques
+                                                                        </span>
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() =>
+                                                                            deleteProperty(
+                                                                                property.id,
+                                                                            )
                                                                         }
-                                                                    />
-                                                                    <span>
-                                                                        Supprimer
-                                                                    </span>
-                                                                </button>
-                                                            </div>
-                                                        )}
+                                                                        className="flex w-full items-center gap-2 px-4 py-3 text-left text-red-600 transition-colors hover:bg-red-50"
+                                                                    >
+                                                                        <Trash2
+                                                                            size={
+                                                                                16
+                                                                            }
+                                                                        />
+                                                                        <span>
+                                                                            Supprimer
+                                                                        </span>
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))
+                                    ),
+                                )
                             )}
                         </div>
                     ) : (
                         /* List View */
                         <div className="overflow-hidden rounded-2xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10">
-                            {properties.data.length === 0 ? (
+                            {(properties?.data || []).length === 0 ? (
                                 <div className="py-16 text-center">
                                     <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-amber-100/50">
                                         <Home
@@ -721,8 +737,11 @@ export default function Properties() {
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-amber-200/30">
-                                            {properties.data.map(
-                                                (property, index) => (
+                                            {(properties?.data || []).map(
+                                                (
+                                                    property: any,
+                                                    index: number,
+                                                ) => (
                                                     <tr
                                                         key={property.id}
                                                         className="transition-colors hover:bg-amber-50/30"
@@ -732,11 +751,12 @@ export default function Properties() {
                                                     >
                                                         <td className="px-6 py-4">
                                                             <div className="h-16 w-16 overflow-hidden rounded-lg">
-                                                                {property
-                                                                    .images?.[0]
-                                                                    ?.url ? (
+                                                                {property.images &&
+                                                                property.images
+                                                                    .length >
+                                                                    0 ? (
                                                                     <img
-                                                                        src={`/storage/${property.images[0].url}`}
+                                                                        src={`/storage/${property.images[0].path}`}
                                                                         alt={
                                                                             property.title
                                                                         }
@@ -822,11 +842,13 @@ export default function Properties() {
 
                                                                 <div
                                                                     className="relative"
-                                                                    ref={(el) =>
-                                                                        (dropdownRefs.current[
+                                                                    ref={(
+                                                                        el,
+                                                                    ) => {
+                                                                        dropdownRefs.current[
                                                                             property.id
-                                                                        ] = el)
-                                                                    }
+                                                                        ] = el;
+                                                                    }}
                                                                 >
                                                                     <button
                                                                         onClick={(
@@ -950,13 +972,6 @@ export default function Properties() {
                         </div>
                     </div>
                 </div>
-
-                <PropertyDetailsPopup
-                    isOpen={isPopupOpen}
-                    onClose={handleClosePopup}
-                    property={selectedProperty}
-                    toggleApproval={toggleApproval}
-                />
             </div>
         </Dashboard>
     );

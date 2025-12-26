@@ -136,6 +136,7 @@ export default function Sidebar({
             description: 'Gérer les propriétés',
             route: 'dashboard.properties.index',
             section: 'main',
+            roles: ['admin', 'seller', 'agency', 'super-admin'],
             permission: 'property.view',
         },
         {
@@ -167,6 +168,7 @@ export default function Sidebar({
             description: 'Ajouter une propriété',
             route: 'dashboard.properties.create',
             section: 'Propriétés',
+            roles: ['admin', 'seller', 'agency', 'super-admin'],
             permission: 'property.create',
         },
         {
@@ -176,6 +178,7 @@ export default function Sidebar({
             description: 'Mes favoris',
             route: 'dashboard.properties.favorites',
             section: 'Propriétés',
+            roles: ['admin', 'seller', 'agency', 'buyer', 'super-admin'],
             permission: 'property.favorites.view',
         },
 
@@ -265,6 +268,7 @@ export default function Sidebar({
             description: 'Mon abonnement',
             route: 'dashboard.subscriptions.index',
             section: 'Profil',
+            roles: ['admin', 'seller', 'agency', 'super-admin'],
             permission: 'subscription.view',
         },
 
@@ -276,6 +280,7 @@ export default function Sidebar({
             description: 'Statistiques détaillées',
             route: 'dashboard.analytics.index',
             section: 'Analytics',
+            roles: ['admin', 'seller', 'agency', 'super-admin'],
             permission: 'analytics.statistics.view',
         },
 
@@ -294,13 +299,17 @@ export default function Sidebar({
         // Si c'est un super-admin, il voit tout
         if (hasRole('super-admin')) return true;
 
-        // Vérification par permission (si spécifiée)
-        if (item.permission && !can(item.permission)) return false;
+        // Si l'item n'a ni rôles ni permissions définis, il est visible par tous (ex: dashboard, profil)
+        if (!item.roles && !item.permission) return true;
 
-        // Vérification par rôle (si spécifié)
-        if (item.roles && !hasRole(item.roles)) return false;
+        // Vérification par rôle (priorité à la simplicité de configuration)
+        const roleMatch = item.roles ? hasRole(item.roles) : false;
 
-        return true;
+        // Vérification par permission
+        const permissionMatch = item.permission ? can(item.permission) : false;
+
+        // L'item est visible si l'un des deux matches (Logique OR pour plus de flexibilité)
+        return roleMatch || permissionMatch;
     });
 
     const handleLogout = () => {

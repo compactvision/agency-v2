@@ -57,4 +57,19 @@ class Ad extends Model
     {
         return $this->belongsTo(\App\Models\User::class);
     }
+
+    public function municipality()
+    {
+        return $this->belongsTo(\App\Domains\Locations\Models\Municipality::class);
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(\App\Domains\Locations\Models\City::class);
+    }
+
+    public function country()
+    {
+        return $this->belongsTo(\App\Domains\Locations\Models\Country::class);
+    }
 }

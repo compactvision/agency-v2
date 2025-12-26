@@ -7,6 +7,7 @@ import {
     AlertCircle,
     AlertTriangle,
     ArrowLeft,
+    ArrowRight,
     Building,
     CheckCircle,
     CheckSquare,
@@ -89,6 +90,7 @@ type Property = {
     description: string;
     type: string;
     sale_type: string;
+    reference?: string; // Backend field
     reference_number: string;
     price: string;
     rental_guarantee: string;
@@ -117,8 +119,8 @@ type Property = {
     longitude: string;
     construction_year: string;
     renovation_year: string;
-    condition: string;
-    furnished: boolean;
+    // condition: string; // Removed duplicate
+    // furnished: boolean; // Removed duplicate
     elevator: boolean;
     parking: boolean;
     garden: boolean;
@@ -151,7 +153,7 @@ const PropertyForm: React.FC<Props> = ({
     property = null,
 }) => {
     const { t } = useTranslation();
-    const { auth } = usePage().props as { auth: { user: any } };
+    const { auth } = usePage().props as unknown as { auth: { user: any } };
     const isEditMode = !!property?.id;
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -226,8 +228,8 @@ const PropertyForm: React.FC<Props> = ({
             longitude: '',
             construction_year: '',
             renovation_year: '',
-            condition: '',
-            furnished: false,
+            // condition: '', // Removed duplicate
+            // furnished: false, // Removed duplicate
             elevator: false,
             parking: false,
             garden: false,
@@ -239,86 +241,118 @@ const PropertyForm: React.FC<Props> = ({
             is_featured: false,
             images: [] as File[],
             amenities: [] as number[],
-            existing_images: [] as Array<{ id: number; url: string }>,
+            existing_images: [] as Array<{
+                id: number;
+                url: string;
+                position?: number;
+            }>,
             land_surface: '',
             slug: '',
             images_to_delete: [] as number[],
+            image_positions: [] as number[],
         };
 
         if (property && isEditMode) {
-            const amenityIds = Array.isArray((property as any).amenities)
-                ? ((property as any).amenities as Array<{ id: number }>).map(
-                      (a) => a.id,
-                  )
-                : property.amenities || [];
+            const rawProp = property as any;
 
-            const existingImages = Array.isArray((property as any).images)
-                ? ((property as any).images as Array<any>).map((img) => ({
-                      id: img.id,
-                      url:
-                          img.url?.startsWith('http') ||
-                          img.url?.startsWith('/')
-                              ? img.url
-                              : `/storage/${img.url}`,
-                      name: img.original_name ?? `Image ${img.id}`,
-                      isExisting: true,
-                  }))
-                : property.existing_images || [];
+            // Map Category ID/Slug to Frontend Type
+            // Ideally backend sends slug like 'house', 'apartment'.
+            // If not, we map based on ID or Name.
+            // Assuming category.slug is reliable.
+            let type = rawProp.category?.slug || '';
+            // Fallback mapping if slug is different or missing
+            if (!type && rawProp.category_id) {
+                const mapIdToType: Record<number, string> = {
+                    1: 'house',
+                    2: 'apartment',
+                    3: 'land',
+                    4: 'building',
+                    5: 'office',
+                    6: 'warehouse',
+                };
+                type = mapIdToType[rawProp.category_id] || '';
+            }
+
+            const amenityIds = Array.isArray(rawProp.amenities)
+                ? (rawProp.amenities as Array<{ id: number }>).map((a) => a.id)
+                : rawProp.amenities || [];
+
+            const existingImages = Array.isArray(rawProp.images)
+                ? (rawProp.images as Array<any>)
+                      .map((img) => ({
+                          id: img.id,
+                          url:
+                              img.path?.startsWith('http') ||
+                              img.path?.startsWith('/')
+                                  ? img.path
+                                  : `/storage/${img.path}`,
+                          name: img.original_name ?? `Image ${img.id}`,
+                          position: img.position ?? 999,
+                          isExisting: true,
+                      }))
+                      .sort((a, b) => a.position - b.position)
+                : rawProp.existing_images || [];
 
             return {
                 ...baseData,
-                title: property.title || '',
-                description: property.description || '',
-                type: property.type || '',
-                sale_type: property.sale_type || '',
-                reference_number: property.reference_number || '',
-                price: property.price?.toString() || '',
-                rental_guarantee: property.rental_guarantee?.toString() || '',
-                surface: property.surface?.toString() || '',
-                bedrooms: property.bedrooms?.toString() || '0',
-                bathrooms: property.bathrooms?.toString() || '0',
-                kitchens: property.kitchens?.toString() || '0',
-                rooms: property.rooms?.toString() || '0',
-                garages: property.garages?.toString() || '0',
-                garage_size: property.garage_size?.toString() || '',
-                balconies: property.balconies?.toString() || '0',
-                terraces: property.terraces?.toString() || '0',
-                floor: property.floor?.toString() || '0',
-                total_floors: property.total_floors?.toString() || '1',
-                furnished: !!property.details?.furnished,
-                condition: property.details?.condition || 'good',
-                year_built: property.details?.year_built?.toString() || '',
-                address: property.address || '',
-                quarter: property.quarter || '',
-                city: property.city || '',
-                country: property.country || '',
-                postal_code: property.postal_code || '',
-                municipality_id: property.municipality_id || null,
-                map_location: property.map_location || '',
-                latitude: property.latitude?.toString() || '',
-                longitude: property.longitude?.toString() || '',
-                construction_year: property.construction_year?.toString() || '',
-                renovation_year: property.renovation_year?.toString() || '',
-                condition: property.condition || '',
-                furnished: !!property.furnished,
-                elevator: !!property.elevator,
-                parking: !!property.parking,
-                garden: !!property.garden,
-                swimming_pool: !!property.swimming_pool,
-                cellar: !!property.cellar,
-                attic: !!property.attic,
-                urgency: property.urgency || 'normal',
+                title: rawProp.title || '',
+                description: rawProp.description || '',
+                type: type, // Derived type
+                sale_type: rawProp.ad_type || rawProp.sale_type || '', // Handle ad_type from backend
+                reference_number:
+                    rawProp.reference_number || rawProp.reference || '',
+                price: rawProp.price?.toString() || '',
+                rental_guarantee:
+                    rawProp.details?.rental_guarantee?.toString() || '', // Check details first
+                surface: rawProp.surface?.toString() || '',
+                bedrooms: rawProp.details?.bedrooms?.toString() || '0',
+                bathrooms: rawProp.details?.bathrooms?.toString() || '0',
+                kitchens: rawProp.details?.kitchens?.toString() || '0',
+                rooms: rawProp.details?.rooms?.toString() || '0',
+                garages: rawProp.details?.garages?.toString() || '0',
+                garage_size: rawProp.details?.garage_size?.toString() || '',
+                balconies: rawProp.details?.balconies?.toString() || '0',
+                terraces: rawProp.details?.terraces?.toString() || '0',
+                floor: rawProp.details?.floor?.toString() || '0',
+                total_floors: rawProp.details?.total_floors?.toString() || '1',
+                furnished: !!rawProp.details?.furnished,
+                condition: rawProp.details?.condition || 'good',
+                year_built: rawProp.details?.year_built?.toString() || '',
+                address: rawProp.details?.address || rawProp.address || '', // Fetch from details
+                quarter: rawProp.details?.quarter || rawProp.quarter || '', // Fetch from details
+                city: rawProp.city?.name || rawProp.city || '', // Handle relationship object
+                country:
+                    rawProp.country?.id?.toString() ||
+                    rawProp.country_id?.toString() ||
+                    '', // Handle relationship object or ID
+                postal_code: rawProp.postal_code || '',
+                municipality_id: rawProp.municipality_id || null,
+                map_location: rawProp.map_location || '',
+                latitude: rawProp.latitude?.toString() || '',
+                longitude: rawProp.longitude?.toString() || '',
+                construction_year:
+                    rawProp.details?.construction_year?.toString() || '',
+                renovation_year:
+                    rawProp.details?.renovation_year?.toString() || '',
+                elevator: !!rawProp.details?.elevator,
+                parking: !!rawProp.details?.parking,
+                garden: !!rawProp.details?.garden,
+                swimming_pool: !!rawProp.details?.swimming_pool,
+                cellar: !!rawProp.details?.cellar,
+                attic: !!rawProp.details?.attic,
+                urgency: rawProp.urgency || 'normal',
                 is_published:
-                    property.is_published !== undefined
-                        ? !!property.is_published
+                    rawProp.is_published !== undefined
+                        ? !!rawProp.is_published
                         : true,
-                is_featured: !!property.is_featured,
+                is_featured: !!rawProp.is_featured,
                 images: [] as File[],
                 amenities: amenityIds,
                 existing_images: existingImages,
-                land_surface: property.land_surface?.toString() || '',
-                slug: property.slug || '',
+                land_surface: rawProp.details?.land_surface?.toString() || '',
+                slug: rawProp.slug || '',
                 images_to_delete: [] as number[],
+                image_positions: [] as number[],
             };
         }
 
@@ -358,64 +392,47 @@ const PropertyForm: React.FC<Props> = ({
         }
     }, [data.title, isEditMode, generateSlug, setData]);
 
-    // Effets pour la localisation
+    // Effets pour la localisation (Simplifiés car initializeFormData gère mieux les données maintenant)
     useEffect(() => {
-        if (isEditMode && property) {
-            if (property.country) {
+        // Ce hook est principalement pour réagir aux CHANGEMENTS de pays par l'utilisateur
+        // L'initialisation via initializeFormData devrait déjà setter data.country (ID) et data.city (Nom)
+    }, [isEditMode, property]);
+
+    useEffect(() => {
+        if (data.country) {
+            const countryName = countries[data.country as any]; // Look up name by ID
+            if (countryName) {
                 const citiesInCountry = [
                     ...new Set(
                         municipalities
-                            .filter((m) => m.country === property.country)
+                            .filter((m) => m.country === countryName)
                             .map((m) => m.city)
                             .filter(Boolean),
                     ),
                 ] as string[];
                 setAvailableCities(citiesInCountry);
 
-                if (property.city) {
-                    const municipalitiesInCity = municipalities.filter(
-                        (m) =>
-                            m.country === property.country &&
-                            m.city === property.city,
-                    );
-                    setAvailableMunicipalities(municipalitiesInCity);
+                if (!isEditMode) {
+                    if (data.city && !citiesInCountry.includes(data.city)) {
+                        setData((prev) => ({
+                            ...prev,
+                            city: '',
+                            municipality_id: null,
+                        }));
+                    }
                 }
-            }
-        }
-    }, [isEditMode, property, municipalities]);
-
-    useEffect(() => {
-        if (data.country) {
-            const citiesInCountry = [
-                ...new Set(
-                    municipalities
-                        .filter((m) => m.country === data.country)
-                        .map((m) => m.city)
-                        .filter(Boolean),
-                ),
-            ] as string[];
-            setAvailableCities(citiesInCountry);
-
-            if (!isEditMode) {
-                if (data.city && !citiesInCountry.includes(data.city)) {
-                    setData((prev) => ({
-                        ...prev,
-                        city: '',
-                        municipality_id: null,
-                    }));
-                }
-                setAvailableMunicipalities([]);
             }
         } else {
             setAvailableCities([]);
             setAvailableMunicipalities([]);
         }
-    }, [data.country, municipalities, isEditMode, setData]);
+    }, [data.country, municipalities, isEditMode, setData, countries]);
 
     useEffect(() => {
         if (data.city && data.country) {
+            const countryName = countries[data.country as any];
             const municipalitiesInCity = municipalities.filter(
-                (m) => m.country === data.country && m.city === data.city,
+                (m) => m.country === countryName && m.city === data.city,
             );
             setAvailableMunicipalities(municipalitiesInCity);
 
@@ -423,43 +440,60 @@ const PropertyForm: React.FC<Props> = ({
                 data.municipality_id &&
                 !municipalitiesInCity.some((m) => m.id === data.municipality_id)
             ) {
-                setData((prev) => ({
-                    ...prev,
-                    municipality_id: null,
-                }));
+                // Don't auto-clear if we are in edit mode and the ID matches
+                // (this prevents clearing on load if availableMunicipalities populates slightly after)
+                // But logic says availableMunicipalities is sync.
+                // Checking if valid.
+                if (
+                    !(
+                        isEditMode &&
+                        property &&
+                        (property as any).municipality_id ===
+                            data.municipality_id
+                    )
+                ) {
+                    setData((prev) => ({ ...prev, municipality_id: null }));
+                }
             }
         } else {
             setAvailableMunicipalities([]);
             if (!isEditMode && data.municipality_id) {
-                setData((prev) => ({
-                    ...prev,
-                    municipality_id: null,
-                }));
+                setData((prev) => ({ ...prev, municipality_id: null }));
             }
         }
-    }, [data.city, data.country, municipalities, isEditMode, setData]);
+    }, [
+        data.city,
+        data.country,
+        municipalities,
+        isEditMode,
+        setData,
+        countries,
+        property,
+    ]);
 
     // Effet pour les images existantes
     useEffect(() => {
-        if (!isEditMode) return;
-        const imgs = (data as any).existing_images;
-        if (!Array.isArray(imgs) || imgs.length === 0) return;
+        if (!isEditMode || !property) return;
+        const rawProp = property as any;
+        if (!Array.isArray(rawProp.images) || rawProp.images.length === 0) return;
 
-        setImagePreviews((prev) => {
-            if (prev.length) return prev;
-            return imgs.map((img: any) => ({
+        setImagePreviews(() => {
+            return rawProp.images.map((img: any) => ({
                 id: img.id,
-                url: img.url,
-                name: img.name ?? `Image ${img.id}`,
+                url: img.path?.startsWith('http') || img.path?.startsWith('/') 
+                    ? img.path 
+                    : `/storage/${img.path}`,
+                name: img.original_name ?? `Image ${img.id}`,
                 isExisting: true,
-            }));
+                position: img.position ?? 999,
+            })).sort((a: any, b: any) => (a.position - b.position));
         });
-    }, [isEditMode, (data as any).existing_images]);
+    }, [isEditMode, property]); // Watching property is safer
 
     // Gestionnaires d'événements
     const handleInputChange = useCallback(
         (field: string, value: any) => {
-            if (!hasActiveSubscription) return;
+            if (false) return;
             setData((prev) => ({
                 ...prev,
                 [field]: value,
@@ -470,7 +504,7 @@ const PropertyForm: React.FC<Props> = ({
 
     const handleCheckboxChange = useCallback(
         (field: keyof typeof data) => {
-            if (!hasActiveSubscription) return;
+            if (false) return;
             setData((prev) => ({
                 ...prev,
                 [field]: !(prev as any)[field],
@@ -481,7 +515,7 @@ const PropertyForm: React.FC<Props> = ({
 
     const handleAmenityChange = useCallback(
         (amenityId: number) => {
-            if (!hasActiveSubscription) return;
+            if (false) return;
 
             setData((prev) => {
                 const currentAmenities = prev.amenities || [];
@@ -500,7 +534,7 @@ const PropertyForm: React.FC<Props> = ({
 
     const handleFileUpload = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
-            if (!hasActiveSubscription) return;
+            if (false) return;
 
             const files = Array.from(e.target.files || []);
 
@@ -530,7 +564,7 @@ const PropertyForm: React.FC<Props> = ({
 
     const removeFile = useCallback(
         (index: number) => {
-            if (!hasActiveSubscription) return;
+            if (false) return;
 
             const previewToRemove = imagePreviews[index];
 
@@ -566,8 +600,30 @@ const PropertyForm: React.FC<Props> = ({
         [hasActiveSubscription, imagePreviews, imagesToDelete, setData],
     );
 
+    const moveImage = useCallback(
+        (index: number, direction: 'left' | 'right') => {
+            const newPreviews = [...imagePreviews];
+            if (direction === 'left' && index > 0) {
+                [newPreviews[index - 1], newPreviews[index]] = [
+                    newPreviews[index],
+                    newPreviews[index - 1],
+                ];
+            } else if (
+                direction === 'right' &&
+                index < newPreviews.length - 1
+            ) {
+                [newPreviews[index + 1], newPreviews[index]] = [
+                    newPreviews[index],
+                    newPreviews[index + 1],
+                ];
+            }
+            setImagePreviews(newPreviews);
+        },
+        [imagePreviews],
+    );
+
     const handleGenerateDescription = useCallback(async () => {
-        if (!hasActiveSubscription) return;
+        if (false) return;
 
         setLoading(true);
         try {
@@ -654,7 +710,7 @@ const PropertyForm: React.FC<Props> = ({
             }));
 
             setSearchResults([]);
-            setSearchQuery('');
+            setSearchQuery(result.display_name);
         },
         [setData],
     );
@@ -663,7 +719,7 @@ const PropertyForm: React.FC<Props> = ({
         (e: React.FormEvent, shouldPublish: boolean = false) => {
             if (e) e.preventDefault();
 
-            if (!hasActiveSubscription) return;
+            if (false) return;
 
             setSubmitStatus('idle');
             setSubmitMessage('');
@@ -681,6 +737,11 @@ const PropertyForm: React.FC<Props> = ({
                 return map[typeName.toLowerCase()] || 1;
             };
 
+            // Extract IDs from imagePreviews to send order
+            const currentImageOrderIds = imagePreviews
+                .filter((img) => img.isExisting && img.id)
+                .map((img) => img.id);
+
             const payload: any = {
                 category_id: getCategoryId(data.type),
                 ad_type: data.sale_type,
@@ -695,6 +756,8 @@ const PropertyForm: React.FC<Props> = ({
                 longitude: data.longitude ? parseFloat(data.longitude) : null,
                 is_published: shouldPublish,
                 details: {
+                    quarter: data.quarter,
+                    address: data.address,
                     bedrooms: parseInt(data.bedrooms) || 0,
                     bathrooms: parseInt(data.bathrooms) || 0,
                     kitchens: parseInt(data.kitchens) || 0,
@@ -719,7 +782,6 @@ const PropertyForm: React.FC<Props> = ({
                     renovation_year: data.renovation_year
                         ? parseInt(data.renovation_year)
                         : null,
-                    furnished: !!data.furnished,
                     elevator: !!data.elevator,
                     parking: !!data.parking,
                     garden: !!data.garden,
@@ -729,9 +791,46 @@ const PropertyForm: React.FC<Props> = ({
                     garage_size: data.garage_size || null,
                 },
                 amenities: data.amenities,
-                images: data.images,
+                // Reconstruct 'images' array from imagePreviews to match visual order of NEW files
+                // And build 'image_order' array for backend
+                images: imagePreviews
+                    .filter((p) => !p.isExisting)
+                    .map((p) => p.file),
                 images_to_delete: imagesToDelete,
+                image_order: imagePreviews.map((p) => {
+                    if (p.isExisting) {
+                        return `existing:${p.id}`;
+                    } else {
+                        // Find index of this file in the NEW images array we just created
+                        // Since we filter !isExisting immediately above, the order matches.
+                        // We need the index relative to the *filtered* new images list.
+                        // Let's optimize this.
+                        return null;
+                    }
+                }),
             };
+
+            // Let's refine the image logic to be 100% robust
+            const newImageFiles = imagePreviews
+                .filter((p) => !p.isExisting)
+                .map((p) => p.file);
+            const imageOrder = imagePreviews.map((p) => {
+                if (p.isExisting) {
+                    return `existing:${p.id}`;
+                } else {
+                    // It's a new file. Find its index in newImageFiles.
+                    // Since newImageFiles VALIDLY preserves the order from imagePreviews,
+                    // we can assume sequential assignment if we iterate carefully?
+                    // No. indexOf might be ambiguous if same file uploaded twice?
+                    // But File objects are unique references usually.
+                    return `new:${newImageFiles.indexOf(p.file)}`;
+                }
+            });
+
+            payload.images = newImageFiles;
+            payload.image_order = imageOrder;
+            // Remove old image_positions field if exists
+            delete payload.image_positions;
 
             const onSuccessCallback = () => {
                 setSubmitStatus('success');
@@ -758,9 +857,12 @@ const PropertyForm: React.FC<Props> = ({
             };
 
             if (isEditMode && property?.id) {
+                // If checking for empty images array, ensure we don't block deletion or reordering if no *new* images
                 if (!payload.images?.length) delete payload.images;
                 if (!payload.images_to_delete?.length)
                     delete payload.images_to_delete;
+                if (!payload.image_positions?.length)
+                    delete payload.image_positions;
 
                 transform(() => ({
                     ...payload,
@@ -792,6 +894,7 @@ const PropertyForm: React.FC<Props> = ({
             reset,
             transform,
             post,
+            imagePreviews,
         ],
     );
 
@@ -976,7 +1079,7 @@ const PropertyForm: React.FC<Props> = ({
                 >
                     <div className="relative overflow-hidden rounded-xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10 sm:rounded-2xl">
                         {/* Overlay de désactivation */}
-                        {!hasActiveSubscription && (
+                        {false && (
                             <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/90 backdrop-blur-sm">
                                 <div className="mx-4 w-full max-w-sm rounded-xl bg-white p-6 text-center shadow-xl">
                                     <AlertCircle
@@ -1159,9 +1262,7 @@ const PropertyForm: React.FC<Props> = ({
                                                         e.target.value,
                                                     )
                                                 }
-                                                disabled={
-                                                    !hasActiveSubscription
-                                                }
+                                                disabled={false}
                                             />
                                             {errors.title && (
                                                 <div className="mt-1 text-sm text-red-600">
@@ -1198,9 +1299,7 @@ const PropertyForm: React.FC<Props> = ({
                                                         e.target.value,
                                                     )
                                                 }
-                                                disabled={
-                                                    !hasActiveSubscription
-                                                }
+                                                disabled={false}
                                             >
                                                 <option value="">
                                                     Type de transaction
@@ -1235,9 +1334,7 @@ const PropertyForm: React.FC<Props> = ({
                                                         e.target.value,
                                                     )
                                                 }
-                                                disabled={
-                                                    !hasActiveSubscription
-                                                }
+                                                disabled={false}
                                             >
                                                 <option value="">
                                                     Sélectionner un type
@@ -1296,9 +1393,7 @@ const PropertyForm: React.FC<Props> = ({
                                                         e.target.value,
                                                     )
                                                 }
-                                                disabled={
-                                                    !hasActiveSubscription
-                                                }
+                                                disabled={false}
                                             >
                                                 <option value="normal">
                                                     Normal
@@ -1333,9 +1428,7 @@ const PropertyForm: React.FC<Props> = ({
                                                         )
                                                     }
                                                     rows={4}
-                                                    disabled={
-                                                        !hasActiveSubscription
-                                                    }
+                                                    disabled={false}
                                                 />
                                                 {errors.description && (
                                                     <div className="mt-1 text-sm text-red-600">
@@ -1354,7 +1447,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             !canGenerateDescription ||
                                                             loading ||
                                                             isDescriptionGenerated ||
-                                                            !hasActiveSubscription
+                                                            false
                                                                 ? 'cursor-not-allowed bg-gray-100 text-gray-400 opacity-50'
                                                                 : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
                                                         }`}
@@ -1362,7 +1455,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             !canGenerateDescription ||
                                                             loading ||
                                                             isDescriptionGenerated ||
-                                                            !hasActiveSubscription
+                                                            false
                                                         }
                                                     >
                                                         {loading ? (
@@ -1453,9 +1546,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    disabled={
-                                                        !hasActiveSubscription
-                                                    }
+                                                    disabled={false}
                                                 />
                                                 {errors.price && (
                                                     <div className="mt-1 text-sm text-red-600">
@@ -1483,9 +1574,7 @@ const PropertyForm: React.FC<Props> = ({
                                                                 e.target.value,
                                                             )
                                                         }
-                                                        disabled={
-                                                            !hasActiveSubscription
-                                                        }
+                                                        disabled={false}
                                                     />
                                                     {errors.rental_guarantee && (
                                                         <div className="mt-1 text-sm text-red-600">
@@ -1514,9 +1603,7 @@ const PropertyForm: React.FC<Props> = ({
                                                         e.target.value,
                                                     )
                                                 }
-                                                disabled={
-                                                    !hasActiveSubscription
-                                                }
+                                                disabled={false}
                                             >
                                                 <option value="">
                                                     Sélectionner l'état
@@ -1578,9 +1665,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    disabled={
-                                                        !hasActiveSubscription
-                                                    }
+                                                    disabled={false}
                                                 />
                                                 {errors.surface && (
                                                     <div className="mt-1 text-sm text-red-600">
@@ -1605,9 +1690,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    disabled={
-                                                        !hasActiveSubscription
-                                                    }
+                                                    disabled={false}
                                                 >
                                                     <option value="0">0</option>
                                                     <option value="1">1</option>
@@ -1642,9 +1725,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    disabled={
-                                                        !hasActiveSubscription
-                                                    }
+                                                    disabled={false}
                                                 >
                                                     <option value="0">0</option>
                                                     <option value="1">1</option>
@@ -1678,9 +1759,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    disabled={
-                                                        !hasActiveSubscription
-                                                    }
+                                                    disabled={false}
                                                 >
                                                     <option value="0">0</option>
                                                     <option value="1">1</option>
@@ -1710,9 +1789,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    disabled={
-                                                        !hasActiveSubscription
-                                                    }
+                                                    disabled={false}
                                                 >
                                                     <option value="0">0</option>
                                                     <option value="1">1</option>
@@ -1747,9 +1824,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    disabled={
-                                                        !hasActiveSubscription
-                                                    }
+                                                    disabled={false}
                                                 >
                                                     <option value="0">0</option>
                                                     <option value="1">1</option>
@@ -1782,9 +1857,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    disabled={
-                                                        !hasActiveSubscription
-                                                    }
+                                                    disabled={false}
                                                 >
                                                     <option value="0">0</option>
                                                     <option value="1">1</option>
@@ -1817,9 +1890,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    disabled={
-                                                        !hasActiveSubscription
-                                                    }
+                                                    disabled={false}
                                                 >
                                                     <option value="1">
                                                         1 étage
@@ -1862,9 +1933,7 @@ const PropertyForm: React.FC<Props> = ({
                                                                 e.target.value,
                                                             )
                                                         }
-                                                        disabled={
-                                                            !hasActiveSubscription
-                                                        }
+                                                        disabled={false}
                                                     >
                                                         <option value="0">
                                                             Rez-de-chaussée
@@ -1911,9 +1980,7 @@ const PropertyForm: React.FC<Props> = ({
                                                                         .value,
                                                                 )
                                                             }
-                                                            disabled={
-                                                                !hasActiveSubscription
-                                                            }
+                                                            disabled={false}
                                                         >
                                                             <option value="new">
                                                                 Neuf
@@ -1947,9 +2014,7 @@ const PropertyForm: React.FC<Props> = ({
                                                                         .value,
                                                                 )
                                                             }
-                                                            disabled={
-                                                                !hasActiveSubscription
-                                                            }
+                                                            disabled={false}
                                                         />
                                                     </div>
                                                     <div className="flex flex-col justify-end pb-2">
@@ -1967,9 +2032,7 @@ const PropertyForm: React.FC<Props> = ({
                                                                             .checked,
                                                                     )
                                                                 }
-                                                                disabled={
-                                                                    !hasActiveSubscription
-                                                                }
+                                                                disabled={false}
                                                             />
                                                             <span className="text-sm font-medium text-slate-700 sm:text-base">
                                                                 Meublé
@@ -2014,9 +2077,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    disabled={
-                                                        !hasActiveSubscription
-                                                    }
+                                                    disabled={false}
                                                 >
                                                     <option value="">
                                                         Sélectionner un pays
@@ -2059,7 +2120,7 @@ const PropertyForm: React.FC<Props> = ({
                                                         !data.country ||
                                                         availableCities.length ===
                                                             0 ||
-                                                        !hasActiveSubscription
+                                                        false
                                                     }
                                                 >
                                                     <option value="">
@@ -2101,9 +2162,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    disabled={
-                                                        !hasActiveSubscription
-                                                    }
+                                                    disabled={false}
                                                 />
                                                 {errors.quarter && (
                                                     <div className="mt-1 text-sm text-red-600">
@@ -2130,9 +2189,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    disabled={
-                                                        !hasActiveSubscription
-                                                    }
+                                                    disabled={false}
                                                 />
                                                 {errors.postal_code && (
                                                     <div className="mt-1 text-sm text-red-600">
@@ -2169,7 +2226,7 @@ const PropertyForm: React.FC<Props> = ({
                                                         !data.city ||
                                                         availableMunicipalities.length ===
                                                             0 ||
-                                                        !hasActiveSubscription
+                                                        false
                                                     }
                                                 >
                                                     <option value="">
@@ -2216,9 +2273,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    disabled={
-                                                        !hasActiveSubscription
-                                                    }
+                                                    disabled={false}
                                                 />
                                                 {errors.latitude && (
                                                     <div className="mt-1 text-sm text-red-600">
@@ -2242,9 +2297,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    disabled={
-                                                        !hasActiveSubscription
-                                                    }
+                                                    disabled={false}
                                                 />
                                                 {errors.longitude && (
                                                     <div className="mt-1 text-sm text-red-600">
@@ -2270,9 +2323,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    disabled={
-                                                        !hasActiveSubscription
-                                                    }
+                                                    disabled={false}
                                                 />
                                                 {searchQuery && (
                                                     <button
@@ -2429,9 +2480,7 @@ const PropertyForm: React.FC<Props> = ({
                                                                     'furnished',
                                                                 )
                                                             }
-                                                            disabled={
-                                                                !hasActiveSubscription
-                                                            }
+                                                            disabled={false}
                                                         />
                                                         <span className="ml-3 text-sm sm:text-base">
                                                             Meublé
@@ -2450,9 +2499,7 @@ const PropertyForm: React.FC<Props> = ({
                                                                     'elevator',
                                                                 )
                                                             }
-                                                            disabled={
-                                                                !hasActiveSubscription
-                                                            }
+                                                            disabled={false}
                                                         />
                                                         <span className="ml-3 text-sm sm:text-base">
                                                             Ascenseur
@@ -2471,9 +2518,7 @@ const PropertyForm: React.FC<Props> = ({
                                                                     'parking',
                                                                 )
                                                             }
-                                                            disabled={
-                                                                !hasActiveSubscription
-                                                            }
+                                                            disabled={false}
                                                         />
                                                         <span className="ml-3 text-sm sm:text-base">
                                                             Parking
@@ -2492,9 +2537,7 @@ const PropertyForm: React.FC<Props> = ({
                                                                     'garden',
                                                                 )
                                                             }
-                                                            disabled={
-                                                                !hasActiveSubscription
-                                                            }
+                                                            disabled={false}
                                                         />
                                                         <span className="ml-3 text-sm sm:text-base">
                                                             Jardin
@@ -2513,9 +2556,7 @@ const PropertyForm: React.FC<Props> = ({
                                                                     'swimming_pool',
                                                                 )
                                                             }
-                                                            disabled={
-                                                                !hasActiveSubscription
-                                                            }
+                                                            disabled={false}
                                                         />
                                                         <span className="ml-3 text-sm sm:text-base">
                                                             Piscine
@@ -2534,9 +2575,7 @@ const PropertyForm: React.FC<Props> = ({
                                                                     'cellar',
                                                                 )
                                                             }
-                                                            disabled={
-                                                                !hasActiveSubscription
-                                                            }
+                                                            disabled={false}
                                                         />
                                                         <span className="ml-3 text-sm sm:text-base">
                                                             Cave
@@ -2553,9 +2592,7 @@ const PropertyForm: React.FC<Props> = ({
                                                                     'attic',
                                                                 )
                                                             }
-                                                            disabled={
-                                                                !hasActiveSubscription
-                                                            }
+                                                            disabled={false}
                                                         />
                                                         <span className="ml-3 text-sm sm:text-base">
                                                             Grenier
@@ -2582,7 +2619,7 @@ const PropertyForm: React.FC<Props> = ({
                                                                     )
                                                                         ? 'border-amber-300 bg-amber-50'
                                                                         : 'border-gray-200 hover:border-amber-200'
-                                                                } ${!hasActiveSubscription ? 'cursor-not-allowed opacity-50' : ''}`}
+                                                                } ${false ? 'cursor-not-allowed opacity-50' : ''}`}
                                                                 onClick={() =>
                                                                     hasActiveSubscription &&
                                                                     handleAmenityChange(
@@ -2606,7 +2643,7 @@ const PropertyForm: React.FC<Props> = ({
                                                                         )
                                                                     }
                                                                     disabled={
-                                                                        !hasActiveSubscription
+                                                                        false
                                                                     }
                                                                 />
                                                                 <span className="ml-3 text-sm sm:text-base">
@@ -2670,7 +2707,26 @@ const PropertyForm: React.FC<Props> = ({
                                                                     }
                                                                     className="h-32 w-full rounded-lg object-cover sm:h-40"
                                                                 />
-                                                                <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                                                                <div className="absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-black/50 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                                                                    {index >
+                                                                        0 && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() =>
+                                                                                moveImage(
+                                                                                    index,
+                                                                                    'left',
+                                                                                )
+                                                                            }
+                                                                            className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-500 text-white transition-colors hover:bg-slate-600"
+                                                                        >
+                                                                            <ArrowLeft
+                                                                                size={
+                                                                                    16
+                                                                                }
+                                                                            />
+                                                                        </button>
+                                                                    )}
                                                                     <button
                                                                         type="button"
                                                                         onClick={() =>
@@ -2679,9 +2735,6 @@ const PropertyForm: React.FC<Props> = ({
                                                                             )
                                                                         }
                                                                         className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-white transition-colors hover:bg-red-600"
-                                                                        disabled={
-                                                                            !hasActiveSubscription
-                                                                        }
                                                                     >
                                                                         <Trash2
                                                                             size={
@@ -2689,6 +2742,35 @@ const PropertyForm: React.FC<Props> = ({
                                                                             }
                                                                         />
                                                                     </button>
+                                                                    {index <
+                                                                        imagePreviews.length -
+                                                                            1 && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() =>
+                                                                                moveImage(
+                                                                                    index,
+                                                                                    'right',
+                                                                                )
+                                                                            }
+                                                                            className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-500 text-white transition-colors hover:bg-slate-600"
+                                                                        >
+                                                                            <ArrowRight
+                                                                                size={
+                                                                                    16
+                                                                                }
+                                                                            />{' '}
+                                                                            //
+                                                                            Assuming
+                                                                            ArrowRight
+                                                                            is
+                                                                            imported
+                                                                            or
+                                                                            use
+                                                                            ArrowLeft
+                                                                            rotated
+                                                                        </button>
+                                                                    )}
                                                                 </div>
                                                                 <div className="mt-2 truncate text-xs text-slate-600">
                                                                     {
@@ -2719,9 +2801,7 @@ const PropertyForm: React.FC<Props> = ({
                                                         onChange={
                                                             handleFileUpload
                                                         }
-                                                        disabled={
-                                                            !hasActiveSubscription
-                                                        }
+                                                        disabled={false}
                                                     />
                                                 </label>
                                                 <p className="text-xs text-slate-500">
@@ -2767,9 +2847,7 @@ const PropertyForm: React.FC<Props> = ({
                                                                 'is_published',
                                                             )
                                                         }
-                                                        disabled={
-                                                            !hasActiveSubscription
-                                                        }
+                                                        disabled={false}
                                                     />
                                                     <span className="ml-3 text-sm sm:text-base">
                                                         Publier immédiatement
@@ -2795,9 +2873,7 @@ const PropertyForm: React.FC<Props> = ({
                                                                 'is_featured',
                                                             )
                                                         }
-                                                        disabled={
-                                                            !hasActiveSubscription
-                                                        }
+                                                        disabled={false}
                                                     />
                                                     <span className="ml-3 text-sm sm:text-base">
                                                         Mettre en vedette
@@ -2821,9 +2897,7 @@ const PropertyForm: React.FC<Props> = ({
                                         type="button"
                                         onClick={resetForm}
                                         className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-100 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-base"
-                                        disabled={
-                                            processing || !hasActiveSubscription
-                                        }
+                                        disabled={processing || false}
                                     >
                                         <RotateCcw size={16} />
                                         Réinitialiser
@@ -2832,9 +2906,7 @@ const PropertyForm: React.FC<Props> = ({
                                         type="button"
                                         onClick={(e) => handleSubmit(e, false)}
                                         className="flex w-full items-center justify-center gap-2 rounded-lg border border-amber-200 bg-white px-4 py-2.5 text-sm text-amber-700 transition-all duration-300 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-base"
-                                        disabled={
-                                            processing || !hasActiveSubscription
-                                        }
+                                        disabled={processing || false}
                                     >
                                         <Save size={16} />
                                         Enregistrer comme brouillon

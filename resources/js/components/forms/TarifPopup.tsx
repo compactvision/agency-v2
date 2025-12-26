@@ -14,6 +14,7 @@ import {
     X,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import { route } from 'ziggy-js';
 
 type Feature = { name: string };
 
@@ -56,20 +57,34 @@ export default function TarifPopup({
 }: TarifPopupProps) {
     const [activeSection, setActiveSection] = useState('basic');
 
-    const { data, setData, post, put, processing, errors, reset } = useForm({
-        name: '',
-        price: '',
-        duration: '',
-        listing_limit: '',
-        image_limit: '',
-        is_featured: false,
-        highlight_homepage: false,
-        priority_support: false,
-        analytics_access: false,
-        description: '',
-        features: '',
-        payment_method: 'manual',
-    });
+    const { data, setData, post, put, processing, errors, reset, transform } =
+        useForm({
+            name: '',
+            price: '',
+            duration: '',
+            listing_limit: '',
+            image_limit: '',
+            is_featured: false,
+            highlight_homepage: false,
+            priority_support: false,
+            analytics_access: false,
+            description: '',
+            features: '',
+            payment_method: 'manual',
+        });
+
+    useEffect(() => {
+        transform((data) => ({
+            ...data,
+            features:
+                typeof data.features === 'string'
+                    ? data.features
+                          .split(',')
+                          .map((f: string) => f.trim())
+                          .filter(Boolean)
+                    : data.features,
+        }));
+    }, [transform]);
 
     // populate form when plan changes
     useEffect(() => {
@@ -123,25 +138,12 @@ export default function TarifPopup({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const payload = {
-            ...data,
-            features:
-                typeof data.features === 'string'
-                    ? data.features
-                          .split(',')
-                          .map((f: string) => f.trim())
-                          .filter(Boolean)
-                    : data.features,
-        };
-
         if (isEditing && plan) {
             put(route('dashboard.plans.update', { id: plan.id }), {
-                data: payload,
                 onSuccess: () => onClose(),
             });
         } else {
             post(route('dashboard.plans.store'), {
-                data: payload,
                 onSuccess: () => onClose(),
             });
         }

@@ -29,6 +29,8 @@ class StoreAdRequest extends FormRequest
             'details'     => ['required', 'array'],
             'amenities'   => ['nullable', 'array'],
             'amenities.*' => ['exists:amenities,id'],
+            'images'      => ['nullable', 'array'],
+            'images.*'    => ['image', 'max:5120'], // 5MB max
         ];
     }
 }
