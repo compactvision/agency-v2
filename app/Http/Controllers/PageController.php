@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Domains\Billing\Models\Plan;
+use App\Domains\CMS\Models\Page;
 
 class PageController extends Controller
 {
@@ -64,6 +65,19 @@ class PageController extends Controller
     {
         return Inertia::render('profile/Profile', [
             'user' => auth()->user()
+        ]);
+    }
+
+    public function page($slug)
+    {
+        $page = Page::with('sections')->where('slug', $slug)->firstOrFail();
+
+        if ($page->status !== 'published') {
+            abort(404);
+        }
+
+        return Inertia::render('Page', [
+            'page' => $page
         ]);
     }
 }

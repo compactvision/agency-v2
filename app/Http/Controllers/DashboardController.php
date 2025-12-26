@@ -7,6 +7,11 @@ use Inertia\Inertia;
 use App\Models\User;
 use App\Domains\Billing\Models\Plan;
 use App\Domains\Billing\Models\Subscription;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+use App\Domains\CMS\Models\Page;
+use App\Domains\CMS\Models\PageSection;
+use App\Models\Notification;
 // Assuming some models exist or using dummy data for placeholder pages
 // In a real scenario, these would fetch from respective domains
 
@@ -24,7 +29,8 @@ class DashboardController extends Controller
                 'properties' => ['total' => 0, 'unapproved' => 0],
                 'views' => ['total' => 0],
                 'favorites' => ['total' => 0],
-            ]
+            ],
+            'recentNotifications' => auth()->user()->notifications()->take(5)->get(),
         ]);
     }
 
@@ -68,7 +74,7 @@ class DashboardController extends Controller
 
         return Inertia::render('dashboard/properties/Properties', [
             'properties' => $properties,
-            'filters' => $request->only(['search', 'sort_by', 'sort_order']),
+            'filters' => (object) $request->only(['search', 'sort_by', 'sort_order']),
             'favorites' => 0, // Placeholder until favorites system is connected
         ]);
     }
@@ -172,19 +178,162 @@ class DashboardController extends Controller
         ];
     }
 
-    public function favorites()
+    public function favorites(Request $request)
     {
-        return Inertia::render('dashboard/properties/FavoriteProperties');
+        $query = auth()->user()->favorites()->with(['images', 'municipality.city.country']);
+
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', "%{$request->search}%")
+                  ->orWhere('ad_type', 'like', "%{$request->search}%")
+                  ->orWhereHas('municipality', function($mq) use ($request) {
+                      $mq->where('name', 'like', "%{$request->search}%");
+                  });
+            });
+        }
+
+        $sortField = $request->input('sort_by', 'created_at');
+        $sortOrder = $request->input('sort_order', 'desc');
+        
+        // Validation basique des champs de tri
+        if (in_array($sortField, ['created_at', 'price', 'title'])) {
+            $query->orderBy($sortField, $sortOrder);
+        }
+
+        $properties = $query->paginate(12)->withQueryString();
+
+        return Inertia::render('dashboard/properties/FavoriteProperties', [
+            'properties' => $properties,
+            'filters' => $request->only(['search', 'sort_field', 'sort_order']),
+            'favorites' => auth()->user()->favorites()->pluck('ad_id'),
+        ]);
+    }
+
+    public function toggleFavorite($id)
+    {
+        $user = auth()->user();
+        $user->favorites()->toggle($id);
+
+        return redirect()->back();
     }
 
     /**
      * User Management
      */
-    public function users()
+    public function users(Request $request)
     {
+        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
+            abort(403);
+        }
+
+        $query = User::query()->with('roles');
+
+        if ($request->search) {
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', "%{$request->search}%")
+                  ->orWhere('email', 'like', "%{$request->search}%");
+            });
+        }
+
+        if ($request->filter) {
+            $query->whereHas('roles', function($q) use ($request) {
+                $q->where('name', $request->filter);
+            });
+        }
+
+        $users = $query->paginate($request->per_page ?? 20)->withQueryString();
+
         return Inertia::render('dashboard/users/User', [
-            'users' => []
+            'users' => [
+                'data' => collect($users->items())->map(fn($user) => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'profile_photo' => $user->profile_photo_path,
+                    'roles' => $user->roles->map(fn($r) => ['name' => $r->name]),
+                    'created_at' => $user->created_at->format('d/m/Y'),
+                ]),
+                'links' => $users->linkCollection()->toArray(),
+                'meta' => [
+                    'current_page' => $users->currentPage(),
+                    'last_page' => $users->lastPage(),
+                    'total' => $users->total(),
+                    'per_page' => $users->perPage(),
+                    'from' => $users->firstItem(),
+                    'to' => $users->lastItem(),
+                ]
+            ],
+            'roles' => Role::all()->map(fn($r) => ['name' => $r->name]),
+            'filters' => (object) $request->only(['search', 'filter', 'per_page']),
         ]);
+    }
+
+    public function storeUser(Request $request)
+    {
+        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => bcrypt($validated['password']),
+        ]);
+
+        return redirect()->back()->with('success', 'Utilisateur créé avec succès.');
+    }
+
+    public function updateUser(Request $request, $id)
+    {
+        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
+            abort(403);
+        }
+
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'roles' => 'nullable|array',
+        ]);
+
+        $user->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+        ]);
+
+        if (isset($validated['roles'])) {
+            $user->syncRoles($validated['roles']);
+        }
+
+        return redirect()->back()->with('success', 'Utilisateur mis à jour avec succès.');
+    }
+
+    public function destroyUser($id)
+    {
+        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
+            abort(403);
+        }
+
+        $user = User::findOrFail($id);
+
+        if ($user->id === auth()->id()) {
+            return redirect()->back()->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
+        }
+
+        if ($user->hasRole('super-admin') && !auth()->user()->hasRole('super-admin')) {
+            return redirect()->back()->with('error', 'Seul un super-administrateur peut supprimer un autre super-administrateur.');
+        }
+
+        $user->delete();
+
+        return redirect()->back()->with('success', 'Utilisateur supprimé avec succès.');
     }
 
     public function profile()
@@ -197,9 +346,97 @@ class DashboardController extends Controller
     /**
      * Administration
      */
-    public function roles()
+    public function roles(Request $request)
     {
-        return Inertia::render('dashboard/roles/Roles');
+        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
+            abort(403);
+        }
+
+        $query = Role::query()->with('permissions');
+
+        if ($request->search) {
+            $query->where('name', 'like', "%{$request->search}%");
+        }
+
+        $roles = $query->paginate($request->per_page ?? 20)->withQueryString();
+
+        return Inertia::render('dashboard/roles/Roles', [
+            'roles' => [
+                'data' => collect($roles->items())->map(fn($role) => [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'permissions' => $role->permissions->map(fn($p) => ['name' => $p->name]),
+                ]),
+                'links' => $roles->linkCollection()->toArray(),
+                'meta' => [
+                    'current_page' => $roles->currentPage(),
+                    'last_page' => $roles->lastPage(),
+                    'total' => $roles->total(),
+                    'per_page' => $roles->perPage(),
+                ]
+            ],
+            'permissions' => Permission::all()->map(fn($p) => ['name' => $p->name]),
+            'filters' => (object) $request->only(['search', 'per_page']),
+        ]);
+    }
+
+    public function storeRole(Request $request)
+    {
+        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|unique:roles,name',
+            'permissions' => 'nullable|array',
+        ]);
+
+        $role = Role::create(['name' => $validated['name']]);
+        
+        if (!empty($validated['permissions'])) {
+            $role->syncPermissions($validated['permissions']);
+        }
+
+        return redirect()->back()->with('success', 'Rôle créé avec succès.');
+    }
+
+    public function updateRole(Request $request, $id)
+    {
+        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
+            abort(403);
+        }
+
+        $role = Role::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|unique:roles,name,' . $role->id,
+            'permissions' => 'nullable|array',
+        ]);
+
+        $role->update(['name' => $validated['name']]);
+        
+        if (isset($validated['permissions'])) {
+            $role->syncPermissions($validated['permissions']);
+        }
+
+        return redirect()->back()->with('success', 'Rôle mis à jour avec succès.');
+    }
+
+    public function destroyRole($id)
+    {
+        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
+            abort(403);
+        }
+
+        $role = Role::findOrFail($id);
+        
+        if (in_array($role->name, ['admin', 'super-admin'])) {
+            return redirect()->back()->with('error', 'Impossible de supprimer un rôle système.');
+        }
+
+        $role->delete();
+
+        return redirect()->back()->with('success', 'Rôle supprimé avec succès.');
     }
 
 
@@ -263,7 +500,7 @@ class DashboardController extends Controller
                 ],
                 'links' => $plans->linkCollection()->toArray(),
             ],
-            'filters' => $request->only(['search']),
+            'filters' => (object) $request->only(['search']),
         ]);
     }
 
@@ -426,37 +663,141 @@ class DashboardController extends Controller
                 ],
                 'links' => $municipalities->linkCollection()->toArray(),
             ],
-            'filters' => $request->only(['search']),
+            'filters' => (object) $request->only(['search']),
         ]);
     }
 
-    public function pages()
+    public function pages(Request $request)
     {
+        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
+            abort(403);
+        }
+
+        $query = Page::query()->orderBy('created_at', 'desc');
+
+        if ($request->search) {
+            $query->where('title', 'like', "%{$request->search}%")
+                  ->orWhere('slug', 'like', "%{$request->search}%");
+        }
+
+        $pages = $query->paginate(20)->withQueryString();
+
         return Inertia::render('dashboard/pages/Pages', [
             'pages' => [
-                'data' => [],
+                'data' => $pages->items(),
+                'links' => $pages->linkCollection()->toArray(),
                 'meta' => [
-                    'current_page' => 1,
-                    'last_page'    => 1,
-                    'total'        => 0,
-                    'from'         => 0,
-                    'to'           => 0,
-                ],
-                'links' => [
-                    ['url' => null, 'label' => '&laquo; Précédent', 'active' => false],
-                    ['url' => null, 'label' => '1', 'active' => true],
-                    ['url' => null, 'label' => 'Suivant &raquo;', 'active' => false],
-                ],
+                    'current_page' => $pages->currentPage(),
+                    'last_page' => $pages->lastPage(),
+                    'total' => $pages->total(),
+                    'per_page' => $pages->perPage(),
+                ]
             ],
-            'filters' => ['search' => ''],
+            'filters' => (object) $request->only(['search']),
         ]);
+    }
+
+    public function createPage()
+    {
+        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
+            abort(403);
+        }
+
+        return Inertia::render('dashboard/pages/PageEditor');
+    }
+
+    public function storePage(Request $request)
+    {
+        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'sections' => 'nullable|array',
+            'sections.*.heading' => 'nullable|string|max:255',
+            'sections.*.paragraph' => 'nullable|string',
+        ]);
+
+        $page = Page::create([
+            'title' => $validated['title'],
+            'status' => 'published', // Default to published for now
+        ]);
+
+        if (!empty($validated['sections'])) {
+            foreach ($validated['sections'] as $index => $section) {
+                $page->sections()->create([
+                    'heading' => $section['heading'],
+                    'paragraph' => $section['paragraph'],
+                    'position' => $index,
+                ]);
+            }
+        }
+
+        return redirect()->route('dashboard.pages.index')
+            ->with('success', 'Page créée avec succès.');
     }
 
     public function editPage($id)
     {
+        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
+            abort(403);
+        }
+
+        $page = Page::with('sections')->findOrFail($id);
+
         return Inertia::render('dashboard/pages/PageEditor', [
-            'id' => $id
+            'page' => $page
         ]);
+    }
+
+    public function updatePage(Request $request, $id)
+    {
+        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
+            abort(403);
+        }
+
+        $page = Page::findOrFail($id);
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'sections' => 'nullable|array',
+            'sections.*.heading' => 'nullable|string|max:255',
+            'sections.*.paragraph' => 'nullable|string',
+        ]);
+
+        $page->update([
+            'title' => $validated['title'],
+        ]);
+
+        // Simple sync: delete old sections and re-create
+        $page->sections()->delete();
+
+        if (!empty($validated['sections'])) {
+            foreach ($validated['sections'] as $index => $section) {
+                $page->sections()->create([
+                    'heading' => $section['heading'],
+                    'paragraph' => $section['paragraph'],
+                    'position' => $index,
+                ]);
+            }
+        }
+
+        return redirect()->route('dashboard.pages.index')
+            ->with('success', 'Page mise à jour avec succès.');
+    }
+
+    public function destroyPage($id)
+    {
+        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
+            abort(403);
+        }
+
+        $page = Page::findOrFail($id);
+        $page->delete();
+
+        return redirect()->route('dashboard.pages.index')
+            ->with('success', 'Page supprimée avec succès.');
     }
 
     public function transactions(Request $request)
@@ -489,7 +830,7 @@ class DashboardController extends Controller
                 ],
                 'links' => $paymentRequests->linkCollection()->toArray(),
             ],
-            'filters' => $request->only(['search']),
+            'filters' => (object) $request->only(['search']),
         ]);
     }
 
@@ -644,7 +985,7 @@ class DashboardController extends Controller
             'hasActiveSubscription' => $user->subscription()->where('status', 'active')->exists(),
             'currentPlan' => $user->subscription()->where('status', 'active')->first(),
             'plans' => Plan::where('is_active', true)->get(),
-            'filters' => $request->only(['search']),
+            'filters' => (object) $request->only(['search']),
         ]);
     }
 
@@ -684,5 +1025,28 @@ class DashboardController extends Controller
         return Inertia::render('dashboard/analytics/Show', [
             'id' => $id
         ]);
+    }
+
+    /* Notifications Management */
+    public function notifications()
+    {
+        return Inertia::render('dashboard/Notifications', [
+            'notifications' => auth()->user()->notifications()->paginate(20)
+        ]);
+    }
+
+    public function markNotificationAsRead($id)
+    {
+        $notification = auth()->user()->notifications()->findOrFail($id);
+        $notification->update(['read_at' => now()]);
+
+        return redirect()->back();
+    }
+
+    public function markAllNotificationsAsRead()
+    {
+        auth()->user()->notifications()->whereNull('read_at')->update(['read_at' => now()]);
+
+        return redirect()->back();
     }
 }

@@ -72,4 +72,9 @@ class Ad extends Model
     {
         return $this->belongsTo(\App\Domains\Locations\Models\Country::class);
     }
+
+    public function favoritedBy()
+    {
+        return $this->belongsToMany(\App\Models\User::class, 'favorites', 'ad_id', 'user_id')->withTimestamps();
+    }
 }
