@@ -19,6 +19,8 @@ class Ad extends Model
         'country_id',
         'city_id',
         'municipality_id',
+        'latitude',
+        'longitude',
         'status',
         'rejection_reason',
         'is_published',

@@ -1,6 +1,8 @@
 import Dashboard from '@/components/layouts/Dashboard/Dashboard';
 import { router, useForm, usePage } from '@inertiajs/react';
 import axios from 'axios';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import {
     AlertCircle,
     AlertTriangle,
@@ -17,12 +19,57 @@ import {
     MapPin,
     RotateCcw,
     Save,
+    Search,
     Trash2,
     Upload,
+    X,
     Zap,
 } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+    MapContainer,
+    Marker,
+    TileLayer,
+    useMap,
+    useMapEvents,
+} from 'react-leaflet';
+import { route } from 'ziggy-js';
+
+// Fix Leaflet marker icons
+// @ts-ignore
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: '/markers/marker-icon-2x.png',
+    iconUrl: '/markers/marker-icon.png',
+    shadowUrl: '/markers/marker-shadow.png',
+});
+
+// Map Click Handler Component
+const LocationMarker = ({
+    position,
+    setPosition,
+}: {
+    position: L.LatLngExpression | null;
+    setPosition: (pos: L.LatLng) => void;
+}) => {
+    useMapEvents({
+        click(e) {
+            setPosition(e.latlng);
+        },
+    });
+
+    return position === null ? null : <Marker position={position} />;
+};
+
+// Map Controller to handle view updates
+const MapController = ({ center }: { center: [number, number] }) => {
+    const map = useMap();
+    useEffect(() => {
+        map.setView(center, map.getZoom());
+    }, [center, map]);
+    return null;
+};
 
 type Municipality = {
     id: number;
@@ -56,6 +103,9 @@ type Property = {
     terraces: string;
     floor: string;
     total_floors: string;
+    furnished: boolean;
+    condition: string;
+    year_built: string;
     address: string;
     quarter: string;
     city: string;
@@ -86,14 +136,20 @@ type Property = {
 };
 
 interface Props {
-    countries: { [key: string]: string };
+    countries: { [key: number]: string };
     municipalities: Municipality[];
     amenities: Amenity[];
     hasActiveSubscription: boolean;
     property?: Property | null;
 }
 
-const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, hasActiveSubscription, property = null }) => {
+const PropertyForm: React.FC<Props> = ({
+    countries,
+    municipalities,
+    amenities,
+    hasActiveSubscription,
+    property = null,
+}) => {
     const { t } = useTranslation();
     const { auth } = usePage().props as { auth: { user: any } };
     const isEditMode = !!property?.id;
@@ -102,8 +158,12 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
     // États pour l'UI responsive
     const [activeSection, setActiveSection] = useState('basic');
     const [availableCities, setAvailableCities] = useState<string[]>([]);
-    const [availableMunicipalities, setAvailableMunicipalities] = useState<Municipality[]>([]);
-    const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+    const [availableMunicipalities, setAvailableMunicipalities] = useState<
+        Municipality[]
+    >([]);
+    const [submitStatus, setSubmitStatus] = useState<
+        'idle' | 'success' | 'error'
+    >('idle');
     const [submitMessage, setSubmitMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const [isDescriptionGenerated, setIsDescriptionGenerated] = useState(false);
@@ -112,6 +172,12 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
     const [isMobile, setIsMobile] = useState(false);
     const [isTablet, setIsTablet] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    // Search state for map
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Détection de la taille d'écran
     useEffect(() => {
@@ -146,6 +212,9 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
             terraces: '0',
             floor: '0',
             total_floors: '1',
+            furnished: false,
+            condition: 'good',
+            year_built: '',
             address: '',
             quarter: '',
             city: '',
@@ -178,13 +247,19 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
 
         if (property && isEditMode) {
             const amenityIds = Array.isArray((property as any).amenities)
-                ? ((property as any).amenities as Array<{ id: number }>).map((a) => a.id)
+                ? ((property as any).amenities as Array<{ id: number }>).map(
+                      (a) => a.id,
+                  )
                 : property.amenities || [];
 
             const existingImages = Array.isArray((property as any).images)
                 ? ((property as any).images as Array<any>).map((img) => ({
                       id: img.id,
-                      url: img.url?.startsWith('http') || img.url?.startsWith('/') ? img.url : `/storage/${img.url}`,
+                      url:
+                          img.url?.startsWith('http') ||
+                          img.url?.startsWith('/')
+                              ? img.url
+                              : `/storage/${img.url}`,
                       name: img.original_name ?? `Image ${img.id}`,
                       isExisting: true,
                   }))
@@ -210,6 +285,9 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                 terraces: property.terraces?.toString() || '0',
                 floor: property.floor?.toString() || '0',
                 total_floors: property.total_floors?.toString() || '1',
+                furnished: !!property.details?.furnished,
+                condition: property.details?.condition || 'good',
+                year_built: property.details?.year_built?.toString() || '',
                 address: property.address || '',
                 quarter: property.quarter || '',
                 city: property.city || '',
@@ -230,7 +308,10 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                 cellar: !!property.cellar,
                 attic: !!property.attic,
                 urgency: property.urgency || 'normal',
-                is_published: property.is_published !== undefined ? !!property.is_published : true,
+                is_published:
+                    property.is_published !== undefined
+                        ? !!property.is_published
+                        : true,
                 is_featured: !!property.is_featured,
                 images: [] as File[],
                 amenities: amenityIds,
@@ -244,11 +325,14 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
         return baseData;
     }, [property, isEditMode]);
 
-    const { data, setData, post, put, errors, processing, reset, transform } = useForm(initializeFormData());
+    const { data, setData, post, put, errors, processing, reset, transform } =
+        useForm(initializeFormData());
 
     // Fonctions utilitaires
     const generateReferenceNumber = useCallback(() => {
-        return 'REF-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        return (
+            'REF-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9)
+        );
     }, []);
 
     const generateSlug = useCallback((title: string) => {
@@ -289,7 +373,11 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                 setAvailableCities(citiesInCountry);
 
                 if (property.city) {
-                    const municipalitiesInCity = municipalities.filter((m) => m.country === property.country && m.city === property.city);
+                    const municipalitiesInCity = municipalities.filter(
+                        (m) =>
+                            m.country === property.country &&
+                            m.city === property.city,
+                    );
                     setAvailableMunicipalities(municipalitiesInCity);
                 }
             }
@@ -326,10 +414,15 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
 
     useEffect(() => {
         if (data.city && data.country) {
-            const municipalitiesInCity = municipalities.filter((m) => m.country === data.country && m.city === data.city);
+            const municipalitiesInCity = municipalities.filter(
+                (m) => m.country === data.country && m.city === data.city,
+            );
             setAvailableMunicipalities(municipalitiesInCity);
 
-            if (data.municipality_id && !municipalitiesInCity.some((m) => m.id === data.municipality_id)) {
+            if (
+                data.municipality_id &&
+                !municipalitiesInCity.some((m) => m.id === data.municipality_id)
+            ) {
                 setData((prev) => ({
                     ...prev,
                     municipality_id: null,
@@ -442,7 +535,10 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
             const previewToRemove = imagePreviews[index];
 
             if (previewToRemove.isExisting && previewToRemove.id) {
-                const newImagesToDelete = [...imagesToDelete, previewToRemove.id];
+                const newImagesToDelete = [
+                    ...imagesToDelete,
+                    previewToRemove.id,
+                ];
                 setImagesToDelete(newImagesToDelete);
                 setData((prev) => ({
                     ...prev,
@@ -450,12 +546,16 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                 }));
             } else {
                 URL.revokeObjectURL(previewToRemove.url);
-                const existingImagesCount = imagePreviews.filter((p) => p.isExisting).length;
+                const existingImagesCount = imagePreviews.filter(
+                    (p) => p.isExisting,
+                ).length;
                 const newImageIndex = index - existingImagesCount;
                 if (newImageIndex >= 0) {
                     setData((prev) => ({
                         ...prev,
-                        images: prev.images.filter((_, i) => i !== newImageIndex),
+                        images: prev.images.filter(
+                            (_, i) => i !== newImageIndex,
+                        ),
                     }));
                 }
             }
@@ -471,21 +571,28 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
 
         setLoading(true);
         try {
-            const municipalityName = municipalities.find((m) => m.id === data.municipality_id)?.name || '';
-            const selectedAmenities = data.amenities.map((id) => amenities.find((a) => a.id === id)?.name || '').filter(Boolean);
+            const municipalityName =
+                municipalities.find((m) => m.id === data.municipality_id)
+                    ?.name || '';
+            const selectedAmenities = data.amenities
+                .map((id) => amenities.find((a) => a.id === id)?.name || '')
+                .filter(Boolean);
 
-            const response = await axios.post(route('description.ai.generate-description'), {
-                type: data.type,
-                sale_type: data.sale_type,
-                municipality: municipalityName,
-                price: data.price,
-                surface: data.surface,
-                bedrooms: data.bedrooms,
-                bathrooms: data.bathrooms,
-                rooms: data.rooms,
-                kitchens: data.kitchens,
-                amenities: selectedAmenities,
-            });
+            const response = await axios.post(
+                route('description.ai.generate-description'),
+                {
+                    type: data.type,
+                    sale_type: data.sale_type,
+                    municipality: municipalityName,
+                    price: data.price,
+                    surface: data.surface,
+                    bedrooms: data.bedrooms,
+                    bathrooms: data.bathrooms,
+                    rooms: data.rooms,
+                    kitchens: data.kitchens,
+                    amenities: selectedAmenities,
+                },
+            );
 
             setData((prev) => ({
                 ...prev,
@@ -493,7 +600,9 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
             }));
             setIsDescriptionGenerated(true);
         } catch (error: any) {
-            const message = error?.response?.data?.error || 'Erreur lors de la génération de la description.';
+            const message =
+                error?.response?.data?.error ||
+                'Erreur lors de la génération de la description.';
             setSubmitStatus('error');
             setSubmitMessage(message);
         } finally {
@@ -501,51 +610,136 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
         }
     }, [hasActiveSubscription, municipalities, amenities, data, setData]);
 
+    // Map search handler
+    const handleMapSearch = useCallback((query: string) => {
+        setSearchQuery(query);
+
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+
+        if (!query.trim()) {
+            setSearchResults([]);
+            return;
+        }
+
+        setIsSearching(true);
+        searchTimeoutRef.current = setTimeout(async () => {
+            try {
+                // Limit search to RDC (Democratic Republic of the Congo)
+                const response = await axios.get(
+                    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+                        query,
+                    )}&countrycodes=cd`,
+                );
+                setSearchResults(response.data);
+            } catch (error) {
+                console.error('Error searching location:', error);
+            } finally {
+                setIsSearching(false);
+            }
+        }, 500);
+    }, []);
+
+    const handleSelectLocation = useCallback(
+        (result: any) => {
+            const lat = parseFloat(result.lat);
+            const lon = parseFloat(result.lon);
+
+            setData((prev) => ({
+                ...prev,
+                latitude: lat.toFixed(6),
+                longitude: lon.toFixed(6),
+                address: result.display_name, // Update address with selected location name
+            }));
+
+            setSearchResults([]);
+            setSearchQuery('');
+        },
+        [setData],
+    );
+
     const handleSubmit = useCallback(
-        (e: React.FormEvent) => {
-            e.preventDefault();
+        (e: React.FormEvent, shouldPublish: boolean = false) => {
+            if (e) e.preventDefault();
 
             if (!hasActiveSubscription) return;
 
             setSubmitStatus('idle');
             setSubmitMessage('');
 
-            const submitData = {
-                ...data,
+            // Logic for Category mapping
+            const getCategoryId = (typeName: string) => {
+                const map: { [key: string]: number } = {
+                    house: 1,
+                    apartment: 2,
+                    land: 3,
+                    building: 4,
+                    office: 5,
+                    warehouse: 6,
+                };
+                return map[typeName.toLowerCase()] || 1;
+            };
+
+            const payload: any = {
+                category_id: getCategoryId(data.type),
+                ad_type: data.sale_type,
+                title: data.title,
+                description: data.description,
                 price: data.price ? parseFloat(data.price) : 0,
+                currency: 'USD', // Default or handle from state if added
                 surface: data.surface ? parseFloat(data.surface) : null,
-                rental_guarantee: data.sale_type === 'rent' ? (data.rental_guarantee ? parseFloat(data.rental_guarantee) : 0) : null,
-                bedrooms: Number.isFinite(parseInt(data.bedrooms)) ? parseInt(data.bedrooms) : 0,
-                bathrooms: Number.isFinite(parseInt(data.bathrooms)) ? parseInt(data.bathrooms) : 0,
-                kitchens: Number.isFinite(parseInt(data.kitchens)) ? parseInt(data.kitchens) : 0,
-                rooms: Number.isFinite(parseInt(data.rooms)) ? parseInt(data.rooms) : 0,
-                terraces: Number.isFinite(parseInt(data.terraces)) ? parseInt(data.terraces) : 0,
-                balconies: Number.isFinite(parseInt(data.balconies)) ? parseInt(data.balconies) : 0,
-                floor: data.floor ? parseInt(data.floor) : null,
-                total_floors: data.total_floors ? parseInt(data.total_floors) : null,
-                construction_year: data.construction_year ? parseInt(data.construction_year) : null,
-                renovation_year: data.renovation_year ? parseInt(data.renovation_year) : null,
-                garages: Number.isFinite(parseInt(data.garages)) ? parseInt(data.garages) : 0,
-                garage_size: data.garage_size || null,
-                land_surface: undefined,
+                country_id: data.country ? parseInt(data.country) : null,
+                municipality_id: data.municipality_id,
+                latitude: data.latitude ? parseFloat(data.latitude) : null,
+                longitude: data.longitude ? parseFloat(data.longitude) : null,
+                is_published: shouldPublish,
+                details: {
+                    bedrooms: parseInt(data.bedrooms) || 0,
+                    bathrooms: parseInt(data.bathrooms) || 0,
+                    kitchens: parseInt(data.kitchens) || 0,
+                    rooms: parseInt(data.rooms) || 0,
+                    floor:
+                        data.total_floors === '1'
+                            ? 0
+                            : data.floor
+                              ? parseInt(data.floor)
+                              : 0,
+                    total_floors: data.total_floors
+                        ? parseInt(data.total_floors)
+                        : 1,
+                    furnished: data.furnished,
+                    condition: data.condition,
+                    year_built: data.year_built
+                        ? parseInt(data.year_built)
+                        : null,
+                    construction_year: data.construction_year
+                        ? parseInt(data.construction_year)
+                        : null,
+                    renovation_year: data.renovation_year
+                        ? parseInt(data.renovation_year)
+                        : null,
+                    furnished: !!data.furnished,
+                    elevator: !!data.elevator,
+                    parking: !!data.parking,
+                    garden: !!data.garden,
+                    swimming_pool: !!data.swimming_pool,
+                    cellar: !!data.cellar,
+                    attic: !!data.attic,
+                    garage_size: data.garage_size || null,
+                },
+                amenities: data.amenities,
+                images: data.images,
                 images_to_delete: imagesToDelete,
             };
 
-            const payload: any = { ...submitData };
-            delete payload.existing_images;
-            if (payload.land_surface === undefined) delete payload.land_surface;
-
-            if (Array.isArray(payload.amenities)) {
-                payload.amenities = payload.amenities.map((n: any) => parseInt(n));
-            }
-
-            ['furnished', 'elevator', 'parking', 'garden', 'swimming_pool', 'cellar', 'attic', 'is_published', 'is_featured'].forEach((k) => {
-                payload[k] = !!payload[k];
-            });
-
             const onSuccessCallback = () => {
                 setSubmitStatus('success');
-                setSubmitMessage(isEditMode ? 'Propriété mise à jour avec succès!' : 'Propriété créée avec succès!');
+                setSubmitMessage(
+                    isEditMode
+                        ? 'Propriété mise à jour avec succès!'
+                        : 'Propriété créée avec succès!',
+                );
                 if (!isEditMode) {
                     reset();
                     setImagePreviews([]);
@@ -565,7 +759,8 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
 
             if (isEditMode && property?.id) {
                 if (!payload.images?.length) delete payload.images;
-                if (!payload.images_to_delete?.length) delete payload.images_to_delete;
+                if (!payload.images_to_delete?.length)
+                    delete payload.images_to_delete;
 
                 transform(() => ({
                     ...payload,
@@ -588,7 +783,16 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                 });
             }
         },
-        [hasActiveSubscription, data, imagesToDelete, isEditMode, property, reset, transform, post],
+        [
+            hasActiveSubscription,
+            data,
+            imagesToDelete,
+            isEditMode,
+            property,
+            reset,
+            transform,
+            post,
+        ],
     );
 
     const resetForm = useCallback(() => {
@@ -609,20 +813,68 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
     }, [reset, imagePreviews]);
 
     // Vérifier si la description peut être générée
-    const canGenerateDescription = data.type && data.sale_type && data.municipality_id && data.price && data.surface && data.bedrooms;
+    const canGenerateDescription =
+        data.type &&
+        data.sale_type &&
+        data.municipality_id &&
+        data.price &&
+        data.surface &&
+        data.bedrooms;
 
     // Vérifier si les champs requis sont remplis
-    const requiredFieldsFilled = data.title && data.type && data.sale_type && data.municipality_id && data.price && data.surface && data.bedrooms;
+    const requiredFieldsFilled =
+        data.title &&
+        data.type &&
+        data.sale_type &&
+        data.municipality_id &&
+        data.price &&
+        data.surface &&
+        data.bedrooms;
 
     // Sections de navigation
     const sections = [
-        { id: 'basic', label: 'Infos', icon: Home, fullLabel: 'Infos principales' },
-        { id: 'pricing', label: 'Prix', icon: DollarSign, fullLabel: 'Prix et transaction' },
-        { id: 'features', label: 'Caract.', icon: Building, fullLabel: 'Caractéristiques' },
-        { id: 'location', label: 'Localisation', icon: MapPin, fullLabel: 'Localisation' },
-        { id: 'equipment', label: 'Équip.', icon: CheckSquare, fullLabel: 'Équipements' },
-        { id: 'media', label: 'Photos', icon: Image, fullLabel: 'Photos et médias' },
-        { id: 'publication', label: 'Publication', icon: FileText, fullLabel: 'Publication' },
+        {
+            id: 'basic',
+            label: 'Infos',
+            icon: Home,
+            fullLabel: 'Infos principales',
+        },
+        {
+            id: 'pricing',
+            label: 'Prix',
+            icon: DollarSign,
+            fullLabel: 'Prix et transaction',
+        },
+        {
+            id: 'features',
+            label: 'Caract.',
+            icon: Building,
+            fullLabel: 'Caractéristiques',
+        },
+        {
+            id: 'location',
+            label: 'Localisation',
+            icon: MapPin,
+            fullLabel: 'Localisation',
+        },
+        {
+            id: 'equipment',
+            label: 'Équip.',
+            icon: CheckSquare,
+            fullLabel: 'Équipements',
+        },
+        {
+            id: 'media',
+            label: 'Photos',
+            icon: Image,
+            fullLabel: 'Photos et médias',
+        },
+        {
+            id: 'publication',
+            label: 'Publication',
+            icon: FileText,
+            fullLabel: 'Publication',
+        },
     ];
 
     return (
@@ -633,16 +885,23 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                     <div className="px-3 py-3 sm:px-4 sm:py-4 lg:px-8">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <button
-                                onClick={() => router.visit(route('dashboard.properties.index'))}
+                                onClick={() =>
+                                    router.visit(
+                                        route('dashboard.properties.index'),
+                                    )
+                                }
                                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-100/50 px-3 py-2 text-amber-700 transition-colors duration-200 hover:bg-amber-100 sm:w-auto"
                             >
                                 <ArrowLeft size={16} />
-                                <span className="text-sm sm:text-base">Retour</span>
+                                <span className="text-sm sm:text-base">
+                                    Retour
+                                </span>
                             </button>
 
                             <div className="flex-1 text-center sm:text-left">
                                 <h1 className="bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-xl font-bold text-transparent sm:text-2xl lg:text-3xl">
-                                    {isEditMode ? 'Modifier' : 'Publier'} une propriété
+                                    {isEditMode ? 'Modifier' : 'Publier'} une
+                                    propriété
                                 </h1>
                                 <p className="mt-1 px-2 text-sm text-slate-600 sm:text-base">
                                     {isEditMode
@@ -659,7 +918,9 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                     {submitStatus === 'success' && (
                         <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-100 p-3 text-emerald-800 sm:p-4">
                             <CheckCircle size={20} />
-                            <span className="text-sm sm:text-base">{submitMessage}</span>
+                            <span className="text-sm sm:text-base">
+                                {submitMessage}
+                            </span>
                         </div>
                     )}
 
@@ -667,7 +928,9 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                         <div className="flex flex-col items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-100 p-3 text-amber-800 sm:flex-row sm:p-4">
                             <div className="flex items-center gap-2">
                                 <AlertCircle size={20} />
-                                <span className="text-sm sm:text-base">{t('no_active_subscription')}</span>
+                                <span className="text-sm sm:text-base">
+                                    {t('no_active_subscription')}
+                                </span>
                             </div>
                             <a
                                 href={route('dashboard.subscriptions.index')}
@@ -683,14 +946,21 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                             <div className="flex items-start gap-3">
                                 <AlertCircle size={20} />
                                 <div className="flex-1">
-                                    <span className="text-sm sm:text-base">{submitMessage}</span>
+                                    <span className="text-sm sm:text-base">
+                                        {submitMessage}
+                                    </span>
                                     {Object.keys(errors).length > 0 && (
                                         <ul className="mt-2 list-inside list-disc text-xs sm:text-sm">
-                                            {Object.entries(errors).map(([field, error]) => (
-                                                <li key={field}>
-                                                    <span className="font-medium">{field}:</span> {error}
-                                                </li>
-                                            ))}
+                                            {Object.entries(errors).map(
+                                                ([field, error]) => (
+                                                    <li key={field}>
+                                                        <span className="font-medium">
+                                                            {field}:
+                                                        </span>{' '}
+                                                        {error}
+                                                    </li>
+                                                ),
+                                            )}
                                         </ul>
                                     )}
                                 </div>
@@ -700,19 +970,32 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                 </div>
 
                 {/* Formulaire responsive */}
-                <form onSubmit={handleSubmit} className="px-3 pb-8 sm:px-4 lg:px-8">
+                <form
+                    onSubmit={handleSubmit}
+                    className="px-3 pb-8 sm:px-4 lg:px-8"
+                >
                     <div className="relative overflow-hidden rounded-xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10 sm:rounded-2xl">
                         {/* Overlay de désactivation */}
                         {!hasActiveSubscription && (
                             <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/90 backdrop-blur-sm">
                                 <div className="mx-4 w-full max-w-sm rounded-xl bg-white p-6 text-center shadow-xl">
-                                    <AlertCircle size={48} className="mx-auto mb-4 text-amber-500" />
-                                    <h3 className="mb-2 text-xl font-semibold text-slate-900">Abonnement requis</h3>
+                                    <AlertCircle
+                                        size={48}
+                                        className="mx-auto mb-4 text-amber-500"
+                                    />
+                                    <h3 className="mb-2 text-xl font-semibold text-slate-900">
+                                        Abonnement requis
+                                    </h3>
                                     <p className="mb-4 text-sm text-slate-600">
-                                        Vous devez avoir un abonnement actif pour {isEditMode ? 'modifier' : 'publier'} une propriété.
+                                        Vous devez avoir un abonnement actif
+                                        pour{' '}
+                                        {isEditMode ? 'modifier' : 'publier'}{' '}
+                                        une propriété.
                                     </p>
                                     <a
-                                        href={route('dashboard.subscriptions.index')}
+                                        href={route(
+                                            'dashboard.subscriptions.index',
+                                        )}
                                         className="inline-flex items-center rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-6 py-3 font-medium text-white transition-all duration-300 hover:from-amber-500 hover:to-amber-700"
                                     >
                                         {t('subscribe_now')}
@@ -729,7 +1012,9 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                                     <button
                                         key={section.id}
                                         type="button"
-                                        onClick={() => setActiveSection(section.id)}
+                                        onClick={() =>
+                                            setActiveSection(section.id)
+                                        }
                                         className={`flex items-center gap-2 rounded-lg px-3 py-2 font-medium whitespace-nowrap transition-all duration-200 ${
                                             activeSection === section.id
                                                 ? 'bg-amber-100 text-amber-700'
@@ -737,7 +1022,9 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                                         }`}
                                     >
                                         <section.icon size={16} />
-                                        <span className="text-sm">{section.fullLabel}</span>
+                                        <span className="text-sm">
+                                            {section.fullLabel}
+                                        </span>
                                     </button>
                                 ))}
                             </div>
@@ -748,7 +1035,9 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                                     <button
                                         key={section.id}
                                         type="button"
-                                        onClick={() => setActiveSection(section.id)}
+                                        onClick={() =>
+                                            setActiveSection(section.id)
+                                        }
                                         className={`flex flex-col items-center gap-1 rounded-lg px-3 py-2 font-medium whitespace-nowrap transition-all duration-200 ${
                                             activeSection === section.id
                                                 ? 'bg-amber-100 text-amber-700'
@@ -756,7 +1045,9 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                                         }`}
                                     >
                                         <section.icon size={18} />
-                                        <span className="text-xs">{section.label}</span>
+                                        <span className="text-xs">
+                                            {section.label}
+                                        </span>
                                     </button>
                                 ))}
                             </div>
@@ -765,20 +1056,43 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                             <div className="sm:hidden">
                                 <div className="flex items-center justify-between border-b border-amber-200/30 p-3">
                                     <div className="flex items-center gap-2">
-                                        {sections.find((s) => s.id === activeSection)?.icon &&
-                                            React.createElement(sections.find((s) => s.id === activeSection).icon, {
-                                                size: 20,
-                                                className: 'text-amber-500',
-                                            })}
+                                        {sections.find(
+                                            (s) => s.id === activeSection,
+                                        )?.icon &&
+                                            React.createElement(
+                                                sections.find(
+                                                    (s) =>
+                                                        s.id === activeSection,
+                                                ).icon,
+                                                {
+                                                    size: 20,
+                                                    className: 'text-amber-500',
+                                                },
+                                            )}
 
-                                        <span className="text-sm font-medium">{sections.find((s) => s.id === activeSection)?.fullLabel}</span>
+                                        <span className="text-sm font-medium">
+                                            {
+                                                sections.find(
+                                                    (s) =>
+                                                        s.id === activeSection,
+                                                )?.fullLabel
+                                            }
+                                        </span>
                                     </div>
                                     <button
                                         type="button"
-                                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                        onClick={() =>
+                                            setIsMobileMenuOpen(
+                                                !isMobileMenuOpen,
+                                            )
+                                        }
                                         className="rounded-md p-1 transition-colors hover:bg-amber-50"
                                     >
-                                        {isMobileMenuOpen ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                                        {isMobileMenuOpen ? (
+                                            <ChevronDown size={20} />
+                                        ) : (
+                                            <ChevronRight size={20} />
+                                        )}
                                     </button>
                                 </div>
 
@@ -789,7 +1103,9 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                                                 key={section.id}
                                                 type="button"
                                                 onClick={() => {
-                                                    setActiveSection(section.id);
+                                                    setActiveSection(
+                                                        section.id,
+                                                    );
                                                     setIsMobileMenuOpen(false);
                                                 }}
                                                 className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 font-medium transition-all duration-200 ${
@@ -799,7 +1115,9 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                                                 }`}
                                             >
                                                 <section.icon size={16} />
-                                                <span className="text-sm">{section.fullLabel}</span>
+                                                <span className="text-sm">
+                                                    {section.fullLabel}
+                                                </span>
                                             </button>
                                         ))}
                                     </div>
@@ -813,55 +1131,190 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                             {activeSection === 'basic' && (
                                 <div className="space-y-4 sm:space-y-6">
                                     <div className="mb-4 flex items-center gap-2">
-                                        <Home size={20} className="text-amber-500" />
-                                        <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">Informations principales</h2>
+                                        <Home
+                                            size={20}
+                                            className="text-amber-500"
+                                        />
+                                        <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
+                                            Informations principales
+                                        </h2>
                                     </div>
 
                                     <div className="space-y-4">
                                         <div>
                                             <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                Titre de la propriété <span className="text-red-500">*</span>
+                                                Titre de la propriété{' '}
+                                                <span className="text-red-500">
+                                                    *
+                                                </span>
                                             </label>
                                             <input
                                                 type="text"
                                                 className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
                                                 placeholder="Ex: Villa moderne avec piscine à Gombe"
                                                 value={data.title}
-                                                onChange={(e) => handleInputChange('title', e.target.value)}
-                                                disabled={!hasActiveSubscription}
+                                                onChange={(e) =>
+                                                    handleInputChange(
+                                                        'title',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                disabled={
+                                                    !hasActiveSubscription
+                                                }
                                             />
-                                            {errors.title && <div className="mt-1 text-sm text-red-600">{errors.title}</div>}
+                                            {errors.title && (
+                                                <div className="mt-1 text-sm text-red-600">
+                                                    {errors.title}
+                                                </div>
+                                            )}
                                         </div>
 
-                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                            <div>
-                                                <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Numéro de référence
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-amber-50 px-3 py-2.5 text-sm text-slate-600 sm:text-base"
-                                                    value={data.reference_number}
-                                                    readOnly
-                                                />
-                                            </div>
+                                        <div>
+                                            <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
+                                                Numéro de référence
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="w-full rounded-lg border border-amber-200/50 bg-amber-50 px-3 py-2.5 text-sm text-slate-600 sm:text-base"
+                                                value={data.reference_number}
+                                                readOnly
+                                            />
+                                        </div>
 
-                                            <div>
-                                                <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Niveau d'urgence <span className="text-red-500">*</span>
-                                                </label>
-                                                <select
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
-                                                    value={data.urgency}
-                                                    onChange={(e) => handleInputChange('urgency', e.target.value)}
-                                                    disabled={!hasActiveSubscription}
-                                                >
-                                                    <option value="normal">Normal</option>
-                                                    <option value="urgent">Urgent</option>
-                                                    <option value="very_urgent">Très urgent</option>
-                                                </select>
-                                                {errors.urgency && <div className="mt-1 text-sm text-red-600">{errors.urgency}</div>}
-                                            </div>
+                                        <div>
+                                            <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
+                                                Type de transaction{' '}
+                                                <span className="text-red-500">
+                                                    *
+                                                </span>
+                                            </label>
+                                            <select
+                                                className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                value={data.sale_type}
+                                                onChange={(e) =>
+                                                    handleInputChange(
+                                                        'sale_type',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                disabled={
+                                                    !hasActiveSubscription
+                                                }
+                                            >
+                                                <option value="">
+                                                    Type de transaction
+                                                </option>
+                                                <option value="sale">
+                                                    Vente
+                                                </option>
+                                                <option value="rent">
+                                                    Location
+                                                </option>
+                                            </select>
+                                            {errors.sale_type && (
+                                                <div className="mt-1 text-sm text-red-600">
+                                                    {errors.sale_type}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
+                                                Type de propriété{' '}
+                                                <span className="text-red-500">
+                                                    *
+                                                </span>
+                                            </label>
+                                            <select
+                                                className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                value={data.type}
+                                                onChange={(e) =>
+                                                    handleInputChange(
+                                                        'type',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                disabled={
+                                                    !hasActiveSubscription
+                                                }
+                                            >
+                                                <option value="">
+                                                    Sélectionner un type
+                                                </option>
+                                                <option value="apartment">
+                                                    Appartement
+                                                </option>
+                                                <option value="house">
+                                                    Maison
+                                                </option>
+                                                <option value="studio">
+                                                    Studio
+                                                </option>
+                                                <option value="villa">
+                                                    Villa
+                                                </option>
+                                                <option value="office">
+                                                    Bureau
+                                                </option>
+                                                <option value="shop">
+                                                    Commerce
+                                                </option>
+                                                <option value="land">
+                                                    Terrain
+                                                </option>
+                                                <option value="garage">
+                                                    Garage
+                                                </option>
+                                                <option value="warehouse">
+                                                    Entrepôt
+                                                </option>
+                                                <option value="other">
+                                                    Autre
+                                                </option>
+                                            </select>
+                                            {errors.type && (
+                                                <div className="mt-1 text-sm text-red-600">
+                                                    {errors.type}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
+                                                Niveau d'urgence{' '}
+                                                <span className="text-red-500">
+                                                    *
+                                                </span>
+                                            </label>
+                                            <select
+                                                className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                value={data.urgency}
+                                                onChange={(e) =>
+                                                    handleInputChange(
+                                                        'urgency',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                disabled={
+                                                    !hasActiveSubscription
+                                                }
+                                            >
+                                                <option value="normal">
+                                                    Normal
+                                                </option>
+                                                <option value="urgent">
+                                                    Urgent
+                                                </option>
+                                                <option value="very_urgent">
+                                                    Très urgent
+                                                </option>
+                                            </select>
+                                            {errors.urgency && (
+                                                <div className="mt-1 text-sm text-red-600">
+                                                    {errors.urgency}
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div>
@@ -873,50 +1326,85 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                                                     className="w-full resize-none rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
                                                     placeholder="Décrivez votre propriété en détail..."
                                                     value={data.description}
-                                                    onChange={(e) => handleInputChange('description', e.target.value)}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            'description',
+                                                            e.target.value,
+                                                        )
+                                                    }
                                                     rows={4}
-                                                    disabled={!hasActiveSubscription}
+                                                    disabled={
+                                                        !hasActiveSubscription
+                                                    }
                                                 />
-                                                {errors.description && <div className="mt-1 text-sm text-red-600">{errors.description}</div>}
+                                                {errors.description && (
+                                                    <div className="mt-1 text-sm text-red-600">
+                                                        {errors.description}
+                                                    </div>
+                                                )}
 
                                                 {/* Bouton de génération de description */}
                                                 <div className="mt-2 flex flex-col items-start gap-2 sm:flex-row sm:items-center">
                                                     <button
                                                         type="button"
-                                                        onClick={handleGenerateDescription}
+                                                        onClick={
+                                                            handleGenerateDescription
+                                                        }
                                                         className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 sm:text-base ${
-                                                            !canGenerateDescription || loading || isDescriptionGenerated || !hasActiveSubscription
+                                                            !canGenerateDescription ||
+                                                            loading ||
+                                                            isDescriptionGenerated ||
+                                                            !hasActiveSubscription
                                                                 ? 'cursor-not-allowed bg-gray-100 text-gray-400 opacity-50'
                                                                 : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
                                                         }`}
                                                         disabled={
-                                                            !canGenerateDescription || loading || isDescriptionGenerated || !hasActiveSubscription
+                                                            !canGenerateDescription ||
+                                                            loading ||
+                                                            isDescriptionGenerated ||
+                                                            !hasActiveSubscription
                                                         }
                                                     >
                                                         {loading ? (
                                                             <>
                                                                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-amber-500 border-t-transparent"></div>
-                                                                Génération en cours...
+                                                                Génération en
+                                                                cours...
                                                             </>
                                                         ) : isDescriptionGenerated ? (
                                                             <>
-                                                                <CheckCircle size={16} />
-                                                                Description générée
+                                                                <CheckCircle
+                                                                    size={16}
+                                                                />
+                                                                Description
+                                                                générée
                                                             </>
                                                         ) : (
                                                             <>
-                                                                <Zap size={16} />
-                                                                Générer avec l'IA
+                                                                <Zap
+                                                                    size={16}
+                                                                />
+                                                                Générer avec
+                                                                l'IA
                                                             </>
                                                         )}
                                                     </button>
 
-                                                    {!canGenerateDescription && !loading && !isDescriptionGenerated && (
-                                                        <div className="mt-1 flex items-center gap-1 text-xs text-amber-600">
-                                                            <AlertTriangle size={12} />
-                                                            <span>Remplissez les champs requis pour générer</span>
-                                                        </div>
-                                                    )}
+                                                    {!canGenerateDescription &&
+                                                        !loading &&
+                                                        !isDescriptionGenerated && (
+                                                            <div className="mt-1 flex items-center gap-1 text-xs text-amber-600">
+                                                                <AlertTriangle
+                                                                    size={12}
+                                                                />
+                                                                <span>
+                                                                    Remplissez
+                                                                    les champs
+                                                                    requis pour
+                                                                    générer
+                                                                </span>
+                                                            </div>
+                                                        )}
                                                 </div>
                                             </div>
                                         </div>
@@ -928,71 +1416,52 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                             {activeSection === 'pricing' && (
                                 <div className="space-y-4 sm:space-y-6">
                                     <div className="mb-4 flex items-center gap-2">
-                                        <DollarSign size={20} className="text-amber-500" />
-                                        <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">Prix et transaction</h2>
+                                        <DollarSign
+                                            size={20}
+                                            className="text-amber-500"
+                                        />
+                                        <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
+                                            Prix et transaction
+                                        </h2>
                                     </div>
 
                                     <div className="space-y-4">
                                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                             <div>
                                                 <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Type de propriété <span className="text-red-500">*</span>
-                                                </label>
-                                                <select
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
-                                                    value={data.type}
-                                                    onChange={(e) => handleInputChange('type', e.target.value)}
-                                                    disabled={!hasActiveSubscription}
-                                                >
-                                                    <option value="">Sélectionner un type</option>
-                                                    <option value="apartment">Appartement</option>
-                                                    <option value="house">Maison</option>
-                                                    <option value="studio">Studio</option>
-                                                    <option value="villa">Villa</option>
-                                                    <option value="office">Bureau</option>
-                                                    <option value="shop">Commerce</option>
-                                                    <option value="land">Terrain</option>
-                                                    <option value="garage">Garage</option>
-                                                    <option value="warehouse">Entrepôt</option>
-                                                    <option value="other">Autre</option>
-                                                </select>
-                                                {errors.type && <div className="mt-1 text-sm text-red-600">{errors.type}</div>}
-                                            </div>
-
-                                            <div>
-                                                <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Type de transaction <span className="text-red-500">*</span>
-                                                </label>
-                                                <select
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
-                                                    value={data.sale_type}
-                                                    onChange={(e) => handleInputChange('sale_type', e.target.value)}
-                                                    disabled={!hasActiveSubscription}
-                                                >
-                                                    <option value="">Type de transaction</option>
-                                                    <option value="sale">Vente</option>
-                                                    <option value="rent">Location</option>
-                                                </select>
-                                                {errors.sale_type && <div className="mt-1 text-sm text-red-600">{errors.sale_type}</div>}
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                            <div>
-                                                <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    {data.sale_type === 'rent' ? 'Loyer mensuel (USD)' : 'Prix de vente (USD)'}{' '}
-                                                    <span className="text-red-500">*</span>
+                                                    {data.sale_type === 'rent'
+                                                        ? 'Loyer mensuel (USD)'
+                                                        : 'Prix de vente (USD)'}{' '}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
                                                 </label>
                                                 <input
                                                     type="number"
                                                     step="0.01"
                                                     className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
-                                                    placeholder={data.sale_type === 'rent' ? 'Ex: 80000' : 'Ex: 15000000'}
+                                                    placeholder={
+                                                        data.sale_type ===
+                                                        'rent'
+                                                            ? 'Ex: 80000'
+                                                            : 'Ex: 15000000'
+                                                    }
                                                     value={data.price}
-                                                    onChange={(e) => handleInputChange('price', e.target.value)}
-                                                    disabled={!hasActiveSubscription}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            'price',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        !hasActiveSubscription
+                                                    }
                                                 />
-                                                {errors.price && <div className="mt-1 text-sm text-red-600">{errors.price}</div>}
+                                                {errors.price && (
+                                                    <div className="mt-1 text-sm text-red-600">
+                                                        {errors.price}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             {data.sale_type === 'rent' && (
@@ -1005,12 +1474,25 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                                                         step="0.01"
                                                         className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
                                                         placeholder="Ex: 160000 (2 mois de loyer)"
-                                                        value={data.rental_guarantee}
-                                                        onChange={(e) => handleInputChange('rental_guarantee', e.target.value)}
-                                                        disabled={!hasActiveSubscription}
+                                                        value={
+                                                            data.rental_guarantee
+                                                        }
+                                                        onChange={(e) =>
+                                                            handleInputChange(
+                                                                'rental_guarantee',
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            !hasActiveSubscription
+                                                        }
                                                     />
                                                     {errors.rental_guarantee && (
-                                                        <div className="mt-1 text-sm text-red-600">{errors.rental_guarantee}</div>
+                                                        <div className="mt-1 text-sm text-red-600">
+                                                            {
+                                                                errors.rental_guarantee
+                                                            }
+                                                        </div>
                                                     )}
                                                 </div>
                                             )}
@@ -1018,21 +1500,45 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
 
                                         <div>
                                             <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                État du bien <span className="text-red-500">*</span>
+                                                État du bien{' '}
+                                                <span className="text-red-500">
+                                                    *
+                                                </span>
                                             </label>
                                             <select
                                                 className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
                                                 value={data.condition}
-                                                onChange={(e) => handleInputChange('condition', e.target.value)}
-                                                disabled={!hasActiveSubscription}
+                                                onChange={(e) =>
+                                                    handleInputChange(
+                                                        'condition',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                disabled={
+                                                    !hasActiveSubscription
+                                                }
                                             >
-                                                <option value="">Sélectionner l'état</option>
-                                                <option value="new">Neuf</option>
-                                                <option value="old">Ancien</option>
-                                                <option value="renovated">Rénové</option>
-                                                <option value="renovation_needed">À rénover</option>
+                                                <option value="">
+                                                    Sélectionner l'état
+                                                </option>
+                                                <option value="new">
+                                                    Neuf
+                                                </option>
+                                                <option value="old">
+                                                    Ancien
+                                                </option>
+                                                <option value="renovated">
+                                                    Rénové
+                                                </option>
+                                                <option value="renovation_needed">
+                                                    À rénover
+                                                </option>
                                             </select>
-                                            {errors.condition && <div className="mt-1 text-sm text-red-600">{errors.condition}</div>}
+                                            {errors.condition && (
+                                                <div className="mt-1 text-sm text-red-600">
+                                                    {errors.condition}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -1042,15 +1548,23 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                             {activeSection === 'features' && (
                                 <div className="space-y-4 sm:space-y-6">
                                     <div className="mb-4 flex items-center gap-2">
-                                        <Building size={20} className="text-amber-500" />
-                                        <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">Caractéristiques</h2>
+                                        <Building
+                                            size={20}
+                                            className="text-amber-500"
+                                        />
+                                        <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
+                                            Caractéristiques
+                                        </h2>
                                     </div>
 
                                     <div className="space-y-4">
                                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                                             <div>
                                                 <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Surface habitable (m²) <span className="text-red-500">*</span>
+                                                    Surface habitable (m²){' '}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
                                                 </label>
                                                 <input
                                                     type="number"
@@ -1058,21 +1572,42 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                                                     className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
                                                     placeholder="Ex: 120"
                                                     value={data.surface}
-                                                    onChange={(e) => handleInputChange('surface', e.target.value)}
-                                                    disabled={!hasActiveSubscription}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            'surface',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        !hasActiveSubscription
+                                                    }
                                                 />
-                                                {errors.surface && <div className="mt-1 text-sm text-red-600">{errors.surface}</div>}
+                                                {errors.surface && (
+                                                    <div className="mt-1 text-sm text-red-600">
+                                                        {errors.surface}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div>
                                                 <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Chambres <span className="text-red-500">*</span>
+                                                    Chambres{' '}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
                                                 </label>
                                                 <select
                                                     className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
                                                     value={data.bedrooms}
-                                                    onChange={(e) => handleInputChange('bedrooms', e.target.value)}
-                                                    disabled={!hasActiveSubscription}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            'bedrooms',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        !hasActiveSubscription
+                                                    }
                                                 >
                                                     <option value="0">0</option>
                                                     <option value="1">1</option>
@@ -1080,58 +1615,104 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                                                     <option value="3">3</option>
                                                     <option value="4">4</option>
                                                     <option value="5">5</option>
-                                                    <option value="6">6+</option>
+                                                    <option value="6">
+                                                        6+
+                                                    </option>
                                                 </select>
-                                                {errors.bedrooms && <div className="mt-1 text-sm text-red-600">{errors.bedrooms}</div>}
+                                                {errors.bedrooms && (
+                                                    <div className="mt-1 text-sm text-red-600">
+                                                        {errors.bedrooms}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div>
                                                 <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Salles de bain <span className="text-red-500">*</span>
+                                                    Salles de bain{' '}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
                                                 </label>
                                                 <select
                                                     className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
                                                     value={data.bathrooms}
-                                                    onChange={(e) => handleInputChange('bathrooms', e.target.value)}
-                                                    disabled={!hasActiveSubscription}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            'bathrooms',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        !hasActiveSubscription
+                                                    }
                                                 >
                                                     <option value="0">0</option>
                                                     <option value="1">1</option>
                                                     <option value="2">2</option>
                                                     <option value="3">3</option>
                                                     <option value="4">4</option>
-                                                    <option value="5">5+</option>
+                                                    <option value="5">
+                                                        5+
+                                                    </option>
                                                 </select>
-                                                {errors.bathrooms && <div className="mt-1 text-sm text-red-600">{errors.bathrooms}</div>}
+                                                {errors.bathrooms && (
+                                                    <div className="mt-1 text-sm text-red-600">
+                                                        {errors.bathrooms}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div>
                                                 <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Cuisines <span className="text-red-500">*</span>
+                                                    Cuisines{' '}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
                                                 </label>
                                                 <select
                                                     className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
                                                     value={data.kitchens}
-                                                    onChange={(e) => handleInputChange('kitchens', e.target.value)}
-                                                    disabled={!hasActiveSubscription}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            'kitchens',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        !hasActiveSubscription
+                                                    }
                                                 >
                                                     <option value="0">0</option>
                                                     <option value="1">1</option>
                                                     <option value="2">2</option>
                                                     <option value="3">3</option>
                                                 </select>
-                                                {errors.kitchens && <div className="mt-1 text-sm text-red-600">{errors.kitchens}</div>}
+                                                {errors.kitchens && (
+                                                    <div className="mt-1 text-sm text-red-600">
+                                                        {errors.kitchens}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div>
                                                 <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Nombre de pièces <span className="text-red-500">*</span>
+                                                    Nombre de pièces{' '}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
                                                 </label>
                                                 <select
                                                     className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
                                                     value={data.rooms}
-                                                    onChange={(e) => handleInputChange('rooms', e.target.value)}
-                                                    disabled={!hasActiveSubscription}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            'rooms',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        !hasActiveSubscription
+                                                    }
                                                 >
                                                     <option value="0">0</option>
                                                     <option value="1">1</option>
@@ -1139,86 +1720,263 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                                                     <option value="3">3</option>
                                                     <option value="4">4</option>
                                                     <option value="5">5</option>
-                                                    <option value="6">6+</option>
+                                                    <option value="6">
+                                                        6+
+                                                    </option>
                                                 </select>
-                                                {errors.rooms && <div className="mt-1 text-sm text-red-600">{errors.rooms}</div>}
+                                                {errors.rooms && (
+                                                    <div className="mt-1 text-sm text-red-600">
+                                                        {errors.rooms}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div>
                                                 <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Balcons <span className="text-red-500">*</span>
+                                                    Balcons{' '}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
                                                 </label>
                                                 <select
                                                     className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
                                                     value={data.balconies}
-                                                    onChange={(e) => handleInputChange('balconies', e.target.value)}
-                                                    disabled={!hasActiveSubscription}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            'balconies',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        !hasActiveSubscription
+                                                    }
                                                 >
                                                     <option value="0">0</option>
                                                     <option value="1">1</option>
                                                     <option value="2">2</option>
                                                     <option value="3">3</option>
-                                                    <option value="4">4+</option>
+                                                    <option value="4">
+                                                        4+
+                                                    </option>
                                                 </select>
-                                                {errors.balconies && <div className="mt-1 text-sm text-red-600">{errors.balconies}</div>}
+                                                {errors.balconies && (
+                                                    <div className="mt-1 text-sm text-red-600">
+                                                        {errors.balconies}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div>
                                                 <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Terrasses <span className="text-red-500">*</span>
+                                                    Terrasses{' '}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
                                                 </label>
                                                 <select
                                                     className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
                                                     value={data.terraces}
-                                                    onChange={(e) => handleInputChange('terraces', e.target.value)}
-                                                    disabled={!hasActiveSubscription}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            'terraces',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        !hasActiveSubscription
+                                                    }
                                                 >
                                                     <option value="0">0</option>
                                                     <option value="1">1</option>
                                                     <option value="2">2</option>
                                                     <option value="3">3</option>
-                                                    <option value="4">4+</option>
+                                                    <option value="4">
+                                                        4+
+                                                    </option>
                                                 </select>
-                                                {errors.terraces && <div className="mt-1 text-sm text-red-600">{errors.terraces}</div>}
+                                                {errors.terraces && (
+                                                    <div className="mt-1 text-sm text-red-600">
+                                                        {errors.terraces}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div>
                                                 <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Étage du bien <span className="text-red-500">*</span>
-                                                </label>
-                                                <select
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
-                                                    value={data.floor}
-                                                    onChange={(e) => handleInputChange('floor', e.target.value)}
-                                                    disabled={!hasActiveSubscription}
-                                                >
-                                                    <option value="0">Rez-de-chaussée</option>
-                                                    <option value="1">1er étage</option>
-                                                    <option value="2">2e étage</option>
-                                                    <option value="3">3e étage</option>
-                                                    <option value="4">4e étage</option>
-                                                    <option value="5">5e étage et +</option>
-                                                </select>
-                                                {errors.floor && <div className="mt-1 text-sm text-red-600">{errors.floor}</div>}
-                                            </div>
-
-                                            <div>
-                                                <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Nombre total d'étages <span className="text-red-500">*</span>
+                                                    Nombre total d'étages{' '}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
                                                 </label>
                                                 <select
                                                     className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
                                                     value={data.total_floors}
-                                                    onChange={(e) => handleInputChange('total_floors', e.target.value)}
-                                                    disabled={!hasActiveSubscription}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            'total_floors',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        !hasActiveSubscription
+                                                    }
                                                 >
-                                                    <option value="1">1 étage</option>
-                                                    <option value="2">2 étages</option>
-                                                    <option value="3">3 étages</option>
-                                                    <option value="4">4 étages</option>
-                                                    <option value="5">5 étages et +</option>
+                                                    <option value="1">
+                                                        1 étage
+                                                        (Rez-de-chaussée)
+                                                    </option>
+                                                    <option value="2">
+                                                        2 étages
+                                                    </option>
+                                                    <option value="3">
+                                                        3 étages
+                                                    </option>
+                                                    <option value="4">
+                                                        4 étages
+                                                    </option>
+                                                    <option value="5">
+                                                        5 étages et +
+                                                    </option>
                                                 </select>
-                                                {errors.total_floors && <div className="mt-1 text-sm text-red-600">{errors.total_floors}</div>}
+                                                {errors.total_floors && (
+                                                    <div className="mt-1 text-sm text-red-600">
+                                                        {errors.total_floors}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {data.total_floors !== '1' && (
+                                                <div>
+                                                    <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
+                                                        Étage du bien{' '}
+                                                        <span className="text-red-500">
+                                                            *
+                                                        </span>
+                                                    </label>
+                                                    <select
+                                                        className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                        value={data.floor}
+                                                        onChange={(e) =>
+                                                            handleInputChange(
+                                                                'floor',
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            !hasActiveSubscription
+                                                        }
+                                                    >
+                                                        <option value="0">
+                                                            Rez-de-chaussée
+                                                        </option>
+                                                        <option value="1">
+                                                            1er étage
+                                                        </option>
+                                                        <option value="2">
+                                                            2e étage
+                                                        </option>
+                                                        <option value="3">
+                                                            3e étage
+                                                        </option>
+                                                        <option value="4">
+                                                            4e étage
+                                                        </option>
+                                                        <option value="5">
+                                                            5e étage et +
+                                                        </option>
+                                                    </select>
+                                                    {errors.floor && (
+                                                        <div className="mt-1 text-sm text-red-600">
+                                                            {errors.floor}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            <div className="sm:col-span-2">
+                                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                                    <div>
+                                                        <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
+                                                            État du bien
+                                                        </label>
+                                                        <select
+                                                            className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                            value={
+                                                                data.condition
+                                                            }
+                                                            onChange={(e) =>
+                                                                handleInputChange(
+                                                                    'condition',
+                                                                    e.target
+                                                                        .value,
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                !hasActiveSubscription
+                                                            }
+                                                        >
+                                                            <option value="new">
+                                                                Neuf
+                                                            </option>
+                                                            <option value="good">
+                                                                Bon état
+                                                            </option>
+                                                            <option value="to_renovate">
+                                                                À rénover
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
+                                                            Année de
+                                                            construction
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            min="1800"
+                                                            max={new Date().getFullYear()}
+                                                            className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                            placeholder="Ex: 2020"
+                                                            value={
+                                                                data.year_built
+                                                            }
+                                                            onChange={(e) =>
+                                                                handleInputChange(
+                                                                    'year_built',
+                                                                    e.target
+                                                                        .value,
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                !hasActiveSubscription
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <div className="flex flex-col justify-end pb-2">
+                                                        <label className="flex cursor-pointer items-center gap-2">
+                                                            <input
+                                                                type="checkbox"
+                                                                className="h-5 w-5 rounded border-amber-300 text-amber-500 focus:ring-amber-500"
+                                                                checked={
+                                                                    data.furnished
+                                                                }
+                                                                onChange={(e) =>
+                                                                    setData(
+                                                                        'furnished',
+                                                                        e.target
+                                                                            .checked,
+                                                                    )
+                                                                }
+                                                                disabled={
+                                                                    !hasActiveSubscription
+                                                                }
+                                                            />
+                                                            <span className="text-sm font-medium text-slate-700 sm:text-base">
+                                                                Meublé
+                                                            </span>
+                                                        </label>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1229,160 +1987,412 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                             {activeSection === 'location' && (
                                 <div className="space-y-4 sm:space-y-6">
                                     <div className="mb-4 flex items-center gap-2">
-                                        <MapPin size={20} className="text-amber-500" />
-                                        <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">Localisation</h2>
+                                        <MapPin
+                                            size={20}
+                                            className="text-amber-500"
+                                        />
+                                        <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
+                                            Localisation
+                                        </h2>
                                     </div>
 
                                     <div className="space-y-4">
-                                        <div>
-                                            <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                Adresse complète <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
-                                                placeholder="Ex: 145 Avenue de la Paix"
-                                                value={data.address}
-                                                onChange={(e) => handleInputChange('address', e.target.value)}
-                                                disabled={!hasActiveSubscription}
-                                            />
-                                            {errors.address && <div className="mt-1 text-sm text-red-600">{errors.address}</div>}
-                                        </div>
-
                                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                             <div>
                                                 <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Pays <span className="text-red-500">*</span>
+                                                    Pays{' '}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
                                                 </label>
                                                 <select
                                                     className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
                                                     value={data.country}
-                                                    onChange={(e) => handleInputChange('country', e.target.value)}
-                                                    disabled={!hasActiveSubscription}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            'country',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        !hasActiveSubscription
+                                                    }
                                                 >
-                                                    <option value="">Sélectionner un pays</option>
-                                                    {Object.entries(countries).map(([code, name]) => (
-                                                        <option key={code} value={code}>
-                                                            {name}
+                                                    <option value="">
+                                                        Sélectionner un pays
+                                                    </option>
+                                                    {Object.entries(
+                                                        countries || {},
+                                                    ).map(([id, label]) => (
+                                                        <option
+                                                            key={id}
+                                                            value={id}
+                                                        >
+                                                            {label}
                                                         </option>
                                                     ))}
                                                 </select>
-                                                {errors.country && <div className="mt-1 text-sm text-red-600">{errors.country}</div>}
+                                                {errors.country && (
+                                                    <div className="mt-1 text-sm text-red-600">
+                                                        {errors.country}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div>
                                                 <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Ville <span className="text-red-500">*</span>
+                                                    Ville{' '}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
                                                 </label>
                                                 <select
                                                     className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
                                                     value={data.city}
-                                                    onChange={(e) => handleInputChange('city', e.target.value)}
-                                                    disabled={!data.country || availableCities.length === 0 || !hasActiveSubscription}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            'city',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        !data.country ||
+                                                        availableCities.length ===
+                                                            0 ||
+                                                        !hasActiveSubscription
+                                                    }
                                                 >
-                                                    <option value="">Sélectionner une ville</option>
-                                                    {availableCities.map((city) => (
-                                                        <option key={city} value={city}>
-                                                            {city}
-                                                        </option>
-                                                    ))}
+                                                    <option value="">
+                                                        Sélectionner une ville
+                                                    </option>
+                                                    {availableCities.map(
+                                                        (city) => (
+                                                            <option
+                                                                key={city}
+                                                                value={city}
+                                                            >
+                                                                {city}
+                                                            </option>
+                                                        ),
+                                                    )}
                                                 </select>
-                                                {errors.city && <div className="mt-1 text-sm text-red-600">{errors.city}</div>}
+                                                {errors.city && (
+                                                    <div className="mt-1 text-sm text-red-600">
+                                                        {errors.city}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div>
                                                 <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Quartier <span className="text-red-500">*</span>
+                                                    Quartier{' '}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
                                                 </label>
                                                 <input
                                                     type="text"
                                                     className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
                                                     placeholder="Ex: Gombe, Kimpe, Lemba..."
                                                     value={data.quarter}
-                                                    onChange={(e) => handleInputChange('quarter', e.target.value)}
-                                                    disabled={!hasActiveSubscription}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            'quarter',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        !hasActiveSubscription
+                                                    }
                                                 />
-                                                {errors.quarter && <div className="mt-1 text-sm text-red-600">{errors.quarter}</div>}
+                                                {errors.quarter && (
+                                                    <div className="mt-1 text-sm text-red-600">
+                                                        {errors.quarter}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div>
                                                 <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Code postal <span className="text-red-500">*</span>
+                                                    Code postal{' '}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
                                                 </label>
                                                 <input
                                                     type="text"
                                                     className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
                                                     placeholder="Ex: 8200"
                                                     value={data.postal_code}
-                                                    onChange={(e) => handleInputChange('postal_code', e.target.value)}
-                                                    disabled={!hasActiveSubscription}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            'postal_code',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        !hasActiveSubscription
+                                                    }
                                                 />
-                                                {errors.postal_code && <div className="mt-1 text-sm text-red-600">{errors.postal_code}</div>}
+                                                {errors.postal_code && (
+                                                    <div className="mt-1 text-sm text-red-600">
+                                                        {errors.postal_code}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div className="sm:col-span-2">
                                                 <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Commune/Municipality <span className="text-red-500">*</span>
+                                                    Commune/Municipality{' '}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
                                                 </label>
                                                 <select
                                                     className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
-                                                    value={data.municipality_id || ''}
-                                                    onChange={(e) =>
-                                                        handleInputChange('municipality_id', e.target.value ? parseInt(e.target.value) : null)
+                                                    value={
+                                                        data.municipality_id ||
+                                                        ''
                                                     }
-                                                    disabled={!data.city || availableMunicipalities.length === 0 || !hasActiveSubscription}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            'municipality_id',
+                                                            e.target.value
+                                                                ? parseInt(
+                                                                      e.target
+                                                                          .value,
+                                                                  )
+                                                                : null,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        !data.city ||
+                                                        availableMunicipalities.length ===
+                                                            0 ||
+                                                        !hasActiveSubscription
+                                                    }
                                                 >
-                                                    <option value="">Sélectionner une commune</option>
-                                                    {availableMunicipalities.map((municipality) => (
-                                                        <option key={municipality.id} value={municipality.id}>
-                                                            {municipality.name}
-                                                        </option>
-                                                    ))}
+                                                    <option value="">
+                                                        Sélectionner une commune
+                                                    </option>
+                                                    {availableMunicipalities.map(
+                                                        (municipality) => (
+                                                            <option
+                                                                key={
+                                                                    municipality.id
+                                                                }
+                                                                value={
+                                                                    municipality.id
+                                                                }
+                                                            >
+                                                                {
+                                                                    municipality.name
+                                                                }
+                                                            </option>
+                                                        ),
+                                                    )}
                                                 </select>
-                                                {errors.municipality_id && <div className="mt-1 text-sm text-red-600">{errors.municipality_id}</div>}
+                                                {errors.municipality_id && (
+                                                    <div className="mt-1 text-sm text-red-600">
+                                                        {errors.municipality_id}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
 
                                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                             <div>
-                                                <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">Latitude</label>
+                                                <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
+                                                    Latitude
+                                                </label>
                                                 <input
                                                     type="text"
                                                     className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
                                                     placeholder="Ex: -4.4419"
                                                     value={data.latitude}
-                                                    onChange={(e) => handleInputChange('latitude', e.target.value)}
-                                                    disabled={!hasActiveSubscription}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            'latitude',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        !hasActiveSubscription
+                                                    }
                                                 />
-                                                {errors.latitude && <div className="mt-1 text-sm text-red-600">{errors.latitude}</div>}
+                                                {errors.latitude && (
+                                                    <div className="mt-1 text-sm text-red-600">
+                                                        {errors.latitude}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div>
-                                                <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">Longitude</label>
+                                                <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
+                                                    Longitude
+                                                </label>
                                                 <input
                                                     type="text"
                                                     className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
                                                     placeholder="Ex: 15.2663"
                                                     value={data.longitude}
-                                                    onChange={(e) => handleInputChange('longitude', e.target.value)}
-                                                    disabled={!hasActiveSubscription}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            'longitude',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        !hasActiveSubscription
+                                                    }
                                                 />
-                                                {errors.longitude && <div className="mt-1 text-sm text-red-600">{errors.longitude}</div>}
+                                                {errors.longitude && (
+                                                    <div className="mt-1 text-sm text-red-600">
+                                                        {errors.longitude}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
 
-                                        <div>
-                                            <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">Lien Google Maps</label>
-                                            <input
-                                                type="text"
-                                                className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
-                                                placeholder="Ex: https://maps.google.com/?q=..."
-                                                value={data.map_location}
-                                                onChange={(e) => handleInputChange('map_location', e.target.value)}
-                                                disabled={!hasActiveSubscription}
-                                            />
-                                            {errors.map_location && <div className="mt-1 text-sm text-red-600">{errors.map_location}</div>}
+                                        <div className="relative mb-4">
+                                            <div className="relative">
+                                                <Search
+                                                    className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400"
+                                                    size={20}
+                                                />
+                                                <input
+                                                    type="text"
+                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 py-2.5 pr-10 pl-10 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                    placeholder="Rechercher un lieu (ex: Avenue Tribunal, Kinshasa...)"
+                                                    value={searchQuery}
+                                                    onChange={(e) =>
+                                                        handleMapSearch(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        !hasActiveSubscription
+                                                    }
+                                                />
+                                                {searchQuery && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setSearchQuery('');
+                                                            setSearchResults(
+                                                                [],
+                                                            );
+                                                        }}
+                                                        className="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                                    >
+                                                        <X size={16} />
+                                                    </button>
+                                                )}
+                                            </div>
+
+                                            {/* Search Results Dropdown */}
+                                            {searchResults.length > 0 && (
+                                                <div className="absolute z-[1000] mt-1 w-full overflow-hidden rounded-lg border border-amber-100 bg-white shadow-lg">
+                                                    <ul className="max-h-60 overflow-y-auto">
+                                                        {searchResults.map(
+                                                            (result, index) => (
+                                                                <li
+                                                                    key={index}
+                                                                    className="cursor-pointer border-b border-amber-50 px-4 py-2 text-sm text-slate-700 last:border-0 hover:bg-amber-50"
+                                                                    onClick={() =>
+                                                                        handleSelectLocation(
+                                                                            result,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        result.display_name
+                                                                    }
+                                                                </li>
+                                                            ),
+                                                        )}
+                                                    </ul>
+                                                </div>
+                                            )}
                                         </div>
+
+                                        <div className="relative z-0 h-[300px] w-full overflow-hidden rounded-xl border border-amber-200 shadow-sm sm:h-[400px]">
+                                            <MapContainer
+                                                center={
+                                                    data.latitude &&
+                                                    data.longitude
+                                                        ? [
+                                                              parseFloat(
+                                                                  data.latitude,
+                                                              ),
+                                                              parseFloat(
+                                                                  data.longitude,
+                                                              ),
+                                                          ]
+                                                        : [-4.4419, 15.2663]
+                                                }
+                                                zoom={
+                                                    data.latitude &&
+                                                    data.longitude
+                                                        ? 15
+                                                        : 12
+                                                }
+                                                scrollWheelZoom={false}
+                                                className="h-full w-full"
+                                            >
+                                                <MapController
+                                                    center={
+                                                        data.latitude &&
+                                                        data.longitude
+                                                            ? [
+                                                                  parseFloat(
+                                                                      data.latitude,
+                                                                  ),
+                                                                  parseFloat(
+                                                                      data.longitude,
+                                                                  ),
+                                                              ]
+                                                            : [-4.4419, 15.2663]
+                                                    }
+                                                />
+                                                <TileLayer
+                                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                                />
+                                                <LocationMarker
+                                                    position={
+                                                        data.latitude &&
+                                                        data.longitude
+                                                            ? [
+                                                                  parseFloat(
+                                                                      data.latitude,
+                                                                  ),
+                                                                  parseFloat(
+                                                                      data.longitude,
+                                                                  ),
+                                                              ]
+                                                            : null
+                                                    }
+                                                    setPosition={(pos) => {
+                                                        setData((prev) => ({
+                                                            ...prev,
+                                                            latitude:
+                                                                pos.lat.toFixed(
+                                                                    6,
+                                                                ),
+                                                            longitude:
+                                                                pos.lng.toFixed(
+                                                                    6,
+                                                                ),
+                                                        }));
+                                                    }}
+                                                />
+                                            </MapContainer>
+                                        </div>
+                                        <p className="text-xs text-slate-500 italic">
+                                            * Cliquez sur la carte pour définir
+                                            la localisation exacte de la
+                                            propriété.
+                                        </p>
                                     </div>
                                 </div>
                             )}
@@ -1391,79 +2401,146 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                             {activeSection === 'equipment' && (
                                 <div className="space-y-4 sm:space-y-6">
                                     <div className="mb-4 flex items-center gap-2">
-                                        <CheckSquare size={20} className="text-amber-500" />
-                                        <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">Équipements</h2>
+                                        <CheckSquare
+                                            size={20}
+                                            className="text-amber-500"
+                                        />
+                                        <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
+                                            Équipements
+                                        </h2>
                                     </div>
 
                                     <div className="space-y-4">
                                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                             <div>
-                                                <h3 className="mb-4 text-base font-medium text-slate-900 sm:text-lg">Équipements de base</h3>
+                                                <h3 className="mb-4 text-base font-medium text-slate-900 sm:text-lg">
+                                                    Équipements de base
+                                                </h3>
                                                 <div className="space-y-3">
                                                     <label className="flex cursor-pointer items-center">
                                                         <input
                                                             type="checkbox"
                                                             className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                                                            checked={data.furnished}
-                                                            onChange={() => handleCheckboxChange('furnished')}
-                                                            disabled={!hasActiveSubscription}
+                                                            checked={
+                                                                data.furnished
+                                                            }
+                                                            onChange={() =>
+                                                                handleCheckboxChange(
+                                                                    'furnished',
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                !hasActiveSubscription
+                                                            }
                                                         />
-                                                        <span className="ml-3 text-sm sm:text-base">Meublé</span>
+                                                        <span className="ml-3 text-sm sm:text-base">
+                                                            Meublé
+                                                        </span>
                                                     </label>
 
                                                     <label className="flex cursor-pointer items-center">
                                                         <input
                                                             type="checkbox"
                                                             className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                                                            checked={data.elevator}
-                                                            onChange={() => handleCheckboxChange('elevator')}
-                                                            disabled={!hasActiveSubscription}
+                                                            checked={
+                                                                data.elevator
+                                                            }
+                                                            onChange={() =>
+                                                                handleCheckboxChange(
+                                                                    'elevator',
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                !hasActiveSubscription
+                                                            }
                                                         />
-                                                        <span className="ml-3 text-sm sm:text-base">Ascenseur</span>
+                                                        <span className="ml-3 text-sm sm:text-base">
+                                                            Ascenseur
+                                                        </span>
                                                     </label>
 
                                                     <label className="flex cursor-pointer items-center">
                                                         <input
                                                             type="checkbox"
                                                             className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                                                            checked={data.parking}
-                                                            onChange={() => handleCheckboxChange('parking')}
-                                                            disabled={!hasActiveSubscription}
+                                                            checked={
+                                                                data.parking
+                                                            }
+                                                            onChange={() =>
+                                                                handleCheckboxChange(
+                                                                    'parking',
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                !hasActiveSubscription
+                                                            }
                                                         />
-                                                        <span className="ml-3 text-sm sm:text-base">Parking</span>
+                                                        <span className="ml-3 text-sm sm:text-base">
+                                                            Parking
+                                                        </span>
                                                     </label>
 
                                                     <label className="flex cursor-pointer items-center">
                                                         <input
                                                             type="checkbox"
                                                             className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                                                            checked={data.garden}
-                                                            onChange={() => handleCheckboxChange('garden')}
-                                                            disabled={!hasActiveSubscription}
+                                                            checked={
+                                                                data.garden
+                                                            }
+                                                            onChange={() =>
+                                                                handleCheckboxChange(
+                                                                    'garden',
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                !hasActiveSubscription
+                                                            }
                                                         />
-                                                        <span className="ml-3 text-sm sm:text-base">Jardin</span>
+                                                        <span className="ml-3 text-sm sm:text-base">
+                                                            Jardin
+                                                        </span>
                                                     </label>
 
                                                     <label className="flex cursor-pointer items-center">
                                                         <input
                                                             type="checkbox"
                                                             className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                                                            checked={data.swimming_pool}
-                                                            onChange={() => handleCheckboxChange('swimming_pool')}
-                                                            disabled={!hasActiveSubscription}
+                                                            checked={
+                                                                data.swimming_pool
+                                                            }
+                                                            onChange={() =>
+                                                                handleCheckboxChange(
+                                                                    'swimming_pool',
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                !hasActiveSubscription
+                                                            }
                                                         />
-                                                        <span className="ml-3 text-sm sm:text-base">Piscine</span>
+                                                        <span className="ml-3 text-sm sm:text-base">
+                                                            Piscine
+                                                        </span>
                                                     </label>
 
                                                     <label className="flex cursor-pointer items-center">
                                                         <input
                                                             type="checkbox"
                                                             className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                                                            checked={data.cellar}
-                                                            onChange={() => handleCheckboxChange('cellar')}
-                                                            disabled={!hasActiveSubscription}
+                                                            checked={
+                                                                data.cellar
+                                                            }
+                                                            onChange={() =>
+                                                                handleCheckboxChange(
+                                                                    'cellar',
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                !hasActiveSubscription
+                                                            }
                                                         />
-                                                        <span className="ml-3 text-sm sm:text-base">Cave</span>
+                                                        <span className="ml-3 text-sm sm:text-base">
+                                                            Cave
+                                                        </span>
                                                     </label>
 
                                                     <label className="flex cursor-pointer items-center">
@@ -1471,39 +2548,81 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                                                             type="checkbox"
                                                             className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
                                                             checked={data.attic}
-                                                            onChange={() => handleCheckboxChange('attic')}
-                                                            disabled={!hasActiveSubscription}
+                                                            onChange={() =>
+                                                                handleCheckboxChange(
+                                                                    'attic',
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                !hasActiveSubscription
+                                                            }
                                                         />
-                                                        <span className="ml-3 text-sm sm:text-base">Grenier</span>
+                                                        <span className="ml-3 text-sm sm:text-base">
+                                                            Grenier
+                                                        </span>
                                                     </label>
                                                 </div>
                                             </div>
 
                                             <div>
-                                                <h3 className="mb-4 text-base font-medium text-slate-900 sm:text-lg">Équipements avancés</h3>
+                                                <h3 className="mb-4 text-base font-medium text-slate-900 sm:text-lg">
+                                                    Équipements avancés
+                                                </h3>
                                                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                                    {amenities.map((amenity) => (
-                                                        <label
-                                                            key={amenity.id}
-                                                            className={`flex cursor-pointer items-center rounded-lg border p-3 transition-all ${
-                                                                (data.amenities || []).includes(amenity.id)
-                                                                    ? 'border-amber-300 bg-amber-50'
-                                                                    : 'border-gray-200 hover:border-amber-200'
-                                                            } ${!hasActiveSubscription ? 'cursor-not-allowed opacity-50' : ''}`}
-                                                            onClick={() => hasActiveSubscription && handleAmenityChange(amenity.id)}
-                                                        >
-                                                            <input
-                                                                type="checkbox"
-                                                                className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                                                                checked={(data.amenities || []).includes(amenity.id)}
-                                                                onChange={() => hasActiveSubscription && handleAmenityChange(amenity.id)}
-                                                                disabled={!hasActiveSubscription}
-                                                            />
-                                                            <span className="ml-3 text-sm sm:text-base">{amenity.name}</span>
-                                                        </label>
-                                                    ))}
+                                                    {amenities.map(
+                                                        (amenity) => (
+                                                            <label
+                                                                key={amenity.id}
+                                                                className={`flex cursor-pointer items-center rounded-lg border p-3 transition-all ${
+                                                                    (
+                                                                        data.amenities ||
+                                                                        []
+                                                                    ).includes(
+                                                                        amenity.id,
+                                                                    )
+                                                                        ? 'border-amber-300 bg-amber-50'
+                                                                        : 'border-gray-200 hover:border-amber-200'
+                                                                } ${!hasActiveSubscription ? 'cursor-not-allowed opacity-50' : ''}`}
+                                                                onClick={() =>
+                                                                    hasActiveSubscription &&
+                                                                    handleAmenityChange(
+                                                                        amenity.id,
+                                                                    )
+                                                                }
+                                                            >
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                                                                    checked={(
+                                                                        data.amenities ||
+                                                                        []
+                                                                    ).includes(
+                                                                        amenity.id,
+                                                                    )}
+                                                                    onChange={() =>
+                                                                        hasActiveSubscription &&
+                                                                        handleAmenityChange(
+                                                                            amenity.id,
+                                                                        )
+                                                                    }
+                                                                    disabled={
+                                                                        !hasActiveSubscription
+                                                                    }
+                                                                />
+                                                                <span className="ml-3 text-sm sm:text-base">
+                                                                    {
+                                                                        amenity.name
+                                                                    }
+                                                                </span>
+                                                            </label>
+                                                        ),
+                                                    )}
                                                 </div>
-                                                {errors.amenities && <div className="mt-1 text-sm text-red-600">{errors.amenities}</div>}
+                                                {errors.amenities && (
+                                                    <div className="mt-1 text-sm text-red-600">
+                                                        {errors.amenities}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -1514,58 +2633,107 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                             {activeSection === 'media' && (
                                 <div className="space-y-4 sm:space-y-6">
                                     <div className="mb-4 flex items-center gap-2">
-                                        <Image size={20} className="text-amber-500" />
-                                        <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">Photos</h2>
+                                        <Image
+                                            size={20}
+                                            className="text-amber-500"
+                                        />
+                                        <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
+                                            Photos
+                                        </h2>
                                     </div>
 
                                     <div className="space-y-4">
                                         <div>
                                             <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                Images de la propriété {!isEditMode && <span className="text-red-500">*</span>}
+                                                Images de la propriété{' '}
+                                                {!isEditMode && (
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
+                                                )}
                                             </label>
 
                                             {imagePreviews.length > 0 && (
                                                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                                                    {imagePreviews.map((preview, index) => (
-                                                        <div key={index} className="group relative">
-                                                            <img
-                                                                src={preview.url}
-                                                                alt={preview.name}
-                                                                className="h-32 w-full rounded-lg object-cover sm:h-40"
-                                                            />
-                                                            <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => removeFile(index)}
-                                                                    className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-white transition-colors hover:bg-red-600"
-                                                                    disabled={!hasActiveSubscription}
-                                                                >
-                                                                    <Trash2 size={16} />
-                                                                </button>
+                                                    {imagePreviews.map(
+                                                        (preview, index) => (
+                                                            <div
+                                                                key={index}
+                                                                className="group relative"
+                                                            >
+                                                                <img
+                                                                    src={
+                                                                        preview.url
+                                                                    }
+                                                                    alt={
+                                                                        preview.name
+                                                                    }
+                                                                    className="h-32 w-full rounded-lg object-cover sm:h-40"
+                                                                />
+                                                                <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            removeFile(
+                                                                                index,
+                                                                            )
+                                                                        }
+                                                                        className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-white transition-colors hover:bg-red-600"
+                                                                        disabled={
+                                                                            !hasActiveSubscription
+                                                                        }
+                                                                    >
+                                                                        <Trash2
+                                                                            size={
+                                                                                16
+                                                                            }
+                                                                        />
+                                                                    </button>
+                                                                </div>
+                                                                <div className="mt-2 truncate text-xs text-slate-600">
+                                                                    {
+                                                                        preview.name
+                                                                    }
+                                                                </div>
                                                             </div>
-                                                            <div className="mt-2 truncate text-xs text-slate-600">{preview.name}</div>
-                                                        </div>
-                                                    ))}
+                                                        ),
+                                                    )}
                                                 </div>
                                             )}
 
                                             <div className="flex w-full items-center justify-center">
                                                 <label className="flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-amber-300 transition-colors hover:bg-amber-50">
-                                                    <Upload size={24} className="mb-2 text-amber-500" />
-                                                    <span className="text-sm text-slate-600 sm:text-base">Cliquez pour télécharger</span>
+                                                    <Upload
+                                                        size={24}
+                                                        className="mb-2 text-amber-500"
+                                                    />
+                                                    <span className="text-sm text-slate-600 sm:text-base">
+                                                        Cliquez pour télécharger
+                                                    </span>
                                                     <input
                                                         ref={fileInputRef}
                                                         type="file"
                                                         className="hidden"
                                                         accept="image/*"
                                                         multiple
-                                                        onChange={handleFileUpload}
-                                                        disabled={!hasActiveSubscription}
+                                                        onChange={
+                                                            handleFileUpload
+                                                        }
+                                                        disabled={
+                                                            !hasActiveSubscription
+                                                        }
                                                     />
                                                 </label>
-                                                <p className="text-xs text-slate-500">Formats: JPG, PNG, GIF (Max 5MB)</p>
+                                                <p className="text-xs text-slate-500">
+                                                    Formats: JPG, PNG, GIF (Max
+                                                    5MB)
+                                                </p>
                                             </div>
-                                            {errors.images && <div className="mt-1 text-sm text-red-600">{errors.images}</div>}
+                                            {errors.images && (
+                                                <div className="mt-1 text-sm text-red-600">
+                                                    {errors.images}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -1575,8 +2743,13 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                             {activeSection === 'publication' && (
                                 <div className="space-y-4 sm:space-y-6">
                                     <div className="mb-4 flex items-center gap-2">
-                                        <FileText size={20} className="text-amber-500" />
-                                        <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">Publication</h2>
+                                        <FileText
+                                            size={20}
+                                            className="text-amber-500"
+                                        />
+                                        <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
+                                            Publication
+                                        </h2>
                                     </div>
 
                                     <div className="space-y-4">
@@ -1586,14 +2759,26 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                                                     <input
                                                         type="checkbox"
                                                         className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                                                        checked={data.is_published}
-                                                        onChange={() => handleCheckboxChange('is_published')}
-                                                        disabled={!hasActiveSubscription}
+                                                        checked={
+                                                            data.is_published
+                                                        }
+                                                        onChange={() =>
+                                                            handleCheckboxChange(
+                                                                'is_published',
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            !hasActiveSubscription
+                                                        }
                                                     />
-                                                    <span className="ml-3 text-sm sm:text-base">Publier immédiatement</span>
+                                                    <span className="ml-3 text-sm sm:text-base">
+                                                        Publier immédiatement
+                                                    </span>
                                                 </label>
                                                 <p className="mt-1 ml-8 text-xs text-slate-500">
-                                                    Cochez cette case pour publier la propriété immédiatement
+                                                    Cochez cette case pour
+                                                    publier la propriété
+                                                    immédiatement
                                                 </p>
                                             </div>
 
@@ -1602,14 +2787,26 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                                                     <input
                                                         type="checkbox"
                                                         className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                                                        checked={data.is_featured}
-                                                        onChange={() => handleCheckboxChange('is_featured')}
-                                                        disabled={!hasActiveSubscription}
+                                                        checked={
+                                                            data.is_featured
+                                                        }
+                                                        onChange={() =>
+                                                            handleCheckboxChange(
+                                                                'is_featured',
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            !hasActiveSubscription
+                                                        }
                                                     />
-                                                    <span className="ml-3 text-sm sm:text-base">Mettre en vedette</span>
+                                                    <span className="ml-3 text-sm sm:text-base">
+                                                        Mettre en vedette
+                                                    </span>
                                                 </label>
                                                 <p className="mt-1 ml-8 text-xs text-slate-500">
-                                                    Cochez cette case pour mettre en avant cette propriété
+                                                    Cochez cette case pour
+                                                    mettre en avant cette
+                                                    propriété
                                                 </p>
                                             </div>
                                         </div>
@@ -1624,25 +2821,43 @@ const PropertyForm: React.FC<Props> = ({ countries, municipalities, amenities, h
                                         type="button"
                                         onClick={resetForm}
                                         className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-100 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-base"
-                                        disabled={processing || !hasActiveSubscription}
+                                        disabled={
+                                            processing || !hasActiveSubscription
+                                        }
                                     >
                                         <RotateCcw size={16} />
                                         Réinitialiser
                                     </button>
                                     <button
-                                        type="submit"
+                                        type="button"
+                                        onClick={(e) => handleSubmit(e, false)}
+                                        className="flex w-full items-center justify-center gap-2 rounded-lg border border-amber-200 bg-white px-4 py-2.5 text-sm text-amber-700 transition-all duration-300 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-base"
+                                        disabled={
+                                            processing || !hasActiveSubscription
+                                        }
+                                    >
+                                        <Save size={16} />
+                                        Enregistrer comme brouillon
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={(e) => handleSubmit(e, true)}
                                         className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-amber-400 to-amber-600 px-4 py-2.5 text-sm text-white transition-all duration-300 hover:from-amber-500 hover:to-amber-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-base"
-                                        disabled={processing || !hasActiveSubscription}
+                                        disabled={
+                                            processing || !hasActiveSubscription
+                                        }
                                     >
                                         {processing ? (
                                             <>
                                                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                                                {isEditMode ? 'Mise à jour...' : 'Publication...'}
+                                                Traitement...
                                             </>
                                         ) : (
                                             <>
-                                                <Save size={16} />
-                                                {isEditMode ? 'Mettre à jour' : 'Publier'}
+                                                <Zap size={16} />
+                                                {isEditMode
+                                                    ? 'Mettre à jour & Publier'
+                                                    : 'Soumettre pour validation'}
                                             </>
                                         )}
                                     </button>

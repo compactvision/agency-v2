@@ -39,6 +39,8 @@ class AdService
                 'country_id' => $data['country_id'] ?? null,
                 'city_id' => $data['city_id'] ?? null,
                 'municipality_id' => $data['municipality_id'] ?? null,
+                'latitude' => $data['latitude'] ?? null,
+                'longitude' => $data['longitude'] ?? null,
                 'status' => 'draft',
                 'is_published' => false,
             ]);
@@ -214,6 +216,18 @@ class AdService
         $ad->update([
             'status' => 'pending_validation',
         ]);
+
+        // Send Emails
+        try {
+            \Illuminate\Support\Facades\Mail::to($ad->user->email)
+                ->send(new \App\Mail\PropertyValidationPending($ad));
+
+            $adminEmail = config('mail.from.address'); // Or a specific admin email
+            \Illuminate\Support\Facades\Mail::to($adminEmail)
+                ->send(new \App\Mail\AdminNewPropertyNotification($ad));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send property validation emails: " . $e->getMessage());
+        }
 
         return $ad;
     }
