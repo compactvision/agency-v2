@@ -36,14 +36,8 @@ export default function Home({
             <Hero />
             <About />
             <Service />
-            <RecentProperty
-                properties={properties.data}
-                favorites={favorites}
-            />
-            <PopularProperty
-                properties={properties.data}
-                favorites={favorites}
-            />
+            <RecentProperty favorites={favorites} />
+            <PopularProperty favorites={favorites} />
             <Counter />
             <LocationProperty municipalities={municipalities} />
             <Work />

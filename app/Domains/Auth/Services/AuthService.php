@@ -5,6 +5,8 @@ namespace App\Domains\Auth\Services;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WelcomeSeller;
 use Illuminate\Validation\ValidationException;
 
 class AuthService
@@ -95,19 +97,31 @@ class AuthService
         $cleaned = array_map(fn($v) => $v === '' ? null : $v, $data);
 
         $user->fill([
+            'name' => $cleaned['name'] ?? $user->name,
             'phone' => $cleaned['phone'],
-            'country_id' => $cleaned['country_id'],
-            'city_id' => $cleaned['city_id'],
-            'municipality_id' => $cleaned['municipality_id'],
-            'address' => $cleaned['address'],
+            'bio' => $cleaned['bio'],
+            'company' => $cleaned['company'],
+            'rc_number' => $cleaned['rc_number'],
+            'tax_number' => $cleaned['tax_number'],
+            'user_type' => $cleaned['user_type'],
+            'address' => $cleaned['address'] ?? $user->address,
+            'country_id' => $cleaned['country_id'] ?? $user->country_id,
+            'city_id' => $cleaned['city_id'] ?? $user->city_id,
+            'municipality_id' => $cleaned['municipality_id'] ?? $user->municipality_id,
         ]);
 
-        if (isset($cleaned['profile_photo'])) {
-            $user->profile_photo = $cleaned['profile_photo'];
+        if (request()->hasFile('profile_photo')) {
+            $path = request()->file('profile_photo')->store('profile-photos', 'public');
+            $user->profile_photo = $path;
         }
 
-        // Aucun changement sur les champs + role seller déjà présent
-        if (!$user->isDirty() && $user->hasRole('seller')) {
+        // Determine correct role based on user_type
+        $roleToAdd = ($cleaned['user_type'] === 'agency') ? 'agency' : 'seller';
+        
+        $roleChanged = !$user->hasRole($roleToAdd);
+
+        // Aucun changement sur les champs + role déjà présent
+        if (!$user->isDirty() && !$roleChanged) {
             return "NO_CHANGES";
         }
 
@@ -116,9 +130,22 @@ class AuthService
             $user->save();
         }
 
-        // Ajouter le rôle seller uniquement si absent
-        if (!$user->hasRole('seller')) {
-            $user->assignRole('seller');
+        // Gérer les rôles si nécessaire
+        if ($roleChanged) {
+            // Supprimer explicitement le rôle 'buyer' s'il existe
+            $user->removeRole('buyer');
+            
+            // Supprimer l'autre rôle de vendeur/agence pour éviter les doublons
+            if ($roleToAdd === 'agency') {
+                $user->removeRole('seller');
+            } else {
+                $user->removeRole('agency');
+            }
+            
+            $user->assignRole($roleToAdd);
+            
+            // Envoyer le mail de bienvenue uniquement lors du premier passage ou changement de rôle majeur
+            Mail::to($user->email)->send(new WelcomeSeller($user, $roleToAdd));
         }
 
         if (!$user->is_seller) {

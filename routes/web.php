@@ -16,9 +16,10 @@ Route::get('/properties', [PageController::class, 'properties'])->name('properti
 Route::get('/property/{slug}', [PageController::class, 'property'])->name('property.show');
 Route::get('pages/{slug}', [PageController::class, 'page'])->name('pages.show');
 Route::post('/language', [PageController::class, 'language'])->name('language');
-
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/subscriptions/check-access', [\App\Domains\Billing\Controllers\BillingController::class, 'start'])->name('subscriptions.checkAccess');
+    Route::get('/profile', [PageController::class, 'profile'])->name('profile');
+    Route::post('/become-seller', \App\Http\Controllers\Auth\BecomeSellerController::class)->name('become-seller');
 });
 
 // Route::middleware(['auth', 'verified'])->group(function () {

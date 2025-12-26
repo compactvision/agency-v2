@@ -18,6 +18,7 @@ import {
     Award,
     Target
 } from 'lucide-react';
+import { route } from "ziggy-js";
 
 export default function AboutType() {
     const { t } = useTranslation();
@@ -230,7 +231,7 @@ export default function AboutType() {
             </div>
 
             {/* Styles personnalisés pour les animations */}
-            <style jsx>{`
+            <style>{`
                 @keyframes float {
                     0%, 100% {
                         transform: translateY(0) translateX(0);

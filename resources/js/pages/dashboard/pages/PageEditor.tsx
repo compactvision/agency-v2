@@ -249,7 +249,7 @@ export default function PageEditor({ page }: { page?: Page }) {
                 </form>
             </div>
 
-            <style jsx>{`
+            <style>{`
                 @keyframes fadeInUp {
                     from {
                         opacity: 0;

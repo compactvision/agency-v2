@@ -59,4 +59,11 @@ class PageController extends Controller
 
         return back();
     }
+
+    public function profile()
+    {
+        return Inertia::render('profile/Profile', [
+            'user' => auth()->user()
+        ]);
+    }
 }

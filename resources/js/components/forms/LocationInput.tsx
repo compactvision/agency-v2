@@ -198,7 +198,7 @@ const LocationInput = ({ data, handleInputChange, errors }) => {
                 />
             </div>
 
-            <style jsx>{`
+            <style>{`
                 /* Styles pour le composant de localisation */
                 .property-form__coordinates {
                     display: flex;

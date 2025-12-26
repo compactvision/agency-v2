@@ -51,12 +51,12 @@ export default function Header() {
     const userRoles =
         user?.roles?.map((r: any) => (typeof r === 'string' ? r : r.name)) ??
         [];
-    const isBuyer = userRoles.includes('Buyer');
+    const isBuyer = userRoles.includes('buyer');
     const isSeller =
-        userRoles.includes('Simple_seller') ||
-        userRoles.includes('Agency') ||
-        userRoles.includes('Admin');
-    const isAdmin = userRoles.includes('Admin');
+        userRoles.includes('seller') ||
+        userRoles.includes('agency') ||
+        userRoles.includes('admin');
+    const isAdmin = userRoles.includes('admin');
 
     const toggleSellerPopup = () => setSellerPopup(!sellerPopup);
 

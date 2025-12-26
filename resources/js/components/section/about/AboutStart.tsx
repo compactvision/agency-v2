@@ -205,21 +205,7 @@ export default function AboutStart() {
                         </div>
 
                         {/* Bouton CTA */}
-                        <div className="relative">
-                            <a
-                                href="#"
-                                className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-400 to-amber-600 text-white font-semibold rounded-xl hover:from-amber-500 hover:to-amber-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-amber-500/25"
-                            >
-                                <span>{t("learn_more", "Learn More")}</span>
-                                <ArrowRight className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" />
-                                <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                            </a>
-                            
-                            {/* Éléments décoratifs */}
-                            <div className="absolute -top-4 -right-4 w-8 h-8 bg-amber-400 rounded-full flex items-center justify-center">
-                                <Sparkles className="w-4 h-4 text-white" />
-                            </div>
-                        </div>
+                        
                     </div>
                 </div>
 

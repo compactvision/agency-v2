@@ -1,31 +1,72 @@
 import PropertyCardHome from '@/components/ui/PropertyCardHome';
+import { useAds } from '@/hooks/useAds';
 import { Link } from '@inertiajs/react';
-import { useState, useEffect, useRef } from 'react';
+import {
+    LucideArrowRight,
+    LucideBuilding,
+    LucideBuilding2,
+    LucideFilter,
+    LucideGrid,
+    LucideHome,
+    LucideList,
+    LucideSearch,
+} from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LucideHome, LucideBuilding, LucideBuilding2, LucideMapPin, LucideGrid, LucideList, LucideArrowRight, LucideFilter, LucideSearch } from 'lucide-react';
+import { route } from 'ziggy-js';
 
-export default function RecentProperty({ properties, favorites }: { properties: any; favorites: number[] }) {
+export default function RecentProperty({ favorites }: { favorites: number[] }) {
     const { t } = useTranslation();
-    const [selectedType, setSelectedType] = useState('villa');
+    const [selectedType, setSelectedType] = useState('all');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [searchTerm, setSearchTerm] = useState('');
     const [sortBy, setSortBy] = useState('newest');
-    const [isLoading, setIsLoading] = useState(false);
     const [visible, setVisible] = useState(false);
     const sectionRef = useRef<HTMLDivElement>(null);
 
+    // Initialisation des filtres pour le hook useAds
+    const adsFilters = {
+        type: selectedType === 'all' ? '' : selectedType,
+        search: searchTerm,
+        sort: sortBy,
+        limit: 6,
+    };
+
+    const { ads, loading: isLoading, error } = useAds(adsFilters);
+    const properties = ads?.data || [];
+
     const types = [
-        { id: 'villa', label: t('villa'), icon: LucideHome, color: 'from-blue-400 to-blue-600' },
-        { id: 'apartment', label: t('apartment'), icon: LucideBuilding, color: 'from-purple-400 to-purple-600' },
-        { id: 'house', label: t('house'), icon: LucideBuilding2, color: 'from-green-400 to-green-600' },
-        { id: 'studio', label: t('studio'), icon: LucideMapPin, color: 'from-amber-400 to-amber-600' }
+        {
+            id: 'all',
+            label: t('all_types') || 'Tous',
+            icon: LucideGrid,
+            color: 'from-gray-400 to-gray-600',
+        },
+        {
+            id: 'villa',
+            label: t('villa'),
+            icon: LucideHome,
+            color: 'from-blue-400 to-blue-600',
+        },
+        {
+            id: 'apartment',
+            label: t('apartment'),
+            icon: LucideBuilding,
+            color: 'from-purple-400 to-purple-600',
+        },
+        {
+            id: 'house',
+            label: t('house'),
+            icon: LucideBuilding2,
+            color: 'from-green-400 to-green-600',
+        },
     ];
 
     const sortOptions = [
         { id: 'newest', label: t('newest_first') },
         { id: 'price_low', label: t('price_low_to_high') },
         { id: 'price_high', label: t('price_high_to_low') },
-        { id: 'popular', label: t('most_popular') }
+        { id: 'popular', label: t('most_popular') },
     ];
 
     // Animation au scroll
@@ -36,7 +77,7 @@ export default function RecentProperty({ properties, favorites }: { properties: 
                     setVisible(true);
                 }
             },
-            { threshold: 0.1 }
+            { threshold: 0.1 },
         );
 
         if (sectionRef.current) {
@@ -50,90 +91,72 @@ export default function RecentProperty({ properties, favorites }: { properties: 
         };
     }, []);
 
-    // Animation de chargement lors du changement de type
-    useEffect(() => {
-        setIsLoading(true);
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [selectedType]);
-
-    const filteredProperties = selectedType === 'all' 
-        ? properties 
-        : properties.filter((property: any) => property.type === selectedType);
-
-    const searchedProperties = searchTerm 
-        ? filteredProperties.filter((property: any) => 
-            property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            property.location.toLowerCase().includes(searchTerm.toLowerCase())
-          )
-        : filteredProperties;
-
-    const sortedProperties = [...searchedProperties].sort((a: any, b: any) => {
-        switch (sortBy) {
-            case 'price_low':
-                return a.price - b.price;
-            case 'price_high':
-                return b.price - a.price;
-            case 'popular':
-                return b.views - a.views;
-            case 'newest':
-            default:
-                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        }
-    });
+    const sortedProperties = properties;
 
     return (
-        <section ref={sectionRef} className="relative py-20 lg:py-32 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
+        <section
+            ref={sectionRef}
+            className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-20 lg:py-32"
+        >
             {/* Formes décoratives de fond */}
             <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-amber-300/10 rounded-full filter blur-3xl"></div>
-                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-300/10 rounded-full filter blur-3xl"></div>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-300/5 rounded-full filter blur-3xl"></div>
+                <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-amber-300/10 blur-3xl filter"></div>
+                <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-blue-300/10 blur-3xl filter"></div>
+                <div className="absolute top-1/2 left-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-purple-300/5 blur-3xl filter"></div>
             </div>
 
-            <div className="container mx-auto px-4 relative z-10">
+            <div className="relative z-10 container mx-auto px-4">
                 {/* En-tête avec animation */}
-                <div className={`grid lg:grid-cols-2 gap-12 mb-16 transition-all duration-1000 transform ${
-                    visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                }`}>
+                <div
+                    className={`mb-16 grid transform gap-12 transition-all duration-1000 lg:grid-cols-2 ${
+                        visible
+                            ? 'translate-y-0 opacity-100'
+                            : 'translate-y-10 opacity-0'
+                    }`}
+                >
                     <div>
                         <div className="inline-block">
-                            <span className="text-sm font-medium text-amber-400 tracking-wider uppercase">
+                            <span className="text-sm font-medium tracking-wider text-amber-400 uppercase">
                                 {t('recent_properties')}
                             </span>
                         </div>
-                        <h2 className="mt-4 text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-tight">
+                        <h2 className="mt-4 text-4xl leading-tight font-bold text-white lg:text-5xl xl:text-6xl">
                             {t('find_apartment')}
                         </h2>
-                        <p className="mt-6 text-lg text-gray-300 max-w-lg">
-                            {t('find_apartment_description') || 'Découvrez notre sélection exclusive de propriétés de qualité, soigneusement choisies pour répondre à vos besoins les plus exigeants.'}
+                        <p className="mt-6 max-w-lg text-lg text-gray-300">
+                            {t('find_apartment_description') ||
+                                'Découvrez notre sélection exclusive de propriétés de qualité, soigneusement choisies pour répondre à vos besoins les plus exigeants.'}
                         </p>
                     </div>
 
                     <div className="flex flex-col justify-center space-y-6">
                         {/* Tabs de types avec design moderne */}
-                        <div className="bg-white/10 backdrop-blur-md rounded-xl p-2 border border-white/20">
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <div className="rounded-xl border border-white/20 bg-white/10 p-2 backdrop-blur-md">
+                            <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
                                 {types.map((type) => {
                                     const Icon = type.icon;
                                     return (
                                         <button
                                             key={type.id}
-                                            onClick={() => setSelectedType(type.id)}
-                                            className={`relative px-4 py-3 rounded-lg font-medium transition-all duration-300 ${
+                                            onClick={() =>
+                                                setSelectedType(type.id)
+                                            }
+                                            className={`relative rounded-lg px-4 py-3 font-medium transition-all duration-300 ${
                                                 selectedType === type.id
                                                     ? 'text-white'
-                                                    : 'text-gray-300 hover:text-white hover:bg-white/10'
+                                                    : 'text-gray-300 hover:bg-white/10 hover:text-white'
                                             }`}
                                         >
                                             {selectedType === type.id && (
-                                                <div className={`absolute inset-0 bg-gradient-to-r ${type.color} rounded-lg`}></div>
+                                                <div
+                                                    className={`absolute inset-0 bg-gradient-to-r ${type.color} rounded-lg`}
+                                                ></div>
                                             )}
                                             <div className="relative flex items-center justify-center gap-2">
-                                                <Icon className="w-5 h-5" />
-                                                <span className="hidden md:inline">{type.label}</span>
+                                                <Icon className="h-5 w-5" />
+                                                <span className="hidden md:inline">
+                                                    {type.label}
+                                                </span>
                                             </div>
                                         </button>
                                     );
@@ -142,54 +165,63 @@ export default function RecentProperty({ properties, favorites }: { properties: 
                         </div>
 
                         {/* Barre de recherche et filtres */}
-                        <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="flex flex-col gap-3 sm:flex-row">
                             <div className="relative flex-1">
-                                <LucideSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <LucideSearch className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
                                 <input
                                     type="text"
-                                    placeholder={t('search_properties') || 'Rechercher des propriétés...'}
+                                    placeholder={
+                                        t('search_properties') ||
+                                        'Rechercher des propriétés...'
+                                    }
                                     value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-transparent transition-all duration-300"
+                                    onChange={(e) =>
+                                        setSearchTerm(e.target.value)
+                                    }
+                                    className="w-full rounded-lg border border-white/20 bg-white/10 py-3 pr-4 pl-10 text-white placeholder-gray-400 backdrop-blur-md transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-amber-400/50 focus:outline-none"
                                 />
                             </div>
-                            
+
                             <div className="relative">
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
-                                    className="appearance-none bg-white/10 backdrop-blur-md border border-white/20 rounded-lg px-4 py-3 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-transparent transition-all duration-300"
+                                    className="appearance-none rounded-lg border border-white/20 bg-white/10 px-4 py-3 pr-10 text-white backdrop-blur-md transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-amber-400/50 focus:outline-none"
                                 >
-                                    {sortOptions.map((option) => (
-                                        <option key={option.id} value={option.id} className="bg-slate-800">
+                                    {sortOptions.map((option: any) => (
+                                        <option
+                                            key={option.id}
+                                            value={option.id}
+                                            className="bg-slate-800"
+                                        >
                                             {option.label}
                                         </option>
                                     ))}
                                 </select>
-                                <LucideFilter className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                <LucideFilter className="pointer-events-none absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
                             </div>
 
                             {/* Boutons de vue */}
-                            <div className="flex bg-white/10 backdrop-blur-md rounded-lg border border-white/20 p-1">
+                            <div className="flex rounded-lg border border-white/20 bg-white/10 p-1 backdrop-blur-md">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded transition-all duration-300 ${
-                                        viewMode === 'grid' 
-                                            ? 'bg-white/20 text-white' 
+                                    className={`rounded p-2 transition-all duration-300 ${
+                                        viewMode === 'grid'
+                                            ? 'bg-white/20 text-white'
                                             : 'text-gray-400 hover:text-white'
                                     }`}
                                 >
-                                    <LucideGrid className="w-5 h-5" />
+                                    <LucideGrid className="h-5 w-5" />
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded transition-all duration-300 ${
-                                        viewMode === 'list' 
-                                            ? 'bg-white/20 text-white' 
+                                    className={`rounded p-2 transition-all duration-300 ${
+                                        viewMode === 'list'
+                                            ? 'bg-white/20 text-white'
                                             : 'text-gray-400 hover:text-white'
                                     }`}
                                 >
-                                    <LucideList className="w-5 h-5" />
+                                    <LucideList className="h-5 w-5" />
                                 </button>
                             </div>
                         </div>
@@ -197,56 +229,65 @@ export default function RecentProperty({ properties, favorites }: { properties: 
                 </div>
 
                 {/* Grille de propriétés avec animation de chargement */}
-                <div className={`transition-all duration-700 ${
-                    visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                }`}>
+                <div
+                    className={`transition-all duration-700 ${
+                        visible
+                            ? 'translate-y-0 opacity-100'
+                            : 'translate-y-10 opacity-0'
+                    }`}
+                >
                     {isLoading ? (
-                        <div className="flex justify-center items-center py-20">
+                        <div className="flex items-center justify-center py-20">
                             <div className="relative">
-                                <div className="w-16 h-16 border-4 border-amber-400/20 rounded-full"></div>
-                                <div className="absolute top-0 left-0 w-16 h-16 border-4 border-amber-400 rounded-full animate-spin border-t-transparent"></div>
+                                <div className="h-16 w-16 rounded-full border-4 border-amber-400/20"></div>
+                                <div className="absolute top-0 left-0 h-16 w-16 animate-spin rounded-full border-4 border-amber-400 border-t-transparent"></div>
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-8 h-8 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full animate-pulse"></div>
+                                    <div className="h-8 w-8 animate-pulse rounded-full bg-gradient-to-r from-amber-400 to-amber-500"></div>
                                 </div>
                             </div>
                         </div>
                     ) : (
-                        <div className={`grid gap-6 ${
-                            viewMode === 'grid' 
-                                ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
-                                : 'grid-cols-1'
-                        }`}>
+                        <div
+                            className={`grid gap-6 ${
+                                viewMode === 'grid'
+                                    ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                                    : 'grid-cols-1'
+                            }`}
+                        >
                             {sortedProperties.length > 0 ? (
-                                sortedProperties.slice(0, 6).map((property: any, index) => (
-                                    <div
-                                        key={property.id}
-                                        className={`transform transition-all duration-700 ${
-                                            visible 
-                                                ? 'opacity-100 translate-y-0' 
-                                                : 'opacity-0 translate-y-10'
-                                        }`}
-                                        style={{
-                                            transitionDelay: `${index * 100}ms`
-                                        }}
-                                    >
-                                        <PropertyCardHome 
-                                            property={property} 
-                                            favorites={favorites}
-                                            viewMode={viewMode}
-                                        />
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="col-span-full text-center py-20">
-                                    <div className="inline-flex flex-col items-center">
-                                        <div className="w-20 h-20 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center mb-4">
-                                            <LucideSearch className="w-10 h-10 text-gray-400" />
+                                sortedProperties
+                                    .slice(0, 6)
+                                    .map((property: any, index: number) => (
+                                        <div
+                                            key={property.id}
+                                            className={`transform transition-all duration-700 ${
+                                                visible
+                                                    ? 'translate-y-0 opacity-100'
+                                                    : 'translate-y-10 opacity-0'
+                                            }`}
+                                            style={{
+                                                transitionDelay: `${index * 100}ms`,
+                                            }}
+                                        >
+                                            <PropertyCardHome
+                                                property={property}
+                                                favorites={favorites}
+                                                viewMode={viewMode}
+                                            />
                                         </div>
-                                        <h3 className="text-xl font-semibold text-white mb-2">
+                                    ))
+                            ) : (
+                                <div className="col-span-full py-20 text-center">
+                                    <div className="inline-flex flex-col items-center">
+                                        <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white/10 backdrop-blur-md">
+                                            <LucideSearch className="h-10 w-10 text-gray-400" />
+                                        </div>
+                                        <h3 className="mb-2 text-xl font-semibold text-white">
                                             {t('no_properties_found')}
                                         </h3>
-                                        <p className="text-gray-400 max-w-md">
-                                            {t('no_properties_description') || 'Essayez de modifier vos filtres ou votre recherche pour trouver des propriétés correspondantes.'}
+                                        <p className="max-w-md text-gray-400">
+                                            {t('no_properties_description') ||
+                                                'Essayez de modifier vos filtres ou votre recherche pour trouver des propriétés correspondantes.'}
                                         </p>
                                     </div>
                                 </div>
@@ -256,39 +297,43 @@ export default function RecentProperty({ properties, favorites }: { properties: 
                 </div>
 
                 {/* Bouton CTA avec effet de brillance */}
-                <div className={`text-center mt-16 transition-all duration-1000 delay-300 transform ${
-                    visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                }`}>
-                    <Link 
-                        href={route('properties')} 
-                        className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-400 to-amber-600 text-white font-semibold rounded-xl hover:from-amber-500 hover:to-amber-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-amber-500/25"
+                <div
+                    className={`mt-16 transform text-center transition-all delay-300 duration-1000 ${
+                        visible
+                            ? 'translate-y-0 opacity-100'
+                            : 'translate-y-10 opacity-0'
+                    }`}
+                >
+                    <Link
+                        href={route('properties')}
+                        className="group relative inline-flex transform items-center gap-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-8 py-4 font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-amber-500 hover:to-amber-700 hover:shadow-xl hover:shadow-amber-500/25"
                     >
                         <span>{t('find_properties')}</span>
-                        <LucideArrowRight className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" />
-                        <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                        <LucideArrowRight className="h-5 w-5 transform transition-transform duration-300 group-hover:translate-x-1" />
+                        <div className="absolute inset-0 rounded-xl bg-white opacity-0 transition-opacity duration-300 group-hover:opacity-20"></div>
+                        <div className="absolute inset-0 -translate-x-full -skew-x-12 transform rounded-xl bg-gradient-to-r from-transparent via-white to-transparent transition-transform duration-1000 group-hover:translate-x-full"></div>
                     </Link>
                 </div>
             </div>
 
             {/* Particules flottantes pour l'effet visuel */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
                 {[...Array(15)].map((_, i) => (
                     <div
                         key={i}
-                        className="absolute w-2 h-2 bg-amber-400/10 rounded-full animate-float"
+                        className="animate-float absolute h-2 w-2 rounded-full bg-amber-400/10"
                         style={{
                             left: `${Math.random() * 100}%`,
                             top: `${Math.random() * 100}%`,
                             animationDelay: `${Math.random() * 5}s`,
-                            animationDuration: `${15 + Math.random() * 10}s`
+                            animationDuration: `${15 + Math.random() * 10}s`,
                         }}
                     ></div>
                 ))}
             </div>
 
             {/* Styles personnalisés pour les animations */}
-            <style jsx>{`
+            <style>{`
                 @keyframes float {
                     0%, 100% {
                         transform: translateY(0) translateX(0);

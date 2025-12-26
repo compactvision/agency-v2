@@ -1,17 +1,20 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
+import axios from 'axios';
 import {
     LucideArrowRight,
     LucideBuilding,
     LucideDollarSign,
     LucideHome,
     LucideInfo,
+    LucideLogOut,
     LucidePhone,
     LucidePlus,
     LucideUser,
     LucideX,
 } from 'lucide-react';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { route } from 'ziggy-js';
 import { HeaderContext } from '../../partials/Header';
 
 export default function MobileMenu() {
@@ -33,11 +36,51 @@ export default function MobileMenu() {
     const userRoles =
         user?.roles?.map((r: any) => (typeof r === 'string' ? r : r.name)) ??
         [];
-    const isBuyer = userRoles.includes('Buyer');
+    const isBuyer = userRoles.includes('buyer');
     const isSeller =
-        userRoles.includes('Simple_seller') ||
-        userRoles.includes('Agency') ||
-        userRoles.includes('Admin');
+        userRoles.includes('seller') ||
+        userRoles.includes('agency') ||
+        userRoles.includes('admin');
+
+    useEffect(() => {
+        if (active) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [active]);
+
+    const handleLogout = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (
+            confirm(
+                t('confirm_logout') ||
+                    'Êtes-vous sûr de vouloir vous déconnecter ?',
+            )
+        ) {
+            router.post(
+                route('logout'),
+                {},
+                {
+                    onStart: () => toggleActive(),
+                },
+            );
+        }
+    };
+
+    const { i18n } = useTranslation();
+
+    const changeLanguage = async (lng: string) => {
+        i18n.changeLanguage(lng);
+        try {
+            await axios.post('/language', { language: lng });
+        } catch (error) {
+            console.error('Error updating language:', error);
+        }
+    };
 
     return (
         <>
@@ -173,6 +216,17 @@ export default function MobileMenu() {
                                         </div>
                                     </Link>
                                 )}
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex w-full items-center gap-3 rounded-lg bg-red-50 px-4 py-3 text-red-600 transition-all duration-300 hover:bg-red-100"
+                                >
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
+                                        <LucideLogOut className="h-5 w-5 text-red-600" />
+                                    </div>
+                                    <span className="font-medium">
+                                        {t('logout') || 'Déconnexion'}
+                                    </span>
+                                </button>
                             </div>
                         ) : (
                             <Link
@@ -243,6 +297,41 @@ export default function MobileMenu() {
 
                     {/* Pied de menu */}
                     <div className="absolute right-0 bottom-0 left-0 border-t border-gray-200 bg-gray-50 p-6">
+                        {/* Language Selector */}
+                        <div className="mb-6 flex items-center justify-center gap-4">
+                            {[
+                                {
+                                    code: 'fr',
+                                    label: 'Français',
+                                    flag: '/assets/images/icons/fr.svg',
+                                },
+                                {
+                                    code: 'en',
+                                    label: 'English',
+                                    flag: '/assets/images/icons/en.svg',
+                                },
+                            ].map((lang) => (
+                                <button
+                                    key={lang.code}
+                                    onClick={() => changeLanguage(lang.code)}
+                                    className={`flex items-center gap-2 rounded-xl border px-3 py-2 transition-all duration-300 ${
+                                        i18n.language === lang.code
+                                            ? 'border-amber-500 bg-amber-50 text-amber-600 shadow-sm'
+                                            : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    <img
+                                        src={lang.flag}
+                                        alt={lang.label}
+                                        className="h-5 w-5 rounded-full object-cover"
+                                    />
+                                    <span className="text-sm font-medium">
+                                        {lang.label}
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+
                         <div className="flex items-center justify-center gap-4">
                             <a
                                 href="#"

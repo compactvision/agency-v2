@@ -2,44 +2,38 @@ import App from '@/components/layouts/Home/App';
 import Breadcumb from '@/components/ui/Breadcumb';
 import NewsLetter from '@/components/ui/NewsLetter';
 import { Head, router, usePage } from '@inertiajs/react';
-import { useTranslation } from 'react-i18next';
-import { useState, useEffect } from 'react';
 import {
-    Home,
-    User,
-    MapPin,
-    Settings,
+    Activity,
+    Building,
+    Calendar,
+    Camera,
+    CheckCircle,
+    Edit3,
+    Eye,
+    FileText,
     Heart,
+    Home,
     Lock,
     LogOut,
-    TrendingUp,
-    Eye,
-    Calendar,
-    Award,
-    Building,
-    Star,
     Mail,
+    MapPin,
     Phone,
-    CheckCircle,
-    XCircle,
-    Clock,
-    Edit3,
-    Camera,
-    FileText,
-    Map,
-    BarChart3,
+    Settings,
     Shield,
-    Zap,
+    Star,
+    TrendingUp,
+    User,
     Users,
-    Activity,
-    ArrowRight,
-    ChevronRight,
+    XCircle,
+    Zap,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
+import { route } from 'ziggy-js';
+import AccountDetails from './common/AccountDetails';
 import ChangePassword from './common/ChangePassword';
 import FavoriteProperties from './common/FavoriteProperties';
-import AccountDetails from './common/AccountDetails';
-import UserAddress from './common/UserAddress';
 import UserProfile from './common/UserProfile';
 
 interface User {
@@ -48,7 +42,7 @@ interface User {
     email: string;
     phone: number;
     email_verified_at?: string;
-    avatar?: string;
+    profile_photo?: string;
     role?: string;
     created_at: string;
 }
@@ -89,9 +83,22 @@ interface PageProps {
     };
 }
 
-type TabType = 'home' | 'profile' | 'address' | 'accountDetails' | 'favoriteProperties' | 'changePassword';
+type TabType =
+    | 'home'
+    | 'profile'
+    | 'address'
+    | 'accountDetails'
+    | 'favoriteProperties'
+    | 'changePassword';
 
-const VALID_TABS: TabType[] = ['home', 'profile', 'address', 'accountDetails', 'favoriteProperties', 'changePassword'];
+const VALID_TABS: TabType[] = [
+    'home',
+    'profile',
+    'address',
+    'accountDetails',
+    'favoriteProperties',
+    'changePassword',
+];
 
 export default function Profile() {
     const { auth, properties, stats, flash } = usePage<PageProps>().props;
@@ -123,13 +130,22 @@ export default function Profile() {
 
     const handleLogout = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (confirm(t('confirm_logout') || 'Êtes-vous sûr de vouloir vous déconnecter ?')) {
+        if (
+            confirm(
+                t('confirm_logout') ||
+                    'Êtes-vous sûr de vouloir vous déconnecter ?',
+            )
+        ) {
             setIsLoggingOut(true);
             try {
-                router.post(route('logout'), {}, {
-                    onFinish: () => setIsLoggingOut(false),
-                    onError: () => setIsLoggingOut(false)
-                });
+                router.post(
+                    route('logout'),
+                    {},
+                    {
+                        onFinish: () => setIsLoggingOut(false),
+                        onError: () => setIsLoggingOut(false),
+                    },
+                );
             } catch (error) {
                 console.error('Erreur lors de la déconnexion:', error);
                 setIsLoggingOut(false);
@@ -140,7 +156,10 @@ export default function Profile() {
     // Statistiques avec valeurs par défaut et validation
     const dashboardStats = {
         total_properties: Math.max(0, stats?.total_properties || 0),
-        favorite_properties: Math.max(0, stats?.favorite_properties || properties?.data?.length || 0),
+        favorite_properties: Math.max(
+            0,
+            stats?.favorite_properties || properties?.data?.length || 0,
+        ),
         total_views: Math.max(0, stats?.total_views || 0),
         featured_properties: Math.max(0, stats?.featured_properties || 0),
     };
@@ -150,32 +169,32 @@ export default function Profile() {
             id: 'home' as TabType,
             label: t('dashboard') || 'Tableau de bord',
             icon: Home,
-            count: null
+            count: null,
         },
         {
             id: 'profile' as TabType,
             label: t('profile') || 'Profil',
             icon: User,
-            count: null
+            count: null,
         },
         {
             id: 'accountDetails' as TabType,
             label: t('account_details') || 'Détails du compte',
             icon: Settings,
-            count: null
+            count: null,
         },
         {
             id: 'favoriteProperties' as TabType,
             label: t('favorite_properties') || 'Propriétés favorites',
             icon: Heart,
-            count: dashboardStats.favorite_properties
+            count: dashboardStats.favorite_properties,
         },
         {
             id: 'changePassword' as TabType,
             label: t('change_password') || 'Changer le mot de passe',
             icon: Lock,
-            count: null
-        }
+            count: null,
+        },
     ];
 
     const statCards = [
@@ -188,7 +207,7 @@ export default function Profile() {
             iconBg: 'bg-blue-100',
             iconColor: 'text-blue-600',
             change: '+12%',
-            changeType: 'increase'
+            changeType: 'increase',
         },
         {
             title: t('favorite_properties') || 'Propriétés favorites',
@@ -199,7 +218,7 @@ export default function Profile() {
             iconBg: 'bg-red-100',
             iconColor: 'text-red-600',
             change: '+5%',
-            changeType: 'increase'
+            changeType: 'increase',
         },
         {
             title: t('total_views') || 'Vues totales',
@@ -210,7 +229,7 @@ export default function Profile() {
             iconBg: 'bg-green-100',
             iconColor: 'text-green-600',
             change: '+18%',
-            changeType: 'increase'
+            changeType: 'increase',
         },
         {
             title: t('featured_properties') || 'Propriétés en vedette',
@@ -221,8 +240,8 @@ export default function Profile() {
             iconBg: 'bg-purple-100',
             iconColor: 'text-purple-600',
             change: '+2%',
-            changeType: 'increase'
-        }
+            changeType: 'increase',
+        },
     ];
 
     const recentActivities = [
@@ -231,29 +250,29 @@ export default function Profile() {
             title: t('added_to_favorites') || 'Ajouté aux favoris',
             description: 'Villa Moderne à Kinshasa',
             time: 'Il y a 2 heures',
-            color: 'text-red-500'
+            color: 'text-red-500',
         },
         {
             icon: Eye,
             title: t('viewed_property') || 'Propriété consultée',
             description: 'Appartement 3 pièces à Gombe',
             time: 'Il y a 5 heures',
-            color: 'text-blue-500'
+            color: 'text-blue-500',
         },
         {
             icon: MapPin,
             title: t('searched_location') || 'Localisation recherchée',
             description: 'Propriétés à Limete',
             time: 'Hier',
-            color: 'text-green-500'
+            color: 'text-green-500',
         },
         {
             icon: FileText,
             title: t('submitted_inquiry') || 'Demande envoyée',
             description: 'Maison à Matete',
             time: 'Il y a 2 jours',
-            color: 'text-purple-500'
-        }
+            color: 'text-purple-500',
+        },
     ];
 
     const quickActions = [
@@ -262,22 +281,25 @@ export default function Profile() {
             description: t('browse_listings') || 'Parcourir nos annonces',
             icon: Building,
             color: 'from-blue-500 to-blue-600',
-            action: () => router.visit(route('properties.index'))
+            action: () => router.visit(route('properties.index')),
         },
         {
             title: t('edit_profile') || 'Modifier le profil',
-            description: t('update_personal_info') || 'Mettre à jour vos informations',
+            description:
+                t('update_personal_info') || 'Mettre à jour vos informations',
             icon: Edit3,
             color: 'from-purple-500 to-purple-600',
-            action: () => handleTabChange('profile')
+            action: () => handleTabChange('profile'),
         },
         {
             title: t('view_favorites') || 'Voir les favoris',
-            description: t('manage_saved_properties') || 'Gérer vos propriétés enregistrées',
+            description:
+                t('manage_saved_properties') ||
+                'Gérer vos propriétés enregistrées',
             icon: Heart,
             color: 'from-red-500 to-red-600',
-            action: () => handleTabChange('favoriteProperties')
-        }
+            action: () => handleTabChange('favoriteProperties'),
+        },
     ];
 
     const renderTabContent = () => {
@@ -286,22 +308,24 @@ export default function Profile() {
                 return (
                     <div className="space-y-6">
                         {/* Welcome Section */}
-                        <div className="bg-gradient-to-r from-orange-400 to-orange-600 rounded-2xl p-8 text-white">
-                            <div className="flex flex-col md:flex-row items-center justify-between">
+                        <div className="rounded-2xl bg-gradient-to-r from-orange-400 to-orange-600 p-8 text-white">
+                            <div className="flex flex-col items-center justify-between md:flex-row">
                                 <div>
-                                    <h2 className="text-3xl font-bold mb-2">
-                                        {t('welcome_back') || 'Bienvenue'}, {user.name}!
+                                    <h2 className="mb-2 text-3xl font-bold">
+                                        {t('welcome_back') || 'Bienvenue'},{' '}
+                                        {user?.name}!
                                     </h2>
-                                    <p className="text-white/90 max-w-xl">
-                                        {t('dashboard_description') || 'Depuis votre tableau de bord, vous pouvez gérer vos propriétés favorites, modifier vos informations personnelles et suivre vos activités.'}
+                                    <p className="max-w-xl text-white/90">
+                                        {t('dashboard_description') ||
+                                            'Depuis votre tableau de bord, vous pouvez gérer vos propriétés favorites, modifier vos informations personnelles et suivre vos activités.'}
                                     </p>
                                 </div>
                                 <div className="mt-6 md:mt-0">
-                                    <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 text-center">
-                                        <div className="text-4xl font-bold mb-1">
-                                            {user.role || 'Acheteur'}
+                                    <div className="rounded-2xl bg-white/20 p-6 text-center backdrop-blur-sm">
+                                        <div className="mb-1 text-4xl font-bold">
+                                            {user?.role || 'Acheteur'}
                                         </div>
-                                        <div className="text-white/80 text-sm">
+                                        <div className="text-sm text-white/80">
                                             {t('status') || 'Statut'}
                                         </div>
                                     </div>
@@ -310,27 +334,45 @@ export default function Profile() {
                         </div>
 
                         {/* Stats Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
                             {statCards.map((stat, index) => {
                                 const Icon = stat.icon;
                                 return (
-                                    <div key={index} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                                    <div
+                                        key={index}
+                                        className="overflow-hidden rounded-2xl bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl"
+                                    >
                                         <div className="p-6">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div className={`p-3 rounded-xl ${stat.iconBg}`}>
-                                                    <Icon size={24} className={stat.iconColor} />
+                                            <div className="mb-4 flex items-center justify-between">
+                                                <div
+                                                    className={`rounded-xl p-3 ${stat.iconBg}`}
+                                                >
+                                                    <Icon
+                                                        size={24}
+                                                        className={
+                                                            stat.iconColor
+                                                        }
+                                                    />
                                                 </div>
-                                                <div className={`flex items-center text-sm font-medium ${
-                                                    stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
-                                                }`}>
-                                                    <TrendingUp size={16} className="mr-1" />
+                                                <div
+                                                    className={`flex items-center text-sm font-medium ${
+                                                        stat.changeType ===
+                                                        'increase'
+                                                            ? 'text-green-600'
+                                                            : 'text-red-600'
+                                                    }`}
+                                                >
+                                                    <TrendingUp
+                                                        size={16}
+                                                        className="mr-1"
+                                                    />
                                                     {stat.change}
                                                 </div>
                                             </div>
-                                            <div className="text-3xl font-bold text-gray-900 mb-1">
+                                            <div className="mb-1 text-3xl font-bold text-gray-900">
                                                 {stat.value}
                                             </div>
-                                            <div className="text-gray-600 text-sm">
+                                            <div className="text-sm text-gray-600">
                                                 {stat.title}
                                             </div>
                                         </div>
@@ -339,27 +381,36 @@ export default function Profile() {
                             })}
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                             {/* Quick Actions */}
                             <div className="lg:col-span-2">
-                                <div className="bg-white rounded-2xl shadow-lg p-6">
-                                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                                        <Zap size={20} className="mr-2 text-orange-500" />
-                                        {t('quick_actions') || 'Actions rapides'}
+                                <div className="rounded-2xl bg-white p-6 shadow-lg">
+                                    <h3 className="mb-6 flex items-center text-xl font-bold text-gray-900">
+                                        <Zap
+                                            size={20}
+                                            className="mr-2 text-orange-500"
+                                        />
+                                        {t('quick_actions') ||
+                                            'Actions rapides'}
                                     </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                                         {quickActions.map((action, index) => {
                                             const Icon = action.icon;
                                             return (
                                                 <div
                                                     key={index}
-                                                    className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-colors cursor-pointer group"
+                                                    className="group cursor-pointer rounded-xl bg-gray-50 p-4 transition-colors hover:bg-gray-100"
                                                     onClick={action.action}
                                                 >
-                                                    <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
-                                                        <Icon size={20} className="text-white" />
+                                                    <div
+                                                        className={`h-12 w-12 rounded-lg bg-gradient-to-r ${action.color} mb-3 flex items-center justify-center transition-transform group-hover:scale-110`}
+                                                    >
+                                                        <Icon
+                                                            size={20}
+                                                            className="text-white"
+                                                        />
                                                     </div>
-                                                    <h4 className="font-semibold text-gray-900 mb-1">
+                                                    <h4 className="mb-1 font-semibold text-gray-900">
                                                         {action.title}
                                                     </h4>
                                                     <p className="text-sm text-gray-600">
@@ -374,89 +425,146 @@ export default function Profile() {
 
                             {/* Recent Activities */}
                             <div className="lg:col-span-1">
-                                <div className="bg-white rounded-2xl shadow-lg p-6">
-                                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                                        <Activity size={20} className="mr-2 text-orange-500" />
-                                        {t('recent_activities') || 'Activités récentes'}
+                                <div className="rounded-2xl bg-white p-6 shadow-lg">
+                                    <h3 className="mb-6 flex items-center text-xl font-bold text-gray-900">
+                                        <Activity
+                                            size={20}
+                                            className="mr-2 text-orange-500"
+                                        />
+                                        {t('recent_activities') ||
+                                            'Activités récentes'}
                                     </h3>
                                     <div className="space-y-4">
-                                        {recentActivities.map((activity, index) => {
-                                            const Icon = activity.icon;
-                                            return (
-                                                <div key={index} className="flex items-start gap-3">
-                                                    <div className={`p-2 rounded-lg bg-gray-100 ${activity.color}`}>
-                                                        <Icon size={16} />
+                                        {recentActivities.map(
+                                            (activity, index) => {
+                                                const Icon = activity.icon;
+                                                return (
+                                                    <div
+                                                        key={index}
+                                                        className="flex items-start gap-3"
+                                                    >
+                                                        <div
+                                                            className={`rounded-lg bg-gray-100 p-2 ${activity.color}`}
+                                                        >
+                                                            <Icon size={16} />
+                                                        </div>
+                                                        <div className="min-w-0 flex-1">
+                                                            <h4 className="text-sm font-medium text-gray-900">
+                                                                {activity.title}
+                                                            </h4>
+                                                            <p className="truncate text-xs text-gray-600">
+                                                                {
+                                                                    activity.description
+                                                                }
+                                                            </p>
+                                                            <p className="mt-1 text-xs text-gray-500">
+                                                                {activity.time}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <h4 className="font-medium text-gray-900 text-sm">
-                                                            {activity.title}
-                                                        </h4>
-                                                        <p className="text-gray-600 text-xs truncate">
-                                                            {activity.description}
-                                                        </p>
-                                                        <p className="text-gray-500 text-xs mt-1">
-                                                            {activity.time}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
+                                                );
+                                            },
+                                        )}
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Account Info */}
-                        <div className="bg-white rounded-2xl shadow-lg p-6">
-                            <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                                <Users size={20} className="mr-2 text-orange-500" />
+                        <div className="rounded-2xl bg-white p-6 shadow-lg">
+                            <h3 className="mb-6 flex items-center text-xl font-bold text-gray-900">
+                                <Users
+                                    size={20}
+                                    className="mr-2 text-orange-500"
+                                />
                                 {t('account_info') || 'Informations du compte'}
                             </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-3">
-                                        <Mail size={18} className="text-gray-400" />
+                                        <Mail
+                                            size={18}
+                                            className="text-gray-400"
+                                        />
                                         <div>
-                                            <p className="text-xs text-gray-500">{t('email') || 'Email'}</p>
-                                            <p className="font-medium text-gray-900">{user.email}</p>
+                                            <p className="text-xs text-gray-500">
+                                                {t('email') || 'Email'}
+                                            </p>
+                                            <p className="font-medium text-gray-900">
+                                                {user?.email}
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                        <Phone size={18} className="text-gray-400" />
+                                        <Phone
+                                            size={18}
+                                            className="text-gray-400"
+                                        />
                                         <div>
-                                            <p className="text-xs text-gray-500">{t('phone') || 'Téléphone'}</p>
-                                            <p className="font-medium text-gray-900">{user.phone}</p>
+                                            <p className="text-xs text-gray-500">
+                                                {t('phone') || 'Téléphone'}
+                                            </p>
+                                            <p className="font-medium text-gray-900">
+                                                {user?.phone}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-3">
-                                        <Calendar size={18} className="text-gray-400" />
+                                        <Calendar
+                                            size={18}
+                                            className="text-gray-400"
+                                        />
                                         <div>
-                                            <p className="text-xs text-gray-500">{t('member_since') || 'Membre depuis'}</p>
+                                            <p className="text-xs text-gray-500">
+                                                {t('member_since') ||
+                                                    'Membre depuis'}
+                                            </p>
                                             <p className="font-medium text-gray-900">
-                                                {new Date(user.created_at).toLocaleDateString('fr-FR', {
-                                                    year: 'numeric',
-                                                    month: 'long',
-                                                    day: 'numeric'
-                                                })}
+                                                {user?.created_at
+                                                    ? new Date(
+                                                          user.created_at,
+                                                      ).toLocaleDateString(
+                                                          'fr-FR',
+                                                          {
+                                                              year: 'numeric',
+                                                              month: 'long',
+                                                              day: 'numeric',
+                                                          },
+                                                      )
+                                                    : ''}
                                             </p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                        <Shield size={18} className="text-gray-400" />
+                                        <Shield
+                                            size={18}
+                                            className="text-gray-400"
+                                        />
                                         <div>
-                                            <p className="text-xs text-gray-500">{t('email_verified') || 'Email vérifié'}</p>
+                                            <p className="text-xs text-gray-500">
+                                                {t('email_verified') ||
+                                                    'Email vérifié'}
+                                            </p>
                                             <p className="font-medium">
-                                                {user.email_verified_at ? (
-                                                    <span className="text-green-600 flex items-center">
-                                                        <CheckCircle size={16} className="mr-1" />
-                                                        {t('verified') || 'Vérifié'}
+                                                {user?.email_verified_at ? (
+                                                    <span className="flex items-center text-green-600">
+                                                        <CheckCircle
+                                                            size={16}
+                                                            className="mr-1"
+                                                        />
+                                                        {t('verified') ||
+                                                            'Vérifié'}
                                                     </span>
                                                 ) : (
-                                                    <span className="text-yellow-600 flex items-center">
-                                                        <XCircle size={16} className="mr-1" />
-                                                        {t('not_verified') || 'Non vérifié'}
+                                                    <span className="flex items-center text-yellow-600">
+                                                        <XCircle
+                                                            size={16}
+                                                            className="mr-1"
+                                                        />
+                                                        {t('not_verified') ||
+                                                            'Non vérifié'}
                                                     </span>
                                                 )}
                                             </p>
@@ -492,10 +600,15 @@ export default function Profile() {
                 <div className="container mx-auto px-4">
                     {/* Messages flash */}
                     {flash?.success && (
-                        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center justify-between">
+                        <div className="mb-6 flex items-center justify-between rounded-xl border border-green-200 bg-green-50 p-4">
                             <div className="flex items-center">
-                                <CheckCircle size={20} className="text-green-600 mr-3" />
-                                <p className="text-green-800">{flash.success}</p>
+                                <CheckCircle
+                                    size={20}
+                                    className="mr-3 text-green-600"
+                                />
+                                <p className="text-green-800">
+                                    {flash.success}
+                                </p>
                             </div>
                             <button className="text-green-600 hover:text-green-800">
                                 <XCircle size={20} />
@@ -504,9 +617,12 @@ export default function Profile() {
                     )}
 
                     {flash?.error && (
-                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
+                        <div className="mb-6 flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-4">
                             <div className="flex items-center">
-                                <XCircle size={20} className="text-red-600 mr-3" />
+                                <XCircle
+                                    size={20}
+                                    className="mr-3 text-red-600"
+                                />
                                 <p className="text-red-800">{flash.error}</p>
                             </div>
                             <button className="text-red-600 hover:text-red-800">
@@ -515,33 +631,43 @@ export default function Profile() {
                         </div>
                     )}
 
-                    <div className="flex flex-col lg:flex-row gap-6">
+                    <div className="flex flex-col gap-6 lg:flex-row">
                         {/* Sidebar */}
                         <div className="w-full lg:w-1/4">
-                            <div className="bg-white rounded-2xl shadow-lg overflow-hidden sticky top-6">
+                            <div className="sticky top-6 overflow-hidden rounded-2xl bg-white shadow-lg">
                                 {/* User Profile Card */}
-                                <div className="p-6 bg-gradient-to-r from-orange-400 to-orange-600 text-white">
+                                <div className="bg-gradient-to-r from-orange-400 to-orange-600 p-6 text-white">
                                     <div className="flex flex-col items-center">
                                         <div className="relative mb-4">
-                                            {user.avatar ? (
+                                            {user?.profile_photo ? (
                                                 <img
-                                                    src={user.avatar}
+                                                    src={user.profile_photo}
                                                     alt={user.name}
-                                                    className="w-24 h-24 rounded-full object-cover border-4 border-white/30"
+                                                    className="h-24 w-24 rounded-full border-4 border-white/30 object-cover"
                                                 />
                                             ) : (
-                                                <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center">
-                                                    <User size={40} className="text-white" />
+                                                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-white/20">
+                                                    <User
+                                                        size={40}
+                                                        className="text-white"
+                                                    />
                                                 </div>
                                             )}
-                                            <button className="absolute bottom-0 right-0 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg">
-                                                <Camera size={16} className="text-orange-600" />
+                                            <button className="absolute right-0 bottom-0 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-lg">
+                                                <Camera
+                                                    size={16}
+                                                    className="text-orange-600"
+                                                />
                                             </button>
                                         </div>
-                                        <h3 className="text-xl font-bold text-center">{user.name}</h3>
-                                        <p className="text-white/80 text-center">{user.email}</p>
-                                        <div className="mt-4 px-3 py-1 bg-white/20 rounded-full text-sm text-center">
-                                            {user.role || 'Acheteur'}
+                                        <h3 className="text-center text-xl font-bold">
+                                            {user?.name}
+                                        </h3>
+                                        <p className="text-center text-white/80">
+                                            {user?.email}
+                                        </p>
+                                        <div className="mt-4 rounded-full bg-white/20 px-3 py-1 text-center text-sm">
+                                            {user?.role || 'Acheteur'}
                                         </div>
                                     </div>
                                 </div>
@@ -554,19 +680,30 @@ export default function Profile() {
                                             return (
                                                 <li key={item.id}>
                                                     <button
-                                                        onClick={() => handleTabChange(item.id)}
-                                                        className={`w-full flex items-center justify-between p-3 rounded-xl transition-colors ${
-                                                            activeTab === item.id
+                                                        onClick={() =>
+                                                            handleTabChange(
+                                                                item.id,
+                                                            )
+                                                        }
+                                                        className={`flex w-full items-center justify-between rounded-xl p-3 transition-colors ${
+                                                            activeTab ===
+                                                            item.id
                                                                 ? 'bg-orange-50 text-orange-600'
                                                                 : 'text-gray-700 hover:bg-gray-100'
                                                         }`}
                                                     >
                                                         <div className="flex items-center">
-                                                            <Icon size={18} className="mr-3" />
-                                                            <span>{item.label}</span>
+                                                            <Icon
+                                                                size={18}
+                                                                className="mr-3"
+                                                            />
+                                                            <span>
+                                                                {item.label}
+                                                            </span>
                                                         </div>
-                                                        {item.count !== null && (
-                                                            <span className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full">
+                                                        {item.count !==
+                                                            null && (
+                                                            <span className="rounded-full bg-gray-200 px-2 py-1 text-xs text-gray-700">
                                                                 {item.count}
                                                             </span>
                                                         )}
@@ -581,14 +718,23 @@ export default function Profile() {
                                     <button
                                         onClick={handleLogout}
                                         disabled={isLoggingOut}
-                                        className="w-full flex items-center justify-between p-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                                        className="flex w-full items-center justify-between rounded-xl p-3 text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
                                     >
                                         <div className="flex items-center">
-                                            <LogOut size={18} className="mr-3" />
-                                            <span>{isLoggingOut ? (t('logging_out') || 'Déconnexion...') : (t('logout') || 'Déconnexion')}</span>
+                                            <LogOut
+                                                size={18}
+                                                className="mr-3"
+                                            />
+                                            <span>
+                                                {isLoggingOut
+                                                    ? t('logging_out') ||
+                                                      'Déconnexion...'
+                                                    : t('logout') ||
+                                                      'Déconnexion'}
+                                            </span>
                                         </div>
                                         {isLoggingOut && (
-                                            <div className="w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                                            <div className="h-5 w-5 animate-spin rounded-full border-2 border-red-600 border-t-transparent"></div>
                                         )}
                                     </button>
                                 </nav>
@@ -597,7 +743,7 @@ export default function Profile() {
 
                         {/* Main Content */}
                         <div className="w-full lg:w-3/4">
-                            <div className="bg-white rounded-2xl shadow-lg p-6">
+                            <div className="rounded-2xl bg-white p-6 shadow-lg">
                                 {renderTabContent()}
                             </div>
                         </div>
@@ -606,24 +752,30 @@ export default function Profile() {
             </section>
 
             {/* Mobile Menu Toggle */}
-            <div className="lg:hidden fixed bottom-6 right-6 z-50">
+            <div className="fixed right-6 bottom-6 z-50 lg:hidden">
                 <button
                     onClick={() => setShowMobileMenu(!showMobileMenu)}
-                    className="w-14 h-14 bg-orange-500 text-white rounded-full shadow-lg flex items-center justify-center"
+                    className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-500 text-white shadow-lg"
                 >
-                    {showMobileMenu ? <XCircle size={24} /> : <User size={24} />}
+                    {showMobileMenu ? (
+                        <XCircle size={24} />
+                    ) : (
+                        <User size={24} />
+                    )}
                 </button>
             </div>
 
             {/* Mobile Menu */}
             {showMobileMenu && (
-                <div className="lg:hidden fixed inset-0 bg-black/50 z-40 flex items-end">
-                    <div className="bg-white w-full rounded-t-3xl p-6 animate-slide-up">
-                        <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-xl font-bold text-gray-900">{t('menu') || 'Menu'}</h3>
+                <div className="fixed inset-0 z-40 flex items-end bg-black/50 lg:hidden">
+                    <div className="animate-slide-up w-full rounded-t-3xl bg-white p-6">
+                        <div className="mb-6 flex items-center justify-between">
+                            <h3 className="text-xl font-bold text-gray-900">
+                                {t('menu') || 'Menu'}
+                            </h3>
                             <button
                                 onClick={() => setShowMobileMenu(false)}
-                                className="p-2 hover:bg-gray-100 rounded-lg"
+                                className="rounded-lg p-2 hover:bg-gray-100"
                             >
                                 <XCircle size={20} />
                             </button>
@@ -634,19 +786,24 @@ export default function Profile() {
                                 return (
                                     <li key={item.id}>
                                         <button
-                                            onClick={() => handleTabChange(item.id)}
-                                            className={`w-full flex items-center justify-between p-3 rounded-xl transition-colors ${
+                                            onClick={() =>
+                                                handleTabChange(item.id)
+                                            }
+                                            className={`flex w-full items-center justify-between rounded-xl p-3 transition-colors ${
                                                 activeTab === item.id
                                                     ? 'bg-orange-50 text-orange-600'
                                                     : 'text-gray-700 hover:bg-gray-100'
                                             }`}
                                         >
                                             <div className="flex items-center">
-                                                <Icon size={18} className="mr-3" />
+                                                <Icon
+                                                    size={18}
+                                                    className="mr-3"
+                                                />
                                                 <span>{item.label}</span>
                                             </div>
                                             {item.count !== null && (
-                                                <span className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full">
+                                                <span className="rounded-full bg-gray-200 px-2 py-1 text-xs text-gray-700">
                                                     {item.count}
                                                 </span>
                                             )}
@@ -659,14 +816,18 @@ export default function Profile() {
                         <button
                             onClick={handleLogout}
                             disabled={isLoggingOut}
-                            className="w-full flex items-center justify-between p-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                            className="flex w-full items-center justify-between rounded-xl p-3 text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
                         >
                             <div className="flex items-center">
                                 <LogOut size={18} className="mr-3" />
-                                <span>{isLoggingOut ? (t('logging_out') || 'Déconnexion...') : (t('logout') || 'Déconnexion')}</span>
+                                <span>
+                                    {isLoggingOut
+                                        ? t('logging_out') || 'Déconnexion...'
+                                        : t('logout') || 'Déconnexion'}
+                                </span>
                             </div>
                             {isLoggingOut && (
-                                <div className="w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                                <div className="h-5 w-5 animate-spin rounded-full border-2 border-red-600 border-t-transparent"></div>
                             )}
                         </button>
                     </div>

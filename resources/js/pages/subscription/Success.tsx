@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { CheckCircle, Home, Receipt, Download, Share2, Mail, Calendar, CreditCard, Shield, ArrowRight, Zap, Sparkles } from 'lucide-react';
+import { route } from 'ziggy-js';
 
 export default function PaymentSuccess() {
     const { props } = usePage();
@@ -248,7 +249,7 @@ export default function PaymentSuccess() {
                 </div>
             </div>
 
-            <style jsx>{`
+            <style>{`
                 @keyframes bounce-in {
                     0% { transform: scale(0.3); opacity: 0; }
                     50% { transform: scale(1.1); }

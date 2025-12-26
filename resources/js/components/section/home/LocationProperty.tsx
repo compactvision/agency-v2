@@ -1,25 +1,29 @@
 import { router } from '@inertiajs/react';
+import {
+    ArrowRight,
+    Building,
+    ChevronLeft,
+    ChevronRight,
+    Filter,
+    Home,
+    MapPin,
+    Search,
+    Star,
+} from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useEffect, useState, useRef } from 'react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { 
-    MapPin, 
-    Home, 
-    ArrowRight, 
-    TrendingUp, 
-    Star, 
-    Building,
-    Search,
-    ChevronLeft,
-    ChevronRight,
-    Filter
-} from 'lucide-react';
+import { route } from 'ziggy-js';
 
-export default function LocationProperty({ municipalities }: { municipalities: any }) {
+export default function LocationProperty({
+    municipalities,
+}: {
+    municipalities: any;
+}) {
     const { t, i18n } = useTranslation();
     const [visible, setVisible] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
@@ -47,7 +51,7 @@ export default function LocationProperty({ municipalities }: { municipalities: a
                     setVisible(true);
                 }
             },
-            { threshold: 0.1 }
+            { threshold: 0.1 },
         );
 
         if (sectionRef.current) {
@@ -90,77 +94,106 @@ export default function LocationProperty({ municipalities }: { municipalities: a
     };
 
     // Calculer le total des propriétés
-    const totalProperties = municipalities.reduce((sum: number, m: any) => sum + m.properties, 0);
+    const totalProperties = municipalities.reduce(
+        (sum: number, m: any) => sum + m.properties,
+        0,
+    );
 
     return (
-        <section ref={sectionRef} className="relative py-20 lg:py-32 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
+        <section
+            ref={sectionRef}
+            className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-20 lg:py-32"
+        >
             {/* Formes décoratives de fond */}
             <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-amber-300/10 rounded-full filter blur-3xl"></div>
-                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-300/10 rounded-full filter blur-3xl"></div>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-300/5 rounded-full filter blur-3xl"></div>
+                <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-amber-300/10 blur-3xl filter"></div>
+                <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-blue-300/10 blur-3xl filter"></div>
+                <div className="absolute top-1/2 left-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-purple-300/5 blur-3xl filter"></div>
             </div>
 
-            <div className="container mx-auto px-4 relative z-10">
+            <div className="relative z-10 container mx-auto px-4">
                 {/* En-tête avec animation */}
-                <div className={`text-center mb-16 transition-all duration-1000 transform ${
-                    visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                }`}>
+                <div
+                    className={`mb-16 transform text-center transition-all duration-1000 ${
+                        visible
+                            ? 'translate-y-0 opacity-100'
+                            : 'translate-y-10 opacity-0'
+                    }`}
+                >
                     <div className="inline-block">
-                        <span className="text-sm font-medium text-amber-400 tracking-wider uppercase">
+                        <span className="text-sm font-medium tracking-wider text-amber-400 uppercase">
                             {t('location_property_subtitle')}
                         </span>
                     </div>
-                    <h2 className="mt-4 text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+                    <h2 className="mt-4 text-4xl leading-tight font-bold text-white md:text-5xl lg:text-6xl">
                         {i18n.language === 'fr' ? (
                             <>
-                                Découvrir la maison de vos <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">rêves</span>
+                                Découvrir la maison de vos{' '}
+                                <span className="bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">
+                                    rêves
+                                </span>
                             </>
                         ) : (
                             <>
-                                Discover your dream <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">house</span>
+                                Discover your dream{' '}
+                                <span className="bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">
+                                    house
+                                </span>
                             </>
                         )}
                     </h2>
-                    <p className="mt-6 text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed">
+                    <p className="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-gray-300">
                         {t('location_property_paragraph')}
                     </p>
 
                     {/* Filtres et statistiques */}
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-8">
+                    <div className="mt-8 flex flex-col items-center justify-center gap-6 sm:flex-row">
                         {/* Sélecteur de tri */}
-                        <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md rounded-lg px-4 py-2 border border-white/20">
-                            <Filter className="w-4 h-4 text-gray-300" />
+                        <div className="flex items-center gap-3 rounded-lg border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-md">
+                            <Filter className="h-4 w-4 text-gray-300" />
                             <select
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
-                                className="bg-transparent text-white border-none focus:outline-none cursor-pointer"
+                                className="cursor-pointer border-none bg-transparent text-white focus:outline-none"
                             >
-                                <option value="name" className="bg-slate-800">{t('sort_by_name') || 'Trier par nom'}</option>
-                                <option value="properties" className="bg-slate-800">{t('sort_by_properties') || 'Trier par propriétés'}</option>
+                                <option value="name" className="bg-slate-800">
+                                    {t('sort_by_name') || 'Trier par nom'}
+                                </option>
+                                <option
+                                    value="properties"
+                                    className="bg-slate-800"
+                                >
+                                    {t('sort_by_properties') ||
+                                        'Trier par propriétés'}
+                                </option>
                             </select>
                         </div>
 
                         {/* Statistique totale */}
-                        <div className="flex items-center gap-2 bg-amber-500/20 backdrop-blur-sm rounded-lg px-4 py-2 border border-amber-500/30">
-                            <Home className="w-4 h-4 text-amber-400" />
-                            <span className="text-amber-400 font-semibold">
-                                {totalProperties} {t('total_properties') || 'propriétés au total'}
+                        <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/20 px-4 py-2 backdrop-blur-sm">
+                            <Home className="h-4 w-4 text-amber-400" />
+                            <span className="font-semibold text-amber-400">
+                                {totalProperties}{' '}
+                                {t('total_properties') || 'propriétés au total'}
                             </span>
                         </div>
                     </div>
                 </div>
 
                 {/* Carrousel avec design moderne */}
-                <div className={`relative transition-all duration-1000 delay-300 transform ${
-                    visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                }`}>
+                <div
+                    className={`relative transform transition-all delay-300 duration-1000 ${
+                        visible
+                            ? 'translate-y-0 opacity-100'
+                            : 'translate-y-10 opacity-0'
+                    }`}
+                >
                     <Swiper
-                        ref={swiperRef}
+                        onSwiper={(swiper) => (swiperRef.current = swiper)}
                         modules={[Autoplay, Navigation, Pagination]}
                         spaceBetween={30}
                         slidesPerView={3}
-                        loop={true}
+                        loop={(municipalities?.length || 0) > 3}
                         centeredSlides={true}
                         autoplay={{
                             delay: 4000,
@@ -186,162 +219,195 @@ export default function LocationProperty({ municipalities }: { municipalities: a
                         }}
                         className="location-swiper"
                     >
-                        {sortedMunicipalities.map((municipality: any, index: number) => (
-                            <SwiperSlide key={municipality.id}>
-                                <div
-                                    className={`relative group cursor-pointer transition-all duration-700 transform ${
-                                        activeIndex === index 
-                                            ? 'scale-105 z-10' 
-                                            : 'scale-95 opacity-70'
-                                    }`}
-                                    onMouseEnter={() => setHoveredSlide(municipality.id)}
-                                    onMouseLeave={() => setHoveredSlide(null)}
-                                    onClick={() => handleSearch(municipality.id)}
-                                >
-                                    {/* Carte de localisation */}
-                                    <div className="relative bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden border border-white/20 hover:border-amber-400/50 transition-all duration-500">
-                                        {/* Image avec overlay */}
-                                        <div className="relative h-64 overflow-hidden">
-                                            <img
-                                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                                src={`/storage/${municipality.image}`}
-                                                alt={municipality.name}
-                                                loading="lazy"
-                                            />
-                                            
-                                            {/* Overlay dégradé */}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
-                                            
-                                            {/* Badge du nombre de propriétés - TRÈS VISIBLE */}
-                                            <div className="absolute top-4 right-4 z-20">
-                                                <div className="bg-amber-500 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
-                                                    <Home className="w-4 h-4" />
-                                                    <span className="font-bold text-lg">{municipality.properties}</span>
-                                                </div>
-                                            </div>
-                                            
-                                            {/* Badge de popularité */}
-                                            {municipality.featured && (
-                                                <div className="absolute top-4 left-4 z-20">
-                                                    <div className="inline-flex items-center gap-1 px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-full shadow-lg">
-                                                        <Star className="w-3 h-3 fill-current" />
-                                                        {t('popular') || 'Populaire'}
+                        {sortedMunicipalities.map(
+                            (municipality: any, index: number) => (
+                                <SwiperSlide key={municipality.id}>
+                                    <div
+                                        className={`group relative transform cursor-pointer transition-all duration-700 ${
+                                            activeIndex === index
+                                                ? 'z-10 scale-105'
+                                                : 'scale-95 opacity-70'
+                                        }`}
+                                        onMouseEnter={() =>
+                                            setHoveredSlide(municipality.id)
+                                        }
+                                        onMouseLeave={() =>
+                                            setHoveredSlide(null)
+                                        }
+                                        onClick={() =>
+                                            handleSearch(municipality.id)
+                                        }
+                                    >
+                                        {/* Carte de localisation */}
+                                        <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md transition-all duration-500 hover:border-amber-400/50">
+                                            {/* Image avec overlay */}
+                                            <div className="relative h-64 overflow-hidden">
+                                                <img
+                                                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                    src={`/storage/${municipality.image}`}
+                                                    alt={municipality.name}
+                                                    loading="lazy"
+                                                />
+
+                                                {/* Overlay dégradé */}
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+
+                                                {/* Badge du nombre de propriétés - TRÈS VISIBLE */}
+                                                <div className="absolute top-4 right-4 z-20">
+                                                    <div className="flex items-center gap-2 rounded-full bg-amber-500 px-4 py-2 text-white shadow-lg">
+                                                        <Home className="h-4 w-4" />
+                                                        <span className="text-lg font-bold">
+                                                            {
+                                                                municipality.properties
+                                                            }
+                                                        </span>
                                                     </div>
                                                 </div>
-                                            )}
-                                            
-                                            {/* Icône centrale au survol */}
-                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                                                <div className="w-20 h-20 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center transform scale-0 group-hover:scale-100 transition-transform duration-500 delay-100">
-                                                    <MapPin className="w-10 h-10 text-amber-500" />
-                                                </div>
-                                            </div>
-                                        </div>
 
-                                        {/* Contenu avec le nombre de propriétés en évidence */}
-                                        <div className="p-6 text-center">
-                                            <h3 className="text-xl font-bold text-white mb-3 group-hover:text-amber-400 transition-colors duration-300">
-                                                {municipality.name}
-                                            </h3>
-                                            
-                                            {/* Nombre de propriétés MIS EN AVANT */}
-                                            <div className="mb-4">
-                                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 rounded-lg border border-amber-500/30">
-                                                    <Building className="w-5 h-5 text-amber-400" />
-                                                    <span className="text-amber-400 font-semibold text-lg">
-                                                        {municipality.properties}
-                                                    </span>
-                                                    <span className="text-amber-300 text-sm">
-                                                        {t('properties_available') || 'propriétés disponibles'}
-                                                    </span>
+                                                {/* Badge de popularité */}
+                                                {municipality.featured && (
+                                                    <div className="absolute top-4 left-4 z-20">
+                                                        <div className="inline-flex items-center gap-1 rounded-full bg-red-500 px-3 py-1 text-xs font-semibold text-white shadow-lg">
+                                                            <Star className="h-3 w-3 fill-current" />
+                                                            {t('popular') ||
+                                                                'Populaire'}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Icône centrale au survol */}
+                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+                                                    <div className="flex h-20 w-20 scale-0 transform items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-transform delay-100 duration-500 group-hover:scale-100">
+                                                        <MapPin className="h-10 w-10 text-amber-500" />
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            {/* Bouton d'action */}
-                                            <button className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-400 to-amber-600 text-white font-semibold rounded-lg hover:from-amber-500 hover:to-amber-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-amber-500/25">
-                                                <span>{t('explore_properties') || 'Explorer'}</span>
-                                                <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" />
-                                            </button>
-                                        </div>
+                                            {/* Contenu avec le nombre de propriétés en évidence */}
+                                            <div className="p-6 text-center">
+                                                <h3 className="mb-3 text-xl font-bold text-white transition-colors duration-300 group-hover:text-amber-400">
+                                                    {municipality.name}
+                                                </h3>
 
-                                        {/* Effet de brillance */}
-                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none rounded-2xl"></div>
+                                                {/* Nombre de propriétés MIS EN AVANT */}
+                                                <div className="mb-4">
+                                                    <div className="inline-flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/20 px-4 py-2">
+                                                        <Building className="h-5 w-5 text-amber-400" />
+                                                        <span className="text-lg font-semibold text-amber-400">
+                                                            {
+                                                                municipality.properties
+                                                            }
+                                                        </span>
+                                                        <span className="text-sm text-amber-300">
+                                                            {t(
+                                                                'properties_available',
+                                                            ) ||
+                                                                'propriétés disponibles'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Bouton d'action */}
+                                                <button className="inline-flex w-full transform items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-amber-400 to-amber-600 px-6 py-3 font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-amber-500 hover:to-amber-700 hover:shadow-xl hover:shadow-amber-500/25">
+                                                    <span>
+                                                        {t(
+                                                            'explore_properties',
+                                                        ) || 'Explorer'}
+                                                    </span>
+                                                    <ArrowRight className="h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
+                                                </button>
+                                            </div>
+
+                                            {/* Effet de brillance */}
+                                            <div className="pointer-events-none absolute inset-0 -translate-x-full -skew-x-12 transform rounded-2xl bg-gradient-to-r from-transparent via-white to-transparent transition-transform duration-1000 group-hover:translate-x-full"></div>
+                                        </div>
                                     </div>
-                                </div>
-                            </SwiperSlide>
-                        ))}
+                                </SwiperSlide>
+                            ),
+                        )}
                     </Swiper>
 
                     {/* Navigation personnalisée */}
-                    <div className="flex justify-center items-center gap-4 mt-8">
+                    <div className="mt-8 flex items-center justify-center gap-4">
                         <button
                             onClick={goPrev}
-                            className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-all duration-300 transform hover:scale-110"
+                            className="flex h-12 w-12 transform items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white/20"
                             aria-label="Previous slide"
                         >
-                            <ChevronLeft className="w-5 h-5" />
+                            <ChevronLeft className="h-5 w-5" />
                         </button>
-                        
+
                         {/* Pagination personnalisée */}
                         <div className="flex items-center gap-2">
-                            {sortedMunicipalities.map((_: any, index: number) => (
-                                <button
-                                    key={index}
-                                    onClick={() => swiperRef.current?.slideTo(index)}
-                                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                                        activeIndex === index 
-                                            ? 'w-8 bg-amber-400' 
-                                            : 'bg-white/30 hover:bg-white/50'
-                                    }`}
-                                    aria-label={`Go to slide ${index + 1}`}
-                                ></button>
-                            ))}
+                            {sortedMunicipalities.map(
+                                (_: any, index: number) => (
+                                    <button
+                                        key={index}
+                                        onClick={() =>
+                                            swiperRef.current?.slideTo(index)
+                                        }
+                                        className={`h-2 w-2 rounded-full transition-all duration-300 ${
+                                            activeIndex === index
+                                                ? 'w-8 bg-amber-400'
+                                                : 'bg-white/30 hover:bg-white/50'
+                                        }`}
+                                        aria-label={`Go to slide ${index + 1}`}
+                                    ></button>
+                                ),
+                            )}
                         </div>
-                        
+
                         <button
                             onClick={goNext}
-                            className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-all duration-300 transform hover:scale-110"
+                            className="flex h-12 w-12 transform items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white/20"
                             aria-label="Next slide"
                         >
-                            <ChevronRight className="w-5 h-5" />
+                            <ChevronRight className="h-5 w-5" />
                         </button>
                     </div>
                 </div>
 
                 {/* Bouton CTA global */}
-                <div className={`text-center mt-16 transition-all duration-1000 delay-700 transform ${
-                    visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                }`}>
+                <div
+                    className={`mt-16 transform text-center transition-all delay-700 duration-1000 ${
+                        visible
+                            ? 'translate-y-0 opacity-100'
+                            : 'translate-y-10 opacity-0'
+                    }`}
+                >
                     <a
                         href={route('properties')}
-                        className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-gray-700 to-gray-800 text-white font-semibold rounded-xl hover:from-gray-800 hover:to-gray-900 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+                        className="group inline-flex transform items-center gap-3 rounded-xl bg-gradient-to-r from-gray-700 to-gray-800 px-8 py-4 font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-gray-800 hover:to-gray-900 hover:shadow-xl"
                     >
-                        <Search className="w-5 h-5" />
-                        <span>{t('view_all_locations') || 'Voir toutes les localisations'}</span>
-                        <ArrowRight className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" />
-                        <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                        <Search className="h-5 w-5" />
+                        <span>
+                            {t('view_all_locations') ||
+                                'Voir toutes les localisations'}
+                        </span>
+                        <ArrowRight className="h-5 w-5 transform transition-transform duration-300 group-hover:translate-x-1" />
+                        <div className="absolute inset-0 rounded-xl bg-white opacity-0 transition-opacity duration-300 group-hover:opacity-10"></div>
                     </a>
                 </div>
             </div>
 
             {/* Particules flottantes */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
                 {[...Array(15)].map((_, i) => (
                     <div
                         key={i}
-                        className="absolute w-2 h-2 bg-amber-400/10 rounded-full animate-float"
+                        className="animate-float absolute h-2 w-2 rounded-full bg-amber-400/10"
                         style={{
                             left: `${Math.random() * 100}%`,
                             top: `${Math.random() * 100}%`,
                             animationDelay: `${Math.random() * 5}s`,
-                            animationDuration: `${15 + Math.random() * 10}s`
+                            animationDuration: `${15 + Math.random() * 10}s`,
                         }}
                     ></div>
                 ))}
             </div>
 
             {/* Styles personnalisés */}
-            <style jsx>{`
+            <style>{`
                 @keyframes float {
                     0%, 100% {
                         transform: translateY(0) translateX(0);
