@@ -37,7 +37,11 @@ Route::middleware(['auth', 'verified'])->prefix('/dashboard')->name('dashboard.'
     Route::prefix('properties')->name('properties.')->group(function () {
         Route::get('/', [DashboardController::class, 'properties'])->name('index');
         Route::get('/create', [DashboardController::class, 'createProperty'])->name('create');
+        Route::post('/store', [DashboardController::class, 'storeProperty'])->name('store');
+        Route::get('/{id}', [DashboardController::class, 'showProperty'])->name('show');
         Route::get('/{id}/edit', [DashboardController::class, 'editProperty'])->name('edit');
+        Route::put('/{id}/update', [DashboardController::class, 'updateProperty'])->name('update');
+        Route::patch('/{id}/approve', [DashboardController::class, 'approveProperty'])->name('approve');
         Route::get('/favorites', [DashboardController::class, 'favorites'])->name('favorites');
     });
 
@@ -51,9 +55,15 @@ Route::middleware(['auth', 'verified'])->prefix('/dashboard')->name('dashboard.'
     // Admin Tools
     Route::get('/municipalities', [DashboardController::class, 'municipalities'])->name('municipalities.index');
     Route::get('/plans', [DashboardController::class, 'plans'])->name('plans.index');
+    Route::post('/plans', [DashboardController::class, 'storePlan'])->name('plans.store');
+    Route::put('/plans/{id}', [DashboardController::class, 'updatePlan'])->name('plans.update');
+    Route::delete('/plans/{id}', [DashboardController::class, 'destroyPlan'])->name('plans.destroy');
     Route::get('/pages', [DashboardController::class, 'pages'])->name('pages.index');
     Route::get('/pages/{id}/edit', [DashboardController::class, 'editPage'])->name('pages.edit');
     Route::get('/payment-requests', [DashboardController::class, 'transactions'])->name('payment-requests.index');
+    Route::post('/payment-requests/store', [DashboardController::class, 'storePaymentRequest'])->name('payment-requests.store');
+    Route::put('/payment-requests/{id}/approve', [DashboardController::class, 'approvePaymentRequest'])->name('payment-requests.approve');
+    Route::put('/payment-requests/{id}/reject', [DashboardController::class, 'rejectPaymentRequest'])->name('payment-requests.reject');
     Route::get('/audit-logs', [DashboardController::class, 'auditLogs'])->name('audit-logs.index');
     Route::get('/chatbot-logs', [DashboardController::class, 'chatbotLogs'])->name('chatbot-logs.index');
 

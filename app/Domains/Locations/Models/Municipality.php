@@ -18,4 +18,9 @@ class Municipality extends Model
     {
         return $this->belongsTo(City::class);
     }
+
+    public function properties()
+    {
+        return $this->hasMany(\App\Domains\Ads\Models\Ad::class);
+    }
 }

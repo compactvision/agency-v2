@@ -13,6 +13,7 @@ class Plan extends Model
         'interval',
         'is_active',
         'position',
+        'payment_method',
     ];
 
     protected $casts = [
