@@ -254,12 +254,103 @@ class AdService
     /* =========================================================
      | PUBLIC
      |=========================================================*/
-    public function publicList()
+    /* =========================================================
+     | PUBLIC
+     |=========================================================*/
+    public function publicList(array $filters = [])
+    {
+        $query = Ad::where('status', 'published')
+            ->where('is_published', true)
+            ->with(['category', 'amenities', 'images', 'details', 'user', 'municipality', 'city', 'country']);
+
+        // 1. Search (Title, Description, Reference)
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('reference', 'like', "%{$search}%");
+            });
+        }
+
+        // 2. Filters
+        if (!empty($filters['sale_type'])) {
+            $query->where('ad_type', $filters['sale_type']);
+        }
+
+        if (!empty($filters['type'])) {
+            // Assuming 'type' maps to category name or similar. 
+            // If it's category_id, use that. If it's a string looking up category, we need relation.
+            // For now assuming strict mapping if passed, but frontend sends string names often.
+            // Let's assume it matches a category name or slug if joined, or just ignored if not ID.
+            // Given frontend usage, let's try to match category slug or name via relation if possible.
+            // Or if frontend sends ID? Frontend sends string. 
+            // Let's filter by category name for now.
+            $query->whereHas('category', function($q) use ($filters) {
+                $q->where('name', $filters['type'])
+                  ->orWhere('slug', $filters['type']);
+            });
+        }
+
+        if (!empty($filters['municipality_id'])) {
+            $query->where('municipality_id', $filters['municipality_id']);
+        }
+
+        if (!empty($filters['price_min'])) {
+            $query->where('price', '>=', $filters['price_min']);
+        }
+
+        if (!empty($filters['price_max'])) {
+            $query->where('price', '<=', $filters['price_max']);
+        }
+
+        if (!empty($filters['bedrooms'])) {
+            // stored in json column 'details' -> 'bedrooms'? Or separate column?
+            // Ad model fillable has 'bedrooms' not listed explicitly as column, 
+            // but Ad table likely has them or they are in details.
+            // Looking at AdService create, it puts 'details' into AdDetail model.
+            // So we need to query AdDetail.
+             $query->whereHas('details', function($q) use ($filters) {
+                $q->where('details->bedrooms', '>=', $filters['bedrooms']);
+            });
+        }
+
+        if (!empty($filters['bathrooms'])) {
+             $query->whereHas('details', function($q) use ($filters) {
+                $q->where('details->bathrooms', '>=', $filters['bathrooms']);
+            });
+        }
+
+        if (!empty($filters['amenities']) && is_array($filters['amenities'])) {
+            $query->whereHas('amenities', function($q) use ($filters) {
+                $q->whereIn('amenities.id', $filters['amenities']);
+            });
+        }
+
+        // 3. Sort
+        $sort = $filters['sort'] ?? 'newest';
+        switch ($sort) {
+            case 'low_price':
+                $query->orderBy('price', 'asc');
+                break;
+            case 'high_price':
+                $query->orderBy('price', 'desc');
+                break;
+            case 'newest':
+            default:
+                $query->latest();
+                break;
+        }
+
+        return $query->paginate(12);
+    }
+
+    public function getPublicAd($id)
     {
         return Ad::where('status', 'published')
             ->where('is_published', true)
-            ->with(['category', 'amenities', 'images', 'details'])
-            ->latest()
-            ->get();
+            ->where('id', $id)
+            ->with(['category', 'amenities', 'images', 'details', 'user', 'municipality', 'city', 'country'])
+            ->firstOrFail();
     }
 }

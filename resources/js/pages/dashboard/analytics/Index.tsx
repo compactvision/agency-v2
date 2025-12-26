@@ -1,21 +1,51 @@
 import Dashboard from '@/components/layouts/Dashboard/Dashboard';
 import BackButton from '@/components/ui/BackButton';
-import { ArcElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Tooltip } from 'chart.js';
+import {
+    ArcElement,
+    CategoryScale,
+    Chart as ChartJS,
+    Legend,
+    LinearScale,
+    LineElement,
+    PointElement,
+    Tooltip,
+} from 'chart.js';
 import 'chart.js/auto';
-import { Award, CheckCircle, Clock, CreditCard, Eye, Home, Phone, TrendingUp, Users, XCircle, Building, FileText, Star, Calendar, DollarSign, Activity, BarChart3 } from 'lucide-react';
+import {
+    BarChart3,
+    Building,
+    CheckCircle,
+    Clock,
+    CreditCard,
+    Eye,
+    Home,
+    Phone,
+    Star,
+    TrendingUp,
+    Users,
+    XCircle,
+} from 'lucide-react';
 import { Doughnut, Line } from 'react-chartjs-2';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Tooltip, Legend);
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    ArcElement,
+    Tooltip,
+    Legend,
+);
 
 export default function Index({
-    viewsPerDay,
-    contactsPerMethod,
-    mostViewedProperties,
-    userStats,
-    propertyStats,
-    subscriptionStats,
-    paymentRequestStats,
-    isAdmin,
+    viewsPerDay = [],
+    contactsPerMethod = [],
+    mostViewedProperties = [],
+    userStats = { sellers: 0, agencies: 0, buyers: 0 },
+    propertyStats = { total: 0, published: 0, approved: 0, featured: 0 },
+    subscriptionStats = { active: 0, expired: 0, total: 0 },
+    paymentRequestStats = { pending: 0, approved: 0, rejected: 0 },
+    isAdmin = false,
 }: any) {
     const lineData = {
         labels: viewsPerDay.map((v: any) => v.date).reverse(),
@@ -41,8 +71,16 @@ export default function Index({
         datasets: [
             {
                 data: contactsPerMethod.map((c: any) => c.total),
-                backgroundColor: ['rgba(34, 197, 94, 0.8)', 'rgba(250, 204, 21, 0.8)', 'rgba(239, 68, 68, 0.8)'],
-                borderColor: ['rgba(34, 197, 94, 1)', 'rgba(250, 204, 21, 1)', 'rgba(239, 68, 68, 1)'],
+                backgroundColor: [
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(250, 204, 21, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                ],
+                borderColor: [
+                    'rgba(34, 197, 94, 1)',
+                    'rgba(250, 204, 21, 1)',
+                    'rgba(239, 68, 68, 1)',
+                ],
                 borderWidth: 2,
                 hoverOffset: 10,
             },
@@ -86,7 +124,7 @@ export default function Index({
                 },
                 border: {
                     color: 'rgba(148, 163, 184, 0.2)',
-                }
+                },
             },
             y: {
                 ticks: {
@@ -100,7 +138,7 @@ export default function Index({
                 },
                 border: {
                     color: 'rgba(148, 163, 184, 0.2)',
-                }
+                },
             },
         },
     };
@@ -165,20 +203,28 @@ export default function Index({
 
         return (
             <article
-                className="bg-white rounded-2xl shadow-lg shadow-amber-500/10 border border-amber-200/30 overflow-hidden hover:shadow-xl hover:shadow-amber-500/20 transition-all duration-300 transform hover:-translate-y-1"
+                className="transform overflow-hidden rounded-2xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/20"
                 style={{ animationDelay: `${delay}ms` }}
             >
                 <div className="p-6">
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="mb-4 flex items-center justify-between">
                         <div className="flex-1">
-                            <h4 className="text-sm font-medium text-gray-600 mb-1">{title}</h4>
-                            <p className="text-2xl font-bold text-gray-900">{value?.toLocaleString() || 0}</p>
+                            <h4 className="mb-1 text-sm font-medium text-gray-600">
+                                {title}
+                            </h4>
+                            <p className="text-2xl font-bold text-gray-900">
+                                {value?.toLocaleString() || 0}
+                            </p>
                         </div>
-                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${colorClasses[modifier]} flex items-center justify-center shadow-lg`}>
+                        <div
+                            className={`h-12 w-12 rounded-xl bg-gradient-to-br ${colorClasses[modifier]} flex items-center justify-center shadow-lg`}
+                        >
                             <Icon size={24} className="text-white" />
                         </div>
                     </div>
-                    <div className={`h-1 bg-gradient-to-r ${colorClasses[modifier]} rounded-full`}></div>
+                    <div
+                        className={`h-1 bg-gradient-to-r ${colorClasses[modifier]} rounded-full`}
+                    ></div>
                 </div>
             </article>
         );
@@ -196,20 +242,24 @@ export default function Index({
     return (
         <Dashboard>
             <div className="min-h-screen bg-gradient-to-br from-amber-50/30 via-white to-amber-50/20">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div className="mb-8">
                         <BackButton />
                         <div className="mt-6 text-center">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">Statistiques globales</h1>
-                            <p className="text-gray-600">Vue d'ensemble des performances en temps réel</p>
+                            <h1 className="mb-2 text-3xl font-bold text-gray-900">
+                                Statistiques globales
+                            </h1>
+                            <p className="text-gray-600">
+                                Vue d'ensemble des performances en temps réel
+                            </p>
                         </div>
                     </div>
 
                     {/* User Stats - Admin only */}
                     {isAdmin && (
                         <section className="mb-8">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                                 <StatCard
                                     title="Vendeurs"
                                     value={userStats.sellers}
@@ -230,7 +280,11 @@ export default function Index({
                                 />
                                 <StatCard
                                     title="Total utilisateurs"
-                                    value={userStats.sellers + userStats.agencies + userStats.buyers}
+                                    value={
+                                        userStats.sellers +
+                                        userStats.agencies +
+                                        userStats.buyers
+                                    }
                                     type="total"
                                     delay={300}
                                 />
@@ -240,7 +294,7 @@ export default function Index({
 
                     {/* Property Stats */}
                     <section className="mb-8">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                             <StatCard
                                 title="Annonces"
                                 value={propertyStats.total}
@@ -270,7 +324,7 @@ export default function Index({
 
                     {/* Subscription Stats */}
                     <section className="mb-8">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                             <StatCard
                                 title="Abonnements actifs"
                                 value={subscriptionStats.active}
@@ -298,7 +352,7 @@ export default function Index({
 
                     {/* Payment Stats */}
                     <section className="mb-8">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             <StatCard
                                 title="Paiements en attente"
                                 value={paymentRequestStats.pending}
@@ -322,31 +376,50 @@ export default function Index({
 
                     {/* Charts Section */}
                     <section className="mb-8">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div className="bg-white rounded-2xl shadow-lg shadow-amber-500/10 border border-amber-200/30 overflow-hidden">
+                        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                            <div className="overflow-hidden rounded-2xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10">
                                 <div className="p-6">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                                            <BarChart3 size={20} className="text-white" />
+                                    <div className="mb-6 flex items-center gap-3">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-400 to-blue-600">
+                                            <BarChart3
+                                                size={20}
+                                                className="text-white"
+                                            />
                                         </div>
-                                        <h2 className="text-xl font-bold text-gray-900">Évolution des vues</h2>
+                                        <h2 className="text-xl font-bold text-gray-900">
+                                            Évolution des vues
+                                        </h2>
                                     </div>
                                     <div className="h-64">
-                                        <Line data={lineData} options={chartOptions} />
+                                        <Line
+                                            data={lineData}
+                                            options={chartOptions}
+                                        />
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded-2xl shadow-lg shadow-amber-500/10 border border-amber-200/30 overflow-hidden">
+                            <div className="overflow-hidden rounded-2xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10">
                                 <div className="p-6">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
-                                            <Phone size={20} className="text-white" />
+                                    <div className="mb-6 flex items-center gap-3">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-amber-600">
+                                            <Phone
+                                                size={20}
+                                                className="text-white"
+                                            />
                                         </div>
-                                        <h2 className="text-xl font-bold text-gray-900">Méthodes de contact</h2>
+                                        <h2 className="text-xl font-bold text-gray-900">
+                                            Méthodes de contact
+                                        </h2>
                                     </div>
                                     <div className="h-64">
-                                        <Doughnut data={doughnutData} options={{ ...chartOptions, cutout: '60%' }} />
+                                        <Doughnut
+                                            data={doughnutData}
+                                            options={{
+                                                ...chartOptions,
+                                                cutout: '60%',
+                                            }}
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -355,46 +428,75 @@ export default function Index({
 
                     {/* Top Properties Table */}
                     <section>
-                        <div className="bg-white rounded-2xl shadow-lg shadow-amber-500/10 border border-amber-200/30 overflow-hidden">
+                        <div className="overflow-hidden rounded-2xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10">
                             <div className="p-6">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
+                                <div className="mb-6 flex items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-amber-600">
                                         <Eye size={20} className="text-white" />
                                     </div>
-                                    <h2 className="text-xl font-bold text-gray-900">Top 10 des annonces les plus vues</h2>
+                                    <h2 className="text-xl font-bold text-gray-900">
+                                        Top 10 des annonces les plus vues
+                                    </h2>
                                 </div>
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
                                         <thead className="bg-amber-50/30">
                                             <tr>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">ID</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Titre</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Municipalité</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Vues</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
+                                                    ID
+                                                </th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
+                                                    Titre
+                                                </th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
+                                                    Municipalité
+                                                </th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
+                                                    Vues
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-amber-200/30">
-                                            {mostViewedProperties.map((property: any, index: number) => (
-                                                <tr
-                                                    key={property.id}
-                                                    className="hover:bg-amber-50/30 transition-colors"
-                                                    style={{ animationDelay: `${index * 50}ms` }}
-                                                >
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">#{property.id}</td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{property.title}</td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{property.municipality?.name || '-'}</td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                        <div className="flex items-center gap-2">
-                                                            <Eye size={16} className="text-amber-500" />
-                                                            {property.views_count?.toLocaleString() || 0}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
+                                            {mostViewedProperties.map(
+                                                (
+                                                    property: any,
+                                                    index: number,
+                                                ) => (
+                                                    <tr
+                                                        key={property.id}
+                                                        className="transition-colors hover:bg-amber-50/30"
+                                                        style={{
+                                                            animationDelay: `${index * 50}ms`,
+                                                        }}
+                                                    >
+                                                        <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
+                                                            #{property.id}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
+                                                            {property.title}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
+                                                            {property
+                                                                .municipality
+                                                                ?.name || '-'}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
+                                                            <div className="flex items-center gap-2">
+                                                                <Eye
+                                                                    size={16}
+                                                                    className="text-amber-500"
+                                                                />
+                                                                {property.views_count?.toLocaleString() ||
+                                                                    0}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ),
+                                            )}
                                         </tbody>
                                     </table>
                                     {mostViewedProperties.length < 1 && (
-                                        <div className="text-center py-8 text-gray-500">
+                                        <div className="py-8 text-center text-gray-500">
                                             Aucune annonce trouvée.
                                         </div>
                                     )}

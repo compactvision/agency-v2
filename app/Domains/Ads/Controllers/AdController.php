@@ -7,6 +7,7 @@ use App\Domains\Ads\Models\Ad;
 use App\Domains\Ads\Services\AdService;
 use App\Domains\Ads\Requests\StoreAdRequest;
 use App\Domains\Ads\Requests\UpdateAdRequest;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AdController
@@ -55,11 +56,19 @@ class AdController
         return ApiResponse::success($ad, 'Ad submitted');
     }
 
-    public function public()
+    public function public(Request $request)
     {
         return ApiResponse::success(
-            $this->service->publicList(),
+            $this->service->publicList($request->all()),
             'Public ads retrieved'
+        );
+    }
+
+    public function show($id)
+    {
+        return ApiResponse::success(
+            $this->service->getPublicAd($id),
+            'Ad details retrieved'
         );
     }
 }

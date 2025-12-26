@@ -9,6 +9,7 @@ Route::prefix('ads')->group(function () {
 
     // 🌍 PUBLIC
     Route::get('/public', [AdController::class, 'public']);
+    Route::get('/public/{id}', [AdController::class, 'show']);
 
     // 🟢 SELLER + SUBSCRIPTION ACTIVE
     Route::middleware(['auth:sanctum', 'maintenance', 'seller.active'])->group(function () {
