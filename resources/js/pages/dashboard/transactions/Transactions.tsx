@@ -58,7 +58,13 @@ export default function Transactions() {
         filters,
     } = usePage<PageProps>().props;
 
-    const isAdmin = !!auth?.user?.roles?.includes?.('Admin');
+    const isAdmin =
+        !!auth?.user?.roles?.some?.((r: any) =>
+            ['admin', 'super-admin'].includes(r?.name?.toLowerCase()),
+        ) ||
+        !!auth?.roles?.some?.((r: string) =>
+            ['admin', 'super-admin'].includes(r?.toLowerCase()),
+        );
 
     const [searchQuery, setSearchQuery] = useState<string>(
         filters?.search ?? '',
@@ -387,19 +393,20 @@ export default function Transactions() {
                                                                 'pending' ? (
                                                                     <>
                                                                         <button
-                                                                            className="rounded-lg bg-emerald-50 p-2 text-emerald-600 transition-colors hover:bg-emerald-100 hover:text-emerald-800"
+                                                                            className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-100 hover:text-emerald-800"
                                                                             onClick={() =>
                                                                                 handleApprove(
                                                                                     pay.id,
                                                                                 )
                                                                             }
-                                                                            title="Approuver"
+                                                                            title="Valider la demande"
                                                                         >
                                                                             <CheckCircle
                                                                                 size={
-                                                                                    18
+                                                                                    16
                                                                                 }
                                                                             />
+                                                                            Valider
                                                                         </button>
                                                                         <button
                                                                             className="rounded-lg bg-red-50 p-2 text-red-600 transition-colors hover:bg-red-100 hover:text-red-800"
@@ -507,7 +514,7 @@ export default function Transactions() {
                                                             <CheckCircle
                                                                 size={16}
                                                             />{' '}
-                                                            Approuver
+                                                            Valider
                                                         </button>
                                                         <button
                                                             className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-50 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100"
