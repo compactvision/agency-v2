@@ -28,10 +28,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 //     })->name('dashboard');
 // });
 
-// require __DIR__.'/settings.php';
+require __DIR__.'/settings.php';
 
-Route::middleware(['auth', 'verified'])->prefix('/dashboard')->name('dashboard.')->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('index');
+Route::middleware(['auth', 'verified'])->prefix('/dashboard')->group(function () {
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::name('dashboard.')->group(function () {
 
     // Properties
     Route::prefix('properties')->name('properties.')->group(function () {
@@ -96,6 +98,7 @@ Route::middleware(['auth', 'verified'])->prefix('/dashboard')->name('dashboard.'
     Route::get('/notifications', [DashboardController::class, 'notifications'])->name('notifications');
     Route::post('/notifications/mark-all-read', [DashboardController::class, 'markAllNotificationsAsRead'])->name('notifications.mark-all-read');
     Route::post('/notifications/{id}/mark-read', [DashboardController::class, 'markNotificationAsRead'])->name('notifications.mark-read');
+    });
 });
 
 
