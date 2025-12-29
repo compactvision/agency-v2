@@ -67,11 +67,11 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
 
     // Public Header Links
     const publicLinks = [
-        { label: t('Accueil'), path: 'home', icon: Home },
-        { label: t('Propriétés'), path: 'properties', icon: Building },
-        { label: t('À propos'), path: 'about', icon: Users },
-        { label: t('Tarifs'), path: 'tarifs', icon: CreditCard },
-        { label: t('Contact'), path: 'contact', icon: Mail },
+        { label: t('home'), path: 'home', icon: Home },
+        { label: t('properties'), path: 'properties', icon: Building },
+        { label: t('about'), path: 'about', icon: Users },
+        { label: t('pricing'), path: 'tarifs', icon: CreditCard },
+        { label: t('contact'), path: 'contact', icon: Mail },
     ];
 
     // Detect mobile
@@ -227,7 +227,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                                         size={18}
                                                         className="text-amber-500"
                                                     />
-                                                    Notifications
+                                                    {t('notifications')}
                                                 </h3>
                                                 {unreadCount > 0 && (
                                                     <button
@@ -240,7 +240,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                                         }
                                                         className="text-xs font-semibold text-amber-600 hover:text-amber-700"
                                                     >
-                                                        Tout marquer comme lu
+                                                        {t('mark_all_as_read')}
                                                     </button>
                                                 )}
                                             </div>
@@ -302,9 +302,9 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                                                                 }
                                                                                 className="text-[10px] font-bold tracking-wider text-amber-600 uppercase hover:text-amber-700"
                                                                             >
-                                                                                Marquer
-                                                                                comme
-                                                                                lu
+                                                                                {t(
+                                                                                    'mark_as_read',
+                                                                                )}
                                                                             </button>
                                                                         )}
                                                                     </div>
@@ -321,8 +321,9 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                                             />
                                                         </div>
                                                         <p className="text-sm font-medium text-slate-500">
-                                                            Aucune notification
-                                                            pour le moment
+                                                            {t(
+                                                                'no_notifications_yet',
+                                                            )}
                                                         </p>
                                                     </div>
                                                 )}
@@ -334,7 +335,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                                 )}
                                                 className="block border-t border-slate-100 p-3 text-center text-sm font-bold text-slate-600 transition-colors hover:bg-slate-50 hover:text-amber-600"
                                             >
-                                                Voir toutes les notifications
+                                                {t('view_all_notifications')}
                                             </Link>
                                         </div>
                                     )}
@@ -395,7 +396,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                                     className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-amber-50 hover:text-amber-600"
                                                 >
                                                     <Home size={18} />
-                                                    Accueil
+                                                    {t('home')}
                                                 </Link>
                                                 {/* <Link
                                                     href={route(
@@ -412,7 +413,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                                     className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
                                                 >
                                                     <LogOut size={18} />
-                                                    Déconnexion
+                                                    {t('logout')}
                                                 </button>
                                             </div>
                                         </div>
