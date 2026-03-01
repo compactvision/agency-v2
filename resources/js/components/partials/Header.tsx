@@ -1,3 +1,4 @@
+import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import {
@@ -42,11 +43,11 @@ export default function Header() {
         setActive(!active);
     };
 
-    const { url } = usePage();
+    const { url } = usePage<SharedData>();
     const isPropertiesActive = url.startsWith('/properties');
     const isActive = (path: string) =>
         url === path || url.startsWith(path + '/');
-    const user = usePage().props.auth?.user;
+    const user = usePage<SharedData>().props.auth?.user;
 
     const userRoles =
         user?.roles?.map((r: any) => (typeof r === 'string' ? r : r.name)) ??
@@ -92,7 +93,7 @@ export default function Header() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const { appSettings } = usePage().props as { appSettings: any };
+    const { appSettings } = usePage<SharedData>().props as any;
 
     const numero = appSettings?.numero ?? '+1 800 123 456 789';
     const email = appSettings?.email ?? 'your_protect@mail.com';
@@ -195,7 +196,7 @@ export default function Header() {
                                         </Link>
                                     ) : (
                                         <Link
-                                            href={route('dashboard.index')}
+                                            href={route('dashboard')}
                                             className="text-sm font-medium tracking-wide text-slate-300 transition-all duration-300 hover:text-amber-400"
                                         >
                                             {user.name}

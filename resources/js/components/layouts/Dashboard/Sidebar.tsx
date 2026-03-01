@@ -126,7 +126,7 @@ export default function Sidebar({
             label: t('overview'),
             icon: LayoutDashboard,
             description: 'Tableau de bord',
-            route: 'dashboard.index',
+            route: 'dashboard',
             section: 'main',
         },
         {

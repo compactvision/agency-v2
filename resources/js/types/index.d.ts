@@ -45,5 +45,6 @@ export interface User {
     two_factor_enabled?: boolean;
     created_at: string;
     updated_at: string;
-    [key: string]: unknown; // This allows for additional properties...
+    roles?: any[];
+    [key: string]: any; // Changed from unknown to any to allow easier property access in this specific project context
 }
