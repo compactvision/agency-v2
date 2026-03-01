@@ -7,9 +7,17 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-
+use App\Domains\Auth\Services\RoleService;
+use App\Domains\Auth\Resources\RoleResource;
 class RoleController extends Controller
 {
+    protected $roleService;
+
+    public function __construct(RoleService $roleService)
+    {
+        $this->roleService = $roleService;
+    }
+
     /**
      * Administration
      */
@@ -19,21 +27,12 @@ class RoleController extends Controller
             abort(403);
         }
 
-        $query = Role::query()->with('permissions');
-
-        if ($request->search) {
-            $query->where('name', 'like', "%{$request->search}%");
-        }
-
-        $roles = $query->paginate($request->per_page ?? 20)->withQueryString();
+        $perPage = $request->input('per_page', 20);
+        $roles = $this->roleService->list($request->only(['search']), $perPage);
 
         return Inertia::render('dashboard/roles/Roles', [
             'roles' => [
-                'data' => collect($roles->items())->map(fn($role) => [
-                    'id' => $role->id,
-                    'name' => $role->name,
-                    'permissions' => $role->permissions->map(fn($p) => ['name' => $p->name]),
-                ]),
+                'data' => RoleResource::collection($roles->items())->resolve(),
                 'links' => $roles->linkCollection()->toArray(),
                 'meta' => [
                     'current_page' => $roles->currentPage(),
@@ -49,13 +48,7 @@ class RoleController extends Controller
 
     public function store(\App\Http\Requests\Dashboard\StoreRoleRequest $request)
     {
-        $validated = $request->validated();
-
-        $role = Role::create(['name' => $validated['name']]);
-        
-        if (!empty($validated['permissions'])) {
-            $role->syncPermissions($validated['permissions']);
-        }
+        $this->roleService->create($request->validated());
 
         return redirect()->back()->with('success', 'Rôle créé avec succès.');
     }
@@ -63,30 +56,20 @@ class RoleController extends Controller
     public function update(\App\Http\Requests\Dashboard\UpdateRoleRequest $request, $id)
     {
         $role = Role::findOrFail($id);
-        $validated = $request->validated();
-
-        $role->update(['name' => $validated['name']]);
-        
-        if (isset($validated['permissions'])) {
-            $role->syncPermissions($validated['permissions']);
-        }
+        $this->roleService->update($role, $request->validated());
 
         return redirect()->back()->with('success', 'Rôle mis à jour avec succès.');
     }
 
     public function destroy($id)
     {
-        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
-            abort(403);
-        }
-
         $role = Role::findOrFail($id);
         
-        if (in_array($role->name, ['admin', 'super-admin'])) {
-            return redirect()->back()->with('error', 'Impossible de supprimer un rôle système.');
+        try {
+            $this->roleService->delete($role);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
         }
-
-        $role->delete();
 
         return redirect()->back()->with('success', 'Rôle supprimé avec succès.');
     }

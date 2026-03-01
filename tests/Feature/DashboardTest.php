@@ -1,19 +1,23 @@
 <?php
  
 use App\Models\User;
- 
+use Spatie\Permission\Models\Role;
+
 test('guests are redirected to the login page', function () {
-    $this->get(route('dashboard.index'))->assertRedirect(route('login'));
+    $this->get(route('dashboard'))->assertRedirect(route('login'));
 });
  
 test('authenticated users can visit the dashboard', function () {
     $this->actingAs($user = User::factory()->create());
  
-    $this->get(route('dashboard.index'))->assertOk();
+    $this->get(route('dashboard'))->assertOk();
 });
 
 test('authenticated users can visit the audit logs page', function () {
-    $this->actingAs($user = User::factory()->create());
+    Role::firstOrCreate(['name' => 'admin']);
+    $user = User::factory()->create();
+    $user->assignRole('admin');
+    $this->actingAs($user);
 
     $this->get(route('dashboard.audit-logs.index'))
         ->assertOk()
@@ -25,7 +29,10 @@ test('authenticated users can visit the audit logs page', function () {
 });
 
 test('authenticated users can visit the transactions page', function () {
-    $this->actingAs($user = User::factory()->create());
+    Role::firstOrCreate(['name' => 'admin']);
+    $user = User::factory()->create();
+    $user->assignRole('admin');
+    $this->actingAs($user);
 
     $this->get(route('dashboard.payment-requests.index'))
         ->assertOk()

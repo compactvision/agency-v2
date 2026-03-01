@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Domains\Locations\Resources;
+namespace App\Domains\Auth\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class MunicipalityResource extends JsonResource
+class UserResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,9 +17,9 @@ class MunicipalityResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'city' => $this->city?->name ?? 'Kinshasa',
-            'country' => 'Congo-Kinshasa',
-            'properties_count' => $this->whenCounted('properties'),
+            'email' => $this->email,
+            'profile_photo' => $this->profile_photo_path ?? $this->avatar,
+            'roles' => RoleResource::collection($this->whenLoaded('roles', $this->roles, []))->resolve(),
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

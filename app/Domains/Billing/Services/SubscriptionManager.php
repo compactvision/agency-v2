@@ -7,6 +7,27 @@ use App\Domains\Billing\Models\Subscription;
 
 class SubscriptionManager
 {
+    public function list(array $filters = [])
+    {
+        $query = Subscription::with(['user', 'plan']);
+
+        if (!empty($filters['user_id'])) {
+            $query->where('user_id', $filters['user_id']);
+        }
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $query->orderBy('created_at', 'desc');
+
+        return $query->paginate($filters['per_page'] ?? 10);
+    }
+
     public function createPending(int $userId, Plan $plan): Subscription
     {
         return Subscription::updateOrCreate(

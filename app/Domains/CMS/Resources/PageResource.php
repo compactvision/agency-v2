@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Domains\Locations\Resources;
+namespace App\Domains\CMS\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class MunicipalityResource extends JsonResource
+class PageResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,10 +16,10 @@ class MunicipalityResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'city' => $this->city?->name ?? 'Kinshasa',
-            'country' => 'Congo-Kinshasa',
-            'properties_count' => $this->whenCounted('properties'),
+            'title' => $this->title,
+            'slug' => $this->slug,
+            'status' => $this->status,
+            'sections' => PageSectionResource::collection($this->whenLoaded('sections')),
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

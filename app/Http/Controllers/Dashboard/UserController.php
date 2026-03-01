@@ -7,9 +7,17 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
-
+use App\Domains\Auth\Services\UserService;
+use App\Domains\Auth\Resources\UserResource;
 class UserController extends Controller
 {
+    protected $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
     /**
      * User Management
      */
@@ -19,33 +27,11 @@ class UserController extends Controller
             abort(403);
         }
 
-        $query = User::query()->with('roles');
-
-        if ($request->search) {
-            $query->where(function($q) use ($request) {
-                $q->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('email', 'like', "%{$request->search}%");
-            });
-        }
-
-        if ($request->filter) {
-            $query->whereHas('roles', function($q) use ($request) {
-                $q->where('name', $request->filter);
-            });
-        }
-
-        $users = $query->paginate($request->per_page ?? 20)->withQueryString();
+        $users = $this->userService->list($request->only(['search', 'filter', 'per_page']));
 
         return Inertia::render('dashboard/users/User', [
             'users' => [
-                'data' => collect($users->items())->map(fn($user) => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'profile_photo' => $user->profile_photo_path,
-                    'roles' => $user->roles->map(fn($r) => ['name' => $r->name]),
-                    'created_at' => $user->created_at->format('d/m/Y'),
-                ]),
+                'data' => UserResource::collection($users->items())->resolve(),
                 'links' => $users->linkCollection()->toArray(),
                 'meta' => [
                     'current_page' => $users->currentPage(),
@@ -63,13 +49,7 @@ class UserController extends Controller
 
     public function store(\App\Http\Requests\Dashboard\StoreUserRequest $request)
     {
-        $validated = $request->validated();
-
-        User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => bcrypt($validated['password']),
-        ]);
+        $this->userService->create($request->validated());
 
         return redirect()->back()->with('success', 'Utilisateur créé avec succès.');
     }
@@ -77,37 +57,20 @@ class UserController extends Controller
     public function update(\App\Http\Requests\Dashboard\UpdateUserRequest $request, $id)
     {
         $user = User::findOrFail($id);
-        $validated = $request->validated();
-
-        $user->update([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-        ]);
-
-        if (isset($validated['roles'])) {
-            $user->syncRoles($validated['roles']);
-        }
+        $this->userService->update($user, $request->validated());
 
         return redirect()->back()->with('success', 'Utilisateur mis à jour avec succès.');
     }
 
     public function destroy($id)
     {
-        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
-            abort(403);
-        }
-
         $user = User::findOrFail($id);
-
-        if ($user->id === auth()->id()) {
-            return redirect()->back()->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
+        
+        try {
+            $this->userService->delete($user);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
         }
-
-        if ($user->hasRole('super-admin') && !auth()->user()->hasRole('super-admin')) {
-            return redirect()->back()->with('error', 'Seul un super-administrateur peut supprimer un autre super-administrateur.');
-        }
-
-        $user->delete();
 
         return redirect()->back()->with('success', 'Utilisateur supprimé avec succès.');
     }
@@ -115,7 +78,7 @@ class UserController extends Controller
     public function profile()
     {
         return Inertia::render('dashboard/profile/Profile', [
-            'user' => auth()->user()
+            'user' => new UserResource(auth()->user()->load(['roles']))
         ]);
     }
 }

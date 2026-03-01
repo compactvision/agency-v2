@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Domains\Billing\Resources\SubscriptionResource;
 use App\Domains\Billing\Models\Subscription;
 use App\Domains\Billing\Models\Plan;
 
@@ -30,7 +31,7 @@ class TransactionController extends Controller
 
         return Inertia::render('dashboard/transactions/Transactions', [
             'paymentRequests' => [
-                'data' => $paymentRequests->items(),
+                'data' => SubscriptionResource::collection($paymentRequests->items())->resolve(),
                 'meta' => [
                     'current_page' => $paymentRequests->currentPage(),
                     'last_page' => $paymentRequests->lastPage(),
