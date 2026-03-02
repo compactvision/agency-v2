@@ -2,28 +2,25 @@
 
 namespace App\Domains\Locations\Resources;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class MunicipalityResource extends JsonResource
 {
-    public function toArray($request): array
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
     {
         return [
-            'id'      => $this->id,
-            'name'    => $this->name,
-
-            'city' => [
-                'id'   => $this->city?->id,
-                'name' => $this->city?->name,
-            ],
-
-            'country' => [
-                'id'   => $this->city?->country?->id,
-                'name' => $this->city?->country?->name,
-            ],
-
+            'id' => $this->id,
+            'name' => $this->name,
+            'city' => $this->city?->name ?? 'Kinshasa',
+            'country' => 'Congo-Kinshasa',
+            'properties_count' => $this->whenCounted('properties'),
             'created_at' => $this->created_at?->toIso8601String(),
-            'updated_at' => $this->updated_at?->toIso8601String(),
         ];
     }
 }

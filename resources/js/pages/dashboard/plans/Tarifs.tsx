@@ -3,7 +3,17 @@ import TarifPopup from '@/components/forms/TarifPopup';
 import Dashboard from '@/components/layouts/Dashboard/Dashboard';
 import BackButton from '@/components/ui/BackButton';
 import { router, usePage } from '@inertiajs/react';
-import { Building, CheckCircle, Edit3, Plus, Search, Star, Trash2, TrendingUp, X } from 'lucide-react';
+import {
+    Building,
+    CheckCircle,
+    Edit3,
+    Plus,
+    Search,
+    Star,
+    Trash2,
+    TrendingUp,
+    X,
+} from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -33,6 +43,7 @@ type Plan = {
     description: string | null;
     features: { name: string }[];
     image?: string | null;
+    payment_method: 'manual' | 'automatic';
 };
 
 type PaginationLink = { url: string | null; label: string; active: boolean };
@@ -45,7 +56,10 @@ type Paginated<T> = {
 
 export default function Tarifs() {
     const page = usePage();
-    const props = page.props as unknown as { plans: Paginated<Plan>; filters?: { search?: string } };
+    const props = page.props as unknown as {
+        plans: Paginated<Plan>;
+        filters?: { search?: string };
+    };
 
     const { plans } = props;
     const [searchQuery, setSearchQuery] = useState(props.filters?.search ?? '');
@@ -119,7 +133,17 @@ export default function Tarifs() {
     };
 
     // StatCard component (local)
-    const StatCard = ({ title, value, type, delay = 0 }: { title: string; value: number | string; type: string; delay?: number }) => {
+    const StatCard = ({
+        title,
+        value,
+        type,
+        delay = 0,
+    }: {
+        title: string;
+        value: number | string;
+        type: string;
+        delay?: number;
+    }) => {
         const iconMap: Record<string, any> = {
             total: TrendingUp,
             plans: Star,
@@ -144,20 +168,34 @@ export default function Tarifs() {
                 <div className="p-6">
                     <div className="mb-4 flex items-center justify-between">
                         <div className="flex-1">
-                            <h4 className="text-lg font-bold text-gray-900">{title}</h4>
-                            <p className="text-sm text-gray-500">#{value || 0}</p>
+                            <h4 className="text-lg font-bold text-gray-900">
+                                {title}
+                            </h4>
+                            <p className="text-sm text-gray-500">
+                                #{value || 0}
+                            </p>
                         </div>
-                        <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}>
+                        <div
+                            className={`h-12 w-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}
+                        >
                             <Icon size={24} className="text-white" />
                         </div>
                     </div>
-                    <div className={`h-1 bg-gradient-to-r ${gradient} rounded-full`} />
+                    <div
+                        className={`h-1 bg-gradient-to-r ${gradient} rounded-full`}
+                    />
                 </div>
             </article>
         );
     };
 
-    const ChartIcon = ({ type, size = 20 }: { type: string; size?: number }) => {
+    const ChartIcon = ({
+        type,
+        size = 20,
+    }: {
+        type: string;
+        size?: number;
+    }) => {
         const iconMap: Record<string, any> = {
             line: TrendingUp,
             doughnut: Star,
@@ -167,8 +205,14 @@ export default function Tarifs() {
     };
 
     // Memoize counts for readability
-    const featuredCount = useMemo(() => plans.data.filter((p) => p.is_featured).length, [plans.data]);
-    const standardCount = useMemo(() => plans.data.filter((p) => !p.is_featured).length, [plans.data]);
+    const featuredCount = useMemo(
+        () => plans.data.filter((p) => p.is_featured).length,
+        [plans.data],
+    );
+    const standardCount = useMemo(
+        () => plans.data.filter((p) => !p.is_featured).length,
+        [plans.data],
+    );
 
     return (
         <Dashboard>
@@ -181,14 +225,34 @@ export default function Tarifs() {
                             <div className="p-6">
                                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                                     <div className="mb-6 lg:mb-0">
-                                        <h1 className="text-2xl font-bold text-gray-900">Tarifs</h1>
-                                        <p className="mt-1 text-gray-600">Gérez vos tarifs et leurs fonctionnalités</p>
+                                        <h1 className="text-2xl font-bold text-gray-900">
+                                            Tarifs
+                                        </h1>
+                                        <p className="mt-1 text-gray-600">
+                                            Gérez vos tarifs et leurs
+                                            fonctionnalités
+                                        </p>
                                     </div>
                                 </div>
                                 <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                                    <StatCard title="Total tarifs" value={plans.data.length} type="total" delay={0} />
-                                    <StatCard title="Tarifs en vedette" value={featuredCount} type="featured" delay={100} />
-                                    <StatCard title="Tarifs standards" value={standardCount} type="plans" delay={200} />
+                                    <StatCard
+                                        title="Total tarifs"
+                                        value={plans.data.length}
+                                        type="total"
+                                        delay={0}
+                                    />
+                                    <StatCard
+                                        title="Tarifs en vedette"
+                                        value={featuredCount}
+                                        type="featured"
+                                        delay={100}
+                                    />
+                                    <StatCard
+                                        title="Tarifs standards"
+                                        value={standardCount}
+                                        type="plans"
+                                        delay={200}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -199,13 +263,18 @@ export default function Tarifs() {
                         <div className="rounded-xl border-amber-200/30 bg-white p-4 shadow-sm">
                             <div className="flex flex-col gap-4 sm:flex-row">
                                 <div className="relative flex-1">
-                                    <Search size={20} className="absolute top-1/2 left-3 -translate-y-1/2 text-amber-500" />
+                                    <Search
+                                        size={20}
+                                        className="absolute top-1/2 left-3 -translate-y-1/2 text-amber-500"
+                                    />
                                     <input
                                         type="text"
                                         placeholder="Rechercher un tarif..."
                                         className={`w-full rounded-lg border border-gray-300 bg-white py-3 pr-10 pl-10 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none ${loading ? 'opacity-70' : ''}`}
                                         value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        onChange={(e) =>
+                                            setSearchQuery(e.target.value)
+                                        }
                                     />
                                     {searchQuery && (
                                         <button
@@ -224,8 +293,12 @@ export default function Tarifs() {
                                         className="inline-flex transform items-center rounded-lg bg-gradient-to-r from-amber-400 to-amber-600 px-4 py-3 font-medium text-white shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-105 hover:from-amber-500 hover:to-amber-700"
                                     >
                                         <Plus size={18} className="mr-2" />
-                                        <span className="hidden sm:inline">Nouveau tarif</span>
-                                        <span className="sm:hidden">Ajouter</span>
+                                        <span className="hidden sm:inline">
+                                            Nouveau tarif
+                                        </span>
+                                        <span className="sm:hidden">
+                                            Ajouter
+                                        </span>
                                     </button>
                                 </div>
                             </div>
@@ -242,11 +315,24 @@ export default function Tarifs() {
                                         <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
                                             Nom du tarif
                                         </th>
-                                        <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">Prix</th>
-                                        <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">Durée</th>
-                                        <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">Populaire</th>
-                                        <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">Statut</th>
-                                        <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">Actions</th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
+                                            Prix
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
+                                            Durée
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
+                                            Paiement
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
+                                            Populaire
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
+                                            Statut
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
+                                            Actions
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-amber-200/30">
@@ -254,12 +340,15 @@ export default function Tarifs() {
                                         <tr
                                             key={plan.id ?? index}
                                             className="transition-colors hover:bg-amber-50/30"
-                                            style={{ animationDelay: `${index * 50}ms` }}
+                                            style={{
+                                                animationDelay: `${index * 50}ms`,
+                                            }}
                                         >
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-3">
                                                     <div className="h-10 w-10 overflow-hidden rounded-full">
-                                                        {plan.is_featured && plan.image ? (
+                                                        {plan.is_featured &&
+                                                        plan.image ? (
                                                             <img
                                                                 src={`/storage/${plan.image}`}
                                                                 alt={plan.name}
@@ -267,23 +356,50 @@ export default function Tarifs() {
                                                             />
                                                         ) : (
                                                             <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-400 to-amber-600">
-                                                                <Star size={16} className="text-white" />
+                                                                <Star
+                                                                    size={16}
+                                                                    className="text-white"
+                                                                />
                                                             </div>
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <h4 className="text-sm font-medium text-gray-900">{plan.name}</h4>
-                                                        <p className="text-xs text-gray-500">#{plan.id}</p>
+                                                        <h4 className="text-sm font-medium text-gray-900">
+                                                            {plan.name}
+                                                        </h4>
+                                                        <p className="text-xs text-gray-500">
+                                                            #{plan.id}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </td>
 
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className="text-2xl font-bold text-amber-600">{plan.price}</span>
+                                                <span className="text-2xl font-bold text-amber-600">
+                                                    {plan.price}
+                                                </span>
                                             </td>
 
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className="text-sm text-gray-900">{plan.duration}</span>
+                                                <span className="text-sm text-gray-900">
+                                                    {plan.duration}
+                                                </span>
+                                            </td>
+
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span
+                                                    className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+                                                        plan.payment_method ===
+                                                        'automatic'
+                                                            ? 'border border-blue-200 bg-blue-100 text-blue-800'
+                                                            : 'border border-amber-200 bg-amber-100 text-amber-800'
+                                                    }`}
+                                                >
+                                                    {plan.payment_method ===
+                                                    'automatic'
+                                                        ? 'Automatique'
+                                                        : 'Manuel'}
+                                                </span>
                                             </td>
 
                                             <td className="px-6 py-4 whitespace-nowrap">
@@ -296,7 +412,9 @@ export default function Tarifs() {
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-800">
                                                     <CheckCircle size={12} />
-                                                    <span className="ml-1">Standard</span>
+                                                    <span className="ml-1">
+                                                        Standard
+                                                    </span>
                                                 </span>
                                             </td>
 
@@ -304,14 +422,18 @@ export default function Tarifs() {
                                                 <div className="flex space-x-2">
                                                     <button
                                                         className="rounded-lg p-1 text-amber-600 transition-colors hover:bg-amber-50 hover:text-amber-900"
-                                                        onClick={() => handleOpenEdit(plan)}
+                                                        onClick={() =>
+                                                            handleOpenEdit(plan)
+                                                        }
                                                         title="Modifier"
                                                     >
                                                         <Edit3 size={16} />
                                                     </button>
                                                     <button
                                                         className="rounded-lg p-1 text-red-600 transition-colors hover:bg-red-50 hover:text-red-900"
-                                                        onClick={() => deletePlan(plan.id)}
+                                                        onClick={() =>
+                                                            deletePlan(plan.id)
+                                                        }
                                                         title="Supprimer"
                                                     >
                                                         <Trash2 size={16} />
@@ -329,22 +451,36 @@ export default function Tarifs() {
                                     <div
                                         key={plan.id ?? index}
                                         className="border-b border-amber-200/30 p-4 last:border-b-0"
-                                        style={{ animationDelay: `${index * 50}ms` }}
+                                        style={{
+                                            animationDelay: `${index * 50}ms`,
+                                        }}
                                     >
                                         <div className="mb-3 flex items-start justify-between">
                                             <div className="flex items-center">
                                                 <div className="mr-3 h-12 w-12 overflow-hidden rounded-full">
-                                                    {plan.is_featured && plan.image ? (
-                                                        <img src={`/storage/${plan.image}`} alt={plan.name} className="h-full w-full object-cover" />
+                                                    {plan.is_featured &&
+                                                    plan.image ? (
+                                                        <img
+                                                            src={`/storage/${plan.image}`}
+                                                            alt={plan.name}
+                                                            className="h-full w-full object-cover"
+                                                        />
                                                     ) : (
                                                         <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-400 to-amber-600">
-                                                            <Star size={16} className="text-white" />
+                                                            <Star
+                                                                size={16}
+                                                                className="text-white"
+                                                            />
                                                         </div>
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-base font-medium text-gray-900">{plan.name}</h3>
-                                                    <p className="text-sm text-gray-500">#{plan.id}</p>
+                                                    <h3 className="text-base font-medium text-gray-900">
+                                                        {plan.name}
+                                                    </h3>
+                                                    <p className="text-sm text-gray-500">
+                                                        #{plan.id}
+                                                    </p>
                                                 </div>
                                             </div>
 
@@ -353,7 +489,10 @@ export default function Tarifs() {
                                             >
                                                 {plan.is_featured ? (
                                                     <>
-                                                        <CheckCircle size={12} className="mr-1" />
+                                                        <CheckCircle
+                                                            size={12}
+                                                            className="mr-1"
+                                                        />
                                                         <span>Populaire</span>
                                                     </>
                                                 ) : (
@@ -364,26 +503,51 @@ export default function Tarifs() {
 
                                         <div className="mb-3 space-y-3">
                                             <div className="flex justify-between">
-                                                <span className="text-sm text-gray-500">Prix</span>
-                                                <span className="text-sm text-gray-900">{plan.price}</span>
+                                                <span className="text-sm text-gray-500">
+                                                    Prix
+                                                </span>
+                                                <span className="text-sm text-gray-900">
+                                                    {plan.price}
+                                                </span>
                                             </div>
                                             <div className="flex justify-between">
-                                                <span className="text-sm text-gray-500">Durée</span>
-                                                <span className="text-sm text-gray-900">{plan.duration}</span>
+                                                <span className="text-sm text-gray-500">
+                                                    Durée
+                                                </span>
+                                                <span className="text-sm text-gray-900">
+                                                    {plan.duration}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-sm text-gray-500">
+                                                    Paiement
+                                                </span>
+                                                <span
+                                                    className={`text-sm font-medium ${plan.payment_method === 'automatic' ? 'text-blue-600' : 'text-amber-600'}`}
+                                                >
+                                                    {plan.payment_method ===
+                                                    'automatic'
+                                                        ? 'Automatique'
+                                                        : 'Manuel'}
+                                                </span>
                                             </div>
                                         </div>
 
                                         <div className="flex justify-end space-x-2">
                                             <button
                                                 className="rounded-lg p-2 text-amber-600 transition-colors hover:bg-amber-50 hover:text-amber-900"
-                                                onClick={() => handleOpenEdit(plan)}
+                                                onClick={() =>
+                                                    handleOpenEdit(plan)
+                                                }
                                                 title="Modifier"
                                             >
                                                 <Edit3 size={16} />
                                             </button>
                                             <button
                                                 className="rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 hover:text-red-900"
-                                                onClick={() => deletePlan(plan.id)}
+                                                onClick={() =>
+                                                    deletePlan(plan.id)
+                                                }
                                                 title="Supprimer"
                                             >
                                                 <Trash2 size={16} />
@@ -396,16 +560,25 @@ export default function Tarifs() {
                             {plans.data.length === 0 && (
                                 <div className="py-12 text-center">
                                     <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-amber-100/50">
-                                        <Building size={32} className="text-amber-500" />
+                                        <Building
+                                            size={32}
+                                            className="text-amber-500"
+                                        />
                                     </div>
-                                    <h3 className="mb-2 text-xl font-semibold text-gray-900">Aucun tarif trouvé</h3>
-                                    <p className="mb-6 text-gray-600">Commencez par créer votre premier tarif</p>
+                                    <h3 className="mb-2 text-xl font-semibold text-gray-900">
+                                        Aucun tarif trouvé
+                                    </h3>
+                                    <p className="mb-6 text-gray-600">
+                                        Commencez par créer votre premier tarif
+                                    </p>
                                     <button
                                         onClick={handleOpenCreate}
                                         className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-6 py-3 font-medium text-white shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-105 hover:from-amber-500 hover:to-amber-700"
                                     >
                                         <Plus size={20} className="mr-2" />
-                                        <span className="hidden sm:inline">Créer un tarif</span>
+                                        <span className="hidden sm:inline">
+                                            Créer un tarif
+                                        </span>
                                     </button>
                                 </div>
                             )}
@@ -417,8 +590,10 @@ export default function Tarifs() {
                         <div className="mb-4 text-sm text-gray-700 sm:mb-0">
                             {plans.data.length > 0 ? (
                                 <>
-                                    Affichage de {plans.meta?.from ?? 1} à {plans.meta?.to ?? plans.data.length} sur{' '}
-                                    {plans.meta?.total ?? plans.data.length} tarifs
+                                    Affichage de {plans.meta?.from ?? 1} à{' '}
+                                    {plans.meta?.to ?? plans.data.length} sur{' '}
+                                    {plans.meta?.total ?? plans.data.length}{' '}
+                                    tarifs
                                 </>
                             ) : (
                                 'Aucun tarif'
@@ -437,21 +612,25 @@ export default function Tarifs() {
                                     disabled={!link.url}
                                     onClick={() => goTo(link.url)}
                                 >
-                                    <span dangerouslySetInnerHTML={{ __html: link.label }} />
+                                    <span
+                                        dangerouslySetInnerHTML={{
+                                            __html: link.label,
+                                        }}
+                                    />
                                 </button>
                             ))}
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             {/* CORRECTION: Afficher le popup seulement si isOpen est true, avec les bonnes props */}
             {isOpen && (
-                <TarifPopup 
-                    key={currentPlan?.id ?? 'create'} 
-                    plan={currentPlan} 
-                    onClose={close} 
-                    isEditing={editMode} 
+                <TarifPopup
+                    key={currentPlan?.id ?? 'create'}
+                    plan={currentPlan}
+                    onClose={close}
+                    isEditing={editMode}
                 />
             )}
         </Dashboard>

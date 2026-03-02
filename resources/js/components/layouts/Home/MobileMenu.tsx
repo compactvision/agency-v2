@@ -1,3 +1,4 @@
+import { type SharedData } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import {
@@ -26,8 +27,8 @@ export default function MobileMenu() {
         );
     }
     const { active, toggleActive, toggleSellerPopup } = context;
-    const user = usePage().props.auth?.user;
-    const { url } = usePage();
+    const user = usePage<SharedData>().props.auth?.user;
+    const { url } = usePage<SharedData>();
 
     const isPropertiesActive = url.startsWith('/properties');
     const isActive = (path: string) =>
@@ -199,7 +200,7 @@ export default function MobileMenu() {
                                     </Link>
                                 ) : (
                                     <Link
-                                        href={route('dashboard.index')}
+                                        href={route('dashboard')}
                                         onClick={toggleActive}
                                         className="flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-3 text-gray-700 transition-all duration-300 hover:bg-gray-100"
                                     >

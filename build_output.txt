@@ -1,0 +1,74 @@
+
+> build
+> vite build
+
+vite v7.1.5 building for production...
+[plugin @laravel/vite-plugin-wayfinder] Types generated for actions, routes, form variants
+
+/patterns/grid.svg referenced in /patterns/grid.svg didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+/patterns/hero-pattern.svg referenced in /patterns/hero-pattern.svg didn't resolve at build time, it will remain unchanged to be resolved at runtime
+transforming...
+✓ 6 modules transformed.
+✗ Build failed in 15.89s
+error during build:
+[vite:react-babel] /home/juan-loze/Documents/Compact/agency-v2/resources/js/pages/dashboard/properties/EditProperties.tsx: Missing semicolon. (301:25)
+
+  299 |         useForm(initializeFormData());
+  300 |                 condition: property.condition || property.details?.condition || 'good',
+> 301 |                 furnished: !!property.furnished || !!property.details?.furnished,
+      |                          ^
+  302 |     const generateReferenceNumber = useCallback(() => {
+  303 |         return (
+  304 |             'REF-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9)
+file: /home/juan-loze/Documents/Compact/agency-v2/resources/js/pages/dashboard/properties/EditProperties.tsx:301:25
+    at constructor (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:367:19)
+    at TypeScriptParserMixin.raise (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:6630:19)
+    at TypeScriptParserMixin.semicolon (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:6926:10)
+    at TypeScriptParserMixin.parseExpressionStatement (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:13294:10)
+    at TypeScriptParserMixin.parseExpressionStatement (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:9616:26)
+    at TypeScriptParserMixin.parseStatementContent (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12908:19)
+    at TypeScriptParserMixin.parseStatementContent (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:9532:18)
+    at TypeScriptParserMixin.parseStatementLike (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12776:17)
+    at TypeScriptParserMixin.parseStatement (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12769:17)
+    at TypeScriptParserMixin.parseLabeledStatement (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:13287:95)
+    at TypeScriptParserMixin.parseStatementContent (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12906:19)
+    at TypeScriptParserMixin.parseStatementContent (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:9532:18)
+    at TypeScriptParserMixin.parseStatementLike (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12776:17)
+    at TypeScriptParserMixin.parseStatementListItem (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12756:17)
+    at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:13325:61)
+    at TypeScriptParserMixin.parseBlockBody (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:13318:10)
+    at TypeScriptParserMixin.parseBlock (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:13306:10)
+    at TypeScriptParserMixin.parseFunctionBody (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12110:24)
+    at TypeScriptParserMixin.parseArrowExpression (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12085:10)
+    at TypeScriptParserMixin.parseParenAndDistinguishExpression (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:11695:12)
+    at TypeScriptParserMixin.parseExprAtom (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:11335:23)
+    at TypeScriptParserMixin.parseExprAtom (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:4797:20)
+    at TypeScriptParserMixin.parseExprSubscripts (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:11085:23)
+    at TypeScriptParserMixin.parseUpdate (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:11070:21)
+    at TypeScriptParserMixin.parseMaybeUnary (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:11050:23)
+    at TypeScriptParserMixin.parseMaybeUnary (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:9857:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:10903:61)
+    at TypeScriptParserMixin.parseExprOps (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:10908:23)
+    at TypeScriptParserMixin.parseMaybeConditional (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:10885:23)
+    at TypeScriptParserMixin.parseMaybeAssign (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:10835:21)
+    at TypeScriptParserMixin.parseMaybeAssign (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:9806:20)
+    at /home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:10804:39
+    at TypeScriptParserMixin.allowInAnd (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12431:16)
+    at TypeScriptParserMixin.parseMaybeAssignAllowIn (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:10804:17)
+    at TypeScriptParserMixin.parseVar (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:13393:91)
+    at TypeScriptParserMixin.parseVarStatement (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:13239:10)
+    at TypeScriptParserMixin.parseVarStatement (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:9498:31)
+    at TypeScriptParserMixin.parseStatementContent (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12860:23)
+    at TypeScriptParserMixin.parseStatementContent (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:9532:18)
+    at TypeScriptParserMixin.parseStatementLike (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12776:17)
+    at TypeScriptParserMixin.parseModuleItem (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12753:17)
+    at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:13325:36)
+    at TypeScriptParserMixin.parseBlockBody (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:13318:10)
+    at TypeScriptParserMixin.parseProgram (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12634:10)
+    at TypeScriptParserMixin.parseTopLevel (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12624:25)
+    at TypeScriptParserMixin.parse (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:14501:10)
+    at TypeScriptParserMixin.parse (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:10149:18)
+    at parse (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:14535:38)
+    at parser (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/core/lib/parser/index.js:41:34)
+    at parser.next (<anonymous>)

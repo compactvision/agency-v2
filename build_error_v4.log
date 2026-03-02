@@ -1,0 +1,81 @@
+
+> build
+> vite build
+
+vite v7.1.5 building for production...
+[plugin @laravel/vite-plugin-wayfinder] Types generated for actions, routes, form variants
+
+/patterns/grid.svg referenced in /patterns/grid.svg didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+/patterns/hero-pattern.svg referenced in /patterns/hero-pattern.svg didn't resolve at build time, it will remain unchanged to be resolved at runtime
+transforming...
+[plugin vite:esbuild] resources/js/pages/dashboard/properties/EditProperties.tsx: Duplicate key "furnished" in object literal
+589 |          construction_year: data.construction_year ? parseInt(data.construction_year) : null,
+590 |          renovation_year: data.renovation_year ? parseInt(data.renovation_year) : null,
+591 |          furnished: !!data.furnished,
+    |          ^
+592 |          elevator: !!data.elevator,
+593 |          parking: !!data.parking,
+
+✓ 2015 modules transformed.
+✗ Build failed in 55.27s
+error during build:
+[vite:react-babel] /home/juan-loze/Documents/Compact/agency-v2/resources/js/routes/verification/index.ts: Identifier 'verify' has already been declared. (186:13)
+
+  184 | * @route '/api/auth/email/verify/{id}/{hash}'
+  185 | */
+> 186 | export const verify = (args: { id: string | number, hash: string | number } | [id: string | number, hash: string | number ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+      |              ^
+  187 |     url: verify.url(args, options),
+  188 |     method: 'get',
+  189 | })
+file: /home/juan-loze/Documents/Compact/agency-v2/resources/js/routes/verification/index.ts:186:13
+    at constructor (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:367:19)
+    at TypeScriptParserMixin.raise (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:6630:19)
+    at TypeScriptScopeHandler.checkRedeclarationInScope (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:1647:19)
+    at TypeScriptScopeHandler.declareName (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:1613:12)
+    at TypeScriptScopeHandler.declareName (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:4913:11)
+    at TypeScriptParserMixin.declareNameFromIdentifier (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:7594:16)
+    at TypeScriptParserMixin.checkIdentifier (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:7590:12)
+    at TypeScriptParserMixin.checkLVal (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:7529:12)
+    at TypeScriptParserMixin.parseVarId (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:13421:10)
+    at TypeScriptParserMixin.parseVarId (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:9772:11)
+    at TypeScriptParserMixin.parseVar (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:13392:12)
+    at TypeScriptParserMixin.parseVarStatement (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:13239:10)
+    at TypeScriptParserMixin.parseVarStatement (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:9498:31)
+    at TypeScriptParserMixin.parseStatementContent (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12860:23)
+    at TypeScriptParserMixin.parseStatementContent (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:9532:18)
+    at TypeScriptParserMixin.parseStatementLike (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12776:17)
+    at TypeScriptParserMixin.parseStatementListItem (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12756:17)
+    at TypeScriptParserMixin.parseExportDeclaration (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:13943:17)
+    at TypeScriptParserMixin.parseExportDeclaration (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:9657:85)
+    at TypeScriptParserMixin.maybeParseExportDeclaration (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:13902:31)
+    at TypeScriptParserMixin.parseExport (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:13821:29)
+    at TypeScriptParserMixin.parseExport (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:9475:20)
+    at TypeScriptParserMixin.parseStatementContent (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12887:27)
+    at TypeScriptParserMixin.parseStatementContent (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:9532:18)
+    at TypeScriptParserMixin.parseStatementLike (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12776:17)
+    at TypeScriptParserMixin.parseModuleItem (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12753:17)
+    at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:13325:36)
+    at TypeScriptParserMixin.parseBlockBody (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:13318:10)
+    at TypeScriptParserMixin.parseProgram (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12634:10)
+    at TypeScriptParserMixin.parseTopLevel (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:12624:25)
+    at TypeScriptParserMixin.parse (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:14501:10)
+    at TypeScriptParserMixin.parse (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:10149:18)
+    at parse (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/parser/lib/index.js:14535:38)
+    at parser (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/core/lib/parser/index.js:41:34)
+    at parser.next (<anonymous>)
+    at normalizeFile (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/core/lib/transformation/normalize-file.js:64:37)
+    at normalizeFile.next (<anonymous>)
+    at run (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/core/lib/transformation/index.js:22:50)
+    at run.next (<anonymous>)
+    at transform (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/core/lib/transform.js:22:33)
+    at transform.next (<anonymous>)
+    at step (/home/juan-loze/Documents/Compact/agency-v2/node_modules/gensync/index.js:261:32)
+    at evaluateAsync (/home/juan-loze/Documents/Compact/agency-v2/node_modules/gensync/index.js:291:5)
+    at /home/juan-loze/Documents/Compact/agency-v2/node_modules/gensync/index.js:93:9
+    at new Promise (<anonymous>)
+    at async (/home/juan-loze/Documents/Compact/agency-v2/node_modules/gensync/index.js:92:14)
+    at stopHiding - secret - don't use this - v1 (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+    at Module.transformAsync (/home/juan-loze/Documents/Compact/agency-v2/node_modules/@babel/core/lib/transform.js:45:77)
+    at Object.handler (file:///home/juan-loze/Documents/Compact/agency-v2/node_modules/@vitejs/plugin-react/dist/index.js:185:46)

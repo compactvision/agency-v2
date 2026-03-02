@@ -19,6 +19,8 @@ class Ad extends Model
         'country_id',
         'city_id',
         'municipality_id',
+        'latitude',
+        'longitude',
         'status',
         'rejection_reason',
         'is_published',
@@ -54,5 +56,25 @@ class Ad extends Model
     public function user()
     {
         return $this->belongsTo(\App\Models\User::class);
+    }
+
+    public function municipality()
+    {
+        return $this->belongsTo(\App\Domains\Locations\Models\Municipality::class);
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(\App\Domains\Locations\Models\City::class);
+    }
+
+    public function country()
+    {
+        return $this->belongsTo(\App\Domains\Locations\Models\Country::class);
+    }
+
+    public function favoritedBy()
+    {
+        return $this->belongsToMany(\App\Models\User::class, 'favorites', 'ad_id', 'user_id')->withTimestamps();
     }
 }

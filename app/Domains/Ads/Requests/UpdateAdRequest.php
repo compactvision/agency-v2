@@ -24,6 +24,8 @@ class UpdateAdRequest extends FormRequest
             'country_id' => ['nullable', 'exists:countries,id'],
             'city_id' => ['nullable', 'exists:cities,id'],
             'municipality_id' => ['nullable', 'exists:municipalities,id'],
+            'latitude'    => ['nullable', 'numeric'],
+            'longitude'    => ['nullable', 'numeric'],
 
             // Champs RELATIONNELS
             'details' => ['sometimes', 'array'],
@@ -32,6 +34,14 @@ class UpdateAdRequest extends FormRequest
 
             'amenities.remove' => ['sometimes', 'array'],
             'amenities.remove.*' => ['exists:amenities,id'],
+
+            // IMAGES
+            'images' => ['sometimes', 'array'],
+            'images.*' => ['image', 'max:5120'], // 5MB max
+            'images_to_delete' => ['sometimes', 'array'],
+            'images_to_delete.*' => ['integer'],
+            'image_order' => ['sometimes', 'array'],
+            'image_order.*' => ['string'], // Format: existing:ID or new:INDEX
 
         ];
     }

@@ -24,9 +24,13 @@ class StoreAdRequest extends FormRequest
             'country_id'  => ['nullable', 'exists:countries,id'],
             'city_id'     => ['nullable', 'exists:cities,id'],
             'municipality_id' => ['nullable', 'exists:municipalities,id'],
+            'latitude'    => ['nullable', 'numeric'],
+            'longitude'    => ['nullable', 'numeric'],
             'details'     => ['required', 'array'],
             'amenities'   => ['nullable', 'array'],
             'amenities.*' => ['exists:amenities,id'],
+            'images'      => ['nullable', 'array'],
+            'images.*'    => ['image', 'max:5120'], // 5MB max
         ];
     }
 }

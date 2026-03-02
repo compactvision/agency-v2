@@ -181,7 +181,7 @@ export default function Register() {
                                 </div>
                                 
                                 <div className="relative z-10 mt-8">
-                                    <img src="/assets/images/thumbs/register.svg" alt="register-img" className="w-full max-w-md mx-auto" />
+                                    <img src="/assets/images/thumbs/register.png" alt="register-img" className="w-full max-w-md mx-auto" />
                                 </div>
                             </div>
                             

@@ -4,48 +4,63 @@ namespace App\Domains\Locations\Services;
 
 use App\Domains\Locations\Models\Municipality;
 use App\Domains\Locations\Resources\MunicipalityResource;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class MunicipalityService
 {
+    /**
+     * List municipalities with filters and pagination.
+     */
+    public function list(array $filters = [], int $perPage = 10)
+    {
+        $query = Municipality::query()
+            ->with(['city'])
+            ->withCount('properties');
+
+        if (!empty($filters['search'])) {
+            $query->where('name', 'like', "%{$filters['search']}%");
+        }
+
+        return $query->paginate($perPage)->withQueryString();
+    }
+
+    /**
+     * Get all municipalities.
+     */
     public function all()
     {
         return MunicipalityResource::collection(
-            Municipality::with(['city.country'])
-                ->orderBy('name')
-                ->get()
+            Municipality::with(['city'])->get()
         );
     }
 
-    public function find(int $id)
+    /**
+     * Find a municipality by ID.
+     */
+    public function find($id)
     {
-        $municipality = Municipality::with(['city.country'])->find($id);
-
-        if (!$municipality) {
-            throw new ModelNotFoundException("Municipality not found");
-        }
-
-        return new MunicipalityResource($municipality);
+        return new MunicipalityResource(
+            Municipality::with(['city'])->findOrFail($id)
+        );
     }
 
+    /**
+     * Create a new municipality.
+     */
     public function create(array $data)
     {
         $municipality = Municipality::create($data);
-        $municipality->load(['city.country']);
-
+        $municipality->load('city');
         return new MunicipalityResource($municipality);
     }
 
-    public function update(int $id, array $data)
+    /**
+     * Update an existing municipality.
+     */
+    public function update($id, array $data)
     {
-        $municipality = Municipality::find($id);
-
-        if (!$municipality) {
-            throw new ModelNotFoundException("Municipality not found");
-        }
-
+        $municipality = Municipality::findOrFail($id);
+        
         $changes = [];
-
         foreach ($data as $field => $value) {
             if ($municipality->$field !== $value) {
                 $changes[$field] = $value;
@@ -61,8 +76,8 @@ class MunicipalityService
         }
 
         $municipality->update($changes);
-        $municipality->load(['city.country']);
-
+        $municipality->load('city');
+        
         return [
             'no_changes' => false,
             'changed_fields' => $changes,
@@ -70,14 +85,12 @@ class MunicipalityService
         ];
     }
 
-    public function delete(int $id): bool
+    /**
+     * Delete a municipality.
+     */
+    public function delete($id)
     {
-        $municipality = Municipality::find($id);
-
-        if (!$municipality) {
-            throw new ModelNotFoundException("Municipality not found");
-        }
-
+        $municipality = Municipality::findOrFail($id);
         return $municipality->delete();
     }
 }

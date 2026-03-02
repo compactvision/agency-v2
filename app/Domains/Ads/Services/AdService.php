@@ -15,6 +15,52 @@ class AdService
         protected AdSchemaValidator $schemaValidator
     ) {
     }
+    
+    public function list(array $filters = [])
+    {
+        $query = Ad::query()->with(['category', 'images', 'details', 'user', 'municipality']);
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('reference', 'like', "%{$search}%");
+            });
+        }
+
+        if (!empty($filters['user_id'])) {
+            $query->where('user_id', $filters['user_id']);
+        }
+
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (!empty($filters['category_id'])) {
+            $query->where('category_id', $filters['category_id']);
+        }
+
+        $sortBy = $filters['sort_by'] ?? 'created_at';
+        $sortOrder = $filters['sort_order'] ?? 'desc';
+        $query->orderBy($sortBy, $sortOrder);
+
+        return $query->paginate($filters['per_page'] ?? 12);
+    }
+
+    public function count(array $filters = []): int
+    {
+        $query = Ad::query();
+
+        if (!empty($filters['user_id'])) {
+            $query->where('user_id', $filters['user_id']);
+        }
+
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        return $query->count();
+    }
 
     /* =========================================================
      | CREATE
@@ -39,6 +85,8 @@ class AdService
                 'country_id' => $data['country_id'] ?? null,
                 'city_id' => $data['city_id'] ?? null,
                 'municipality_id' => $data['municipality_id'] ?? null,
+                'latitude' => $data['latitude'] ?? null,
+                'longitude' => $data['longitude'] ?? null,
                 'status' => 'draft',
                 'is_published' => false,
             ]);
@@ -52,7 +100,9 @@ class AdService
                 $ad->amenities()->sync($data['amenities']);
             }
 
-            return $ad->load(['details', 'amenities']);
+            $this->handleImages($ad, $data);
+
+            return $ad->load(['details', 'amenities', 'images']);
         });
     }
 
@@ -71,7 +121,7 @@ class AdService
             | 1. SIMPLE FIELDS (TYPE-SAFE COMPARISON)
             |------------------------------------------------------
             */
-            $adFields = collect($data)->except(['details', 'amenities'])->toArray();
+            $adFields = collect($data)->except(['details', 'amenities', 'images', 'images_to_delete', 'image_positions'])->toArray();
 
             foreach ($adFields as $key => $value) {
                 $current = $ad->{$key};
@@ -162,26 +212,103 @@ class AdService
                 }
             }
 
-
+            /*
+            |--------------------------------------------------------------
+            | 4. IMAGES
+            |--------------------------------------------------------------
+            */
+            if ($this->handleImages($ad, $data)) {
+                $changed = true;
+            }
 
 
             /*
             |------------------------------------------------------
-            | 4. NO CHANGES
+            | 5. NO CHANGES
             |------------------------------------------------------
             */
             if (!$changed) {
                 return [
                     'no_changes' => true,
-                    'ad' => $ad->load(['details', 'amenities']),
+                    'ad' => $ad->load(['details', 'amenities', 'images']),
                 ];
             }
 
             return [
                 'no_changes' => false,
-                'ad' => $ad->fresh(['details', 'amenities']),
+                'ad' => $ad->fresh(['details', 'amenities', 'images']),
             ];
         });
+    }
+
+    private function handleImages(Ad $ad, array $data): bool
+    {
+        $changed = false;
+
+        // 1. Delete
+        if (!empty($data['images_to_delete'])) {
+            $imagesToDelete = $ad->images()->whereIn('id', $data['images_to_delete'])->get();
+            foreach ($imagesToDelete as $img) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($img->path);
+                $img->delete();
+                $changed = true;
+            }
+        }
+
+        // 2. Upload New
+        $newUploadedImages = [];
+        if (!empty($data['images'])) {
+            foreach ($data['images'] as $index => $file) {
+                if ($file instanceof \Illuminate\Http\UploadedFile) {
+                    $path = $file->store('ads/' . $ad->id, 'public');
+                    $newImg = $ad->images()->create([
+                        'path' => $path,
+                        'position' => 999, // Temp position
+                    ]);
+                    $newUploadedImages[$index] = $newImg;
+                    $changed = true;
+                }
+            }
+        }
+
+        // 3. Reorder using image_order
+        // Payload 'image_order' format: ['existing:1', 'new:0', 'existing:5', ...]
+        if (!empty($data['image_order'])) {
+            foreach ($data['image_order'] as $position => $orderItem) {
+                if (str_starts_with($orderItem, 'existing:')) {
+                    $id = (int) str_replace('existing:', '', $orderItem);
+                    $img = $ad->images()->find($id);
+                    if ($img && $img->position !== $position) {
+                        $img->update(['position' => $position]);
+                        $changed = true;
+                    }
+                } elseif (str_starts_with($orderItem, 'new:')) {
+                    $index = (int) str_replace('new:', '', $orderItem);
+                    if (isset($newUploadedImages[$index])) {
+                        $img = $newUploadedImages[$index];
+                        if ($img->position !== $position) {
+                            $img->update(['position' => $position]);
+                            $changed = true;
+                        }
+                    }
+                }
+            }
+        } elseif (!empty($data['image_positions'])) {
+            // Fallback for old logic if needed, or if only reordering existing
+            $positions = array_flip($data['image_positions']);
+            $images = $ad->images()->get();
+            foreach ($images as $img) {
+                if (isset($positions[$img->id])) {
+                    $newPos = $positions[$img->id];
+                    if ($img->position !== $newPos) {
+                        $img->update(['position' => $newPos]);
+                        $changed = true;
+                    }
+                }
+            }
+        }
+
+        return $changed;
     }
 
     private function normalizeArray(array $array): array
@@ -214,6 +341,18 @@ class AdService
         $ad->update([
             'status' => 'pending_validation',
         ]);
+
+        // Send Emails
+        try {
+            \Illuminate\Support\Facades\Mail::to($ad->user->email)
+                ->send(new \App\Mail\PropertyValidationPending($ad));
+
+            $adminEmail = config('mail.from.address'); // Or a specific admin email
+            \Illuminate\Support\Facades\Mail::to($adminEmail)
+                ->send(new \App\Mail\AdminNewPropertyNotification($ad));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send property validation emails: " . $e->getMessage());
+        }
 
         return $ad;
     }
