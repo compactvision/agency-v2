@@ -143,7 +143,7 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
             if (user.profile_photo) {
                 setPreviewImage(
                     user.profile_photo.startsWith('blob:')
-                        ? user.profile_photo
+                        ? `/storage/${user.profile_photo}`
                         : `/storage/${user.profile_photo}`,
                 );
             }
