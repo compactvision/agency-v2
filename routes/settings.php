@@ -10,7 +10,7 @@ Route::middleware('auth')->group(function () {
     Route::redirect('settings', '/settings/profile');
 
     Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('settings/password', [PasswordController::class, 'edit'])->name('user-password.edit');
@@ -25,4 +25,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('settings/two-factor', [TwoFactorAuthenticationController::class, 'show'])
         ->name('two-factor.show');
+
+    Route::post('settings/profile-photo', [ProfileController::class, 'updateProfilePhoto'])
+        ->name('profile-photo.update');
+    Route::delete('settings/profile-photo', [ProfileController::class, 'deleteProfilePhoto'])
+        ->name('profile-photo.delete');
 });

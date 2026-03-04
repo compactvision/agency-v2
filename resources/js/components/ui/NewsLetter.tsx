@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { router } from '@inertiajs/react';
 import { 
     Mail, 
     Send, 
@@ -54,7 +55,7 @@ export default function NewsLetter() {
     useEffect(() => {
         const handleKeyPress = (e: KeyboardEvent) => {
             if (e.key === 'Enter' && emailFocused && !isLoading) {
-                handleSubmit(e);
+                handleSubmit();
             }
         };
 
@@ -62,8 +63,8 @@ export default function NewsLetter() {
         return () => window.removeEventListener('keypress', handleKeyPress);
     }, [email, emailFocused, isLoading]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
         
         if (!email.trim()) {
             setError(t('email_required') || 'Veuillez entrer votre email');
@@ -76,25 +77,20 @@ export default function NewsLetter() {
         }
 
         setError('');
-        setIsLoading(true);
-
-        // Simuler l'envoi
-        try {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            setIsSubscribed(true);
-            setEmail('');
-            setIsLoading(false);
-
-            // Réinitialiser après 3 secondes
-            setTimeout(() => {
-                setIsSubscribed(false);
-            }, 3000);
-
-        } catch (err) {
-            setError(t('subscription_error') || 'Une erreur est survenue');
-            setIsLoading(false);
-        }
+        router.post(route('newsletter.subscribe'), { email }, {
+            preserveScroll: true,
+            onStart: () => setIsLoading(true),
+            onSuccess: () => {
+                setIsSubscribed(true);
+                setEmail('');
+                setIsLoading(false);
+                setTimeout(() => setIsSubscribed(false), 3000);
+            },
+            onError: (errors) => {
+                setError(errors.email || t('subscription_error') || 'Une erreur est survenue');
+                setIsLoading(false);
+            }
+        });
     };
 
     const validateEmail = (email: string) => {

@@ -18,10 +18,14 @@ use App\Http\Controllers\Dashboard\SettingController;
 use App\Http\Controllers\Dashboard\SubscriptionController;
 use App\Http\Controllers\Dashboard\AnalyticsController;
 use App\Http\Controllers\Dashboard\NotificationController;
+use App\Http\Controllers\Dashboard\CategoryController;
+use App\Http\Controllers\Dashboard\AmenityController;
+use App\Http\Controllers\NewsletterController;
 
 Route::get('/', [FrontPageController::class, 'home'])->name('home');
 Route::get('/about', [FrontPageController::class, 'about'])->name('about');
 Route::get('/contact', [FrontPageController::class, 'contact'])->name('contact');
+Route::post('/contact', [FrontPageController::class, 'contactSend'])->name('contact.send');
 Route::get('/tarifs', [FrontPageController::class, 'tarifs'])->name('tarifs');
 Route::get('/faq', [FrontPageController::class, 'faq'])->name('faq');
 Route::get('/properties', [FrontPageController::class, 'properties'])->name('properties');
@@ -55,41 +59,51 @@ Route::middleware(['auth', 'verified'])->prefix('/dashboard')->group(function ()
     });
 
     // Users & Roles
-    Route::prefix('users')->name('users.')->group(function () {
-        Route::get('/', [UserController::class, 'index'])->name('index');
-        Route::post('/', [UserController::class, 'store'])->name('store');
-        Route::get('/profile', [UserController::class, 'profile'])->name('profile');
-        Route::put('/{id}', [UserController::class, 'update'])->name('update');
-        Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy');
-    });
-    Route::prefix('roles')->name('roles.')->group(function () {
-        Route::get('/', [RoleController::class, 'index'])->name('index');
-        Route::post('/', [RoleController::class, 'store'])->name('store');
-        Route::put('/{id}', [RoleController::class, 'update'])->name('update');
-        Route::delete('/{id}', [RoleController::class, 'destroy'])->name('destroy');
-    });
+    Route::middleware('admin')->group(function() {
+        Route::prefix('users')->name('users.')->group(function () {
+            Route::get('/', [UserController::class, 'index'])->name('index');
+            Route::post('/', [UserController::class, 'store'])->name('store');
+            Route::get('/profile', [UserController::class, 'profile'])->name('profile');
+            Route::put('/{id}', [UserController::class, 'update'])->name('update');
+            Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy');
+        });
+        Route::prefix('roles')->name('roles.')->group(function () {
+            Route::get('/', [RoleController::class, 'index'])->name('index');
+            Route::post('/', [RoleController::class, 'store'])->name('store');
+            Route::put('/{id}', [RoleController::class, 'update'])->name('update');
+            Route::delete('/{id}', [RoleController::class, 'destroy'])->name('destroy');
+        });
 
-    // Admin Tools
-    Route::get('/municipalities', [MunicipalityController::class, 'index'])->name('municipalities.index');
-    Route::get('/plans', [PlanController::class, 'index'])->name('plans.index');
-    Route::post('/plans', [PlanController::class, 'store'])->name('plans.store');
-    Route::put('/plans/{id}', [PlanController::class, 'update'])->name('plans.update');
-    Route::delete('/plans/{id}', [PlanController::class, 'destroy'])->name('plans.destroy');
-    
-    Route::get('/pages', [AdminPageController::class, 'index'])->name('pages.index');
-    Route::get('/pages/create', [AdminPageController::class, 'create'])->name('pages.create');
-    Route::post('/pages', [AdminPageController::class, 'store'])->name('pages.store');
-    Route::get('/pages/{id}/edit', [AdminPageController::class, 'edit'])->name('pages.edit');
-    Route::put('/pages/{id}', [AdminPageController::class, 'update'])->name('pages.update');
-    Route::delete('/pages/{id}', [AdminPageController::class, 'destroy'])->name('pages.destroy');
-    
-    Route::get('/payment-requests', [TransactionController::class, 'index'])->name('payment-requests.index');
-    Route::post('/payment-requests/store', [TransactionController::class, 'store'])->name('payment-requests.store');
-    Route::put('/payment-requests/{id}/approve', [TransactionController::class, 'approve'])->name('payment-requests.approve');
-    Route::put('/payment-requests/{id}/reject', [TransactionController::class, 'reject'])->name('payment-requests.reject');
-    
-    Route::get('/audit-logs', [LogController::class, 'auditLogs'])->name('audit-logs.index');
-    Route::get('/chatbot-logs', [LogController::class, 'chatbotLogs'])->name('chatbot-logs.index');
+        // Admin Tools
+        Route::get('/municipalities', [MunicipalityController::class, 'index'])->name('municipalities.index');
+        Route::get('/plans', [PlanController::class, 'index'])->name('plans.index');
+        Route::post('/plans', [PlanController::class, 'store'])->name('plans.store');
+        Route::put('/plans/{id}', [PlanController::class, 'update'])->name('plans.update');
+        Route::delete('/plans/{id}', [PlanController::class, 'destroy'])->name('plans.destroy');
+        
+        Route::get('/pages', [AdminPageController::class, 'index'])->name('pages.index');
+        Route::get('/pages/create', [AdminPageController::class, 'create'])->name('pages.create');
+        Route::post('/pages', [AdminPageController::class, 'store'])->name('pages.store');
+        Route::get('/pages/{id}/edit', [AdminPageController::class, 'edit'])->name('pages.edit');
+        Route::put('/pages/{id}', [AdminPageController::class, 'update'])->name('pages.update');
+        Route::delete('/pages/{id}', [AdminPageController::class, 'destroy'])->name('pages.destroy');
+        
+        Route::get('/payment-requests', [TransactionController::class, 'index'])->name('payment-requests.index');
+        Route::post('/payment-requests/store', [TransactionController::class, 'store'])->name('payment-requests.store');
+        Route::put('/payment-requests/{id}/approve', [TransactionController::class, 'approve'])->name('payment-requests.approve');
+        Route::put('/payment-requests/{id}/reject', [TransactionController::class, 'reject'])->name('payment-requests.reject');
+        
+        Route::get('/audit-logs', [LogController::class, 'auditLogs'])->name('audit-logs.index');
+        Route::get('/chatbot-logs', [LogController::class, 'chatbotLogs'])->name('chatbot-logs.index');
+
+        Route::resource('categories', CategoryController::class)->except(['create', 'edit', 'show']);
+        Route::resource('amenities', AmenityController::class)->except(['create', 'edit', 'show']);
+
+        Route::get('/settings', [SettingController::class, 'index'])->name('settings');
+        Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
+        Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+        Route::get('/analytics/{id}', [AnalyticsController::class, 'show'])->name('analytics.show');
+    });
 
     // Favorites dedicated routes for the dashboard component
     Route::prefix('favorites')->name('favorites.')->group(function () {
@@ -97,11 +111,8 @@ Route::middleware(['auth', 'verified'])->prefix('/dashboard')->group(function ()
         Route::delete('/{id}', [PropertyController::class, 'toggleFavorite'])->name('destroy');
     });
 
-    // Settings & Others
-    Route::get('/settings', [SettingController::class, 'index'])->name('settings');
+    // Subscriptions
     Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
-    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
-    Route::get('/analytics/{id}', [AnalyticsController::class, 'show'])->name('analytics.show');
 
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
@@ -109,3 +120,4 @@ Route::middleware(['auth', 'verified'])->prefix('/dashboard')->group(function ()
     Route::post('/notifications/{id}/mark-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
     });
 });
+Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');

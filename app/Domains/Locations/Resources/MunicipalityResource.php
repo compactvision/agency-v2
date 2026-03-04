@@ -17,6 +17,7 @@ class MunicipalityResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'city_id' => $this->city_id,
             'city' => $this->city?->name ?? 'Kinshasa',
             'country' => 'Congo-Kinshasa',
             'properties_count' => $this->whenCounted('properties'),

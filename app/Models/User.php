@@ -42,6 +42,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'tax_number',
         'user_type',
         'is_seller',
+        'language',
+        'notifications_enabled',
     ];
 
     /**
@@ -89,6 +91,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(\App\Domains\Billing\Models\Subscription::class)->latestOfMany();
     }
 
+    public function hasActiveSubscription(): bool
+    {
+        return $this->subscription()->where('status', 'active')->exists();
+    }
+
     public function favorites()
     {
         return $this->belongsToMany(Ad::class, 'favorites', 'user_id', 'ad_id')->withTimestamps();
@@ -97,5 +104,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function notifications()
     {
         return $this->morphMany(Notification::class, 'notifiable')->orderBy('created_at', 'desc');
+    }
+
+    public function newsletter_subscription()
+    {
+        return $this->hasOne(NewsletterSubscription::class);
     }
 }

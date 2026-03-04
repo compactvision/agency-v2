@@ -9,7 +9,7 @@ class AdminMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if (!$request->user() || !$request->user()->hasRole('admin')) {
+        if (!$request->user() || !$request->user()->hasRole(['admin', 'super-admin'])) {
             return response()->json([
                 'success' => false,
                 'message' => 'You are not authorized to perform this action',

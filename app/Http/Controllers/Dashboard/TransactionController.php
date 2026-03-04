@@ -13,11 +13,7 @@ class TransactionController extends Controller
 {
     public function index(Request $request)
     {
-        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
-            abort(403);
-        }
         $query = Subscription::with(['user', 'plan'])
-            ->where('status', 'pending')
             ->orderBy('created_at', 'desc');
 
         if ($request->search) {
@@ -80,9 +76,6 @@ class TransactionController extends Controller
 
     public function approve($id)
     {
-        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
-            abort(403);
-        }
 
         $sub = Subscription::findOrFail($id);
         $sub->update([
@@ -94,14 +87,14 @@ class TransactionController extends Controller
         return back()->with('success', 'Demande approuvée.');
     }
 
-    public function reject($id)
+    public function reject($id, Request $request)
     {
-        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
-            abort(403);
-        }
 
         $sub = Subscription::findOrFail($id);
-        $sub->update(['status' => 'cancelled']);
+        $sub->update([
+            'status' => 'cancelled',
+            'failure_reason' => $request->admin_note,
+        ]);
 
         return back()->with('success', 'Demande rejetée.');
     }

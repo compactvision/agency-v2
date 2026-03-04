@@ -13,12 +13,11 @@ import {
     FileText,
     Heart,
     Home,
-    Lock,
     LogOut,
     Mail,
     MapPin,
     Phone,
-    Settings,
+    Settings as SettingsIcon,
     Shield,
     Star,
     TrendingUp,
@@ -32,15 +31,15 @@ import { useTranslation } from 'react-i18next';
 
 import { route } from 'ziggy-js';
 import AccountDetails from './common/AccountDetails';
-import ChangePassword from './common/ChangePassword';
 import FavoriteProperties from './common/FavoriteProperties';
+import Settings from './common/Settings';
 import UserProfile from './common/UserProfile';
 
 interface User {
     id: number;
     name: string;
     email: string;
-    phone: number;
+    phone: string;
     email_verified_at?: string;
     profile_photo?: string;
     role?: string;
@@ -89,7 +88,7 @@ type TabType =
     | 'address'
     | 'accountDetails'
     | 'favoriteProperties'
-    | 'changePassword';
+    | 'settings';
 
 const VALID_TABS: TabType[] = [
     'home',
@@ -97,7 +96,7 @@ const VALID_TABS: TabType[] = [
     'address',
     'accountDetails',
     'favoriteProperties',
-    'changePassword',
+    'settings',
 ];
 
 export default function Profile() {
@@ -180,7 +179,7 @@ export default function Profile() {
         {
             id: 'accountDetails' as TabType,
             label: t('account_details') || 'Détails du compte',
-            icon: Settings,
+            icon: SettingsIcon,
             count: null,
         },
         {
@@ -190,9 +189,9 @@ export default function Profile() {
             count: dashboardStats.favorite_properties,
         },
         {
-            id: 'changePassword' as TabType,
-            label: t('change_password') || 'Changer le mot de passe',
-            icon: Lock,
+            id: 'settings' as TabType,
+            label: t('settings') || 'Paramètres',
+            icon: SettingsIcon,
             count: null,
         },
     ];
@@ -281,7 +280,7 @@ export default function Profile() {
             description: t('browse_listings') || 'Parcourir nos annonces',
             icon: Building,
             color: 'from-blue-500 to-blue-600',
-            action: () => router.visit(route('properties.index')),
+            action: () => router.visit(route('properties')),
         },
         {
             title: t('edit_profile') || 'Modifier le profil',
@@ -581,12 +580,14 @@ export default function Profile() {
                 return <AccountDetails />;
             case 'favoriteProperties':
                 return <FavoriteProperties properties={properties} />;
-            case 'changePassword':
-                return <ChangePassword />;
+            case 'settings':
+                return <Settings />;
             default:
                 return null;
         }
     };
+
+    console.log(user);
 
     return (
         <App>
@@ -641,7 +642,7 @@ export default function Profile() {
                                         <div className="relative mb-4">
                                             {user?.profile_photo ? (
                                                 <img
-                                                    src={user.profile_photo}
+                                                    src={'/storage/' + user.profile_photo}
                                                     alt={user.name}
                                                     className="h-24 w-24 rounded-full border-4 border-white/30 object-cover"
                                                 />
@@ -752,10 +753,10 @@ export default function Profile() {
             </section>
 
             {/* Mobile Menu Toggle */}
-            <div className="fixed right-6 bottom-6 z-50 lg:hidden">
+            <div className="fixed right-8 bottom-22 z-50 lg:hidden">
                 <button
                     onClick={() => setShowMobileMenu(!showMobileMenu)}
-                    className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-500 text-white shadow-lg"
+                    className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-500 text-white shadow-lg"
                 >
                     {showMobileMenu ? (
                         <XCircle size={24} />

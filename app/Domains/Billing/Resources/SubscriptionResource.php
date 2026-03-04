@@ -26,10 +26,12 @@ class SubscriptionResource extends JsonResource
             'payment_method' => $this->payment_method,
             'amount' => $this->amount,
             'currency' => $this->currency,
+            'status' => $this->status,
+            'is_active' => $this->is_active,
             'started_at' => $this->started_at?->toIso8601String(),
             'expires_at' => $this->expires_at?->toIso8601String(),
             'created_at' => $this->created_at->toIso8601String(),
-            'rejection_reason' => $this->rejection_reason,
+            'failure_reason' => $this->failure_reason,
         ];
     }
 }

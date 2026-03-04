@@ -8,6 +8,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -29,15 +30,79 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $data = $request->validated();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        // Remove newsletter from user fill data (it's not a user column)
+        $newsletter = isset($data['newsletter']) ? (bool) $data['newsletter'] : null;
+        unset($data['newsletter']);
+
+        if ($request->hasFile('profile_photo')) {
+            if ($user->profile_photo) {
+                Storage::disk('public')->delete($user->profile_photo);
+            }
+            $data['profile_photo'] = $request->file('profile_photo')->store('profile-photos', 'public');
         }
 
-        $request->user()->save();
+        // Cast boolean explicitly to avoid PHP falsy issues
+        if (isset($data['notifications_enabled'])) {
+            $data['notifications_enabled'] = (bool) $data['notifications_enabled'];
+        }
 
-        return to_route('profile.edit');
+        $user->fill($data);
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
+
+        if ($newsletter !== null) {
+            $user->newsletter_subscription()->updateOrCreate(
+                ['email' => $user->email],
+                ['is_active' => $newsletter]
+            );
+        }
+
+        return back()->with('success', __('profile_updated_success'));
+    }
+
+    /**
+     * Update the user's profile photo.
+     */
+    public function updateProfilePhoto(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'profile_photo' => ['required', 'image', 'max:2048'],
+        ]);
+
+        $user = $request->user();
+
+        if ($user->profile_photo) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo);
+        }
+
+        $path = $request->file('profile_photo')->store('profile-photos', 'public');
+        $user->profile_photo = $path;
+        $user->save();
+
+        return back()->with('status', 'profile-photo-updated');
+    }
+
+    /**
+     * Delete the user's profile photo.
+     */
+    public function deleteProfilePhoto(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        if ($user->profile_photo) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo);
+            $user->profile_photo = null;
+            $user->save();
+        }
+
+        return back()->with('status', 'profile-photo-deleted');
     }
 
     /**

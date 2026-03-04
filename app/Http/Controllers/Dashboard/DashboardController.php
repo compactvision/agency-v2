@@ -24,29 +24,41 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         $isStaff = $user->hasRole(['admin', 'super-admin']);
+        $isBuyer = $user->hasRole('buyer') && !$isStaff;
 
-        // Stats
-        $totalAds = $this->adService->count($isStaff ? [] : ['user_id' => $user->id]);
-        $unapprovedAds = $this->adService->count($isStaff ? ['status' => 'pending_validation'] : ['user_id' => $user->id, 'status' => 'pending_validation']);
-        
-        // Recent Ads
-        $recentAds = $this->adService->list([
-            'per_page' => 6,
-            'user_id' => $isStaff ? null : $user->id,
-            'sort_by' => 'created_at',
-            'sort_order' => 'desc'
-        ]);
+        if ($isBuyer) {
+            $recentAds = $user->favorites()->with(['category', 'images', 'details', 'user', 'municipality'])->latest()->take(6)->get();
+            $totalAds = $user->favorites()->count();
+            $unapprovedAds = 0; // Buyers don't have unapproved ads
+            $totalViews = 0; // Not applicable for buyers
+            $totalFavorites = $totalAds;
+        } else {
+            // Stats
+            $totalAds = $this->adService->count($isStaff ? [] : ['user_id' => $user->id]);
+            $unapprovedAds = $this->adService->count($isStaff ? ['status' => 'pending_validation'] : ['user_id' => $user->id, 'status' => 'pending_validation']);
+            
+            // Recent Ads
+            $recentAds = $this->adService->list([
+                'per_page' => 6,
+                'user_id' => $isStaff ? null : $user->id,
+                'sort_by' => 'created_at',
+                'sort_order' => 'desc'
+            ]);
+
+            $totalViews = $recentAds->sum('views_count');
+            $totalFavorites = 0; // Still placeholder for sellers/admins
+        }
 
         return Inertia::render('dashboard/Index', [
-            'properties' => AdResource::collection($recentAds->items())->resolve(),
+            'properties' => AdResource::collection($isBuyer ? $recentAds : $recentAds->items())->resolve(),
             'logs' => [],
             'metrics' => [
                 'properties' => [
                     'total' => $totalAds,
                     'unapproved' => $unapprovedAds
                 ],
-                'views' => ['total' => $recentAds->sum('views_count')],
-                'favorites' => ['total' => 0], // Assuming favorites count is not yet in AdService or requires separate logic
+                'views' => ['total' => $totalViews],
+                'favorites' => ['total' => $totalFavorites],
             ],
             'recentNotifications' => $user->notifications()->take(5)->get(),
         ]);

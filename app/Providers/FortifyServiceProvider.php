@@ -12,6 +12,11 @@ use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
+use Laravel\Fortify\Contracts\VerifyEmailResponse as VerifyEmailResponseContract;
+use App\Http\Responses\VerifyEmailResponse;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -20,7 +25,7 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(VerifyEmailResponseContract::class, VerifyEmailResponse::class);
     }
 
     /**
@@ -31,6 +36,7 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
+        $this->configureAuth();
     }
 
     /**
@@ -86,6 +92,30 @@ class FortifyServiceProvider extends ServiceProvider
             $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
 
             return Limit::perMinute(5)->by($throttleKey);
+        });
+    }
+
+    /**
+     * Configure authentication logic.
+     */
+    private function configureAuth(): void
+    {
+        Fortify::authenticateUsing(function (Request $request) {
+            $user = User::where('email', $request->email)->first();
+
+            if (!$user) {
+                throw ValidationException::withMessages([
+                    'email' => ['email_not_found'],
+                ]);
+            }
+
+            if (!Hash::check($request->password, $user->password)) {
+                throw ValidationException::withMessages([
+                    'password' => ['password_incorrect'],
+                ]);
+            }
+
+            return $user;
         });
     }
 }

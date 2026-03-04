@@ -225,10 +225,10 @@ export default function Settings() {
 
     const { user = {}, settings = {}, userRoles = [] } = usePage().props as any;
 
-    const isAgency = userRoles.includes('Agency');
-    const isSimpleSeller = userRoles.includes('Simple_seller');
-    const isAdmin = userRoles.includes('Admin');
-    const isSuperAdmin = userRoles.includes('Super Admin');
+    const isAgency = userRoles.includes('agency');
+    const isSimpleSeller = userRoles.includes('seller');
+    const isAdmin = userRoles.includes('admin');
+    const isSuperAdmin = userRoles.includes('super-admin');
     const [activeTab, setActiveTab] = useState('profile');
     const [preview, setPreview] = useState(
         user.profile_photo ? `/storage/${user.profile_photo}` : null,
@@ -276,7 +276,7 @@ export default function Settings() {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        appForm.post('dashboard.app.settings.update', {
+        appForm.post('dashboard.settings.update', {
             preserveScroll: true,
             preserveState: true,
             onSuccess: () => {
@@ -292,7 +292,7 @@ export default function Settings() {
     const handlePasswordSubmit = (e) => {
         e.preventDefault();
 
-        passwordForm.put('password.update', {
+        passwordForm.put('user-password.update', {
             preserveScroll: true,
             onSuccess: () => {
                 passwordForm.reset();
@@ -322,7 +322,7 @@ export default function Settings() {
         profileForm.processing = true;
 
         // Utiliser router directement pour les FormData
-        router.post(route('dashboard.user.settings.update'), formData, {
+        router.post(route('profile.update'), formData, {
             forceFormData: true, // Important pour les fichiers
             preserveScroll: true,
             preserveState: true,

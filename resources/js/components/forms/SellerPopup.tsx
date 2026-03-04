@@ -141,7 +141,11 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
 
             // Prévisualisation de l'image existante
             if (user.profile_photo) {
-                setPreviewImage(user.profile_photo);
+                setPreviewImage(
+                    user.profile_photo.startsWith('blob:')
+                        ? user.profile_photo
+                        : `/storage/${user.profile_photo}`,
+                );
             }
         }
     }, [active, wasOpened, user, setData]);

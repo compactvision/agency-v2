@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -38,12 +39,24 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        $user = $request->user()?->load(['roles', 'newsletter_subscription']);
+
+        // Build the user data array with profile_photo_url computed (not stored on model)
+        $userData = null;
+        if ($user) {
+            $userData = array_merge($user->toArray(), [
+                'profile_photo_url' => $user->profile_photo
+                    ? asset('storage/' . $user->profile_photo)
+                    : null,
+            ]);
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user()?->load('roles'),
+                'user' => $userData,
                 'roles' => $request->user()?->getRoleNames() ?? [],
                 'permissions' => $request->user()?->getAllPermissions()->pluck('name') ?? [],
             ],

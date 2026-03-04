@@ -23,10 +23,6 @@ class RoleController extends Controller
      */
     public function index(Request $request)
     {
-        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
-            abort(403);
-        }
-
         $perPage = $request->input('per_page', 20);
         $roles = $this->roleService->list($request->only(['search']), $perPage);
 

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Domains\Billing\Services\SubscriptionManager;
 use App\Domains\Billing\Resources\SubscriptionResource;
+use App\Domains\Billing\Models\Plan;
 
 class SubscriptionController extends Controller
 {
@@ -41,7 +42,7 @@ class SubscriptionController extends Controller
                 ],
                 'links' => $subscriptions->linkCollection()->toArray(),
             ],
-            'hasActiveSubscription' => $user->subscription()->where('status', 'active')->exists(),
+            'hasActiveSubscription' => $user->hasActiveSubscription(),
             'currentPlan' => $user->subscription()->where('status', 'active')->first(),
             'plans' => Plan::where('is_active', true)->get(),
             'filters' => (object) $request->only(['search']),

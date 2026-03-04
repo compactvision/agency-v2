@@ -28,6 +28,19 @@ class PageController extends Controller
         return Inertia::render('Contact');
     }
 
+    public function contactSend(Request $request)
+    {
+        $request->validate([
+            'name'    => 'required|string|max:255',
+            'email'   => 'required|email',
+            'message' => 'required|string|min:10',
+        ]);
+
+        // TODO: Implement actual email sending via Mail facade
+        // For now, just return success
+        return back()->with('success', 'Votre message a été envoyé avec succès.');
+    }
+
     public function tarifs(Request $request)
     {
         $plans = Plan::with('features')
@@ -64,7 +77,7 @@ class PageController extends Controller
     public function profile()
     {
         return Inertia::render('profile/Profile', [
-            'user' => auth()->user()
+            'user' => auth()->user()?->load('newsletter_subscription')
         ]);
     }
 

@@ -38,7 +38,7 @@ export default function Sidebar({
     const { url, component } = usePage();
     const [activeMenuItem, setActiveMenuItem] = useState('dashboard');
     const { can, hasRole } = usePermission();
-    const { auth } = usePage().props;
+    const { auth } = usePage().props as any;
     const user = auth?.user;
     const { t } = useTranslation();
 
@@ -63,9 +63,11 @@ export default function Sidebar({
             'Dashboard/Chatbot-Logs/Index': 'chatbot-logs',
             'Dashboard/Audit-Logs/Index': 'audit-logs',
             'Dashboard/Settings': 'settings',
+            'Dashboard/Categories/Index': 'categories',
+            'Dashboard/Amenities/Index': 'amenities',
             'Dashboard/Subscriptions/Index': 'subscription',
             'Dashboard/Analytics/Index': 'stats',
-        };
+        } as Record<string, string>;
 
         // Déterminer l'élément actif
         let activeId = 'dashboard';
@@ -107,6 +109,10 @@ export default function Sidebar({
             activeId = 'audit-logs';
         } else if (currentPath.includes('settings')) {
             activeId = 'settings';
+        } else if (currentPath.includes('categories')) {
+            activeId = 'categories';
+        } else if (currentPath.includes('amenities')) {
+            activeId = 'amenities';
         } else if (currentPath.includes('subscription')) {
             activeId = 'subscription';
         } else if (
@@ -138,6 +144,15 @@ export default function Sidebar({
             section: 'main',
             roles: ['admin', 'seller', 'agency', 'super-admin'],
             permission: 'property.view',
+        },
+        {
+            id: 'search-properties',
+            label: 'Rechercher',
+            icon: MapPin,
+            description: 'Trouver des biens',
+            route: 'properties',
+            section: 'main',
+            roles: ['buyer'],
         },
         {
             id: 'dashboard/users',
@@ -192,6 +207,26 @@ export default function Sidebar({
             section: 'Admin',
             roles: ['admin', 'super-admin'],
             permission: 'municipality.view',
+        },
+        {
+            id: 'categories',
+            label: t('categories'),
+            icon: Building,
+            description: 'Gérer les catégories',
+            route: 'dashboard.categories.index',
+            section: 'Admin',
+            roles: ['admin', 'super-admin'],
+            permission: 'category.view',
+        },
+        {
+            id: 'amenities',
+            label: t('amenities'),
+            icon: Package,
+            description: 'Gérer les équipements',
+            route: 'dashboard.amenities.index',
+            section: 'Admin',
+            roles: ['admin', 'super-admin'],
+            permission: 'amenity.view',
         },
         {
             id: 'plans',
@@ -333,11 +368,14 @@ export default function Sidebar({
         router.visit(route(routeName));
     };
 
-    const groupedMenuItems = filteredMenuItems.reduce((acc, item) => {
-        if (!acc[item.section]) acc[item.section] = [];
-        acc[item.section].push(item);
-        return acc;
-    }, {});
+    const groupedMenuItems = filteredMenuItems.reduce(
+        (acc, item) => {
+            if (!acc[item.section]) acc[item.section] = [];
+            (acc[item.section] as any[]).push(item);
+            return acc;
+        },
+        {} as Record<string, any[]>,
+    );
 
     return (
         <>

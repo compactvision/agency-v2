@@ -27,8 +27,12 @@ class AuthController
     public function register(RegisterRequest $request)
     {
         try {
+            $result = $this->service->register($request->validated());
+            
+            event(new \Illuminate\Auth\Events\Registered($result['user']));
+
             return ApiResponse::success(
-                $this->service->register($request->validated()),
+                $result,
                 'User registered successfully',
                 201
             );

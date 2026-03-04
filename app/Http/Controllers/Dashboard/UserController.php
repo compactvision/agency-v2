@@ -23,10 +23,6 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
-            abort(403);
-        }
-
         $users = $this->userService->list($request->only(['search', 'filter', 'per_page']));
 
         return Inertia::render('dashboard/users/User', [

@@ -242,7 +242,7 @@ class PropertyController extends Controller
                     'name' => $a->name,
                 ];
             }),
-            'hasActiveSubscription' => auth()->user()->subscription?->status === 'active',
+            'hasActiveSubscription' => auth()->user()->hasActiveSubscription(),
         ];
     }
 }

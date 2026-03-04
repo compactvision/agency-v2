@@ -34,7 +34,39 @@ class MunicipalityController extends Controller
                 ],
                 'links' => $municipalities->linkCollection()->toArray(),
             ],
+            'cities' => \App\Domains\Locations\Models\City::all()->map(fn($c) => ['id' => $c->id, 'name' => $c->name]),
             'filters' => (object) $request->only(['search']),
         ]);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'city_id' => 'required|exists:cities,id',
+        ]);
+
+        $this->municipalityService->create($request->all());
+
+        return back()->with('success', 'Commune créée avec succès.');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'city_id' => 'required|exists:cities,id',
+        ]);
+
+        $this->municipalityService->update($id, $request->all());
+
+        return back()->with('success', 'Commune mise à jour avec succès.');
+    }
+
+    public function destroy($id)
+    {
+        $this->municipalityService->delete($id);
+
+        return back()->with('success', 'Commune supprimée avec succès.');
     }
 }

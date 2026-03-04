@@ -1,5 +1,6 @@
 import Dashboard from '@/components/layouts/Dashboard/Dashboard';
 import BackButton from '@/components/ui/BackButton';
+import usePermission from '@/hooks/usePermission';
 import { router, usePage } from '@inertiajs/react';
 import {
     AlertCircle,
@@ -48,8 +49,8 @@ type PageProps = {
 
 // ===== Component =====
 export default function Transactions() {
+    const { hasRole } = usePermission();
     const {
-        auth,
         paymentRequests = {
             data: [],
             meta: { current_page: 1, last_page: 1, total: 0 },
@@ -58,13 +59,7 @@ export default function Transactions() {
         filters,
     } = usePage<PageProps>().props;
 
-    const isAdmin =
-        !!auth?.user?.roles?.some?.((r: any) =>
-            ['admin', 'super-admin'].includes(r?.name?.toLowerCase()),
-        ) ||
-        !!auth?.roles?.some?.((r: string) =>
-            ['admin', 'super-admin'].includes(r?.toLowerCase()),
-        );
+    const isAdmin = hasRole(['admin', 'super-admin']);
 
     const [searchQuery, setSearchQuery] = useState<string>(
         filters?.search ?? '',
@@ -133,6 +128,7 @@ export default function Transactions() {
                         En attente
                     </span>
                 );
+            case 'active':
             case 'completed':
                 return (
                     <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-100 px-2.5 py-1 text-xs font-medium whitespace-nowrap text-emerald-800 shadow-sm">
@@ -145,6 +141,13 @@ export default function Transactions() {
                     <span className="inline-flex items-center rounded-full border border-red-200 bg-red-100 px-2.5 py-1 text-xs font-medium whitespace-nowrap text-red-800 shadow-sm">
                         <XCircle size={12} className="mr-1" />
                         Annulé
+                    </span>
+                );
+            case 'failed':
+                return (
+                    <span className="inline-flex items-center rounded-full border border-rose-200 bg-rose-100 px-2.5 py-1 text-xs font-medium whitespace-nowrap text-rose-800 shadow-sm">
+                        <AlertCircle size={12} className="mr-1" />
+                        Échoué
                     </span>
                 );
             default:
@@ -256,7 +259,7 @@ export default function Transactions() {
                             </div>
                             <div className="text-2xl font-bold text-slate-900">
                                 {paymentRequests?.data?.filter(
-                                    (p) => p.status === 'pending',
+                                    (p: any) => p.status === 'pending',
                                 ).length || 0}
                             </div>
                             <div className="text-sm text-slate-600">
@@ -279,7 +282,7 @@ export default function Transactions() {
                             </div>
                             <div className="text-2xl font-bold text-slate-900">
                                 {paymentRequests?.data?.filter(
-                                    (p) => p.status === 'completed',
+                                    (p: any) => p.status === 'completed',
                                 ).length || 0}
                             </div>
                             <div className="text-sm text-slate-600">
@@ -344,7 +347,7 @@ export default function Transactions() {
                                     </thead>
                                     <tbody className="divide-y divide-amber-200/30">
                                         {paymentRequests?.data?.map(
-                                            (pay, index) => (
+                                            (pay: any, index: number) => (
                                                 <tr
                                                     key={pay.id}
                                                     className="group transition-colors hover:bg-amber-50/40"
@@ -426,10 +429,14 @@ export default function Transactions() {
                                                                     </>
                                                                 ) : (
                                                                     <span className="text-xs text-slate-400 italic">
-                                                                        {pay.status ===
-                                                                        'completed'
+                                                                        {[
+                                                                            'active',
+                                                                            'completed',
+                                                                        ].includes(
+                                                                            pay.status,
+                                                                        )
                                                                             ? 'Validé'
-                                                                            : 'Annulé'}
+                                                                            : 'Terminé'}
                                                                     </span>
                                                                 )}
                                                             </div>
@@ -447,7 +454,7 @@ export default function Transactions() {
 
                                 {/* Mobile Cards */}
                                 <div className="md:hidden">
-                                    {paymentRequests?.data?.map((pay) => (
+                                    {paymentRequests?.data?.map((pay: any) => (
                                         <div
                                             key={pay.id}
                                             className="last:border--0 border-b border-amber-100 p-4 transition-colors hover:bg-amber-50/30"
@@ -546,13 +553,13 @@ export default function Transactions() {
                             <div className="order-2 text-sm font-medium text-slate-600 sm:order-1">
                                 Affichage de{' '}
                                 <span className="text-amber-700">
-                                    {paymentRequests?.meta?.from ??
+                                    {(paymentRequests?.meta as any)?.from ??
                                         (paymentRequests as any)?.from ??
                                         0}
                                 </span>{' '}
                                 à{' '}
                                 <span className="text-amber-700">
-                                    {paymentRequests?.meta?.to ??
+                                    {(paymentRequests?.meta as any)?.to ??
                                         (paymentRequests as any)?.to ??
                                         0}
                                 </span>{' '}
@@ -568,7 +575,7 @@ export default function Transactions() {
                             <div className="order-1 w-full sm:order-2 sm:w-auto">
                                 <div className="hide-scrollbar flex items-center justify-start gap-2 overflow-x-auto px-1 pb-2 sm:justify-center sm:pb-0">
                                     {paymentRequests?.links?.map(
-                                        (link, index) => (
+                                        (link: any, index: number) => (
                                             <button
                                                 key={index}
                                                 className={`flex-shrink-0 rounded-lg border px-4 py-2 text-sm font-medium transition-all duration-200 ${

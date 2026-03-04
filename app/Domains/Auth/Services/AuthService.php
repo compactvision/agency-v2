@@ -32,9 +32,6 @@ class AuthService
         // Default role
         $user->assignRole('buyer');
 
-        // Email verification link
-        $user->sendEmailVerificationNotification();
-
         // Token for API
         $token = $user->createToken('auth_token')->plainTextToken;
 
