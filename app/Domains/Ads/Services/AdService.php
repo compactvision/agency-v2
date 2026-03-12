@@ -93,7 +93,7 @@ class AdService
 
             AdDetail::create([
                 'ad_id' => $ad->id,
-                'details' => $data['details'],
+                'details' => $data['details'] ?? [],
             ]);
 
             if (!empty($data['amenities'])) {
@@ -164,6 +164,7 @@ class AdService
                 $this->schemaValidator->validate([
                     'category_id' => $ad->category_id,
                     'ad_type' => $ad->ad_type,
+                    'is_published' => $data['is_published'] ?? $ad->is_published,
                     'details' => $merged,
                 ], 'update');
 

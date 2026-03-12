@@ -96,7 +96,7 @@ class PropertyController extends Controller
 
         return Inertia::render('dashboard/properties/EditProperties', array_merge(
             $this->getLookupData(),
-            ['property' => new AdResource($property)]
+            ['property' => (new AdResource($property))->resolve()]
         ));
     }
 
@@ -128,7 +128,7 @@ class PropertyController extends Controller
         }
 
         return Inertia::render('dashboard/properties/ShowProperty', [
-            'property' => new AdResource($property)
+            'property' => (new AdResource($property))->resolve()
         ]);
     }
 
@@ -240,6 +240,13 @@ class PropertyController extends Controller
                 return [
                     'id' => $a->id,
                     'name' => $a->name,
+                ];
+            }),
+            'categories' => \App\Domains\Categories\Models\Category::all()->map(function($c) {
+                return [
+                    'id' => $c->id,
+                    'name' => $c->name,
+                    'slug' => $c->slug,
                 ];
             }),
             'hasActiveSubscription' => auth()->user()->hasActiveSubscription(),

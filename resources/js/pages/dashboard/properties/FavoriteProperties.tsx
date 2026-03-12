@@ -55,7 +55,7 @@ export default function FavoriteProperties() {
 
     // Refs pour les dropdowns
     const dropdownRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
-    const searchTimeoutRef = useRef<NodeJS.Timeout>();
+    const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const props = usePage().props as any;
     const auth = props.auth;
@@ -115,7 +115,7 @@ export default function FavoriteProperties() {
 
     const toggleApproval = (id: number) => {
         router.patch(
-            route('dashboard.properties.approve', id),
+            route('dashboard.properties.approve', { id }),
             {},
             { preserveScroll: true },
         );
@@ -138,7 +138,7 @@ export default function FavoriteProperties() {
                 'Voulez-vous vraiment supprimer cette propriété de vos favoris ?',
             )
         ) {
-            router.delete(route('dashboard.favorites.destroy', id), {
+            router.delete(route('dashboard.favorites.destroy', { id }), {
                 preserveScroll: true,
             });
         }
@@ -150,12 +150,14 @@ export default function FavoriteProperties() {
     };
 
     const handleEditProperty = (property: Property) => {
-        router.visit(route('dashboard.properties.edit', property.id));
+        router.visit(route('dashboard.properties.edit', { id: property.id }));
         setDropdownOpen(null);
     };
 
     const handleViewStatistics = (property: Property) => {
-        router.visit(route('dashboard.analytics.property', property.id));
+        router.visit(
+            route('dashboard.analytics.property', { id: property.id }),
+        );
         setDropdownOpen(null);
     };
 
@@ -176,7 +178,7 @@ export default function FavoriteProperties() {
 
     const toggleFavorite = (id: number) => {
         router.post(
-            route('dashboard.properties.favorite', id),
+            route('dashboard.properties.favorite', { id }),
             {},
             { preserveScroll: true },
         );
@@ -401,222 +403,237 @@ export default function FavoriteProperties() {
                             {viewMode === 'grid' ? (
                                 /* Grid View */
                                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                    {properties.data.map((property, index) => (
-                                        <div
-                                            key={property.id}
-                                            className="group relative transform overflow-hidden rounded-2xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/20"
-                                            style={{
-                                                animationDelay: `${index * 0.1}s`,
-                                            }}
-                                        >
-                                            {/* Image */}
-                                            <div className="relative h-48 overflow-hidden">
-                                                {property.images?.[0]?.url ||
-                                                property.image?.[0]?.url ? (
-                                                    <img
-                                                        src={`/storage/${property.images?.[0]?.url || property.image?.[0]?.url}`}
-                                                        alt={property.title}
-                                                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                                    />
-                                                ) : (
-                                                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-100 to-amber-200">
-                                                        <ImageOff
-                                                            size={32}
-                                                            className="text-amber-400"
+                                    {properties.data.map(
+                                        (property: Property, index: number) => (
+                                            <div
+                                                key={property.id}
+                                                className="group relative transform overflow-hidden rounded-2xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/20"
+                                                style={{
+                                                    animationDelay: `${index * 0.1}s`,
+                                                }}
+                                            >
+                                                {/* Image */}
+                                                <div className="relative h-48 overflow-hidden">
+                                                    {property.images?.[0]
+                                                        ?.url ||
+                                                    property.image?.[0]?.url ? (
+                                                        <img
+                                                            src={`/storage/${property.images?.[0]?.url || property.image?.[0]?.url}`}
+                                                            alt={property.title}
+                                                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                                                         />
-                                                    </div>
-                                                )}
-
-                                                {/* Status Badge */}
-                                                <div className="absolute top-3 right-3">
-                                                    {getStatusBadge(property)}
-                                                </div>
-
-                                                {/* Price Badge */}
-                                                <div className="absolute bottom-3 left-3 rounded-lg bg-white/90 px-2 py-1 backdrop-blur-sm">
-                                                    <span className="text-sm font-bold text-amber-600">
-                                                        {formatPrice(
-                                                            property.price,
-                                                        )}
-                                                    </span>
-                                                </div>
-
-                                                {/* Favorite Badge */}
-                                                <div className="absolute top-3 left-3">
-                                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500 shadow-lg">
-                                                        <Heart
-                                                            size={16}
-                                                            className="fill-white text-white"
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Content */}
-                                            <div className="p-4">
-                                                <h3 className="mb-2 font-semibold text-slate-900 transition-colors group-hover:text-amber-700">
-                                                    {property.title}
-                                                </h3>
-
-                                                <div className="mb-3 flex items-center gap-4 text-sm text-slate-600">
-                                                    <span className="flex items-center">
-                                                        <Building
-                                                            size={14}
-                                                            className="mr-1 text-amber-500"
-                                                        />
-                                                        {property.type}
-                                                    </span>
-                                                    {property.location && (
-                                                        <span className="flex items-center truncate">
-                                                            <MapPin
-                                                                size={14}
-                                                                className="mr-1 text-amber-500"
+                                                    ) : (
+                                                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-100 to-amber-200">
+                                                            <ImageOff
+                                                                size={32}
+                                                                className="text-amber-400"
                                                             />
-                                                            {property.location}
-                                                        </span>
+                                                        </div>
                                                     )}
-                                                </div>
 
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-3 text-sm">
-                                                        <span className="flex items-center text-slate-500">
-                                                            <Eye
-                                                                size={14}
-                                                                className="mr-1"
-                                                            />
-                                                            {property.views_count ||
-                                                                0}
-                                                        </span>
-                                                        <span className="flex items-center text-slate-500">
-                                                            <Calendar
-                                                                size={14}
-                                                                className="mr-1"
-                                                            />
-                                                            {formatDate(
-                                                                property.created_at ||
-                                                                    '',
+                                                    {/* Status Badge */}
+                                                    <div className="absolute top-3 right-3">
+                                                        {getStatusBadge(
+                                                            property,
+                                                        )}
+                                                    </div>
+
+                                                    {/* Price Badge */}
+                                                    <div className="absolute bottom-3 left-3 rounded-lg bg-white/90 px-2 py-1 backdrop-blur-sm">
+                                                        <span className="text-sm font-bold text-amber-600">
+                                                            {formatPrice(
+                                                                property.price,
                                                             )}
                                                         </span>
                                                     </div>
 
-                                                    {/* Actions */}
-                                                    <div className="flex items-center gap-2">
-                                                        <button
-                                                            onClick={() =>
-                                                                handleViewProperty(
-                                                                    property,
-                                                                )
-                                                            }
-                                                            className="rounded-lg p-2 text-amber-600 transition-colors hover:bg-amber-100"
-                                                            title="Voir détails"
-                                                        >
-                                                            <Eye size={16} />
-                                                        </button>
+                                                    {/* Favorite Badge */}
+                                                    <div className="absolute top-3 left-3">
+                                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500 shadow-lg">
+                                                            <Heart
+                                                                size={16}
+                                                                className="fill-white text-white"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-                                                        <div
-                                                            className="relative"
-                                                            ref={(el) =>
-                                                                (dropdownRefs.current[
-                                                                    property.id
-                                                                ] = el)
-                                                            }
-                                                        >
+                                                {/* Content */}
+                                                <div className="p-4">
+                                                    <h3 className="mb-2 font-semibold text-slate-900 transition-colors group-hover:text-amber-700">
+                                                        {property.title}
+                                                    </h3>
+
+                                                    <div className="mb-3 flex items-center gap-4 text-sm text-slate-600">
+                                                        <span className="flex items-center">
+                                                            <Building
+                                                                size={14}
+                                                                className="mr-1 text-amber-500"
+                                                            />
+                                                            {property.type}
+                                                        </span>
+                                                        {property.location && (
+                                                            <span className="flex items-center truncate">
+                                                                <MapPin
+                                                                    size={14}
+                                                                    className="mr-1 text-amber-500"
+                                                                />
+                                                                {
+                                                                    property.location
+                                                                }
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-3 text-sm">
+                                                            <span className="flex items-center text-slate-500">
+                                                                <Eye
+                                                                    size={14}
+                                                                    className="mr-1"
+                                                                />
+                                                                {property.views_count ||
+                                                                    0}
+                                                            </span>
+                                                            <span className="flex items-center text-slate-500">
+                                                                <Calendar
+                                                                    size={14}
+                                                                    className="mr-1"
+                                                                />
+                                                                {formatDate(
+                                                                    property.created_at ||
+                                                                        '',
+                                                                )}
+                                                            </span>
+                                                        </div>
+
+                                                        {/* Actions */}
+                                                        <div className="flex items-center gap-2">
                                                             <button
-                                                                onClick={(e) =>
-                                                                    toggleDropdown(
-                                                                        property.id,
-                                                                        e,
+                                                                onClick={() =>
+                                                                    handleViewProperty(
+                                                                        property,
                                                                     )
                                                                 }
-                                                                className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100"
-                                                                title="Plus d'options"
+                                                                className="rounded-lg p-2 text-amber-600 transition-colors hover:bg-amber-100"
+                                                                title="Voir détails"
                                                             >
-                                                                <MoreVertical
+                                                                <Eye
                                                                     size={16}
                                                                 />
                                                             </button>
 
-                                                            {dropdownOpen ===
-                                                                property.id && (
-                                                                <div className="absolute right-0 bottom-full z-[100] mb-2 w-48 overflow-hidden rounded-xl border border-amber-200/50 bg-white shadow-2xl shadow-amber-500/20">
-                                                                    <button
-                                                                        onClick={() =>
-                                                                            handleEditProperty(
-                                                                                property,
-                                                                            )
+                                                            <div
+                                                                className="relative"
+                                                                ref={(
+                                                                    el: HTMLDivElement | null,
+                                                                ) => {
+                                                                    dropdownRefs.current[
+                                                                        property.id
+                                                                    ] = el;
+                                                                }}
+                                                            >
+                                                                <button
+                                                                    onClick={(
+                                                                        e,
+                                                                    ) =>
+                                                                        toggleDropdown(
+                                                                            property.id,
+                                                                            e,
+                                                                        )
+                                                                    }
+                                                                    className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100"
+                                                                    title="Plus d'options"
+                                                                >
+                                                                    <MoreVertical
+                                                                        size={
+                                                                            16
                                                                         }
-                                                                        className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-amber-50"
-                                                                    >
-                                                                        <Edit3
-                                                                            size={
-                                                                                16
+                                                                    />
+                                                                </button>
+
+                                                                {dropdownOpen ===
+                                                                    property.id && (
+                                                                    <div className="absolute right-0 bottom-full z-[100] mb-2 w-48 overflow-hidden rounded-xl border border-amber-200/50 bg-white shadow-2xl shadow-amber-500/20">
+                                                                        <button
+                                                                            onClick={() =>
+                                                                                handleEditProperty(
+                                                                                    property,
+                                                                                )
                                                                             }
-                                                                        />
-                                                                        <span>
-                                                                            Modifier
-                                                                        </span>
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() =>
-                                                                            handleViewStatistics(
-                                                                                property,
-                                                                            )
-                                                                        }
-                                                                        className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-amber-50"
-                                                                    >
-                                                                        <BarChart3
-                                                                            size={
-                                                                                16
+                                                                            className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-amber-50"
+                                                                        >
+                                                                            <Edit3
+                                                                                size={
+                                                                                    16
+                                                                                }
+                                                                            />
+                                                                            <span>
+                                                                                Modifier
+                                                                            </span>
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() =>
+                                                                                handleViewStatistics(
+                                                                                    property,
+                                                                                )
                                                                             }
-                                                                        />
-                                                                        <span>
-                                                                            Statistiques
-                                                                        </span>
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() =>
-                                                                            toggleFavorite(
-                                                                                property.id,
-                                                                            )
-                                                                        }
-                                                                        className="flex w-full items-center gap-2 px-4 py-3 text-left text-red-600 transition-colors hover:bg-red-50"
-                                                                    >
-                                                                        <Heart
-                                                                            size={
-                                                                                16
+                                                                            className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-amber-50"
+                                                                        >
+                                                                            <BarChart3
+                                                                                size={
+                                                                                    16
+                                                                                }
+                                                                            />
+                                                                            <span>
+                                                                                Statistiques
+                                                                            </span>
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() =>
+                                                                                toggleFavorite(
+                                                                                    property.id,
+                                                                                )
                                                                             }
-                                                                        />
-                                                                        <span>
-                                                                            Retirer
-                                                                            des
-                                                                            favoris
-                                                                        </span>
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() =>
-                                                                            deleteProperty(
-                                                                                property.id,
-                                                                            )
-                                                                        }
-                                                                        className="flex w-full items-center gap-2 px-4 py-3 text-left text-red-600 transition-colors hover:bg-red-50"
-                                                                    >
-                                                                        <Trash2
-                                                                            size={
-                                                                                16
+                                                                            className="flex w-full items-center gap-2 px-4 py-3 text-left text-red-600 transition-colors hover:bg-red-50"
+                                                                        >
+                                                                            <Heart
+                                                                                size={
+                                                                                    16
+                                                                                }
+                                                                            />
+                                                                            <span>
+                                                                                Retirer
+                                                                                des
+                                                                                favoris
+                                                                            </span>
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() =>
+                                                                                deleteProperty(
+                                                                                    property.id,
+                                                                                )
                                                                             }
-                                                                        />
-                                                                        <span>
-                                                                            Supprimer
-                                                                        </span>
-                                                                    </button>
-                                                                </div>
-                                                            )}
+                                                                            className="flex w-full items-center gap-2 px-4 py-3 text-left text-red-600 transition-colors hover:bg-red-50"
+                                                                        >
+                                                                            <Trash2
+                                                                                size={
+                                                                                    16
+                                                                                }
+                                                                            />
+                                                                            <span>
+                                                                                Supprimer
+                                                                            </span>
+                                                                        </button>
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ),
+                                    )}
                                 </div>
                             ) : (
                                 /* List View */
@@ -647,7 +664,10 @@ export default function FavoriteProperties() {
                                             </thead>
                                             <tbody className="divide-y divide-amber-200/30">
                                                 {properties.data.map(
-                                                    (property, index) => (
+                                                    (
+                                                        property: Property,
+                                                        index: number,
+                                                    ) => (
                                                         <tr
                                                             key={property.id}
                                                             className="transition-colors hover:bg-amber-50/30"
@@ -754,13 +774,13 @@ export default function FavoriteProperties() {
                                                                     <div
                                                                         className="relative"
                                                                         ref={(
-                                                                            el,
-                                                                        ) =>
-                                                                            (dropdownRefs.current[
+                                                                            el: HTMLDivElement | null,
+                                                                        ) => {
+                                                                            dropdownRefs.current[
                                                                                 property.id
                                                                             ] =
-                                                                                el)
-                                                                        }
+                                                                                el;
+                                                                        }}
                                                                     >
                                                                         <button
                                                                             onClick={(

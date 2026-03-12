@@ -44,6 +44,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_seller',
         'language',
         'notifications_enabled',
+        'facebook',
+        'twitter',
+        'instagram',
+        'linkedin',
     ];
 
     /**
@@ -109,5 +113,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function newsletter_subscription()
     {
         return $this->hasOne(NewsletterSubscription::class);
+    }
+
+    public function ads()
+    {
+        return $this->hasMany(Ad::class);
     }
 }

@@ -141,11 +141,7 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
 
             // Prévisualisation de l'image existante
             if (user.profile_photo) {
-                setPreviewImage(
-                    user.profile_photo.startsWith('blob:')
-                        ? `/storage/${user.profile_photo}`
-                        : `/storage/${user.profile_photo}`,
-                );
+                setPreviewImage(`/storage/${user.profile_photo}`);
             }
         }
     }, [active, wasOpened, user, setData]);
@@ -390,7 +386,7 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <div className="relative">
-                                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
                                             <User className="h-5 w-5" />
                                         </div>
                                         <input
@@ -421,7 +417,7 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                             Email
                                         </label>
                                         <div className="relative">
-                                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
                                                 <Mail className="h-5 w-5" />
                                             </div>
                                             <input
@@ -449,7 +445,7 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                                 onChange={
                                                     handleCountryCodeChange
                                                 }
-                                                className="flex cursor-pointer items-center rounded-l-lg border-r border-gray-300 bg-gray-50 px-2 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:border-amber-500 focus:outline-none"
+                                                className="flex cursor-pointer items-center rounded-l-lg border-r border-gray-300 bg-gray-50 px-2 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none"
                                             >
                                                 {COUNTRY_CODES.map((c) => (
                                                     <option
@@ -460,27 +456,29 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                                     </option>
                                                 ))}
                                             </select>
-                                            <div className="pointer-events-none absolute inset-y-0 left-[110px] flex items-center text-gray-400 md:left-[120px]">
-                                                <Phone className="h-4 w-4" />
+                                            <div className="relative flex-1">
+                                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                                    <Phone className="h-4 w-4" />
+                                                </div>
+                                                <input
+                                                    id="phone"
+                                                    type="tel"
+                                                    name="phone"
+                                                    // On affiche seulement le numéro sans l'indicatif
+                                                    value={
+                                                        data.phone.startsWith(
+                                                            selectedCountryCode,
+                                                        )
+                                                            ? data.phone.slice(
+                                                                  selectedCountryCode.length,
+                                                              )
+                                                            : data.phone
+                                                    }
+                                                    onChange={handlePhoneChange}
+                                                    className="w-full rounded-r-lg border-none py-3 pr-4 pl-10 text-sm placeholder-gray-400 focus:ring-0 focus:outline-none"
+                                                    placeholder="000 000 000"
+                                                />
                                             </div>
-                                            <input
-                                                id="phone"
-                                                type="tel"
-                                                name="phone"
-                                                // On affiche seulement le numéro sans l'indicatif
-                                                value={
-                                                    data.phone.startsWith(
-                                                        selectedCountryCode,
-                                                    )
-                                                        ? data.phone.slice(
-                                                              selectedCountryCode.length,
-                                                          )
-                                                        : data.phone
-                                                }
-                                                onChange={handlePhoneChange}
-                                                className="w-full rounded-r-lg py-3 pr-4 pl-10 text-sm placeholder-gray-400 focus:outline-none"
-                                                placeholder="000 000 000"
-                                            />
                                         </div>
                                         <ErrorText error={errors.phone} />
                                     </div>
@@ -521,7 +519,7 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                             </span>
                                         </label>
                                         <div className="relative">
-                                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
                                                 <Building className="h-5 w-5" />
                                             </div>
                                             <input
@@ -554,7 +552,7 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                                 onChange={
                                                     handleCountryCodeChange
                                                 }
-                                                className="flex cursor-pointer items-center rounded-l-lg border-r border-gray-300 bg-gray-50 px-2 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:border-amber-500 focus:outline-none"
+                                                className="flex cursor-pointer items-center rounded-l-lg border-r border-gray-300 bg-gray-50 px-2 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none"
                                             >
                                                 {COUNTRY_CODES.map((c) => (
                                                     <option
@@ -565,26 +563,28 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                                     </option>
                                                 ))}
                                             </select>
-                                            <div className="pointer-events-none absolute inset-y-0 left-[110px] flex items-center text-gray-400 md:left-[120px]">
-                                                <Phone className="h-4 w-4" />
+                                            <div className="relative flex-1">
+                                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                                    <Phone className="h-4 w-4" />
+                                                </div>
+                                                <input
+                                                    id="agency-phone"
+                                                    type="tel"
+                                                    name="phone"
+                                                    value={
+                                                        data.phone.startsWith(
+                                                            selectedCountryCode,
+                                                        )
+                                                            ? data.phone.slice(
+                                                                  selectedCountryCode.length,
+                                                              )
+                                                            : data.phone
+                                                    }
+                                                    onChange={handlePhoneChange}
+                                                    className="w-full rounded-r-lg border-none py-3 pr-4 pl-10 text-sm placeholder-gray-400 focus:ring-0 focus:outline-none"
+                                                    placeholder="000 000 000"
+                                                />
                                             </div>
-                                            <input
-                                                id="agency-phone"
-                                                type="tel"
-                                                name="phone"
-                                                value={
-                                                    data.phone.startsWith(
-                                                        selectedCountryCode,
-                                                    )
-                                                        ? data.phone.slice(
-                                                              selectedCountryCode.length,
-                                                          )
-                                                        : data.phone
-                                                }
-                                                onChange={handlePhoneChange}
-                                                className="w-full rounded-r-lg py-3 pr-4 pl-10 text-sm placeholder-gray-400 focus:outline-none"
-                                                placeholder="000 000 000"
-                                            />
                                         </div>
                                         <ErrorText error={errors.phone} />
                                     </div>
@@ -599,7 +599,7 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                         Adresse physique
                                     </label>
                                     <div className="relative">
-                                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
                                             <MapPin className="h-5 w-5" />
                                         </div>
                                         <input
@@ -695,10 +695,10 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                     <button
                                         type="button"
                                         onClick={handleRemoveImage}
-                                        className="absolute top-1 right-1 rounded-full bg-red-500 p-1 text-white shadow-sm transition-opacity hover:opacity-90"
+                                        className="absolute top-1.5 right-1.5 rounded-full bg-red-500 p-1.5 text-white shadow-sm transition-opacity hover:opacity-90"
                                         title="Supprimer l'image"
                                     >
-                                        <X className="h-3 w-3" />
+                                        <X className="h-4 w-4" />
                                     </button>
                                 </div>
                             ) : (

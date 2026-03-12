@@ -124,19 +124,19 @@ export default function Properties() {
 
     const toggleApproval = (id: number) => {
         router.patch(
-            route('dashboard.properties.approve', id),
+            route('dashboard.properties.approve', { id }),
             {},
             { preserveScroll: true },
         );
     };
 
     const handleViewProperty = (property: Property) => {
-        router.visit(route('dashboard.properties.show', property.id));
+        router.visit(route('dashboard.properties.show', { id: property.id }));
     };
 
     const deleteProperty = (id: number) => {
         if (confirm('Voulez-vous vraiment supprimer cette propriété ?')) {
-            router.delete(route('dashboard.properties.destroy', id), {
+            router.delete(route('dashboard.properties.destroy', { id }), {
                 preserveScroll: true,
             });
         }
@@ -144,12 +144,14 @@ export default function Properties() {
     };
 
     const handleEditProperty = (property: Property) => {
-        router.visit(route('dashboard.properties.edit', property.id));
+        router.visit(route('dashboard.properties.edit', { id: property.id }));
         setDropdownOpen(null);
     };
 
     const handleViewStatistics = (property: Property) => {
-        router.visit(route('dashboard.analytics.property', property.id));
+        router.visit(
+            route('dashboard.analytics.property', { id: property.id }),
+        );
         setDropdownOpen(null);
     };
 

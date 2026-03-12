@@ -46,7 +46,7 @@ class ProfileController extends Controller
 
         // Cast boolean explicitly to avoid PHP falsy issues
         if (isset($data['notifications_enabled'])) {
-            $data['notifications_enabled'] = (bool) $data['notifications_enabled'];
+            $data['notifications_enabled'] = filter_var($data['notifications_enabled'], FILTER_VALIDATE_BOOLEAN);
         }
 
         $user->fill($data);

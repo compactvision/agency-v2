@@ -13,12 +13,14 @@ class StoreAdRequest extends FormRequest
 
     public function rules(): array
     {
+        $isPublished = $this->boolean('is_published');
+
         return [
             'category_id' => ['required', 'exists:categories,id'],
             'ad_type'     => ['required', 'in:sale,rent'],
             'title'       => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'price'       => ['required', 'numeric', 'min:0'],
+            'price'       => [$isPublished ? 'required' : 'nullable', 'numeric', 'min:0'],
             'currency'    => ['nullable', 'string', 'max:3'],
             'surface'     => ['nullable', 'integer'],
             'country_id'  => ['nullable', 'exists:countries,id'],
@@ -26,11 +28,12 @@ class StoreAdRequest extends FormRequest
             'municipality_id' => ['nullable', 'exists:municipalities,id'],
             'latitude'    => ['nullable', 'numeric'],
             'longitude'    => ['nullable', 'numeric'],
-            'details'     => ['required', 'array'],
+            'details'     => [$isPublished ? 'required' : 'nullable', 'array'],
             'amenities'   => ['nullable', 'array'],
             'amenities.*' => ['exists:amenities,id'],
             'images'      => ['nullable', 'array'],
             'images.*'    => ['image', 'max:5120'], // 5MB max
+            'is_published' => ['nullable', 'boolean'],
         ];
     }
 }

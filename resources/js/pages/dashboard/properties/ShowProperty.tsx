@@ -98,7 +98,7 @@ export default function ShowProperty({ property }: { property: Property }) {
 
     const toggleApproval = () => {
         router.patch(
-            route('dashboard.properties.approve', property.id),
+            route('dashboard.properties.approve', { id: property.id }),
             {},
             {
                 preserveScroll: true,
@@ -166,14 +166,36 @@ export default function ShowProperty({ property }: { property: Property }) {
                                 </button>
                             )}
                             <button
-                                onClick={() =>
-                                    router.visit(
-                                        route(
-                                            'dashboard.properties.edit',
-                                            property.id,
-                                        ),
-                                    )
-                                }
+                                onClick={() => {
+                                    if (property?.id) {
+                                        router.visit(
+                                            route('dashboard.properties.edit', {
+                                                id: property.id,
+                                            }),
+                                        );
+                                    } else {
+                                        console.error(
+                                            'Property ID is missing:',
+                                            property,
+                                        );
+                                        // Fallback if property is wrapped in data
+                                        const propId =
+                                            (property as any)?.data?.id ??
+                                            property?.id;
+                                        if (propId) {
+                                            router.visit(
+                                                route(
+                                                    'dashboard.properties.edit',
+                                                    { id: propId },
+                                                ),
+                                            );
+                                        } else {
+                                            alert(
+                                                "Erreur : Impossible de trouver l'identifiant de la propriété.",
+                                            );
+                                        }
+                                    }
+                                }}
                                 className="inline-flex items-center rounded-xl border border-amber-200 bg-white px-4 py-2 font-medium text-amber-700 shadow-lg shadow-amber-500/5 transition-all duration-300 hover:bg-amber-50"
                             >
                                 <Edit3 size={18} className="mr-2" />

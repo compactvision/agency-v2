@@ -21,14 +21,18 @@ class WelcomeSeller extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Bienvenue chez Compact Agency - Votre compte est prêt !',
+            subject: 'Bienvenue chez Agency DRC - Votre compte est prêt !',
         );
     }
 
     public function content(): Content
     {
         return new Content(
-            view: 'emails.welcome_seller',
+            markdown: 'emails.welcome_seller',
+            with: [
+                'name' => $this->user->name,
+                'role' => $this->roleName === 'agency' ? 'Agence Immobilière' : 'Vendeur Particulier',
+            ],
         );
     }
 

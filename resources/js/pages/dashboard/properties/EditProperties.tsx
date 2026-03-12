@@ -20,10 +20,8 @@ import {
     MapPin,
     RotateCcw,
     Save,
-    Search,
     Trash2,
     Upload,
-    X,
     Zap,
 } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -141,6 +139,7 @@ interface Props {
     countries: { [key: number]: string };
     municipalities: Municipality[];
     amenities: Amenity[];
+    categories: Array<{ id: number; name: string; slug: string }>;
     hasActiveSubscription: boolean;
     property?: Property | null;
 }
@@ -149,6 +148,7 @@ const PropertyForm: React.FC<Props> = ({
     countries,
     municipalities,
     amenities,
+    categories,
     hasActiveSubscription,
     property = null,
 }) => {
@@ -260,17 +260,12 @@ const PropertyForm: React.FC<Props> = ({
             // If not, we map based on ID or Name.
             // Assuming category.slug is reliable.
             let type = rawProp.category?.slug || '';
-            // Fallback mapping if slug is different or missing
+            // Match with categories from props if possible
             if (!type && rawProp.category_id) {
-                const mapIdToType: Record<number, string> = {
-                    1: 'house',
-                    2: 'apartment',
-                    3: 'land',
-                    4: 'building',
-                    5: 'office',
-                    6: 'warehouse',
-                };
-                type = mapIdToType[rawProp.category_id] || '';
+                const cat = categories.find(
+                    (c) => c.id === rawProp.category_id,
+                );
+                type = cat?.slug || '';
             }
 
             const amenityIds = Array.isArray(rawProp.amenities)
@@ -361,6 +356,13 @@ const PropertyForm: React.FC<Props> = ({
 
     const { data, setData, post, put, errors, processing, reset, transform } =
         useForm(initializeFormData());
+
+    // Reset form when property changes (Edit mode hydration fix)
+    useEffect(() => {
+        if (property && isEditMode) {
+            reset(initializeFormData());
+        }
+    }, [property, isEditMode, reset, initializeFormData]);
 
     // Fonctions utilitaires
     const generateReferenceNumber = useCallback(() => {
@@ -475,18 +477,23 @@ const PropertyForm: React.FC<Props> = ({
     useEffect(() => {
         if (!isEditMode || !property) return;
         const rawProp = property as any;
-        if (!Array.isArray(rawProp.images) || rawProp.images.length === 0) return;
+        if (!Array.isArray(rawProp.images) || rawProp.images.length === 0)
+            return;
 
         setImagePreviews(() => {
-            return rawProp.images.map((img: any) => ({
-                id: img.id,
-                url: img.path?.startsWith('http') || img.path?.startsWith('/') 
-                    ? img.path 
-                    : `/storage/${img.path}`,
-                name: img.original_name ?? `Image ${img.id}`,
-                isExisting: true,
-                position: img.position ?? 999,
-            })).sort((a: any, b: any) => (a.position - b.position));
+            return rawProp.images
+                .map((img: any) => ({
+                    id: img.id,
+                    url:
+                        img.path?.startsWith('http') ||
+                        img.path?.startsWith('/')
+                            ? img.path
+                            : `/storage/${img.path}`,
+                    name: img.original_name ?? `Image ${img.id}`,
+                    isExisting: true,
+                    position: img.position ?? 999,
+                }))
+                .sort((a: any, b: any) => a.position - b.position);
         });
     }, [isEditMode, property]); // Watching property is safer
 
@@ -726,15 +733,10 @@ const PropertyForm: React.FC<Props> = ({
 
             // Logic for Category mapping
             const getCategoryId = (typeName: string) => {
-                const map: { [key: string]: number } = {
-                    house: 1,
-                    apartment: 2,
-                    land: 3,
-                    building: 4,
-                    office: 5,
-                    warehouse: 6,
-                };
-                return map[typeName.toLowerCase()] || 1;
+                const cat = categories.find(
+                    (c) => c.slug.toLowerCase() === typeName.toLowerCase(),
+                );
+                return cat?.id || categories[0]?.id || 1;
             };
 
             // Extract IDs from imagePreviews to send order
@@ -1339,36 +1341,14 @@ const PropertyForm: React.FC<Props> = ({
                                                 <option value="">
                                                     Sélectionner un type
                                                 </option>
-                                                <option value="apartment">
-                                                    Appartement
-                                                </option>
-                                                <option value="house">
-                                                    Maison
-                                                </option>
-                                                <option value="studio">
-                                                    Studio
-                                                </option>
-                                                <option value="villa">
-                                                    Villa
-                                                </option>
-                                                <option value="office">
-                                                    Bureau
-                                                </option>
-                                                <option value="shop">
-                                                    Commerce
-                                                </option>
-                                                <option value="land">
-                                                    Terrain
-                                                </option>
-                                                <option value="garage">
-                                                    Garage
-                                                </option>
-                                                <option value="warehouse">
-                                                    Entrepôt
-                                                </option>
-                                                <option value="other">
-                                                    Autre
-                                                </option>
+                                                {categories.map((cat) => (
+                                                    <option
+                                                        key={cat.id}
+                                                        value={cat.slug}
+                                                    >
+                                                        {cat.name}
+                                                    </option>
+                                                ))}
                                             </select>
                                             {errors.type && (
                                                 <div className="mt-1 text-sm text-red-600">
@@ -2048,113 +2028,209 @@ const PropertyForm: React.FC<Props> = ({
 
                             {/* Section: Localisation */}
                             {activeSection === 'location' && (
-                                <div className="space-y-4 sm:space-y-6">
-                                    <div className="mb-4 flex items-center gap-2">
+                                <div className="space-y-5 sm:space-y-6">
+                                    <div className="mb-2 flex items-start gap-3">
                                         <MapPin
-                                            size={20}
-                                            className="text-amber-500"
+                                            size={22}
+                                            className="mt-0.5 shrink-0 text-amber-500"
                                         />
-                                        <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
-                                            Localisation
-                                        </h2>
+                                        <div>
+                                            <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
+                                                Localisation
+                                            </h2>
+                                            <p className="text-xs text-slate-400">
+                                                Remplissez les champs puis
+                                                cliquez sur « Localiser » pour
+                                                placer automatiquement votre
+                                                bien sur la carte.
+                                            </p>
+                                        </div>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                            <div>
-                                                <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Pays{' '}
-                                                    <span className="text-red-500">
-                                                        *
-                                                    </span>
-                                                </label>
-                                                <select
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
-                                                    value={data.country}
-                                                    onChange={(e) =>
-                                                        handleInputChange(
-                                                            'country',
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                    disabled={false}
-                                                >
-                                                    <option value="">
-                                                        Sélectionner un pays
-                                                    </option>
-                                                    {Object.entries(
-                                                        countries || {},
-                                                    ).map(([id, label]) => (
-                                                        <option
-                                                            key={id}
-                                                            value={id}
-                                                        >
-                                                            {label}
+                                    <div className="space-y-5">
+                                        {/* Zone 1 — Administrative */}
+                                        <div className="space-y-4 rounded-xl border border-amber-100 bg-gradient-to-br from-amber-50/60 to-transparent p-4">
+                                            <p className="text-xs font-bold tracking-widest text-amber-500 uppercase">
+                                                1 — Zone administrative
+                                            </p>
+                                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                                <div>
+                                                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                                                        Pays{' '}
+                                                        <span className="text-red-500">
+                                                            *
+                                                        </span>
+                                                    </label>
+                                                    <select
+                                                        className="w-full rounded-lg border border-amber-200/50 bg-white px-3 py-2.5 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                                                        value={data.country}
+                                                        onChange={(e) =>
+                                                            handleInputChange(
+                                                                'country',
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                    >
+                                                        <option value="">
+                                                            Sélectionner un pays
                                                         </option>
-                                                    ))}
-                                                </select>
-                                                {errors.country && (
-                                                    <div className="mt-1 text-sm text-red-600">
-                                                        {errors.country}
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div>
-                                                <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Ville{' '}
-                                                    <span className="text-red-500">
-                                                        *
-                                                    </span>
-                                                </label>
-                                                <select
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
-                                                    value={data.city}
-                                                    onChange={(e) =>
-                                                        handleInputChange(
-                                                            'city',
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                    disabled={
-                                                        !data.country ||
-                                                        availableCities.length ===
-                                                            0 ||
-                                                        false
-                                                    }
-                                                >
-                                                    <option value="">
-                                                        Sélectionner une ville
-                                                    </option>
-                                                    {availableCities.map(
-                                                        (city) => (
+                                                        {Object.entries(
+                                                            countries || {},
+                                                        ).map(([id, label]) => (
                                                             <option
-                                                                key={city}
-                                                                value={city}
+                                                                key={id}
+                                                                value={id}
                                                             >
-                                                                {city}
+                                                                {label}
                                                             </option>
-                                                        ),
-                                                    )}
-                                                </select>
-                                                {errors.city && (
-                                                    <div className="mt-1 text-sm text-red-600">
-                                                        {errors.city}
-                                                    </div>
-                                                )}
-                                            </div>
+                                                        ))}
+                                                    </select>
+                                                </div>
 
+                                                <div>
+                                                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                                                        Ville{' '}
+                                                        <span className="text-red-500">
+                                                            *
+                                                        </span>
+                                                    </label>
+                                                    <select
+                                                        className="w-full rounded-lg border border-amber-200/50 bg-white px-3 py-2.5 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none disabled:opacity-50"
+                                                        value={data.city}
+                                                        onChange={(e) =>
+                                                            handleInputChange(
+                                                                'city',
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            !data.country ||
+                                                            availableCities.length ===
+                                                                0
+                                                        }
+                                                    >
+                                                        <option value="">
+                                                            Sélectionner une
+                                                            ville
+                                                        </option>
+                                                        {availableCities.map(
+                                                            (city) => (
+                                                                <option
+                                                                    key={city}
+                                                                    value={city}
+                                                                >
+                                                                    {city}
+                                                                </option>
+                                                            ),
+                                                        )}
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                                                        Commune{' '}
+                                                        <span className="text-red-500">
+                                                            *
+                                                        </span>
+                                                    </label>
+                                                    <select
+                                                        className="w-full rounded-lg border border-amber-200/50 bg-white px-3 py-2.5 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none disabled:opacity-50"
+                                                        value={
+                                                            data.municipality_id ||
+                                                            ''
+                                                        }
+                                                        onChange={(e) =>
+                                                            handleInputChange(
+                                                                'municipality_id',
+                                                                e.target.value
+                                                                    ? parseInt(
+                                                                          e
+                                                                              .target
+                                                                              .value,
+                                                                      )
+                                                                    : null,
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            !data.city ||
+                                                            availableMunicipalities.length ===
+                                                                0
+                                                        }
+                                                    >
+                                                        <option value="">
+                                                            Sélectionner une
+                                                            commune
+                                                        </option>
+                                                        {availableMunicipalities.map(
+                                                            (m) => (
+                                                                <option
+                                                                    key={m.id}
+                                                                    value={m.id}
+                                                                >
+                                                                    {m.name}
+                                                                </option>
+                                                            ),
+                                                        )}
+                                                    </select>
+                                                    {errors.municipality_id && (
+                                                        <div className="mt-1 text-sm text-red-600">
+                                                            {
+                                                                errors.municipality_id
+                                                            }
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Zone 2 — Adresse précise */}
+                                        <div className="space-y-4 rounded-xl border border-slate-200/60 bg-slate-50/40 p-4">
+                                            <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
+                                                2 — Adresse précise
+                                            </p>
+                                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                                <div className="sm:col-span-2">
+                                                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                                                        Avenue / Rue
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                                                        placeholder="Ex: Avenue du Tribunal, Rue Lukusa..."
+                                                        value={data.address}
+                                                        onChange={(e) =>
+                                                            handleInputChange(
+                                                                'address',
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                                                        Numéro / Réf
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                                                        placeholder="Ex: 42"
+                                                        value={data.postal_code}
+                                                        onChange={(e) =>
+                                                            handleInputChange(
+                                                                'postal_code',
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                            </div>
                                             <div>
-                                                <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Quartier{' '}
-                                                    <span className="text-red-500">
-                                                        *
-                                                    </span>
+                                                <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                                                    Quartier
                                                 </label>
                                                 <input
                                                     type="text"
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
-                                                    placeholder="Ex: Gombe, Kimpe, Lemba..."
+                                                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                                                    placeholder="Ex: Gombe, Lemba, Ngaliema..."
                                                     value={data.quarter}
                                                     onChange={(e) =>
                                                         handleInputChange(
@@ -2162,235 +2238,141 @@ const PropertyForm: React.FC<Props> = ({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    disabled={false}
                                                 />
-                                                {errors.quarter && (
-                                                    <div className="mt-1 text-sm text-red-600">
-                                                        {errors.quarter}
-                                                    </div>
-                                                )}
                                             </div>
 
-                                            <div>
-                                                <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Code postal{' '}
-                                                    <span className="text-red-500">
-                                                        *
-                                                    </span>
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
-                                                    placeholder="Ex: 8200"
-                                                    value={data.postal_code}
-                                                    onChange={(e) =>
-                                                        handleInputChange(
-                                                            'postal_code',
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                    disabled={false}
-                                                />
-                                                {errors.postal_code && (
-                                                    <div className="mt-1 text-sm text-red-600">
-                                                        {errors.postal_code}
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div className="sm:col-span-2">
-                                                <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Commune/Municipality{' '}
-                                                    <span className="text-red-500">
-                                                        *
-                                                    </span>
-                                                </label>
-                                                <select
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
-                                                    value={
-                                                        data.municipality_id ||
-                                                        ''
-                                                    }
-                                                    onChange={(e) =>
-                                                        handleInputChange(
-                                                            'municipality_id',
-                                                            e.target.value
-                                                                ? parseInt(
-                                                                      e.target
-                                                                          .value,
-                                                                  )
-                                                                : null,
-                                                        )
-                                                    }
-                                                    disabled={
-                                                        !data.city ||
-                                                        availableMunicipalities.length ===
-                                                            0 ||
-                                                        false
-                                                    }
-                                                >
-                                                    <option value="">
-                                                        Sélectionner une commune
-                                                    </option>
-                                                    {availableMunicipalities.map(
-                                                        (municipality) => (
-                                                            <option
-                                                                key={
-                                                                    municipality.id
-                                                                }
-                                                                value={
-                                                                    municipality.id
-                                                                }
-                                                            >
-                                                                {
-                                                                    municipality.name
-                                                                }
-                                                            </option>
-                                                        ),
-                                                    )}
-                                                </select>
-                                                {errors.municipality_id && (
-                                                    <div className="mt-1 text-sm text-red-600">
-                                                        {errors.municipality_id}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                            <div>
-                                                <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Latitude
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
-                                                    placeholder="Ex: -4.4419"
-                                                    value={data.latitude}
-                                                    onChange={(e) =>
-                                                        handleInputChange(
-                                                            'latitude',
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                    disabled={false}
-                                                />
-                                                {errors.latitude && (
-                                                    <div className="mt-1 text-sm text-red-600">
-                                                        {errors.latitude}
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div>
-                                                <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Longitude
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
-                                                    placeholder="Ex: 15.2663"
-                                                    value={data.longitude}
-                                                    onChange={(e) =>
-                                                        handleInputChange(
-                                                            'longitude',
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                    disabled={false}
-                                                />
-                                                {errors.longitude && (
-                                                    <div className="mt-1 text-sm text-red-600">
-                                                        {errors.longitude}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div className="relative mb-4">
-                                            <div className="relative">
-                                                <Search
-                                                    className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400"
-                                                    size={20}
-                                                />
-                                                <input
-                                                    type="text"
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 py-2.5 pr-10 pl-10 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
-                                                    placeholder="Rechercher un lieu (ex: Avenue Tribunal, Kinshasa...)"
-                                                    value={searchQuery}
-                                                    onChange={(e) =>
-                                                        handleMapSearch(
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                    disabled={false}
-                                                />
-                                                {searchQuery && (
-                                                    <button
-                                                        onClick={() => {
-                                                            setSearchQuery('');
-                                                            setSearchResults(
-                                                                [],
+                                            {/* Auto-geocode button */}
+                                            <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center">
+                                                <button
+                                                    type="button"
+                                                    onClick={async () => {
+                                                        const geoQuery = [
+                                                            data.postal_code,
+                                                            data.address,
+                                                            data.quarter,
+                                                            availableMunicipalities.find(
+                                                                (m) =>
+                                                                    m.id ===
+                                                                    data.municipality_id,
+                                                            )?.name,
+                                                            data.city,
+                                                            countries[
+                                                                data.country as any
+                                                            ],
+                                                        ]
+                                                            .filter(Boolean)
+                                                            .join(', ');
+                                                        if (!geoQuery) return;
+                                                        setIsSearching(true);
+                                                        setSubmitStatus('idle');
+                                                        try {
+                                                            const res =
+                                                                await axios.get(
+                                                                    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(geoQuery)}&limit=1`,
+                                                                );
+                                                            if (
+                                                                res.data
+                                                                    ?.length > 0
+                                                            ) {
+                                                                const {
+                                                                    lat,
+                                                                    lon,
+                                                                } = res.data[0];
+                                                                setData(
+                                                                    (prev) => ({
+                                                                        ...prev,
+                                                                        latitude:
+                                                                            parseFloat(
+                                                                                lat,
+                                                                            ).toFixed(
+                                                                                6,
+                                                                            ),
+                                                                        longitude:
+                                                                            parseFloat(
+                                                                                lon,
+                                                                            ).toFixed(
+                                                                                6,
+                                                                            ),
+                                                                    }),
+                                                                );
+                                                            } else {
+                                                                setSubmitStatus(
+                                                                    'error',
+                                                                );
+                                                                setSubmitMessage(
+                                                                    'Adresse introuvable. Affinez votre saisie ou cliquez manuellement sur la carte.',
+                                                                );
+                                                            }
+                                                        } catch {
+                                                            setSubmitStatus(
+                                                                'error',
                                                             );
-                                                        }}
-                                                        className="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                                                    >
-                                                        <X size={16} />
-                                                    </button>
-                                                )}
+                                                            setSubmitMessage(
+                                                                'Erreur de géolocalisation. Vérifiez votre connexion.',
+                                                            );
+                                                        } finally {
+                                                            setIsSearching(
+                                                                false,
+                                                            );
+                                                        }
+                                                    }}
+                                                    disabled={
+                                                        isSearching ||
+                                                        !(
+                                                            data.city ||
+                                                            data.quarter ||
+                                                            data.address
+                                                        )
+                                                    }
+                                                    className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-200 ${
+                                                        isSearching ||
+                                                        !(
+                                                            data.city ||
+                                                            data.quarter ||
+                                                            data.address
+                                                        )
+                                                            ? 'cursor-not-allowed bg-slate-100 text-slate-400'
+                                                            : 'bg-gradient-to-r from-amber-400 to-amber-500 text-white shadow-md shadow-amber-200/60 hover:from-amber-500 hover:to-amber-600 active:scale-95'
+                                                    }`}
+                                                >
+                                                    {isSearching ? (
+                                                        <>
+                                                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />{' '}
+                                                            Localisation...
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <MapPin size={15} />{' '}
+                                                            Localiser
+                                                            automatiquement
+                                                        </>
+                                                    )}
+                                                </button>
+                                                {data.latitude &&
+                                                    data.longitude && (
+                                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
+                                                            <CheckCircle
+                                                                size={12}
+                                                            />{' '}
+                                                            Position trouvée
+                                                        </span>
+                                                    )}
                                             </div>
-
-                                            {/* Search Results Dropdown */}
-                                            {searchResults.length > 0 && (
-                                                <div className="absolute z-[1000] mt-1 w-full overflow-hidden rounded-lg border border-amber-100 bg-white shadow-lg">
-                                                    <ul className="max-h-60 overflow-y-auto">
-                                                        {searchResults.map(
-                                                            (result, index) => (
-                                                                <li
-                                                                    key={index}
-                                                                    className="cursor-pointer border-b border-amber-50 px-4 py-2 text-sm text-slate-700 last:border-0 hover:bg-amber-50"
-                                                                    onClick={() =>
-                                                                        handleSelectLocation(
-                                                                            result,
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    {
-                                                                        result.display_name
-                                                                    }
-                                                                </li>
-                                                            ),
-                                                        )}
-                                                    </ul>
-                                                </div>
-                                            )}
                                         </div>
 
-                                        <div className="relative z-0 h-[300px] w-full overflow-hidden rounded-xl border border-amber-200 shadow-sm sm:h-[400px]">
-                                            <MapContainer
-                                                center={
-                                                    data.latitude &&
-                                                    data.longitude
-                                                        ? [
-                                                              parseFloat(
-                                                                  data.latitude,
-                                                              ),
-                                                              parseFloat(
-                                                                  data.longitude,
-                                                              ),
-                                                          ]
-                                                        : [-4.4419, 15.2663]
-                                                }
-                                                zoom={
-                                                    data.latitude &&
-                                                    data.longitude
-                                                        ? 15
-                                                        : 12
-                                                }
-                                                scrollWheelZoom={false}
-                                                className="h-full w-full"
-                                            >
-                                                <MapController
+                                        {/* Map Preview */}
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-sm font-semibold text-slate-700">
+                                                    Aperçu carte
+                                                </p>
+                                                <p className="text-xs text-slate-400 italic">
+                                                    Vous pouvez aussi cliquer
+                                                    sur la carte pour ajuster
+                                                </p>
+                                            </div>
+                                            <div className="relative z-0 h-[300px] w-full overflow-hidden rounded-xl border border-amber-200 shadow-sm sm:h-[380px]">
+                                                <MapContainer
                                                     center={
                                                         data.latitude &&
                                                         data.longitude
@@ -2404,46 +2386,97 @@ const PropertyForm: React.FC<Props> = ({
                                                               ]
                                                             : [-4.4419, 15.2663]
                                                     }
-                                                />
-                                                <TileLayer
-                                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                                />
-                                                <LocationMarker
-                                                    position={
+                                                    zoom={
                                                         data.latitude &&
                                                         data.longitude
-                                                            ? [
-                                                                  parseFloat(
-                                                                      data.latitude,
-                                                                  ),
-                                                                  parseFloat(
-                                                                      data.longitude,
-                                                                  ),
-                                                              ]
-                                                            : null
+                                                            ? 15
+                                                            : 11
                                                     }
-                                                    setPosition={(pos) => {
-                                                        setData((prev) => ({
-                                                            ...prev,
-                                                            latitude:
-                                                                pos.lat.toFixed(
-                                                                    6,
-                                                                ),
-                                                            longitude:
-                                                                pos.lng.toFixed(
-                                                                    6,
-                                                                ),
-                                                        }));
-                                                    }}
-                                                />
-                                            </MapContainer>
+                                                    scrollWheelZoom={false}
+                                                    className="h-full w-full"
+                                                >
+                                                    <MapController
+                                                        center={
+                                                            data.latitude &&
+                                                            data.longitude
+                                                                ? [
+                                                                      parseFloat(
+                                                                          data.latitude,
+                                                                      ),
+                                                                      parseFloat(
+                                                                          data.longitude,
+                                                                      ),
+                                                                  ]
+                                                                : [
+                                                                      -4.4419,
+                                                                      15.2663,
+                                                                  ]
+                                                        }
+                                                    />
+                                                    <TileLayer
+                                                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                                                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                                    />
+                                                    <LocationMarker
+                                                        position={
+                                                            data.latitude &&
+                                                            data.longitude
+                                                                ? [
+                                                                      parseFloat(
+                                                                          data.latitude,
+                                                                      ),
+                                                                      parseFloat(
+                                                                          data.longitude,
+                                                                      ),
+                                                                  ]
+                                                                : null
+                                                        }
+                                                        setPosition={(pos) => {
+                                                            setData((prev) => ({
+                                                                ...prev,
+                                                                latitude:
+                                                                    pos.lat.toFixed(
+                                                                        6,
+                                                                    ),
+                                                                longitude:
+                                                                    pos.lng.toFixed(
+                                                                        6,
+                                                                    ),
+                                                            }));
+                                                        }}
+                                                    />
+                                                </MapContainer>
+                                            </div>
+                                            {data.latitude &&
+                                                data.longitude && (
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div>
+                                                            <label className="mb-1 block text-xs font-medium text-slate-400">
+                                                                Latitude
+                                                            </label>
+                                                            <input
+                                                                readOnly
+                                                                className="w-full rounded-lg border border-slate-100 bg-slate-50 px-3 py-1.5 font-mono text-xs text-slate-500"
+                                                                value={
+                                                                    data.latitude
+                                                                }
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="mb-1 block text-xs font-medium text-slate-400">
+                                                                Longitude
+                                                            </label>
+                                                            <input
+                                                                readOnly
+                                                                className="w-full rounded-lg border border-slate-100 bg-slate-50 px-3 py-1.5 font-mono text-xs text-slate-500"
+                                                                value={
+                                                                    data.longitude
+                                                                }
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
                                         </div>
-                                        <p className="text-xs text-slate-500 italic">
-                                            * Cliquez sur la carte pour définir
-                                            la localisation exacte de la
-                                            propriété.
-                                        </p>
                                     </div>
                                 </div>
                             )}

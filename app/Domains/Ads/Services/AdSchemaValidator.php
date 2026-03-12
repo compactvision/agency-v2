@@ -63,10 +63,12 @@ class AdSchemaValidator
 
         /*
         |--------------------------------------------------
-        | 2. REQUIRED FIELDS — ONLY ON CREATE
+        | 2. REQUIRED FIELDS — ONLY ON CREATE AND NOT DRAFT
         |--------------------------------------------------
         */
-        if ($mode === 'create') {
+        $isDraft = filter_var($data['is_published'] ?? true, FILTER_VALIDATE_BOOLEAN) === false;
+
+        if ($mode === 'create' && !$isDraft) {
             foreach ($required as $field => $rule) {
                 if (!array_key_exists($field, $details)) {
                     throw ValidationException::withMessages([

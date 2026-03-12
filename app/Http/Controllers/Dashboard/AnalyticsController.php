@@ -11,32 +11,34 @@ class AnalyticsController extends Controller
 {
     public function index()
     {
+        $isAdmin = auth()->user()->hasRole(['admin', 'super-admin']);
+
         return Inertia::render('dashboard/analytics/Index', [
             'viewsPerDay' => [],
             'contactsPerMethod' => [],
             'mostViewedProperties' => [],
-            'userStats' => [
+            'userStats' => $isAdmin ? [
                 'sellers' => User::role('seller')->count(),
                 'agencies' => 0, // Placeholder for now
                 'buyers' => User::role('buyer')->count(),
-            ],
-            'propertyStats' => [
+            ] : null,
+            'propertyStats' => $isAdmin ? [
                 'total' => 0,
                 'published' => 0,
                 'approved' => 0,
                 'featured' => 0,
-            ],
-            'subscriptionStats' => [
+            ] : null,
+            'subscriptionStats' => $isAdmin ? [
                 'active' => 0,
                 'expired' => 0,
                 'total' => 0,
-            ],
-            'paymentRequestStats' => [
+            ] : null,
+            'paymentRequestStats' => $isAdmin ? [
                 'pending' => 0,
                 'approved' => 0,
                 'rejected' => 0,
-            ],
-            'isAdmin' => auth()->user()->hasRole(['admin', 'super-admin']),
+            ] : null,
+            'isAdmin' => $isAdmin,
         ]);
     }
 

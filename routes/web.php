@@ -58,12 +58,18 @@ Route::middleware(['auth', 'verified'])->prefix('/dashboard')->group(function ()
         Route::patch('/{id}/approve', [PropertyController::class, 'approve'])->name('approve');
     });
 
-    // Users & Roles
+    // Personal Routes (accessible to all roles in dashboard)
+    // User Profile
+    Route::get('/profile', [UserController::class, 'profile'])->name('users.profile');
+
+    Route::get('/settings', [SettingController::class, 'index'])->name('settings');
+    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+
+    // Users & Roles (Admin Only)
     Route::middleware('admin')->group(function() {
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('index');
             Route::post('/', [UserController::class, 'store'])->name('store');
-            Route::get('/profile', [UserController::class, 'profile'])->name('profile');
             Route::put('/{id}', [UserController::class, 'update'])->name('update');
             Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy');
         });
@@ -99,9 +105,8 @@ Route::middleware(['auth', 'verified'])->prefix('/dashboard')->group(function ()
         Route::resource('categories', CategoryController::class)->except(['create', 'edit', 'show']);
         Route::resource('amenities', AmenityController::class)->except(['create', 'edit', 'show']);
 
-        Route::get('/settings', [SettingController::class, 'index'])->name('settings');
+
         Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
-        Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
         Route::get('/analytics/{id}', [AnalyticsController::class, 'show'])->name('analytics.show');
     });
 

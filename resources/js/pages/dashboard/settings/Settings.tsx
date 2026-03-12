@@ -4,6 +4,7 @@ import DeleteUser from '@/components/ui/DeleteUser';
 import { router, usePage } from '@inertiajs/react';
 import {
     AlertCircle,
+    Bell,
     Check,
     Eye,
     EyeOff,
@@ -12,6 +13,7 @@ import {
     Hash,
     Instagram,
     Linkedin,
+    Loader2,
     Lock,
     Mail,
     MapPin,
@@ -35,26 +37,26 @@ import { toast } from 'sonner';
 const usePermission = () => ({ can: (permission) => true });
 
 // Version corrigée de useForm avec router Inertia
-const useForm = (initialData) => {
+const useForm = (initialData: any) => {
     const [data, setData] = useState(initialData);
     const [processing, setProcessing] = useState(false);
-    const [errors, setErrors] = useState({});
+    const [errors, setErrors] = useState<any>({});
 
-    const setDataField = (field, value) => {
-        setData((prev) => ({ ...prev, [field]: value }));
+    const setDataField = (field: string, value: any) => {
+        setData((prev: any) => ({ ...prev, [field]: value }));
     };
 
-    const post = (routeName, options = {}) => {
+    const post = (routeName: string, options: any = {}) => {
         setProcessing(true);
         setErrors({});
 
         router.post(route(routeName), data, {
             ...options,
-            onSuccess: (page) => {
+            onSuccess: (page: any) => {
                 setProcessing(false);
                 if (options.onSuccess) options.onSuccess(page);
             },
-            onError: (errors) => {
+            onError: (errors: any) => {
                 setProcessing(false);
                 setErrors(errors);
                 if (options.onError) options.onError(errors);
@@ -66,17 +68,17 @@ const useForm = (initialData) => {
         });
     };
 
-    const put = (routeName, options = {}) => {
+    const put = (routeName: string, options: any = {}) => {
         setProcessing(true);
         setErrors({});
 
         router.put(route(routeName), data, {
             ...options,
-            onSuccess: (page) => {
+            onSuccess: (page: any) => {
                 setProcessing(false);
                 if (options.onSuccess) options.onSuccess(page);
             },
-            onError: (errors) => {
+            onError: (errors: any) => {
                 setProcessing(false);
                 setErrors(errors);
                 if (options.onError) options.onError(errors);
@@ -88,17 +90,17 @@ const useForm = (initialData) => {
         });
     };
 
-    const destroy = (routeName, options = {}) => {
+    const destroy = (routeName: string, options: any = {}) => {
         setProcessing(true);
         setErrors({});
 
         router.delete(route(routeName), {
             ...options,
-            onSuccess: (page) => {
+            onSuccess: (page: any) => {
                 setProcessing(false);
                 if (options.onSuccess) options.onSuccess(page);
             },
-            onError: (errors) => {
+            onError: (errors: any) => {
                 setProcessing(false);
                 setErrors(errors);
                 if (options.onError) options.onError(errors);
@@ -122,9 +124,38 @@ const useForm = (initialData) => {
         put,
         delete: destroy,
         processing,
+        setProcessing,
         errors,
         reset,
     };
+};
+
+/* ────────── Toggle Switch Component ────────── */
+const Toggle = ({
+    value,
+    onChange,
+    disabled = false,
+}: {
+    value: boolean;
+    onChange: (v: boolean) => void;
+    disabled?: boolean;
+}) => {
+    return (
+        <button
+            type="button"
+            disabled={disabled}
+            onClick={() => onChange(!value)}
+            className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
+                value ? 'bg-amber-600' : 'bg-gray-200'
+            }`}
+        >
+            <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                    value ? 'translate-x-5' : 'translate-x-0'
+                }`}
+            />
+        </button>
+    );
 };
 
 const useTranslation = () => ({
@@ -253,6 +284,8 @@ export default function Settings() {
         instagram: user?.instagram ?? '',
         twitter: user?.twitter ?? '',
         linkedin: user?.linkedin ?? '',
+        language: user?.language ?? 'fr',
+        notifications_enabled: user?.notifications_enabled ?? true,
     });
 
     const appForm = useForm({
@@ -275,70 +308,74 @@ export default function Settings() {
     // Handlers corrigés
     const handleSubmit = (e) => {
         e.preventDefault();
+        const loadingToast = toast.loading('Mise à jour des paramètres...');
 
         appForm.post('dashboard.settings.update', {
             preserveScroll: true,
             preserveState: true,
             onSuccess: () => {
+                toast.dismiss(loadingToast);
                 toast.success('Paramètres mis à jour avec succès');
             },
             onError: (errors) => {
+                toast.dismiss(loadingToast);
                 toast.error('Erreur lors de la mise à jour');
                 console.error('Erreurs:', errors);
             },
         });
     };
 
-    const handlePasswordSubmit = (e) => {
+    const handlePasswordSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        const loadingToast = toast.loading('Mise à jour du mot de passe...');
 
         passwordForm.put('user-password.update', {
             preserveScroll: true,
             onSuccess: () => {
                 passwordForm.reset();
+                toast.dismiss(loadingToast);
                 toast.success('Mot de passe mis à jour avec succès');
             },
             onError: (errors) => {
+                toast.dismiss(loadingToast);
                 toast.error('Erreur lors de la mise à jour du mot de passe');
                 console.error('Erreurs:', errors);
             },
         });
     };
 
-    const handleUserSubmit = (e) => {
+    const handleUserSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
         // Créer FormData pour gérer les fichiers
         const formData = new FormData();
         Object.keys(profileForm.data).forEach((key) => {
-            if (
-                profileForm.data[key] !== null &&
-                profileForm.data[key] !== ''
-            ) {
+            if (profileForm.data[key] !== null) {
                 formData.append(key, profileForm.data[key]);
             }
         });
 
-        profileForm.processing = true;
+        profileForm.setProcessing(true);
+        const loadingToast = toast.loading('Mise à jour du profil...');
 
         // Utiliser router directement pour les FormData
         router.post(route('profile.update'), formData, {
             forceFormData: true, // Important pour les fichiers
             preserveScroll: true,
             preserveState: true,
-            onStart: () => {
-                // Marquer le début du traitement
-            },
             onSuccess: () => {
-                profileForm.processing = false;
+                profileForm.setProcessing(false);
+                toast.dismiss(loadingToast);
+                toast.success('Profil mis à jour avec succès');
             },
             onError: (errors) => {
-                profileForm.processing = false;
+                profileForm.setProcessing(false);
+                toast.dismiss(loadingToast);
                 toast.error('Erreur lors de la mise à jour du profil');
                 console.error('Erreurs:', errors);
             },
             onFinish: () => {
-                profileForm.processing = false;
+                profileForm.setProcessing(false);
             },
         });
     };
@@ -455,6 +492,7 @@ export default function Settings() {
     const tabs = [
         { id: 'profile', label: 'Profil', icon: <User size={18} /> },
         { id: 'password', label: 'Mot de passe', icon: <Lock size={18} /> },
+        { id: 'preferences', label: 'Préférences', icon: <Bell size={18} /> },
         { id: 'appearance', label: 'Apparence', icon: <Palette size={18} /> },
         ...(isAdmin
             ? [
@@ -1715,6 +1753,157 @@ export default function Settings() {
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                );
+
+            case 'preferences':
+                return (
+                    <div className="space-y-6">
+                        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                            <div className="border-b border-gray-100 bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-5">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                                        <Bell size={20} />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-gray-900">
+                                            {t('notification_settings') ||
+                                                'Paramètres de notification'}
+                                        </h3>
+                                        <p className="text-sm text-gray-500">
+                                            {t(
+                                                'manage_notifications_description',
+                                            ) ||
+                                                'Gérez vos préférences de notification.'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4 p-6">
+                                <div className="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 p-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                                            <Bell size={18} />
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-gray-900">
+                                                {t('push_notifications') ||
+                                                    'Notifications Push'}
+                                            </p>
+                                            <p className="text-sm text-gray-500">
+                                                {t('push_notifications_desc') ||
+                                                    'Recevez des alertes en temps réel'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Toggle
+                                        value={
+                                            profileForm.data
+                                                .notifications_enabled
+                                        }
+                                        onChange={(v) =>
+                                            profileForm.setData(
+                                                'notifications_enabled',
+                                                v,
+                                            )
+                                        }
+                                        disabled={profileForm.processing}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                            <div className="border-b border-gray-100 bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-5">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                                        <Globe size={20} />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-gray-900">
+                                            {t('language_preferences') ||
+                                                'Préférences de langue'}
+                                        </h3>
+                                        <p className="text-sm text-gray-500">
+                                            {t('choose_language_description') ||
+                                                "Choisissez la langue de l'application."}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 p-6">
+                                {[
+                                    {
+                                        code: 'fr',
+                                        flag: '🇫🇷',
+                                        label: 'Français',
+                                    },
+                                    {
+                                        code: 'en',
+                                        flag: '🇺🇸',
+                                        label: 'English',
+                                    },
+                                ].map((lang) => (
+                                    <button
+                                        key={lang.code}
+                                        type="button"
+                                        onClick={() =>
+                                            profileForm.setData(
+                                                'language',
+                                                lang.code,
+                                            )
+                                        }
+                                        className={`relative flex flex-col items-center gap-3 rounded-xl border-2 p-6 transition-all duration-200 ${
+                                            profileForm.data.language ===
+                                            lang.code
+                                                ? 'border-amber-500 bg-amber-50'
+                                                : 'border-gray-100 hover:border-amber-200'
+                                        }`}
+                                    >
+                                        <span className="text-3xl">
+                                            {lang.flag}
+                                        </span>
+                                        <span className="font-medium text-gray-900">
+                                            {lang.label}
+                                        </span>
+                                        {profileForm.data.language ===
+                                            lang.code && (
+                                            <div className="absolute top-2 right-2">
+                                                <Check
+                                                    size={16}
+                                                    className="text-amber-500"
+                                                />
+                                            </div>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end">
+                            <button
+                                onClick={handleUserSubmit}
+                                disabled={profileForm.processing}
+                                className="inline-flex items-center rounded-lg bg-gradient-to-r from-amber-400 to-amber-600 px-6 py-3 font-medium text-white transition-all hover:from-amber-500 hover:to-amber-700 disabled:opacity-50"
+                            >
+                                {profileForm.processing ? (
+                                    <>
+                                        <Loader2
+                                            size={18}
+                                            className="mr-2 animate-spin"
+                                        />
+                                        {t('updating') || 'Mise à jour...'}
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save size={18} className="mr-2" />
+                                        {t('save_preferences') || 'Enregistrer'}
+                                    </>
+                                )}
+                            </button>
                         </div>
                     </div>
                 );
