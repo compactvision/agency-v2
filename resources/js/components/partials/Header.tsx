@@ -2,6 +2,7 @@ import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import {
+    ChevronDown,
     LucideArrowRight,
     LucideGlobe,
     LucideMenu,
@@ -301,36 +302,270 @@ export default function Header() {
                         <div className="hidden items-center space-x-1 lg:flex">
                             {[
                                 { path: 'home', label: t('home') },
-                                { path: 'properties', label: t('property') },
+                                {
+                                    path: 'properties',
+                                    label: t('property'),
+                                    isMega: true,
+                                },
                                 { path: 'about', label: t('about') },
                                 { path: 'tarifs', label: t('pricing') },
                                 { path: 'contact', label: t('contact') },
-                            ].map((item, index) => (
-                                <Link
-                                    key={index}
-                                    href={route(item.path)}
-                                    className={`relative mx-1 rounded-xl px-6 py-3 text-sm font-medium transition-all duration-300 ${
-                                        isActive(
+                            ].map((item, index) =>
+                                item.isMega ? (
+                                    <div key={index} className="group relative">
+                                        <Link
+                                            href={route(item.path)}
+                                            className={`relative mx-1 flex items-center rounded-xl px-6 py-3 text-sm font-medium transition-all duration-300 ${
+                                                isActive('/properties')
+                                                    ? 'border border-amber-500/20 bg-gradient-to-r from-amber-500/10 to-amber-600/10 text-amber-400'
+                                                    : 'text-slate-300 hover:bg-slate-700/20 hover:text-amber-400'
+                                            }`}
+                                        >
+                                            {item.label}
+                                            <ChevronDown className="ml-1.5 h-4 w-4 transition-transform duration-300 group-hover:rotate-180" />
+                                            {isActive('/properties') && (
+                                                <span className="absolute bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 transform rounded-full bg-amber-400 shadow-lg shadow-amber-400/50"></span>
+                                            )}
+                                        </Link>
+
+                                        {/* Mega Menu Dropdown */}
+                                        <div className="invisible absolute top-full left-1/2 w-[600px] -translate-x-1/2 translate-y-4 opacity-0 transition-all duration-300 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                                            <div className="mt-4 overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-900/95 shadow-2xl backdrop-blur-xl">
+                                                <div className="grid grid-cols-2 p-6">
+                                                    {/* Categories Section */}
+                                                    <div className="space-y-4 border-r border-slate-700/50 pr-6">
+                                                        <h3 className="px-3 text-xs font-bold tracking-widest text-amber-500 uppercase">
+                                                            {t('categories')}
+                                                        </h3>
+                                                        <div className="grid gap-1">
+                                                            {[
+                                                                {
+                                                                    label: 'Appartements',
+                                                                    type: 'apartment',
+                                                                    icon: 'Building2',
+                                                                },
+                                                                {
+                                                                    label: 'Maisons',
+                                                                    type: 'house',
+                                                                    icon: 'Home',
+                                                                },
+                                                                {
+                                                                    label: 'Terrains',
+                                                                    type: 'land',
+                                                                    icon: 'Map',
+                                                                },
+                                                                {
+                                                                    label: 'Commerces',
+                                                                    type: 'commercial',
+                                                                    icon: 'ShoppingBag',
+                                                                },
+                                                            ].map((cat) => (
+                                                                <Link
+                                                                    key={
+                                                                        cat.type
+                                                                    }
+                                                                    href={route(
+                                                                        'properties',
+                                                                        {
+                                                                            type: cat.type,
+                                                                        },
+                                                                    )}
+                                                                    className="group/item flex items-center space-x-3 rounded-xl p-3 transition-all duration-200 hover:bg-amber-500/10"
+                                                                >
+                                                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 transition-colors group-hover/item:bg-amber-500/20">
+                                                                        {cat.icon ===
+                                                                        'Building2' ? (
+                                                                            <svg
+                                                                                className="h-5 w-5 text-slate-400 group-hover/item:text-amber-400"
+                                                                                fill="none"
+                                                                                viewBox="0 0 24 24"
+                                                                                stroke="currentColor"
+                                                                            >
+                                                                                <path
+                                                                                    strokeLinecap="round"
+                                                                                    strokeLinejoin="round"
+                                                                                    strokeWidth={
+                                                                                        2
+                                                                                    }
+                                                                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                                                                />
+                                                                            </svg>
+                                                                        ) : cat.icon ===
+                                                                          'Home' ? (
+                                                                            <svg
+                                                                                className="h-5 w-5 text-slate-400 group-hover/item:text-amber-400"
+                                                                                fill="none"
+                                                                                viewBox="0 0 24 24"
+                                                                                stroke="currentColor"
+                                                                            >
+                                                                                <path
+                                                                                    strokeLinecap="round"
+                                                                                    strokeLinejoin="round"
+                                                                                    strokeWidth={
+                                                                                        2
+                                                                                    }
+                                                                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                                                                                />
+                                                                            </svg>
+                                                                        ) : cat.icon ===
+                                                                          'Map' ? (
+                                                                            <svg
+                                                                                className="h-5 w-5 text-slate-400 group-hover/item:text-amber-400"
+                                                                                fill="none"
+                                                                                viewBox="0 0 24 24"
+                                                                                stroke="currentColor"
+                                                                            >
+                                                                                <path
+                                                                                    strokeLinecap="round"
+                                                                                    strokeLinejoin="round"
+                                                                                    strokeWidth={
+                                                                                        2
+                                                                                    }
+                                                                                    d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+                                                                                />
+                                                                            </svg>
+                                                                        ) : (
+                                                                            <svg
+                                                                                className="h-5 w-5 text-slate-400 group-hover/item:text-amber-400"
+                                                                                fill="none"
+                                                                                viewBox="0 0 24 24"
+                                                                                stroke="currentColor"
+                                                                            >
+                                                                                <path
+                                                                                    strokeLinecap="round"
+                                                                                    strokeLinejoin="round"
+                                                                                    strokeWidth={
+                                                                                        2
+                                                                                    }
+                                                                                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                                                                                />
+                                                                            </svg>
+                                                                        )}
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className="text-sm font-bold text-slate-200 group-hover/item:text-amber-400">
+                                                                            {
+                                                                                cat.label
+                                                                            }
+                                                                        </div>
+                                                                        <div className="text-[11px] text-slate-500">
+                                                                            {t(
+                                                                                'explore_all',
+                                                                            )}{' '}
+                                                                            {cat.label.toLowerCase()}
+                                                                        </div>
+                                                                    </div>
+                                                                </Link>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Quick Links Section */}
+                                                    <div className="space-y-4 pl-6">
+                                                        <h3 className="px-3 text-xs font-bold tracking-widest text-amber-500 uppercase">
+                                                            {t('quick_links')}
+                                                        </h3>
+                                                        <div className="grid gap-2">
+                                                            {[
+                                                                {
+                                                                    label: 'Propriétés à vendre',
+                                                                    sale_type:
+                                                                        'sale',
+                                                                    color: 'from-amber-400 to-amber-600',
+                                                                },
+                                                                {
+                                                                    label: 'Propriétés à louer',
+                                                                    sale_type:
+                                                                        'rent',
+                                                                    color: 'from-emerald-400 to-emerald-600',
+                                                                },
+                                                            ].map((link) => (
+                                                                <Link
+                                                                    key={
+                                                                        link.sale_type
+                                                                    }
+                                                                    href={route(
+                                                                        'properties',
+                                                                        {
+                                                                            sale_type:
+                                                                                link.sale_type,
+                                                                        },
+                                                                    )}
+                                                                    className="group/btn relative overflow-hidden rounded-xl bg-slate-800 p-4 transition-all duration-300 hover:scale-[1.02]"
+                                                                >
+                                                                    <div
+                                                                        className={`absolute inset-y-0 left-0 w-1 bg-gradient-to-b ${link.color}`}
+                                                                    ></div>
+                                                                    <div className="relative flex items-center justify-between">
+                                                                        <span className="text-sm font-bold text-slate-200 group-hover/btn:text-white">
+                                                                            {
+                                                                                link.label
+                                                                            }
+                                                                        </span>
+                                                                        <LucideArrowRight className="h-4 w-4 transform text-slate-500 transition-transform group-hover/btn:translate-x-1 group-hover/btn:text-white" />
+                                                                    </div>
+                                                                </Link>
+                                                            ))}
+
+                                                            {/* Featured Preview Box */}
+                                                            <div className="mt-4 rounded-xl border border-indigo-500/20 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 p-4">
+                                                                <p className="text-xs font-medium text-slate-300 italic">
+                                                                    "Trouvez
+                                                                    l'endroit
+                                                                    idéal avec
+                                                                    nos filtres
+                                                                    multicritères
+                                                                    avancés."
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {/* Bottom Footer */}
+                                                <div className="flex items-center justify-between border-t border-slate-700/50 bg-slate-800/50 px-6 py-3">
+                                                    <span className="text-[10px] font-bold tracking-widest text-slate-500 uppercase">
+                                                        {t('premium_service')}
+                                                    </span>
+                                                    <Link
+                                                        href={route(
+                                                            'properties',
+                                                        )}
+                                                        className="flex items-center text-xs font-bold text-amber-500 hover:text-amber-400"
+                                                    >
+                                                        {t('view_all')}
+                                                        <LucideArrowRight className="ml-1 h-3 w-3" />
+                                                    </Link>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <Link
+                                        key={index}
+                                        href={route(item.path)}
+                                        className={`relative mx-1 rounded-xl px-6 py-3 text-sm font-medium transition-all duration-300 ${
+                                            isActive(
+                                                '/' +
+                                                    (item.path === 'home'
+                                                        ? ''
+                                                        : item.path),
+                                            )
+                                                ? 'border border-amber-500/20 bg-gradient-to-r from-amber-500/10 to-amber-600/10 text-amber-400'
+                                                : 'text-slate-300 hover:bg-slate-700/20 hover:text-amber-400'
+                                        }`}
+                                    >
+                                        {item.label}
+                                        {isActive(
                                             '/' +
                                                 (item.path === 'home'
                                                     ? ''
                                                     : item.path),
-                                        )
-                                            ? 'border border-amber-500/20 bg-gradient-to-r from-amber-500/10 to-amber-600/10 text-amber-400'
-                                            : 'text-slate-300 hover:bg-slate-700/20 hover:text-amber-400'
-                                    }`}
-                                >
-                                    {item.label}
-                                    {isActive(
-                                        '/' +
-                                            (item.path === 'home'
-                                                ? ''
-                                                : item.path),
-                                    ) && (
-                                        <span className="absolute bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 transform rounded-full bg-amber-400 shadow-lg shadow-amber-400/50"></span>
-                                    )}
-                                </Link>
-                            ))}
+                                        ) && (
+                                            <span className="absolute bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 transform rounded-full bg-amber-400 shadow-lg shadow-amber-400/50"></span>
+                                        )}
+                                    </Link>
+                                ),
+                            )}
                         </div>
 
                         {/* Right Section */}
