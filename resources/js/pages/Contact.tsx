@@ -45,10 +45,10 @@ export default function Contact() {
                             </h3>
                             <p className="text-gray-600 dark:text-zinc-400">
                                 <a
-                                    href={`mailto:${settings?.email ?? ''}`}
+                                    href={`mailto:${settings?.app_email ?? ''}`}
                                     className="text-orange-600 transition-colors hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300"
                                 >
-                                    {settings?.email ?? 'N/A'}
+                                    {settings?.app_email ?? 'Non défini'}
                                 </a>
                             </p>
                         </div>
@@ -65,7 +65,7 @@ export default function Contact() {
                                 {t('location')}
                             </h3>
                             <p className="text-gray-600 dark:text-zinc-400">
-                                {settings?.adresse ?? 'N/A'}
+                                {settings?.adresse ?? 'Non défini'}
                             </p>
                         </div>
 
@@ -82,10 +82,10 @@ export default function Contact() {
                             </h3>
                             <p className="text-gray-600 dark:text-zinc-400">
                                 <a
-                                    href={`tel:${settings?.phone ?? ''}`}
+                                    href={`tel:${settings?.numero ?? ''}`}
                                     className="text-orange-600 transition-colors hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300"
                                 >
-                                    {settings?.phone ?? 'N/A'}
+                                    {settings?.numero ?? 'Non défini'}
                                 </a>
                             </p>
                         </div>

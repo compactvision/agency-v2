@@ -2,55 +2,70 @@
 
 namespace App\Domains\Billing\Services;
 
-use App\Domains\Billing\Models\Subscription;
+use App\Domains\Billing\Application\UseCases\ActivateSubscription;
+use App\Domains\Billing\Domain\ValueObjects\SubscriptionStatus;
+use App\Domains\Billing\Infrastructure\Repositories\SubscriptionRepository;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Handles payment gateway webhook events and delegates to Use Cases.
+ */
 class StatusUpdater
 {
     public function __construct(
-        protected SubscriptionManager $subscriptions
+        protected SubscriptionRepository $subscriptions,
+        protected ActivateSubscription   $activateSubscription,
     ) {}
 
-    public function paymentSucceeded(array $event)
+    public function paymentSucceeded(array $event): void
     {
         $transactionId = $event['data']['transactionId'] ?? null;
-        $sub = Subscription::where('transaction_id', $transactionId)->first();
+        $sub = $this->subscriptions->findByTransactionId($transactionId);
 
         if (!$sub) {
-            Log::error("Subscription not found for succeeded transaction", $event);
+            Log::error('Subscription not found for succeeded transaction', $event);
             return;
         }
 
-        $this->subscriptions->activate($sub, $event);
+        $this->activateSubscription->execute($sub->id, $event['data']);
     }
 
-    public function paymentFailed(array $event)
+    public function paymentFailed(array $event): void
     {
         $transactionId = $event['data']['transactionId'] ?? null;
-        $reason = $event['data']['reason'] ?? 'Unknown error';
+        $reason        = $event['data']['reason'] ?? 'Unknown error';
 
-        $sub = Subscription::where('transaction_id', $transactionId)->first();
+        $sub = $this->subscriptions->findByTransactionId($transactionId);
 
         if ($sub) {
-            $this->subscriptions->markFailed($sub, $reason);
+            $sub->update([
+                'status'         => SubscriptionStatus::Failed->value,
+                'failure_reason' => $reason,
+            ]);
         }
     }
 
-    public function paymentPending(array $event)
+    public function paymentPending(array $event): void
     {
-        $sub = Subscription::where('transaction_id', $event['data']['transactionId'] ?? null)->first();
-        if ($sub) {
-            $this->subscriptions->markPending($sub);
+        $sub = $this->subscriptions->findByTransactionId(
+            $event['data']['transactionId'] ?? null
+        );
+
+        if ($sub && $sub->status !== SubscriptionStatus::Pending->value) {
+            $sub->update(['status' => SubscriptionStatus::Pending->value]);
         }
     }
 
-    public function refundCompleted(array $event)
+    public function refundCompleted(array $event): void
     {
         $paymentId = $event['data']['paymentId'] ?? null;
+        $sub = $this->subscriptions->findByPaymentId($paymentId);
 
-        $sub = Subscription::where('payment_id', $paymentId)->first();
         if ($sub) {
-            $this->subscriptions->markRefunded($sub);
+            $sub->update([
+                'status'     => SubscriptionStatus::Refunded->value,
+                'expires_at' => now(),
+            ]);
         }
     }
 }

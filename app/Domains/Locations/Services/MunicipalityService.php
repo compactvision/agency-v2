@@ -14,7 +14,10 @@ class MunicipalityService
     {
         $query = Municipality::query()
             ->with(['city'])
-            ->withCount('properties');
+            ->withCount(['properties' => function ($query) {
+                $query->where('is_published', true)
+                      ->where('is_approved', true);
+            }]);
 
         if (!empty($filters['search'])) {
             $query->where('name', 'like', "%{$filters['search']}%");
@@ -29,7 +32,12 @@ class MunicipalityService
     public function all()
     {
         return MunicipalityResource::collection(
-            Municipality::with(['city'])->get()
+            Municipality::with(['city'])
+                ->withCount(['properties' => function ($query) {
+                    $query->where('is_published', true)
+                          ->where('is_approved', true);
+                }])
+                ->get()
         );
     }
 

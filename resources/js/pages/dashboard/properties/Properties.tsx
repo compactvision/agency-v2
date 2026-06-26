@@ -150,7 +150,7 @@ export default function Properties() {
 
     const handleViewStatistics = (property: Property) => {
         router.visit(
-            route('dashboard.analytics.property', { id: property.id }),
+            route('dashboard.analytics.show', { id: property.id }),
         );
         setDropdownOpen(null);
     };

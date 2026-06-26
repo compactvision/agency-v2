@@ -17,11 +17,11 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip,
 
 export default function Show({ propertyTitle, views, contacts }) {
     const viewsChartData = {
-        labels: views.chart.map((item) => item.date),
+        labels: views?.chart?.map((item) => item.date) || [],
         datasets: [
             {
                 label: 'Vues',
-                data: views.chart.map((item) => item.total),
+                data: views?.chart?.map((item) => item.total) || [],
                 borderColor: '#3b82f6',
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
                 tension: 0.4,
@@ -36,11 +36,11 @@ export default function Show({ propertyTitle, views, contacts }) {
     }
 
     const contactsChartData = {
-        labels: contacts.chart.map((item) => item.date),
+        labels: contacts?.chart?.map((item) => item.date) || [],
         datasets: [
             {
                 label: 'Email',
-                data: contacts.chart.map((item) => item.total_email),
+                data: contacts?.chart?.map((item) => item.total_email) || [],
                 borderColor: '#10b981',
                 backgroundColor: 'rgba(16, 185, 129, 0.1)',
                 tension: 0.4,
@@ -53,7 +53,7 @@ export default function Show({ propertyTitle, views, contacts }) {
             },
             {
                 label: 'WhatsApp',
-                data: contacts.chart.map((item) => item.total_whatsapp),
+                data: contacts?.chart?.map((item) => item.total_whatsapp) || [],
                 borderColor: '#f59e0b',
                 backgroundColor: 'rgba(245, 158, 11, 0.1)',
                 tension: 0.4,
@@ -243,7 +243,7 @@ export default function Show({ propertyTitle, views, contacts }) {
                                         <h2 className="text-xl font-bold text-gray-900">Répartition des contacts</h2>
                                     </div>
                                     <div className="space-y-4">
-                                        {contacts.byMethod.map((method) => (
+                                        {contacts?.byMethod?.map((method) => (
                                             <div key={method.method} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                                                 <div className="flex items-center gap-3">
                                                     {React.createElement(
@@ -272,7 +272,7 @@ export default function Show({ propertyTitle, views, contacts }) {
                                         <h2 className="text-xl font-bold text-gray-900">Top visiteurs</h2>
                                     </div>
                                     <div className="space-y-4">
-                                        {views.topViewers.map((viewer) => (
+                                        {views?.topViewers?.map((viewer) => (
                                             <div key={viewer.user.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                                                 <div className="flex items-center gap-3">
                                                     <User size={20} className="text-purple-500" />
@@ -302,7 +302,7 @@ export default function Show({ propertyTitle, views, contacts }) {
                                         <h2 className="text-xl font-bold text-gray-900">Historique des vues</h2>
                                     </div>
                                     <div className="space-y-3 max-h-96 overflow-y-auto">
-                                        {views.data.map((view, index) => (
+                                        {views?.data?.map((view, index) => (
                                             <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                                 <span className="text-sm text-gray-900">
                                                     {view.user?.name || 'Visiteur anonyme'}
@@ -324,7 +324,7 @@ export default function Show({ propertyTitle, views, contacts }) {
                                         <h2 className="text-xl font-bold text-gray-900">Historique des contacts</h2>
                                     </div>
                                     <div className="space-y-3 max-h-96 overflow-y-auto">
-                                        {contacts.data.map((contact, index) => (
+                                        {contacts?.data?.map((contact, index) => (
                                             <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                                 <span className="text-sm text-gray-900">
                                                     {contact.user?.name || 'Anonyme'} - <strong className="capitalize">{contact.method}</strong>

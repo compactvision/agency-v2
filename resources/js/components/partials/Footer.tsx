@@ -33,14 +33,17 @@ export default function Footer() {
     const [visible, setVisible] = useState(false);
     const footerRef = useRef<HTMLDivElement>(null);
 
-    const { appSettings } = usePage().props as { appSettings: any };
+    const { settings } = usePage().props as unknown as { settings: any };
 
     // Prépare les valeurs avec fallback
-    const facebook = appSettings?.facebook ?? 'https://www.facebook.com';
-    const twitter = appSettings?.twitter ?? 'https://www.twitter.com';
-    const linkedin = appSettings?.linkedin ?? 'https://www.linkedin.com';
-    const instagram = appSettings?.instagram ?? 'https://www.instagram.com';
-    const siteName = appSettings?.site_name ?? 'The Agency DRC';
+    const facebook = settings?.facebook ?? '#';
+    const twitter = settings?.twitter ?? '#';
+    const linkedin = settings?.linkedin ?? '#';
+    const instagram = settings?.instagram ?? '#';
+    const siteName = settings?.site_name ?? 'The Agency DRC';
+    const emailToDisplay = settings?.app_email ?? 'Non défini';
+    const phoneToDisplay = settings?.numero ?? 'Non défini';
+    const addressToDisplay = settings?.adresse ?? 'Non défini';
 
     // Animation au scroll
     useEffect(() => {
@@ -311,20 +314,16 @@ export default function Footer() {
                                 <li className="flex items-center gap-2 text-gray-300">
                                     <Mail className="h-4 w-4 text-amber-400" />
                                     <span>
-                                        contact@
-                                        {siteName
-                                            .toLowerCase()
-                                            .replace(/\s+/g, '')}
-                                        .com
+                                        {emailToDisplay}
                                     </span>
                                 </li>
                                 <li className="flex items-center gap-2 text-gray-300">
                                     <Phone className="h-4 w-4 text-amber-400" />
-                                    <span>+1 800 123 456 789</span>
+                                    <span>{phoneToDisplay}</span>
                                 </li>
                                 <li className="flex items-center gap-2 text-gray-300">
                                     <MapPin className="h-4 w-4 text-amber-400" />
-                                    <span>123 Main Street, City, Country</span>
+                                    <span>{addressToDisplay}</span>
                                 </li>
                             </ul>
                         </div>

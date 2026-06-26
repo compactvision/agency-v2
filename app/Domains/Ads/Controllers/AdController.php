@@ -23,7 +23,7 @@ class AdController
             Auth::id()
         );
 
-        return ApiResponse::success($ad, 'Ad created');
+        return ApiResponse::success(new \App\Domains\Ads\Resources\AdResource($ad), 'Ad created');
     }
 
     public function update(UpdateAdRequest $request, Ad $ad)
@@ -42,7 +42,7 @@ class AdController
             return ApiResponse::success($result['ad'], "No changes detected");
         }
 
-        return ApiResponse::success($result['ad'], "Ad updated");
+        return ApiResponse::success(new \App\Domains\Ads\Resources\AdResource($result['ad']), "Ad updated");
     }
 
     public function submit(Ad $ad)
@@ -53,21 +53,38 @@ class AdController
 
         $ad = $this->service->submit($ad);
 
-        return ApiResponse::success($ad, 'Ad submitted');
+        return ApiResponse::success(new \App\Domains\Ads\Resources\AdResource($ad), 'Ad submitted');
     }
 
     public function public(Request $request)
     {
+        $ads = $this->service->publicList($request->all());
+        
+        $items = $ads instanceof \Illuminate\Pagination\LengthAwarePaginator 
+            ? $ads->items() 
+            : $ads;
+
         return ApiResponse::success(
-            $this->service->publicList($request->all()),
+            [
+                'data' => \App\Domains\Ads\Resources\AdResource::collection($items)->resolve(),
+                'meta' => $ads instanceof \Illuminate\Pagination\LengthAwarePaginator ? [
+                    'current_page' => $ads->currentPage(),
+                    'last_page' => $ads->lastPage(),
+                    'total' => $ads->total(),
+                    'per_page' => $ads->perPage(),
+                ] : null,
+                'links' => $ads instanceof \Illuminate\Pagination\LengthAwarePaginator ? $ads->linkCollection()->toArray() : null,
+            ],
             'Public ads retrieved'
         );
     }
 
     public function show($id)
     {
+        $ad = $this->service->getPublicAd($id);
+        
         return ApiResponse::success(
-            $this->service->getPublicAd($id),
+            new \App\Domains\Ads\Resources\AdResource($ad),
             'Ad details retrieved'
         );
     }

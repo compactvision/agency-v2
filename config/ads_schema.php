@@ -60,6 +60,9 @@ return [
                 'available_from' => 'nullable|date',
                 'construction_year' => 'nullable|integer|min:1800',
                 'renovation_year' => 'nullable|integer|min:1800',
+                'floor' => 'nullable|integer|min:0',
+                'total_floors' => 'nullable|integer|min:1',
+                'year_built' => 'nullable|integer|min:1800',
                 'garage_size' => 'nullable|numeric|min:0',
                 'elevator' => 'nullable|boolean',
                 'parking' => 'nullable|boolean',
@@ -157,6 +160,7 @@ return [
                 'surface_unit' => 'nullable|in:m2,hectare',
                 'access_road' => 'nullable|boolean',
                 'slope' => 'nullable|in:flat,slight,steep',
+                'plot_surface' => 'nullable|numeric|min:0',
             ],
         ],
 

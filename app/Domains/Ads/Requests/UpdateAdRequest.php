@@ -42,6 +42,7 @@ class UpdateAdRequest extends FormRequest
             'images_to_delete.*' => ['integer'],
             'image_order' => ['sometimes', 'array'],
             'image_order.*' => ['string'], // Format: existing:ID or new:INDEX
+            'is_published' => ['sometimes', 'boolean'],
 
         ];
     }

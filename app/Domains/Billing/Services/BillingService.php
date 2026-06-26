@@ -3,6 +3,8 @@
 namespace App\Domains\Billing\Services;
 
 use App\Domains\Billing\Models\Plan;
+use App\Domains\Billing\Domain\Events\ManualSubscriptionRequested;
+use App\Models\User;
 
 class BillingService
 {
@@ -18,15 +20,37 @@ class BillingService
     {
         $plan = Plan::findOrFail($planId);
 
-        // URLs
+        // Check for existing active subscription
+        $user = User::find($userId);
+        if ($user->subscription && $user->subscription->is_active) {
+            throw new \Exception('ALREADY_HAS_SUBSCRIPTION');
+        }
+
+        // If manual payment method
+        if ($plan->payment_method === 'manual') {
+            $subscription = $this->subscriptionManager->createPending($userId, $plan);
+            
+            // Trigger event/notification for manual request
+            event(new ManualSubscriptionRequested(
+                $userId,
+                $plan->id,
+                $plan->name,
+                $subscription->id
+            ));
+
+            return [
+                'status'         => 'manual_pending',
+                'transaction_id' => $subscription->transaction_id,
+            ];
+        }
+
+        // Automatic payment (Gateway)
         $successUrl   = route('billing.success');
         $cancelUrl    = route('billing.cancel');
         $callbackUrl  = route('webhooks.acoriss');
 
-        // Create subscription in pending status
         $subscription = $this->subscriptionManager->createPending($userId, $plan);
 
-        // Fake OR real gateway depending on environment
         $sessionData = $this->gateway->createSession([
             'amount'        => $plan->price * 100,
             'currency'      => 'USD',
@@ -44,13 +68,13 @@ class BillingService
             ]
         ]);
 
-        // Attach session id
         $this->subscriptionManager->attachPaymentSession(
             $subscription,
             $sessionData['sessionId']
         );
 
         return [
+            'status'         => 'automatic_redirect',
             'checkout_url'   => $sessionData['checkoutUrl'],
             'transaction_id' => $subscription->transaction_id,
         ];

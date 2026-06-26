@@ -6,9 +6,15 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Domains\Billing\Models\Plan;
 use App\Domains\CMS\Models\Page;
+use App\Domains\Ads\Services\AdService;
+use App\Domains\Ads\Resources\AdResource;
 
 class PageController extends Controller
 {
+    public function __construct(
+        protected AdService $adService
+    ) {}
+
     public function home()
     {
         return Inertia::render('Home', [
@@ -91,6 +97,15 @@ class PageController extends Controller
 
         return Inertia::render('Page', [
             'page' => $page
+        ]);
+    }
+
+    public function property($id)
+    {
+        $property = $this->adService->getPublicAd($id);
+
+        return Inertia::render('properties/PropertyDetails', [
+            'property' => (new AdResource($property))->resolve(),
         ]);
     }
 }

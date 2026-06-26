@@ -9,10 +9,12 @@ class MockPaymentController
 {
     public function createSession(Request $request)
     {
+        $transactionId = $request->transactionId ?? ('mock_tx_' . Str::random(8));
+
         return response()->json([
-            'checkoutUrl'    => 'https://mock-payment.local/checkout/' . Str::uuid(),
+            'checkoutUrl'    => route('demo.gateway', ['transactionId' => $transactionId]),
             'sessionId'      => 'mock_session_' . Str::random(10),
-            'transactionId'  => $request->transactionId ?? ('mock_tx_' . Str::random(8)),
+            'transactionId'  => $transactionId,
         ]);
     }
 

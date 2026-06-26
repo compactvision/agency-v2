@@ -10,10 +10,14 @@ class AdminMiddleware
     public function handle(Request $request, Closure $next)
     {
         if (!$request->user() || !$request->user()->hasRole(['admin', 'super-admin'])) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You are not authorized to perform this action',
-            ], 403);
+            if ($request->expectsJson() && !$request->header('X-Inertia')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not authorized to perform this action',
+                ], 403);
+            }
+
+            abort(403, 'You are not authorized to perform this action');
         }
 
         return $next($request);

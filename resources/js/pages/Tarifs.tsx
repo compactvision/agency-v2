@@ -1,8 +1,9 @@
 import App from '@/components/layouts/Home/App';
 import Breadcumb from '@/components/ui/Breadcumb';
 import { useSubscription } from '@/hooks/useSubscription';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { Check, Crown, Shield, Star, TrendingUp, Zap } from 'lucide-react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 declare const route: any;
@@ -15,6 +16,11 @@ export default function Tarifs({
     currentPlanId: number | null;
 }) {
     const { t } = useTranslation();
+    const { auth } = (usePage().props as unknown as any) || {};
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [pendingPlanId, setPendingPlanId] = useState<number | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
     const {
         subscribe,
         submittingPlan,
@@ -23,8 +29,35 @@ export default function Tarifs({
         isSubmitting,
     } = useSubscription({ currentPlanId });
 
-    const handleGetStarted = (planId: number) => {
-        subscribe(planId);
+    const handleGetStarted = (planId: number, force = false) => {
+        if (!auth?.user) {
+            alert("Vous devez être connecté pour vous abonner.");
+            window.location.href = route('login');
+            return;
+        }
+
+        if (currentPlanId && !force) {
+            setPendingPlanId(planId);
+            setShowConfirmModal(true);
+            return;
+        }
+
+        subscribe(planId).then((result) => {
+            if (result?.status === 'manual_pending') {
+                setSuccessMessage(result.message);
+                setShowConfirmModal(false);
+                setPendingPlanId(null);
+            } else if (result?.error_code === 'ALREADY_HAS_SUBSCRIPTION') {
+                 setPendingPlanId(planId);
+                 setShowConfirmModal(true);
+            }
+        });
+    };
+
+    const confirmSwitch = () => {
+        if (pendingPlanId) {
+            handleGetStarted(pendingPlanId, true);
+        }
     };
 
     const getPlanIcon = (planName: string) => {
@@ -48,6 +81,51 @@ export default function Tarifs({
         <App>
             <Head title="Tarifs" />
             <Breadcumb title={t('pricing')} homeLink={route('home')} />
+
+            {/* Modal de confirmation */}
+            {showConfirmModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+                        <h3 className="mb-4 text-xl font-bold text-gray-900">Confirmation</h3>
+                        <p className="mb-6 text-gray-600">
+                            Vous avez déjà un abonnement actif. Voulez-vous passer à ce nouveau plan ?
+                        </p>
+                        <div className="flex justify-end gap-3">
+                            <button 
+                                onClick={() => { setShowConfirmModal(false); setPendingPlanId(null); }}
+                                className="rounded-lg px-4 py-2 font-semibold text-gray-600 hover:bg-gray-100"
+                            >
+                                Annuler
+                            </button>
+                            <button 
+                                onClick={confirmSwitch}
+                                className="rounded-lg bg-orange-600 px-4 py-2 font-semibold text-white hover:bg-orange-700"
+                            >
+                                Confirmer le changement
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Message de succès */}
+            {successMessage && (
+                <div className="fixed top-24 right-4 z-[100] max-w-sm rounded-xl border border-green-200 bg-green-50 p-4 shadow-xl">
+                    <div className="flex items-start gap-3">
+                        <Check className="mt-1 h-5 w-5 text-green-600" />
+                        <div>
+                            <p className="font-semibold text-green-800">Demande envoyée</p>
+                            <p className="text-sm text-green-700">{successMessage}</p>
+                            <button 
+                                onClick={() => setSuccessMessage(null)}
+                                className="mt-2 text-xs font-bold text-green-800 underline uppercase"
+                            >
+                                Fermer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <section className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 py-20">
                 <div className="absolute top-0 left-0 h-full w-full opacity-5">

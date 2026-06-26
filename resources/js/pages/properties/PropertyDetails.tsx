@@ -109,7 +109,7 @@ export default function PropertyDetails({
 
     const [showNumber, setShowNumber] = useState(false);
     // ... rest of state
-    const [loadingAction, setLoadingAction] = useState(false); // rename to avoid conflict
+    const [loading, setLoading] = useState(false);
     const [showMoreFeatures, setShowMoreFeatures] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -229,13 +229,15 @@ export default function PropertyDetails({
     };
 
     const nextImage = useCallback(() => {
+        if (!property?.images?.length) return;
         setCurrentIndex((prev) => (prev + 1) % property.images.length);
         setZoomLevel(1);
         setRotation(0);
         setDragOffset({ x: 0, y: 0 });
-    }, [property.images.length]);
+    }, [property?.images?.length]);
 
     const prevImage = useCallback(() => {
+        if (!property?.images?.length) return;
         setCurrentIndex(
             (prev) =>
                 (prev - 1 + property.images.length) % property.images.length,
@@ -243,7 +245,7 @@ export default function PropertyDetails({
         setZoomLevel(1);
         setRotation(0);
         setDragOffset({ x: 0, y: 0 });
-    }, [property.images.length]);
+    }, [property?.images?.length]);
 
     const handleZoomIn = () => {
         const maxZoom = isMobile ? 2 : 3;
@@ -265,9 +267,10 @@ export default function PropertyDetails({
     };
 
     const handleDownload = () => {
+        if (!property?.images?.[currentIndex]?.url) return;
         const link = document.createElement('a');
-        link.href = `/storage/${property.images[currentIndex]?.url}`;
-        link.download = `${property.title}_${currentIndex + 1}.jpg`;
+        link.href = `/storage/${property.images[currentIndex].url}`;
+        link.download = `${property.title || 'property'}_${currentIndex + 1}.jpg`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -486,7 +489,7 @@ export default function PropertyDetails({
                                 <div className="lg:col-span-3">
                                     <div className="group relative h-[500px] overflow-hidden lg:h-[700px]">
                                         <img
-                                            src={`/storage/${property.images[0]?.url}`}
+                                            src={property.images?.[0]?.url ? `/storage/${property.images[0].url}` : '/assets/images/placeholder.jpg'}
                                             alt={property.title}
                                             className="h-full w-full object-cover transition-all duration-1000 group-hover:scale-105"
                                             onLoad={() => setImageLoaded(true)}
@@ -579,7 +582,7 @@ export default function PropertyDetails({
                                             <span className="flex items-center gap-2 text-sm font-medium text-white">
                                                 <LucideCamera size={18} />
                                                 {currentIndex + 1} /{' '}
-                                                {property.images.length}{' '}
+                                                {(property.images?.length) || 0}{' '}
                                                 {t('photos')}
                                             </span>
                                         </div>
@@ -677,7 +680,7 @@ export default function PropertyDetails({
                                                     className="text-orange-500"
                                                 />
                                                 <span className="font-medium">
-                                                    {property.municipality.name}
+                                                    {property.municipality?.name || t('unknown_location')}
                                                 </span>
                                             </span>
                                             <span className="flex items-center gap-2 text-lg">
@@ -758,7 +761,7 @@ export default function PropertyDetails({
                                                 <>
                                                     <LucidePhone size={22} />
                                                     {showNumber
-                                                        ? property.user.phone
+                                                        ? property.user?.phone || 'N/A'
                                                         : t('show_number')}
                                                 </>
                                             )}
@@ -1412,8 +1415,8 @@ export default function PropertyDetails({
                                     {t('similar_properties')}
                                 </h3>
                                 <div className="space-y-4">
-                                    {arroundProperties
-                                        .slice(0, 3)
+                                    {arroundProperties?.
+                                        slice(0, 3)
                                         .map((p: any) => (
                                             <Link
                                                 key={p.id}

@@ -24,6 +24,7 @@ class Ad extends Model
         'status',
         'rejection_reason',
         'is_published',
+        'is_approved',
     ];
 
     /* RELATIONS */

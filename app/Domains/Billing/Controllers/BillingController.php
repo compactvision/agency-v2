@@ -26,8 +26,23 @@ class BillingController
 
             $result = $this->billing->startSubscription($userId, $planId);
 
+            if ($result['status'] === 'manual_pending') {
+                return ApiResponse::success([
+                    'status' => 'manual_pending',
+                    'message' => 'Votre demande d’abonnement est en cours de vérification par l’administrateur.'
+                ], 'Manual subscription requested', 201);
+            }
+
             return ApiResponse::success($result, 'Payment session created', 201);
         } catch (\Throwable $e) {
+            if ($e->getMessage() === 'ALREADY_HAS_SUBSCRIPTION') {
+                return ApiResponse::error(
+                    'Vous avez déjà un abonnement actif. Voulez-vous passer à celui-ci ?',
+                    422,
+                    'ALREADY_HAS_SUBSCRIPTION'
+                );
+            }
+
             if (app()->isLocal()) {
                 return ApiResponse::error($e->getMessage(), 500, 'START_PAYMENT_ERROR');
             }

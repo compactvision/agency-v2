@@ -5,6 +5,7 @@ namespace App\Domains\Ads\Services;
 use App\Domains\Ads\Models\Ad;
 use App\Domains\Ads\Models\AdDetail;
 use App\Domains\Quotas\Services\QuotaService;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -67,6 +68,14 @@ class AdService
      |=========================================================*/
     public function create(array $data, int $userId): Ad
     {
+        // Check Quota
+        $user = \App\Models\User::with('subscription')->findOrFail($userId);
+        $quota = $this->quota->check($userId, $user->subscription);
+        
+        if ($quota['remaining'] <= 0) {
+            throw new \Exception('QUOTA_EXCEEDED');
+        }
+
         // FULL schema validation
         $this->schemaValidator->validate($data, 'create');
 
@@ -88,7 +97,8 @@ class AdService
                 'latitude' => $data['latitude'] ?? null,
                 'longitude' => $data['longitude'] ?? null,
                 'status' => 'draft',
-                'is_published' => false,
+                'is_published' => $data['is_published'] ?? false,
+                'is_approved' => false,
             ]);
 
             AdDetail::create([
@@ -341,6 +351,7 @@ class AdService
 
         $ad->update([
             'status' => 'pending_validation',
+            'is_published' => true,
         ]);
 
         // Send Emails
@@ -369,9 +380,16 @@ class AdService
 
         $ad->update([
             'status' => 'published',
-            'is_published' => true,
+            'is_approved' => true,
             'rejection_reason' => null,
         ]);
+
+        try {
+            \Illuminate\Support\Facades\Mail::to($ad->user->email)
+                ->send(new \App\Mail\PropertyApprovedMail($ad));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send property approved email: " . $e->getMessage());
+        }
 
         return $ad;
     }
@@ -385,8 +403,15 @@ class AdService
         $ad->update([
             'status' => 'rejected',
             'rejection_reason' => $reason,
-            'is_published' => false,
+            'is_approved' => false,
         ]);
+
+        try {
+            \Illuminate\Support\Facades\Mail::to($ad->user->email)
+                ->send(new \App\Mail\PropertyRejectedMail($ad, $reason));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send property rejected email: " . $e->getMessage());
+        }
 
         return $ad;
     }
@@ -399,8 +424,8 @@ class AdService
      |=========================================================*/
     public function publicList(array $filters = [])
     {
-        $query = Ad::where('status', 'published')
-            ->where('is_published', true)
+        $query = Ad::where('is_published', true)
+            ->where('is_approved', true)
             ->with(['category', 'amenities', 'images', 'details', 'user', 'municipality', 'city', 'country']);
 
         // 1. Search (Title, Description, Reference)
@@ -482,13 +507,17 @@ class AdService
                 break;
         }
 
+        if (!empty($filters['limit'])) {
+            return $query->take($filters['limit'])->get();
+        }
+
         return $query->paginate(12);
     }
 
     public function getPublicAd($id)
     {
-        return Ad::where('status', 'published')
-            ->where('is_published', true)
+        return Ad::where('is_published', true)
+            ->where('is_approved', true)
             ->where('id', $id)
             ->with(['category', 'amenities', 'images', 'details', 'user', 'municipality', 'city', 'country'])
             ->firstOrFail();

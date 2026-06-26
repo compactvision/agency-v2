@@ -187,6 +187,16 @@ export default function Sidebar({
             permission: 'property.create',
         },
         {
+            id: 'dashboard/properties/validation',
+            label: 'Validation',
+            icon: FileText,
+            description: 'Valider les propriétés',
+            route: 'dashboard.properties.validation',
+            section: 'Propriétés',
+            roles: ['admin', 'super-admin'],
+            permission: 'property.validate',
+        },
+        {
             id: 'favorites',
             label: t('my_favorites'),
             icon: Heart,
@@ -220,7 +230,7 @@ export default function Sidebar({
         },
         {
             id: 'amenities',
-            label: t('amenities'),
+            label: t('amenities.amenities'),
             icon: Package,
             description: 'Gérer les équipements',
             route: 'dashboard.amenities.index',
@@ -351,7 +361,7 @@ export default function Sidebar({
         router.post(route('logout'));
     };
 
-    const handleMenuClick = (itemId, routeName) => {
+    const handleMenuClick = (itemId: string, routeName: string) => {
         if (itemId === 'logout') {
             handleLogout();
             return;

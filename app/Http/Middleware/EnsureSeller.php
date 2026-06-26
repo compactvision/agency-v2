@@ -12,10 +12,14 @@ class EnsureSeller
         $user = $request->user();
 
         if (!$user || !$user->hasRole('seller')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Seller access required',
-            ], 403);
+            if ($request->expectsJson() && !$request->header('X-Inertia')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Seller access required',
+                ], 403);
+            }
+
+            abort(403, 'Seller access required');
         }
 
         return $next($request);

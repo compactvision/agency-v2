@@ -25,7 +25,7 @@ class PropertyController extends Controller
         // Role-based filtering: Sellers/Agencies only see their own properties
         // Admins and Super-admins see everything
         if (!$user->hasRole(['admin', 'super-admin'])) {
-            $query->where('user_id', $user->id);
+            $query->where('user_id', auth()->id());
         }
 
         // Search filter
@@ -65,6 +65,43 @@ class PropertyController extends Controller
             ],
             'filters' => (object) $request->only(['search', 'sort_by', 'sort_order']),
             'favorites' => 0, // Placeholder until favorites system is connected
+        ]);
+    }
+
+    public function validation(Request $request)
+    {
+        if (!$request->user()->hasRole(['admin', 'super-admin'])) {
+            abort(403);
+        }
+
+        $query = Ad::query()
+            ->with(['category', 'images', 'details', 'municipality', 'user'])
+            ->where('status', 'pending_validation');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('reference', 'like', "%{$search}%");
+            });
+        }
+
+        $query->latest();
+        $properties = $query->paginate(12)->withQueryString();
+
+        return Inertia::render('dashboard/properties/Validation', [
+            'properties' => [
+                'data' => AdResource::collection($properties->items())->resolve(),
+                'meta' => [
+                    'current_page' => $properties->currentPage(),
+                    'last_page' => $properties->lastPage(),
+                    'total' => $properties->total(),
+                    'from' => $properties->firstItem(),
+                    'to' => $properties->lastItem(),
+                ],
+                'links' => $properties->linkCollection()->toArray(),
+            ],
+            'filters' => (object) $request->only(['search']),
         ]);
     }
 
@@ -128,6 +165,20 @@ class PropertyController extends Controller
         }
 
         return Inertia::render('dashboard/properties/ShowProperty', [
+            'property' => (new AdResource($property))->resolve()
+        ]);
+    }
+
+    public function validationShow($id)
+    {
+        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
+            abort(403);
+        }
+
+        $property = Ad::with(['details', 'amenities', 'images', 'category', 'user', 'municipality'])
+            ->findOrFail($id);
+
+        return Inertia::render('dashboard/properties/ValidationShow', [
             'property' => (new AdResource($property))->resolve()
         ]);
     }

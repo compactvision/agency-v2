@@ -94,14 +94,14 @@ export default function Header() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const { appSettings } = usePage<SharedData>().props as any;
+    const { settings } = usePage<SharedData>().props as any;
 
-    const numero = appSettings?.numero ?? '+1 800 123 456 789';
-    const email = appSettings?.email ?? 'your_protect@mail.com';
-    const facebook = appSettings?.facebook ?? '#';
-    const twitter = appSettings?.twitter ?? '#';
-    const linkedin = appSettings?.linkedin ?? '#';
-    const instagram = appSettings?.instagram ?? '#';
+    const numero = settings?.numero ?? 'Non défini';
+    const email = settings?.app_email ?? 'Non défini';
+    const facebook = settings?.facebook ?? '#';
+    const twitter = settings?.twitter ?? '#';
+    const linkedin = settings?.linkedin ?? '#';
+    const instagram = settings?.instagram ?? '#';
 
     return (
         <HeaderContext.Provider

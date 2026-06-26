@@ -15,17 +15,17 @@ export function useSubscription({ currentPlanId }: UseSubscriptionProps) {
     const [serverErrors, setServerErrors] = useState<Record<string, any>>({});
     const [globalError, setGlobalError] = useState<string | null>(null);
 
-    const subscribe = async (planId: number) => {
+    const subscribe = async (planId: number): Promise<any> => {
         if (!planId) {
             setGlobalError(t('invalid_plan'));
-            return;
+            return null;
         }
 
         if (planId === currentPlanId) {
             setGlobalError(
                 t('already_on_this_plan') || 'Vous avez déjà ce plan.',
             );
-            return;
+            return null;
         }
 
         // Reset errors
@@ -47,17 +47,27 @@ export function useSubscription({ currentPlanId }: UseSubscriptionProps) {
             if (checkoutUrl) {
                 window.location.href = checkoutUrl;
             }
+
+            return data;
         } catch (error: any) {
-            if (error.response?.data?.errors) {
-                setServerErrors(error.response.data.errors);
+            const responseData = error.response?.data;
+            if (responseData?.errors) {
+                setServerErrors(responseData.errors);
             }
-            if (error.response?.data?.message) {
-                setGlobalError(error.response.data.message);
+            
+            if (responseData?.code === 'ALREADY_HAS_SUBSCRIPTION') {
+                // Special code handled by the UI
+                return { error_code: 'ALREADY_HAS_SUBSCRIPTION', message: responseData.message };
+            }
+
+            if (responseData?.message) {
+                setGlobalError(responseData.message);
             } else {
                 setGlobalError(
                     t('error_occurred') || 'Une erreur est survenue.',
                 );
             }
+            return null;
         } finally {
             setSubmittingPlan(null);
         }

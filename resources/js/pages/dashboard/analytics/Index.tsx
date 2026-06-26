@@ -297,25 +297,25 @@ export default function Index({
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                             <StatCard
                                 title="Annonces"
-                                value={propertyStats.total}
+                                value={propertyStats?.total}
                                 type="properties"
                                 delay={0}
                             />
                             <StatCard
                                 title="Publiées"
-                                value={propertyStats.published}
+                                value={propertyStats?.published}
                                 type="published"
                                 delay={100}
                             />
                             <StatCard
                                 title="Approuvées"
-                                value={propertyStats.approved}
+                                value={propertyStats?.approved}
                                 type="approved"
                                 delay={200}
                             />
                             <StatCard
                                 title="En vedette"
-                                value={propertyStats.featured}
+                                value={propertyStats?.featured}
                                 type="featured"
                                 delay={300}
                             />
@@ -327,7 +327,7 @@ export default function Index({
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                             <StatCard
                                 title="Abonnements actifs"
-                                value={subscriptionStats.active}
+                                value={subscriptionStats?.active}
                                 type="active"
                                 delay={0}
                             />
@@ -335,13 +335,13 @@ export default function Index({
                                 <>
                                     <StatCard
                                         title="Abonnements expirés"
-                                        value={subscriptionStats.expired}
+                                        value={subscriptionStats?.expired}
                                         type="expired"
                                         delay={100}
                                     />
                                     <StatCard
                                         title="Total abonnements"
-                                        value={subscriptionStats.total}
+                                        value={subscriptionStats?.total}
                                         type="total"
                                         delay={200}
                                     />

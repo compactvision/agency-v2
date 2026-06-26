@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
@@ -36,6 +37,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/subscriptions/check-access', [\App\Domains\Billing\Controllers\BillingController::class, 'start'])->name('subscriptions.checkAccess');
     Route::get('/profile', [FrontPageController::class, 'profile'])->name('profile');
     Route::post('/become-seller', \App\Http\Controllers\Auth\BecomeSellerController::class)->name('become-seller');
+    Route::get('/demo-gateway', function () {
+        return Inertia::render('demo/DemoGateway', [
+            'transactionId' => request('transactionId', 'demo_' . Str::random(8))
+        ]);
+    })->name('demo.gateway');
 });
 
 require __DIR__.'/settings.php';
@@ -48,6 +54,7 @@ Route::middleware(['auth', 'verified'])->prefix('/dashboard')->group(function ()
     // Properties
     Route::prefix('properties')->name('properties.')->group(function () {
         Route::get('/', [PropertyController::class, 'index'])->name('index');
+        Route::get('/validation', [PropertyController::class, 'validation'])->name('validation');
         Route::get('/create', [PropertyController::class, 'create'])->name('create');
         Route::post('/store', [PropertyController::class, 'store'])->name('store');
         Route::get('/favorites', [PropertyController::class, 'favorites'])->name('favorites');
@@ -55,7 +62,9 @@ Route::middleware(['auth', 'verified'])->prefix('/dashboard')->group(function ()
         Route::get('/{id}', [PropertyController::class, 'show'])->name('show');
         Route::get('/{id}/edit', [PropertyController::class, 'edit'])->name('edit');
         Route::put('/{id}/update', [PropertyController::class, 'update'])->name('update');
+        Route::get('/validation/{id}', [PropertyController::class, 'validationShow'])->name('validation.show');
         Route::patch('/{id}/approve', [PropertyController::class, 'approve'])->name('approve');
+        Route::put('/{id}/reject', [PropertyController::class, 'reject'])->name('reject');
     });
 
     // Personal Routes (accessible to all roles in dashboard)
@@ -64,6 +73,7 @@ Route::middleware(['auth', 'verified'])->prefix('/dashboard')->group(function ()
 
     Route::get('/settings', [SettingController::class, 'index'])->name('settings');
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+    Route::get('/analytics/{id}', [AnalyticsController::class, 'show'])->name('analytics.show');
 
     // Users & Roles (Admin Only)
     Route::middleware('admin')->group(function() {
@@ -107,7 +117,6 @@ Route::middleware(['auth', 'verified'])->prefix('/dashboard')->group(function ()
 
 
         Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
-        Route::get('/analytics/{id}', [AnalyticsController::class, 'show'])->name('analytics.show');
     });
 
     // Favorites dedicated routes for the dashboard component
