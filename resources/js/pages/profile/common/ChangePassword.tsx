@@ -183,7 +183,7 @@ export default function ChangePassword() {
 
             {/* Carte principale */}
             <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
-                <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 text-white">
+                <div className="bg-gradient-to-r from-[#C9A84C] to-[#A8882E] p-6 text-white">
                     <h3 className="flex items-center gap-2 text-2xl font-bold">
                         <Lock size={24} />
                         {t('change_password')}
@@ -214,7 +214,7 @@ export default function ChangePassword() {
                                             : 'password'
                                     }
                                     id="current_password"
-                                    className={`w-full rounded-xl border py-3 pr-12 pl-10 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-orange-500 ${
+                                    className={`w-full rounded-xl border py-3 pr-12 pl-10 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-[#C9A84C] ${
                                         passwordErrors.current_password
                                             ? 'border-red-500'
                                             : 'border-gray-300'
@@ -270,7 +270,7 @@ export default function ChangePassword() {
                                 <input
                                     type={showNewPassword ? 'text' : 'password'}
                                     id="password"
-                                    className={`w-full rounded-xl border py-3 pr-12 pl-10 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-orange-500 ${
+                                    className={`w-full rounded-xl border py-3 pr-12 pl-10 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-[#C9A84C] ${
                                         passwordErrors.password
                                             ? 'border-red-500'
                                             : 'border-gray-300'
@@ -453,7 +453,7 @@ export default function ChangePassword() {
                                             : 'password'
                                     }
                                     id="password_confirmation"
-                                    className={`w-full rounded-xl border py-3 pr-12 pl-10 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-orange-500 ${
+                                    className={`w-full rounded-xl border py-3 pr-12 pl-10 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-[#C9A84C] ${
                                         passwordErrors.password_confirmation
                                             ? 'border-red-500'
                                             : 'border-gray-300'
@@ -530,7 +530,7 @@ export default function ChangePassword() {
                                     !passwordsMatch ||
                                     passwordStrength < 3
                                 }
-                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-3 font-medium text-white transition-all duration-300 hover:from-orange-600 hover:to-orange-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
+                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-4 py-3 font-medium text-white transition-all duration-300 hover:from-[#1E3A5F] hover:to-[#0d2340] focus:ring-2 focus:ring-[#C9A84C] focus:ring-offset-2 focus:outline-none disabled:opacity-50"
                             >
                                 {processingPassword ? (
                                     <>

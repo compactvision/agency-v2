@@ -6,9 +6,17 @@ export default function CallContact() {
                     <div className="modal-body modal__contact--body">
                         <div className="modal__calling--wrapper">
                             <div className="modal__calling--author">
-                                <img className="modal__calling--author__thumb" src="./assets/img/dashboard/calling-author.png" alt="img" />
-                                <h3 className="modal__calling--author__name">William Heineman</h3>
-                                <span className="modal__calling--author__subtitle">Calling...</span>
+                                <img
+                                    className="modal__calling--author__thumb"
+                                    src="./assets/img/dashboard/calling-author.png"
+                                    alt="img"
+                                />
+                                <h3 className="modal__calling--author__name">
+                                    William Heineman
+                                </h3>
+                                <span className="modal__calling--author__subtitle">
+                                    Calling...
+                                </span>
                             </div>
                             <div className="modal__calls--footer d-flex justify-content-center">
                                 <button className="call__receive border-0">
@@ -30,7 +38,10 @@ export default function CallContact() {
                                         <path d="M14.05 6A5 5 0 0 1 18 10" />
                                     </svg>
                                 </button>
-                                <button className="call__cancel color-accent-2 border-0" data-bs-dismiss="modal">
+                                <button
+                                    className="call__cancel color-accent-2 border-0"
+                                    data-bs-dismiss="modal"
+                                >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         width={24}

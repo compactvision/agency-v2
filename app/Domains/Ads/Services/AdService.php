@@ -68,14 +68,6 @@ class AdService
      |=========================================================*/
     public function create(array $data, int $userId): Ad
     {
-        // Check Quota
-        $user = \App\Models\User::with('subscription')->findOrFail($userId);
-        $quota = $this->quota->check($userId, $user->subscription);
-        
-        if ($quota['remaining'] <= 0) {
-            throw new \Exception('QUOTA_EXCEEDED');
-        }
-
         // FULL schema validation
         $this->schemaValidator->validate($data, 'create');
 
@@ -97,7 +89,7 @@ class AdService
                 'latitude' => $data['latitude'] ?? null,
                 'longitude' => $data['longitude'] ?? null,
                 'status' => 'draft',
-                'is_published' => $data['is_published'] ?? false,
+                'is_published' => false,
                 'is_approved' => false,
             ]);
 

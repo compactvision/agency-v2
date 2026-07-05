@@ -65,9 +65,9 @@ const Profile = () => {
             label: 'Propriétés',
             value: total.toString(),
             icon: <Building2 size={20} />,
-            color: 'from-amber-400 to-amber-600',
-            bgColor: 'bg-amber-50',
-            textColor: 'text-amber-600',
+            color: 'from-slate-100 to-slate-100',
+            bgColor: 'bg-slate-50',
+            textColor: 'text-[#1E3A5F]',
         },
         {
             label: 'Approuvées',
@@ -113,7 +113,7 @@ const Profile = () => {
         {
             icon: <Star size={16} />,
             label: 'Membre premium',
-            color: 'text-amber-500',
+            color: 'text-[#C9A84C]',
         },
         {
             icon: <Shield size={16} />,
@@ -125,13 +125,13 @@ const Profile = () => {
 
     return (
         <Dashboard>
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/30 to-slate-50">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-slate-50">
                 <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div className="mb-8">
                         <BackButton />
                         <div className="mt-6 text-center">
-                            <h1 className="mb-2 bg-gradient-to-r from-amber-600 to-amber-800 bg-clip-text text-4xl font-bold text-transparent">
+                            <h1 className="mb-2 bg-gradient-to-r from-slate-100 to-slate-100 bg-clip-text text-4xl font-bold text-transparent">
                                 Mon Profil
                             </h1>
                             <p className="text-lg text-slate-600">
@@ -142,8 +142,8 @@ const Profile = () => {
 
                     {/* Hero Section */}
                     <div className="relative mb-8">
-                        <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 opacity-10"></div>
-                        <div className="relative overflow-hidden rounded-3xl border border-amber-200/30 bg-white shadow-2xl shadow-amber-500/10">
+                        <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100 opacity-10"></div>
+                        <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl shadow-sm">
                             {/* Background Pattern */}
                             <div className="absolute inset-0 opacity-5">
                                 <div
@@ -159,7 +159,7 @@ const Profile = () => {
                                     {/* Avatar Section */}
                                     <div className="flex flex-col items-center">
                                         <div className="group relative">
-                                            <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 opacity-25 blur transition duration-300 group-hover:opacity-40"></div>
+                                            <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-[#C9A84C] to-[#A8882E] opacity-25 blur transition duration-300 group-hover:opacity-40"></div>
                                             {user?.profile_photo_url ? (
                                                 <img
                                                     src={user.profile_photo_url}
@@ -167,7 +167,7 @@ const Profile = () => {
                                                     className="relative h-32 w-32 rounded-full border-4 border-white object-cover shadow-xl lg:h-40 lg:w-40"
                                                 />
                                             ) : (
-                                                <div className="relative flex h-32 w-32 items-center justify-center rounded-full border-4 border-white bg-gradient-to-br from-amber-400 to-amber-600 text-4xl font-bold text-white shadow-xl lg:h-40 lg:w-40 lg:text-5xl">
+                                                <div className="relative flex h-32 w-32 items-center justify-center rounded-full border-4 border-white bg-gradient-to-br from-[#C9A84C] to-[#A8882E] text-4xl font-bold text-white shadow-xl lg:h-40 lg:w-40 lg:text-5xl">
                                                     {getInitial(user.name)}
                                                 </div>
                                             )}
@@ -197,7 +197,7 @@ const Profile = () => {
                                             {user?.name || 'Utilisateur'}
                                         </h2>
                                         <div className="mb-4 flex items-center justify-center gap-2 lg:justify-start">
-                                            <div className="rounded-full bg-gradient-to-r from-amber-100 to-amber-200 px-3 py-1 text-sm font-medium text-amber-800">
+                                            <div className="rounded-full bg-gradient-to-r from-slate-100 to-slate-100 px-3 py-1 text-sm font-medium text-[#0d2340]">
                                                 {user?.roles?.[0]?.name ||
                                                     'Membre'}
                                             </div>
@@ -221,7 +221,7 @@ const Profile = () => {
                                             <div className="flex items-center gap-2 text-slate-600">
                                                 <MapPin
                                                     size={16}
-                                                    className="text-amber-500"
+                                                    className="text-[#C9A84C]"
                                                 />
                                                 <span>
                                                     {user?.address ||
@@ -231,7 +231,7 @@ const Profile = () => {
                                             <div className="flex items-center gap-2 text-slate-600">
                                                 <Building2
                                                     size={16}
-                                                    className="text-amber-500"
+                                                    className="text-[#C9A84C]"
                                                 />
                                                 <span>
                                                     {user?.company ||
@@ -242,13 +242,13 @@ const Profile = () => {
                                                 <div className="flex items-center gap-2 text-slate-600">
                                                     <Globe
                                                         size={16}
-                                                        className="text-amber-500"
+                                                        className="text-[#C9A84C]"
                                                     />
                                                     <a
                                                         href={user.website}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="transition-colors hover:text-amber-600"
+                                                        className="transition-colors hover:text-[#1E3A5F]"
                                                     >
                                                         Site web
                                                     </a>
@@ -296,10 +296,10 @@ const Profile = () => {
                     {/* Contact & Social Section */}
                     <div className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
                         {/* Contact Information */}
-                        <div className="overflow-hidden rounded-3xl border border-amber-200/30 bg-white shadow-xl shadow-amber-500/10">
+                        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm shadow-xl">
                             <div className="p-6">
                                 <div className="mb-6 flex items-center gap-3">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 text-white">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] text-white">
                                         <Mail size={20} />
                                     </div>
                                     <h3 className="text-xl font-bold text-slate-900">
@@ -308,8 +308,8 @@ const Profile = () => {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <div className="group flex cursor-pointer items-center gap-4 rounded-xl p-4 transition-colors hover:bg-amber-50">
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-600 transition-transform group-hover:scale-110">
+                                    <div className="group flex cursor-pointer items-center gap-4 rounded-xl p-4 transition-colors hover:bg-slate-100">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#1E3A5F]/10 text-[#1E3A5F] transition-transform group-hover:scale-110">
                                             <Mail size={20} />
                                         </div>
                                         <div>
@@ -318,15 +318,15 @@ const Profile = () => {
                                             </div>
                                             <a
                                                 href={`mailto:${user?.email}`}
-                                                className="font-medium text-slate-900 transition-colors hover:text-amber-600"
+                                                className="font-medium text-slate-900 transition-colors hover:text-[#1E3A5F]"
                                             >
                                                 {user?.email || 'Non spécifié'}
                                             </a>
                                         </div>
                                     </div>
 
-                                    <div className="group flex cursor-pointer items-center gap-4 rounded-xl p-4 transition-colors hover:bg-amber-50">
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-600 transition-transform group-hover:scale-110">
+                                    <div className="group flex cursor-pointer items-center gap-4 rounded-xl p-4 transition-colors hover:bg-slate-100">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#1E3A5F]/10 text-[#1E3A5F] transition-transform group-hover:scale-110">
                                             <Phone size={20} />
                                         </div>
                                         <div>
@@ -335,15 +335,15 @@ const Profile = () => {
                                             </div>
                                             <a
                                                 href={`tel:${user?.phone}`}
-                                                className="font-medium text-slate-900 transition-colors hover:text-amber-600"
+                                                className="font-medium text-slate-900 transition-colors hover:text-[#1E3A5F]"
                                             >
                                                 {user?.phone || 'Non spécifié'}
                                             </a>
                                         </div>
                                     </div>
 
-                                    <div className="group flex items-center gap-4 rounded-xl p-4 transition-colors hover:bg-amber-50">
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-600 transition-transform group-hover:scale-110">
+                                    <div className="group flex items-center gap-4 rounded-xl p-4 transition-colors hover:bg-slate-100">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#1E3A5F]/10 text-[#1E3A5F] transition-transform group-hover:scale-110">
                                             <MapPin size={20} />
                                         </div>
                                         <div>
@@ -357,8 +357,8 @@ const Profile = () => {
                                         </div>
                                     </div>
 
-                                    <div className="group flex items-center gap-4 rounded-xl p-4 transition-colors hover:bg-amber-50">
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-600 transition-transform group-hover:scale-110">
+                                    <div className="group flex items-center gap-4 rounded-xl p-4 transition-colors hover:bg-slate-100">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#1E3A5F]/10 text-[#1E3A5F] transition-transform group-hover:scale-110">
                                             <Briefcase size={20} />
                                         </div>
                                         <div>
@@ -376,10 +376,10 @@ const Profile = () => {
                         </div>
 
                         {/* Social Networks */}
-                        <div className="overflow-hidden rounded-3xl border border-amber-200/30 bg-white shadow-xl shadow-amber-500/10">
+                        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm shadow-xl">
                             <div className="p-6">
                                 <div className="mb-6 flex items-center gap-3">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 text-white">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] text-white">
                                         <Globe size={20} />
                                     </div>
                                     <h3 className="text-xl font-bold text-slate-900">
@@ -396,7 +396,7 @@ const Profile = () => {
                                             rel="noopener noreferrer"
                                             className={`group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 ${
                                                 social.url
-                                                    ? 'bg-gradient-to-br from-slate-50 to-slate-100 hover:-translate-y-1 hover:from-amber-50 hover:to-amber-100 hover:shadow-lg hover:shadow-amber-500/20'
+                                                    ? 'bg-gradient-to-br from-slate-50 to-slate-100 hover:-translate-y-1 hover:from-slate-100 hover:to-slate-100 hover:shadow-lg hover:shadow-sm'
                                                     : 'cursor-not-allowed bg-slate-50 opacity-60'
                                             }`}
                                         >
@@ -425,11 +425,11 @@ const Profile = () => {
                                 </div>
 
                                 {/* Activity Stats */}
-                                <div className="mt-6 rounded-2xl bg-gradient-to-r from-amber-50 to-amber-100 p-4">
+                                <div className="mt-6 rounded-2xl bg-gradient-to-r from-slate-100 to-slate-100 p-4">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <Activity
-                                                className="text-amber-600"
+                                                className="text-[#1E3A5F]"
                                                 size={20}
                                             />
                                             <span className="text-sm font-medium text-slate-700">
@@ -442,8 +442,8 @@ const Profile = () => {
                                                     key={level}
                                                     className={`h-2 w-2 rounded-full ${
                                                         level <= 3
-                                                            ? 'bg-amber-500'
-                                                            : 'bg-amber-200'
+                                                            ? 'bg-slate-500'
+                                                            : 'bg-slate-200'
                                                     }`}
                                                 ></div>
                                             ))}
@@ -455,10 +455,10 @@ const Profile = () => {
                     </div>
 
                     {/* Performance Overview */}
-                    {/* <div className="bg-white rounded-3xl shadow-xl shadow-amber-500/10 border border-amber-200/30 overflow-hidden">
+                    {/* <div className="bg-white rounded-3xl shadow-xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="p-6">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 flex items-center justify-center text-white">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] flex items-center justify-center text-white">
                   <TrendingUp size={20} />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900">Aperçu des performances</h3>
@@ -481,8 +481,8 @@ const Profile = () => {
                   <div className="text-sm text-slate-600">Vues totales</div>
                 </div>
                 
-                <div className="text-center p-6 bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 flex items-center justify-center text-white">
+                <div className="text-center p-6 bg-gradient-to-br from-slate-100 to-slate-100 rounded-2xl">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] flex items-center justify-center text-white">
                     <Heart size={20} />
                   </div>
                   <div className="text-2xl font-bold text-slate-900">89</div>

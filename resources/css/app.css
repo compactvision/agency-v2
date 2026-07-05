@@ -1,6 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 @import 'tailwindcss';
 
-@import "tw-animate-css";
+@import 'tw-animate-css';
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -9,9 +11,8 @@
 
 @theme {
     --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
-        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-        'Noto Color Emoji';
+        'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -59,6 +60,19 @@
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
+
+    /* ─── Palette Premium Navy + Gold ─── */
+    --navy: #1e3a5f;
+    --navy-dark: #152c47;
+    --navy-light: #2a4f7c;
+    --gold: #c9a84c;
+    --gold-light: #e8c882;
+    --gold-dark: #a8882e;
+    --surface: #f8f7f4;
+    --surface-alt: #f0ede8;
+    --text-primary: #1a1a2e;
+    --text-secondary: #4a5568;
+    --text-muted: #718096;
 }
 
 :root {
@@ -139,6 +153,302 @@
 
     body {
         @apply bg-background text-foreground;
+        font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    input:not([type='checkbox']):not([type='radio']):not([type='range']):not(
+            [type='color']
+        ),
+    textarea,
+    select {
+        background-color: #ffffff !important;
+        color: #111827 !important;
+        caret-color: #111827;
+    }
+
+    input:not([type='checkbox']):not([type='radio']):not([type='range']):not(
+            [type='color']
+        )::placeholder,
+    textarea::placeholder {
+        color: #6b7280 !important;
+        opacity: 1;
+    }
+
+    select option {
+        background-color: #ffffff;
+        color: #111827;
+    }
+
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus {
+        -webkit-text-fill-color: #111827;
+        box-shadow: 0 0 0 1000px #ffffff inset;
     }
 }
+
+/* ─── Animations globales ─── */
+@keyframes ag-fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@keyframes ag-fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+@keyframes ag-fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+@keyframes ag-scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+@keyframes ag-pageEnter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@keyframes ag-pulse-soft {
+    0%,
+    100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.2;
+        transform: scale(1.1);
+    }
+}
+
+.animate-ag-fadeInUp {
+    animation: ag-fadeInUp 0.6s ease-out forwards;
+}
+.animate-ag-fadeInLeft {
+    animation: ag-fadeInLeft 0.7s ease-out forwards;
+}
+.animate-ag-fadeInRight {
+    animation: ag-fadeInRight 0.7s ease-out forwards;
+}
+.animate-ag-scaleIn {
+    animation: ag-scaleIn 0.5s ease-out forwards;
+}
+.animate-ag-pageEnter {
+    animation: ag-pageEnter 0.5s ease-out forwards;
+}
+
+/* ─── Card premium ─── */
+.card-premium {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.06),
+        0 4px 16px rgba(0, 0, 0, 0.05);
+    transition:
+        box-shadow 0.3s ease,
+        transform 0.3s ease;
+}
+.card-premium:hover {
+    box-shadow:
+        0 8px 32px rgba(30, 58, 95, 0.14),
+        0 2px 8px rgba(0, 0, 0, 0.05);
+    transform: translateY(-3px);
+}
+
+/* ─── Glassmorphism ─── */
+.glass {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.glass-white {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+/* ─── Boutons ─── */
+.btn-navy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.75rem;
+    background: var(--navy);
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 10px;
+    transition:
+        background 0.2s,
+        transform 0.2s,
+        box-shadow 0.2s;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+}
+.btn-navy:hover {
+    background: var(--navy-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(30, 58, 95, 0.28);
+}
+.btn-gold {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.75rem;
+    background: var(--gold);
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 10px;
+    transition:
+        background 0.2s,
+        transform 0.2s,
+        box-shadow 0.2s;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+}
+.btn-gold:hover {
+    background: var(--gold-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(201, 168, 76, 0.35);
+}
+.btn-outline-navy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.5rem;
+    background: transparent;
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 10px;
+    border: 2px solid var(--navy);
+    transition: all 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+}
+.btn-outline-navy:hover {
+    background: var(--navy);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+/* ─── Badges statut ─── */
+.badge-sale {
+    background: linear-gradient(135deg, #1e3a5f, #2a4f7c);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+.badge-rent {
+    background: linear-gradient(135deg, #c9a84c, #a8882e);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+/* ─── Section typography ─── */
+.section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+}
+.section-title {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+.section-title-white {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.15;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+}
+
+/* ─── Input premium ─── */
+.input-premium {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: #1a1a2e;
+    background: #fff;
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+    outline: none;
+}
+.input-premium:focus {
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+}
+
+/* ─── Skeleton loading ─── */
+.skeleton {
+    background: linear-gradient(90deg, #f0ede8 25%, #e8e4de 50%, #f0ede8 75%);
+    background-size: 200% 100%;
+    animation: skeleton-wave 1.5s infinite;
+    border-radius: 8px;
+}
+@keyframes skeleton-wave {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
 @import 'leaflet/dist/leaflet.css';

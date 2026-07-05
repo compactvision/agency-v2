@@ -9,8 +9,19 @@ export default function Message() {
                 <div className="chat__sidebar">
                     <ul className="nav chat__sidebar--btn top">
                         <li className="nav-item chat__sidebar--btn__list">
-                            <button className="chat__sidebar--btn__field active" data-bs-toggle="tab" data-bs-target="#chat" type="button">
-                                <svg width={20} height={20} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <button
+                                className="chat__sidebar--btn__field active"
+                                data-bs-toggle="tab"
+                                data-bs-target="#chat"
+                                type="button"
+                            >
+                                <svg
+                                    width={20}
+                                    height={20}
+                                    viewBox="0 0 20 20"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
                                     <path
                                         d="M14.1665 7.50008C14.1665 10.7251 11.3665 13.3334 7.9165 13.3334L7.14151 14.2667L6.68317 14.8168C6.29151 15.2834 5.5415 15.1834 5.28317 14.6251L4.1665 12.1667C2.64984 11.1001 1.6665 9.40842 1.6665 7.50008C1.6665 4.27508 4.4665 1.66675 7.9165 1.66675C10.4332 1.66675 12.6082 3.05842 13.5832 5.05842C13.9582 5.80009 14.1665 6.62508 14.1665 7.50008Z"
                                         stroke="currentColor"
@@ -23,13 +34,29 @@ export default function Message() {
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
                                     />
-                                    <path d="M5.8335 7.5H10.0002" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path
+                                        d="M5.8335 7.5H10.0002"
+                                        stroke="currentColor"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    />
                                 </svg>
                             </button>
                         </li>
                         <li className="nav-item chat__sidebar--btn__list">
-                            <button className="chat__sidebar--btn__field" data-bs-toggle="tab" data-bs-target="#calls" type="button">
-                                <svg width={20} height={20} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <button
+                                className="chat__sidebar--btn__field"
+                                data-bs-toggle="tab"
+                                data-bs-target="#calls"
+                                type="button"
+                            >
+                                <svg
+                                    width={20}
+                                    height={20}
+                                    viewBox="0 0 20 20"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
                                     <path
                                         d="M18.3082 15.2751C18.3082 15.5751 18.2415 15.8834 18.0998 16.1834C17.9582 16.4834 17.7748 16.7667 17.5332 17.0334C17.1248 17.4834 16.6748 17.8084 16.1665 18.0167C15.6665 18.2251 15.1248 18.3334 14.5415 18.3334C13.6915 18.3334 12.7832 18.1334 11.8248 17.7251C10.8665 17.3167 9.90817 16.7667 8.95817 16.0751C7.99984 15.3751 7.0915 14.6001 6.22484 13.7417C5.3665 12.8751 4.5915 11.9667 3.89984 11.0167C3.2165 10.0667 2.6665 9.11675 2.2665 8.17508C1.8665 7.22508 1.6665 6.31675 1.6665 5.45008C1.6665 4.88341 1.7665 4.34175 1.9665 3.84175C2.1665 3.33341 2.48317 2.86675 2.92484 2.45008C3.45817 1.92508 4.0415 1.66675 4.65817 1.66675C4.8915 1.66675 5.12484 1.71675 5.33317 1.81675C5.54984 1.91675 5.7415 2.06675 5.8915 2.28341L7.82484 5.00842C7.97484 5.21675 8.08317 5.40841 8.15817 5.59175C8.23317 5.76675 8.27484 5.94175 8.27484 6.10008C8.27484 6.30008 8.2165 6.50008 8.09984 6.69175C7.9915 6.88341 7.83317 7.08341 7.63317 7.28341L6.99984 7.94175C6.90817 8.03341 6.8665 8.14175 6.8665 8.27508C6.8665 8.34175 6.87484 8.40008 6.8915 8.46675C6.9165 8.53341 6.9415 8.58341 6.95817 8.63341C7.10817 8.90841 7.3665 9.26675 7.73317 9.70008C8.10817 10.1334 8.50817 10.5751 8.9415 11.0167C9.3915 11.4584 9.82484 11.8667 10.2665 12.2417C10.6998 12.6084 11.0582 12.8584 11.3415 13.0084C11.3832 13.0251 11.4332 13.0501 11.4915 13.0751C11.5582 13.1001 11.6248 13.1084 11.6998 13.1084C11.8415 13.1084 11.9498 13.0584 12.0415 12.9667L12.6748 12.3417C12.8832 12.1334 13.0832 11.9751 13.2748 11.8751C13.4665 11.7584 13.6582 11.7001 13.8665 11.7001C14.0248 11.7001 14.1915 11.7334 14.3748 11.8084C14.5582 11.8834 14.7498 11.9917 14.9582 12.1334L17.7165 14.0917C17.9332 14.2417 18.0832 14.4167 18.1748 14.6251C18.2582 14.8334 18.3082 15.0417 18.3082 15.2751Z"
                                         stroke="currentColor"
@@ -39,8 +66,19 @@ export default function Message() {
                             </button>
                         </li>
                         <li className="nav-item chat__sidebar--btn__list">
-                            <button className="chat__sidebar--btn__field" data-bs-toggle="tab" data-bs-target="#contact" type="button">
-                                <svg width={20} height={20} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <button
+                                className="chat__sidebar--btn__field"
+                                data-bs-toggle="tab"
+                                data-bs-target="#contact"
+                                type="button"
+                            >
+                                <svg
+                                    width={20}
+                                    height={20}
+                                    viewBox="0 0 20 20"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
                                     <path
                                         d="M1.8335 11.6833C2.6085 15.4833 5.96683 18.3334 10.0002 18.3334C14.0168 18.3334 17.3668 15.4917 18.1585 11.7083"
                                         stroke="currentColor"
@@ -65,8 +103,17 @@ export default function Message() {
                     </ul>
                     <ul className="nav chat__sidebar--btn bottom">
                         <li className="chat__sidebar--btn__list">
-                            <button className="chat__sidebar--btn__field" type="button">
-                                <svg width={20} height={20} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <button
+                                className="chat__sidebar--btn__field"
+                                type="button"
+                            >
+                                <svg
+                                    width={20}
+                                    height={20}
+                                    viewBox="0 0 20 20"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
                                     <path
                                         d="M11.4416 2.92495L12.9083 5.85828C13.1083 6.26662 13.6416 6.65828 14.0916 6.73328L16.7499 7.17495C18.4499 7.45828 18.8499 8.69162 17.6249 9.90828L15.5583 11.975C15.2083 12.325 15.0166 13 15.1249 13.4833L15.7166 16.0416C16.1833 18.0666 15.1083 18.85 13.3166 17.7916L10.8249 16.3166C10.3749 16.05 9.63326 16.05 9.17492 16.3166L6.68326 17.7916C4.89992 18.85 3.81659 18.0583 4.28326 16.0416L4.87492 13.4833C4.98326 13 4.79159 12.325 4.44159 11.975L2.37492 9.90828C1.15826 8.69162 1.54992 7.45828 3.24992 7.17495L5.90826 6.73328C6.34992 6.65828 6.88326 6.26662 7.08326 5.85828L8.54992 2.92495C9.34992 1.33328 10.6499 1.33328 11.4416 2.92495Z"
                                         stroke="currentColor"
@@ -77,8 +124,17 @@ export default function Message() {
                             </button>
                         </li>
                         <li className="chat__sidebar--btn__list">
-                            <button className="chat__sidebar--btn__field" type="button">
-                                <svg width={20} height={20} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <button
+                                className="chat__sidebar--btn__field"
+                                type="button"
+                            >
+                                <svg
+                                    width={20}
+                                    height={20}
+                                    viewBox="0 0 20 20"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
                                     <path
                                         d="M7.7085 7.54175C9.19183 8.08341 10.8085 8.08341 12.2918 7.54175"
                                         stroke="currentColor"
@@ -101,8 +157,17 @@ export default function Message() {
                             </button>
                         </li>
                         <li className="chat__sidebar--btn__list">
-                            <a className="chat__sidebar--btn__field" href="./settings.html">
-                                <svg width={20} height={20} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <a
+                                className="chat__sidebar--btn__field"
+                                href="./settings.html"
+                            >
+                                <svg
+                                    width={20}
+                                    height={20}
+                                    viewBox="0 0 20 20"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
                                     <path
                                         d="M10 12.5C11.3807 12.5 12.5 11.3807 12.5 10C12.5 8.61929 11.3807 7.5 10 7.5C8.61929 7.5 7.5 8.61929 7.5 10C7.5 11.3807 8.61929 12.5 10 12.5Z"
                                         stroke="currentColor"
@@ -122,8 +187,17 @@ export default function Message() {
                             </a>
                         </li>
                         <li className="chat__sidebar--btn__list profile">
-                            <a className="chat__sidebar--btn__field" href="./profile.html">
-                                <svg width={20} height={20} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <a
+                                className="chat__sidebar--btn__field"
+                                href="./profile.html"
+                            >
+                                <svg
+                                    width={20}
+                                    height={20}
+                                    viewBox="0 0 20 20"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
                                     <path
                                         d="M10.0999 10.65C10.0416 10.6417 9.9666 10.6417 9.89993 10.65C8.43327 10.6 7.2666 9.39998 7.2666 7.92498C7.2666 6.41665 8.48327 5.19165 9.99993 5.19165C11.5083 5.19165 12.7333 6.41665 12.7333 7.92498C12.7249 9.39998 11.5666 10.6 10.0999 10.65Z"
                                         stroke="currentColor"
@@ -153,30 +227,62 @@ export default function Message() {
                         <div className="tab-pane fade show active" id="chat">
                             <div className="chat__inbox--content">
                                 <div className="chat__inbox--header d-flex align-items-center justify-content-between">
-                                    <h2 className="chat__inbox--header__title">Chats</h2>
+                                    <h2 className="chat__inbox--header__title">
+                                        Chats
+                                    </h2>
                                     <button
                                         className="chat__inbox--popup__btn"
                                         data-bs-toggle="modal"
                                         data-bs-target="#modaladdcontact"
                                         aria-label="popup button"
                                     >
-                                        <svg width={20} height={20} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <svg
+                                            width={20}
+                                            height={20}
+                                            viewBox="0 0 20 20"
+                                            fill="none"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                        >
                                             <path
                                                 d="M9.99984 18.3334C14.5832 18.3334 18.3332 14.5834 18.3332 10.0001C18.3332 5.41675 14.5832 1.66675 9.99984 1.66675C5.4165 1.66675 1.6665 5.41675 1.6665 10.0001C1.6665 14.5834 5.4165 18.3334 9.99984 18.3334Z"
                                                 stroke="currentColor"
                                                 strokeLinecap="round"
                                                 strokeLinejoin="round"
                                             />
-                                            <path d="M6.6665 10H13.3332" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
-                                            <path d="M10 13.3334V6.66675" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                                            <path
+                                                d="M6.6665 10H13.3332"
+                                                stroke="currentColor"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            />
+                                            <path
+                                                d="M10 13.3334V6.66675"
+                                                stroke="currentColor"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            />
                                         </svg>
                                     </button>
                                 </div>
                                 <div className="chat__inbox--search">
                                     <form action="#">
-                                        <input className="chat__inbox--search__input" placeholder="Search Chat ...." type="text" />
-                                        <button className="chat__inbox--search__btn" aria-label="search button" type="submit">
-                                            <svg width={12} height={12} viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <input
+                                            className="chat__inbox--search__input"
+                                            placeholder="Search Chat ...."
+                                            type="text"
+                                        />
+                                        <button
+                                            className="chat__inbox--search__btn"
+                                            aria-label="search button"
+                                            type="submit"
+                                        >
+                                            <svg
+                                                width={12}
+                                                height={12}
+                                                viewBox="0 0 10 10"
+                                                fill="none"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
                                                 <path
                                                     d="M4.79171 8.74992C6.97783 8.74992 8.75004 6.97771 8.75004 4.79159C8.75004 2.60546 6.97783 0.833252 4.79171 0.833252C2.60558 0.833252 0.833374 2.60546 0.833374 4.79159C0.833374 6.97771 2.60558 8.74992 4.79171 8.74992Z"
                                                     stroke="currentColor"
@@ -196,178 +302,311 @@ export default function Message() {
                                 <div className="chat__inbox--wrapper">
                                     <ul className="chat__inbox--menu">
                                         <li className="chat__inbox--menu__list">
-                                            <span className="chat__inbox--menu__title">Recent Chats</span>
+                                            <span className="chat__inbox--menu__title">
+                                                Recent Chats
+                                            </span>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link active" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link active"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author1.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author1.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge active" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Marie Prohaska</h3>
-                                                            <p className="chat__inbox--author__desc">I will purchase it for support</p>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Marie Prohaska
+                                                            </h3>
+                                                            <p className="chat__inbox--author__desc">
+                                                                I will purchase
+                                                                it for support
+                                                            </p>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">2 min ago</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        2 min ago
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author2.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author2.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Kara Miller</h3>
-                                                            <p className="chat__inbox--author__desc">Hey, how's it going?</p>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Kara Miller
+                                                            </h3>
+                                                            <p className="chat__inbox--author__desc">
+                                                                Hey, how's it
+                                                                going?
+                                                            </p>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">1:32PM</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        1:32PM
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author3.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author3.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge active" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Jaqueline Hammes</h3>
-                                                            <p className="chat__inbox--author__desc active">Typing...</p>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Jaqueline Hammes
+                                                            </h3>
+                                                            <p className="chat__inbox--author__desc active">
+                                                                Typing...
+                                                            </p>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">14/06/2024</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        14/06/2024
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <span className="chat__inbox--menu__title">All Conversion</span>
+                                            <span className="chat__inbox--menu__title">
+                                                All Conversion
+                                            </span>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author4.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author4.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Marie Prohaska</h3>
-                                                            <p className="chat__inbox--author__desc">Chat with you later,bye</p>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Marie Prohaska
+                                                            </h3>
+                                                            <p className="chat__inbox--author__desc">
+                                                                Chat with you
+                                                                later,bye
+                                                            </p>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">9:45AM</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        9:45AM
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author5.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author5.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge active" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Jaqueline Hammes</h3>
-                                                            <p className="chat__inbox--author__desc">Nice to meet you 😊</p>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Jaqueline Hammes
+                                                            </h3>
+                                                            <p className="chat__inbox--author__desc">
+                                                                Nice to meet you
+                                                                😊
+                                                            </p>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">48 min ago</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        48 min ago
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author6.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author6.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Daniel Miller</h3>
-                                                            <p className="chat__inbox--author__desc active">Congratulations on your new</p>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Daniel Miller
+                                                            </h3>
+                                                            <p className="chat__inbox--author__desc active">
+                                                                Congratulations
+                                                                on your new
+                                                            </p>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">8:31AM</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        8:31AM
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author7.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author7.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Megan Fox</h3>
-                                                            <p className="chat__inbox--author__desc active">Great work keep it up :-)</p>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Megan Fox
+                                                            </h3>
+                                                            <p className="chat__inbox--author__desc active">
+                                                                Great work keep
+                                                                it up :-)
+                                                            </p>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">Tues</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        Tues
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author8.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author8.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge active" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Nicholas Sams</h3>
-                                                            <p className="chat__inbox--author__desc active">Hike management fixed</p>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Nicholas Sams
+                                                            </h3>
+                                                            <p className="chat__inbox--author__desc active">
+                                                                Hike management
+                                                                fixed
+                                                            </p>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">25 min ago</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        25 min ago
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author9.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author9.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Pope Johnson</h3>
-                                                            <p className="chat__inbox--author__desc active">You are need to be appreacia</p>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Pope Johnson
+                                                            </h3>
+                                                            <p className="chat__inbox--author__desc active">
+                                                                You are need to
+                                                                be appreacia
+                                                            </p>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">15 Jan</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        15 Jan
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author2.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author2.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Kara Miller</h3>
-                                                            <p className="chat__inbox--author__desc">Hey, how's it going?</p>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Kara Miller
+                                                            </h3>
+                                                            <p className="chat__inbox--author__desc">
+                                                                Hey, how's it
+                                                                going?
+                                                            </p>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">1:32PM</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        1:32PM
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
@@ -378,13 +617,29 @@ export default function Message() {
                         <div className="tab-pane fade" id="calls">
                             <div className="chat__inbox--content">
                                 <div className="chat__inbox--header">
-                                    <h2 className="chat__inbox--header__title">Calls</h2>
+                                    <h2 className="chat__inbox--header__title">
+                                        Calls
+                                    </h2>
                                 </div>
                                 <div className="chat__inbox--search">
                                     <form action="#">
-                                        <input className="chat__inbox--search__input" placeholder="Search Chat ...." type="text" />
-                                        <button className="chat__inbox--search__btn" aria-label="search button" type="submit">
-                                            <svg width={12} height={12} viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <input
+                                            className="chat__inbox--search__input"
+                                            placeholder="Search Chat ...."
+                                            type="text"
+                                        />
+                                        <button
+                                            className="chat__inbox--search__btn"
+                                            aria-label="search button"
+                                            type="submit"
+                                        >
+                                            <svg
+                                                width={12}
+                                                height={12}
+                                                viewBox="0 0 10 10"
+                                                fill="none"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
                                                 <path
                                                     d="M4.79171 8.74992C6.97783 8.74992 8.75004 6.97771 8.75004 4.79159C8.75004 2.60546 6.97783 0.833252 4.79171 0.833252C2.60558 0.833252 0.833374 2.60546 0.833374 4.79159C0.833374 6.97771 2.60558 8.74992 4.79171 8.74992Z"
                                                     stroke="currentColor"
@@ -404,165 +659,267 @@ export default function Message() {
                                 <div className="chat__inbox--wrapper">
                                     <ul className="chat__inbox--menu">
                                         <li className="chat__inbox--menu__list">
-                                            <span className="chat__inbox--menu__title">Recent Calls</span>
+                                            <span className="chat__inbox--menu__title">
+                                                Recent Calls
+                                            </span>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link active" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link active"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author1.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author1.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge active" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Marie Prohaska</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Marie Prohaska
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">2 min ago</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        2 min ago
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author2.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author2.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Kara Miller</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Kara Miller
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">1:32PM</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        1:32PM
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author3.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author3.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge active" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Jaqueline Hammes</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Jaqueline Hammes
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">14/06/2024</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        14/06/2024
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author4.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author4.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Marie Prohaska</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Marie Prohaska
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">9:45AM</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        9:45AM
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author5.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author5.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge active" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Jaqueline Hammes</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Jaqueline Hammes
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">48 min ago</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        48 min ago
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author6.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author6.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Daniel Miller</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Daniel Miller
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">8:31AM</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        8:31AM
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author7.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author7.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Megan Fox</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Megan Fox
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">Tues</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        Tues
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author8.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author8.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge active" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Nicholas Sams</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Nicholas Sams
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">25 min ago</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        25 min ago
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author9.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author9.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Pope Johnson</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Pope Johnson
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">15 Jan</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        15 Jan
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author2.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author2.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Kara Miller</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Kara Miller
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">1:32PM</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        1:32PM
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
@@ -573,13 +930,29 @@ export default function Message() {
                         <div className="tab-pane fade" id="contact">
                             <div className="chat__inbox--content">
                                 <div className="chat__inbox--header">
-                                    <h2 className="chat__inbox--header__title">Contacts</h2>
+                                    <h2 className="chat__inbox--header__title">
+                                        Contacts
+                                    </h2>
                                 </div>
                                 <div className="chat__inbox--search">
                                     <form action="#">
-                                        <input className="chat__inbox--search__input" placeholder="Search Chat ...." type="text" />
-                                        <button className="chat__inbox--search__btn" aria-label="search button" type="submit">
-                                            <svg width={12} height={12} viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <input
+                                            className="chat__inbox--search__input"
+                                            placeholder="Search Chat ...."
+                                            type="text"
+                                        />
+                                        <button
+                                            className="chat__inbox--search__btn"
+                                            aria-label="search button"
+                                            type="submit"
+                                        >
+                                            <svg
+                                                width={12}
+                                                height={12}
+                                                viewBox="0 0 10 10"
+                                                fill="none"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
                                                 <path
                                                     d="M4.79171 8.74992C6.97783 8.74992 8.75004 6.97771 8.75004 4.79159C8.75004 2.60546 6.97783 0.833252 4.79171 0.833252C2.60558 0.833252 0.833374 2.60546 0.833374 4.79159C0.833374 6.97771 2.60558 8.74992 4.79171 8.74992Z"
                                                     stroke="currentColor"
@@ -599,165 +972,267 @@ export default function Message() {
                                 <div className="chat__inbox--wrapper">
                                     <ul className="chat__inbox--menu">
                                         <li className="chat__inbox--menu__list">
-                                            <span className="chat__inbox--menu__title">My Contacts</span>
+                                            <span className="chat__inbox--menu__title">
+                                                My Contacts
+                                            </span>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link active" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link active"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author1.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author1.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge active" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Marie Prohaska</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Marie Prohaska
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">2 min ago</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        2 min ago
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author2.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author2.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Kara Miller</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Kara Miller
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">1:32PM</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        1:32PM
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author3.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author3.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge active" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Jaqueline Hammes</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Jaqueline Hammes
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">14/06/2024</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        14/06/2024
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author4.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author4.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Marie Prohaska</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Marie Prohaska
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">9:45AM</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        9:45AM
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author5.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author5.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge active" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Jaqueline Hammes</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Jaqueline Hammes
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">48 min ago</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        48 min ago
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author6.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author6.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Daniel Miller</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Daniel Miller
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">8:31AM</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        8:31AM
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author7.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author7.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Megan Fox</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Megan Fox
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">Tues</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        Tues
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author8.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author8.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge active" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Nicholas Sams</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Nicholas Sams
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">25 min ago</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        25 min ago
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author9.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author9.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Pope Johnson</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Pope Johnson
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">15 Jan</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        15 Jan
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
                                         <li className="chat__inbox--menu__list">
-                                            <a className="chat__inbox--menu__link" href="#">
+                                            <a
+                                                className="chat__inbox--menu__link"
+                                                href="#"
+                                            >
                                                 <div className="chat__inbox--menu__wrapper d-flex justify-content-between">
                                                     <div className="chat__inbox--author d-flex align-items-center">
                                                         <div className="chat__inbox--author__thumbnail">
-                                                            <img src="./assets/img/dashboard/inbox-author2.png" alt="img" />
+                                                            <img
+                                                                src="./assets/img/dashboard/inbox-author2.png"
+                                                                alt="img"
+                                                            />
                                                             <span className="chat__inbox--author__badge" />
                                                         </div>
                                                         <div className="chat__inbox--author__content">
-                                                            <h3 className="chat__inbox--author--name">Kara Miller</h3>
+                                                            <h3 className="chat__inbox--author--name">
+                                                                Kara Miller
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                    <span className="chat__inbox--date-time">1:32PM</span>
+                                                    <span className="chat__inbox--date-time">
+                                                        1:32PM
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
@@ -771,18 +1246,36 @@ export default function Message() {
                     <div className="chat__message--header d-flex align-items-center justify-content-between">
                         <div className="chat__message--author d-flex align-items-center">
                             <div className="chat__message--author__thumbnail">
-                                <img src="./assets/img/dashboard/message-author.png" alt="img" />
+                                <img
+                                    src="./assets/img/dashboard/message-author.png"
+                                    alt="img"
+                                />
                                 <span className="chat__message--author__badge" />
                             </div>
                             <div className="chat__message--author__text">
-                                <h3 className="chat__message--author__title">Marie Prohaska</h3>
-                                <span className="chat__message--author__subtitle">Online</span>
+                                <h3 className="chat__message--author__title">
+                                    Marie Prohaska
+                                </h3>
+                                <span className="chat__message--author__subtitle">
+                                    Online
+                                </span>
                             </div>
                         </div>
                         <ul className="chat__message--account d-flex">
                             <li className="chat__message--account__items">
-                                <a className="chat__message--account__btn" data-bs-toggle="modal" data-bs-target="#modaladdcalls" href="#">
-                                    <svg width={18} height={18} viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <a
+                                    className="chat__message--account__btn"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modaladdcalls"
+                                    href="#"
+                                >
+                                    <svg
+                                        width={18}
+                                        height={18}
+                                        viewBox="0 0 18 18"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
                                         <path
                                             d="M16.4775 13.7475C16.4775 14.0175 16.4175 14.295 16.29 14.565C16.1625 14.835 15.9975 15.09 15.78 15.33C15.4125 15.735 15.0075 16.0275 14.55 16.215C14.1 16.4025 13.6125 16.5 13.0875 16.5C12.3225 16.5 11.505 16.32 10.6425 15.9525C9.78 15.585 8.9175 15.09 8.0625 14.4675C7.2 13.8375 6.3825 13.14 5.6025 12.3675C4.83 11.5875 4.1325 10.77 3.51 9.915C2.895 9.06 2.4 8.205 2.04 7.3575C1.68 6.5025 1.5 5.685 1.5 4.905C1.5 4.395 1.59 3.9075 1.77 3.4575C1.95 3 2.235 2.58 2.6325 2.205C3.1125 1.7325 3.6375 1.5 4.1925 1.5C4.4025 1.5 4.6125 1.545 4.8 1.635C4.995 1.725 5.1675 1.86 5.3025 2.055L7.0425 4.5075C7.1775 4.695 7.275 4.8675 7.3425 5.0325C7.41 5.19 7.4475 5.3475 7.4475 5.49C7.4475 5.67 7.395 5.85 7.29 6.0225C7.1925 6.195 7.05 6.375 6.87 6.555L6.3 7.1475C6.2175 7.23 6.18 7.3275 6.18 7.4475C6.18 7.5075 6.1875 7.56 6.2025 7.62C6.225 7.68 6.2475 7.725 6.2625 7.77C6.3975 8.0175 6.63 8.34 6.96 8.73C7.2975 9.12 7.6575 9.5175 8.0475 9.915C8.4525 10.3125 8.8425 10.68 9.24 11.0175C9.63 11.3475 9.9525 11.5725 10.2075 11.7075C10.245 11.7225 10.29 11.745 10.3425 11.7675C10.4025 11.79 10.4625 11.7975 10.53 11.7975C10.6575 11.7975 10.755 11.7525 10.8375 11.67L11.4075 11.1075C11.595 10.92 11.775 10.7775 11.9475 10.6875C12.12 10.5825 12.2925 10.53 12.48 10.53C12.6225 10.53 12.7725 10.56 12.9375 10.6275C13.1025 10.695 13.275 10.7925 13.4625 10.92L15.945 12.6825C16.14 12.8175 16.275 12.975 16.3575 13.1625C16.4325 13.35 16.4775 13.5375 16.4775 13.7475Z"
                                             stroke="currentColor"
@@ -792,8 +1285,17 @@ export default function Message() {
                                 </a>
                             </li>
                             <li className="chat__message--account__items">
-                                <a className="chat__message--account__btn" href="#">
-                                    <svg width={18} height={18} viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <a
+                                    className="chat__message--account__btn"
+                                    href="#"
+                                >
+                                    <svg
+                                        width={18}
+                                        height={18}
+                                        viewBox="0 0 18 18"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
                                         <path
                                             d="M9.3975 15.3151H4.6575C2.2875 15.3151 1.5 13.7401 1.5 12.1576V5.84256C1.5 3.47256 2.2875 2.68506 4.6575 2.68506H9.3975C11.7675 2.68506 12.555 3.47256 12.555 5.84256V12.1576C12.555 14.5276 11.76 15.3151 9.3975 15.3151Z"
                                             stroke="currentColor"
@@ -816,15 +1318,29 @@ export default function Message() {
                                 </a>
                             </li>
                             <li className="chat__message--account__items">
-                                <a className="chat__message--account__btn" href="#">
-                                    <svg width={18} height={18} viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <a
+                                    className="chat__message--account__btn"
+                                    href="#"
+                                >
+                                    <svg
+                                        width={18}
+                                        height={18}
+                                        viewBox="0 0 18 18"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
                                         <path
                                             d="M8.625 15.75C12.56 15.75 15.75 12.56 15.75 8.625C15.75 4.68997 12.56 1.5 8.625 1.5C4.68997 1.5 1.5 4.68997 1.5 8.625C1.5 12.56 4.68997 15.75 8.625 15.75Z"
                                             stroke="currentColor"
                                             strokeLinecap="round"
                                             strokeLinejoin="round"
                                         />
-                                        <path d="M16.5 16.5L15 15" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                                        <path
+                                            d="M16.5 16.5L15 15"
+                                            stroke="currentColor"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        />
                                     </svg>
                                 </a>
                             </li>
@@ -832,14 +1348,21 @@ export default function Message() {
                     </div>
                     <div className="chat__message--wrapper">
                         <div className="chat__message--list message__in">
-                            <span className="chatting__message--date">Tues 23:14</span>
+                            <span className="chatting__message--date">
+                                Tues 23:14
+                            </span>
                             <div className="chat__message--list__inner">
                                 <div className="chatting__message--thumb">
-                                    <img src="./assets/img/dashboard/message-author.png" alt="img" />
+                                    <img
+                                        src="./assets/img/dashboard/message-author.png"
+                                        alt="img"
+                                    />
                                 </div>
                                 <div className="chatting__message--content">
                                     <div className="chatting__message--text">
-                                        <p className="chatting__message--desc">Nice to meet you</p>
+                                        <p className="chatting__message--desc">
+                                            Nice to meet you
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -849,62 +1372,47 @@ export default function Message() {
                                 <div className="message__out--content">
                                     <div className="message__out--text">
                                         <p className="message__out--desc">
-                                            It is a long established fact that a reader will be distracted by the readable content of a page when
+                                            It is a long established fact that a
+                                            reader will be distracted by the
+                                            readable content of a page when
                                             looking at its layout
                                         </p>
                                     </div>
                                     <span className="message__out--author">
                                         Sent by <span>Rïm Öń</span>
                                     </span>
-                                    <span className="chatting__message--date">21:05</span>
-                                </div>
-                                <div className="chatting__message--thumb">
-                                    <img src="./assets/img/dashboard/message-author2.png" alt="img" />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="chat__message--list message__in">
-                            <span className="chatting__message--date">Fri 23:14</span>
-                            <div className="chat__message--list__inner">
-                                <div className="chatting__message--thumb">
-                                    <img src="./assets/img/dashboard/message-author.png" alt="img" />
-                                </div>
-                                <div className="chatting__message--content">
-                                    <div className="chatting__message--text">
-                                        <p className="chatting__message--desc line1">Who are you ?</p> <br />
-                                        <p className="chatting__message--desc line2">I don't know anyone named jeremiah.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="chat__message--list message__out">
-                            <div className="chat__message--list__inner">
-                                <div className="message__out--content">
-                                    <div className="message__out--text">
-                                        <p className="message__out--desc">Some of the recent images taken are nice 👌</p>
-                                    </div>
-                                    <span className="message__out--author">
-                                        Sent by <span>Rïm Öń</span>
+                                    <span className="chatting__message--date">
+                                        21:05
                                     </span>
-                                    <span className="chatting__message--date">17:05</span>
                                 </div>
                                 <div className="chatting__message--thumb">
-                                    <img src="./assets/img/dashboard/message-author2.png" alt="img" />
+                                    <img
+                                        src="./assets/img/dashboard/message-author2.png"
+                                        alt="img"
+                                    />
                                 </div>
                             </div>
                         </div>
                         <div className="chat__message--list message__in">
-                            <span className="chatting__message--date">Sun 19:14</span>
+                            <span className="chatting__message--date">
+                                Fri 23:14
+                            </span>
                             <div className="chat__message--list__inner">
                                 <div className="chatting__message--thumb">
-                                    <img src="./assets/img/dashboard/message-author.png" alt="img" />
+                                    <img
+                                        src="./assets/img/dashboard/message-author.png"
+                                        alt="img"
+                                    />
                                 </div>
                                 <div className="chatting__message--content">
                                     <div className="chatting__message--text">
-                                        <p className="chatting__message--desc">Here are some of them have a look</p>
-                                    </div>
-                                    <div className="chatting__clint--display">
-                                        <img src="./assets/img/dashboard/clint-thumbnail.png" alt="img" />
+                                        <p className="chatting__message--desc line1">
+                                            Who are you ?
+                                        </p>{' '}
+                                        <br />
+                                        <p className="chatting__message--desc line2">
+                                            I don't know anyone named jeremiah.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -914,29 +1422,93 @@ export default function Message() {
                                 <div className="message__out--content">
                                     <div className="message__out--text">
                                         <p className="message__out--desc">
-                                            Sorry, William. O.K. We have a few things to talk about today. would you like to give your report.
+                                            Some of the recent images taken are
+                                            nice 👌
                                         </p>
                                     </div>
                                     <span className="message__out--author">
                                         Sent by <span>Rïm Öń</span>
                                     </span>
-                                    <span className="chatting__message--date">15:05</span>
+                                    <span className="chatting__message--date">
+                                        17:05
+                                    </span>
                                 </div>
                                 <div className="chatting__message--thumb">
-                                    <img src="./assets/img/dashboard/message-author2.png" alt="img" />
+                                    <img
+                                        src="./assets/img/dashboard/message-author2.png"
+                                        alt="img"
+                                    />
                                 </div>
                             </div>
                         </div>
                         <div className="chat__message--list message__in">
-                            <span className="chatting__message--date">Tues 23:14</span>
+                            <span className="chatting__message--date">
+                                Sun 19:14
+                            </span>
                             <div className="chat__message--list__inner">
                                 <div className="chatting__message--thumb">
-                                    <img src="./assets/img/dashboard/message-author.png" alt="img" />
+                                    <img
+                                        src="./assets/img/dashboard/message-author.png"
+                                        alt="img"
+                                    />
                                 </div>
                                 <div className="chatting__message--content">
                                     <div className="chatting__message--text">
                                         <p className="chatting__message--desc">
-                                            Yes, thank you 🤩. I have a sales graph I would like to show everyone. This shows how well we are selling
+                                            Here are some of them have a look
+                                        </p>
+                                    </div>
+                                    <div className="chatting__clint--display">
+                                        <img
+                                            src="./assets/img/dashboard/clint-thumbnail.png"
+                                            alt="img"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="chat__message--list message__out">
+                            <div className="chat__message--list__inner">
+                                <div className="message__out--content">
+                                    <div className="message__out--text">
+                                        <p className="message__out--desc">
+                                            Sorry, William. O.K. We have a few
+                                            things to talk about today. would
+                                            you like to give your report.
+                                        </p>
+                                    </div>
+                                    <span className="message__out--author">
+                                        Sent by <span>Rïm Öń</span>
+                                    </span>
+                                    <span className="chatting__message--date">
+                                        15:05
+                                    </span>
+                                </div>
+                                <div className="chatting__message--thumb">
+                                    <img
+                                        src="./assets/img/dashboard/message-author2.png"
+                                        alt="img"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="chat__message--list message__in">
+                            <span className="chatting__message--date">
+                                Tues 23:14
+                            </span>
+                            <div className="chat__message--list__inner">
+                                <div className="chatting__message--thumb">
+                                    <img
+                                        src="./assets/img/dashboard/message-author.png"
+                                        alt="img"
+                                    />
+                                </div>
+                                <div className="chatting__message--content">
+                                    <div className="chatting__message--text">
+                                        <p className="chatting__message--desc">
+                                            Yes, thank you 🤩. I have a sales
+                                            graph I would like to show everyone.
+                                            This shows how well we are selling
                                             our products this year.
                                         </p>
                                     </div>
@@ -948,29 +1520,43 @@ export default function Message() {
                                 <div className="message__out--content">
                                     <div className="message__out--text">
                                         <p className="message__out--desc">
-                                            Sorry, William. O.K. We have a few things to talk about today. would you like to give your report.
+                                            Sorry, William. O.K. We have a few
+                                            things to talk about today. would
+                                            you like to give your report.
                                         </p>
                                     </div>
                                     <span className="message__out--author">
                                         Sent by <span>Rïm Öń</span>
                                     </span>
-                                    <span className="chatting__message--date">15:05</span>
+                                    <span className="chatting__message--date">
+                                        15:05
+                                    </span>
                                 </div>
                                 <div className="chatting__message--thumb">
-                                    <img src="./assets/img/dashboard/message-author2.png" alt="img" />
+                                    <img
+                                        src="./assets/img/dashboard/message-author2.png"
+                                        alt="img"
+                                    />
                                 </div>
                             </div>
                         </div>
                         <div className="chat__message--list message__in">
-                            <span className="chatting__message--date">Tues 23:14</span>
+                            <span className="chatting__message--date">
+                                Tues 23:14
+                            </span>
                             <div className="chat__message--list__inner">
                                 <div className="chatting__message--thumb">
-                                    <img src="./assets/img/dashboard/message-author.png" alt="img" />
+                                    <img
+                                        src="./assets/img/dashboard/message-author.png"
+                                        alt="img"
+                                    />
                                 </div>
                                 <div className="chatting__message--content">
                                     <div className="chatting__message--text">
                                         <p className="chatting__message--desc">
-                                            Yes, thank you 🤩. I have a sales graph I would like to show everyone. This shows how well we are selling
+                                            Yes, thank you 🤩. I have a sales
+                                            graph I would like to show everyone.
+                                            This shows how well we are selling
                                             our products this year.
                                         </p>
                                     </div>
@@ -980,9 +1566,22 @@ export default function Message() {
                     </div>
                     <div className="chat__message--footer">
                         <form className="chat__message--form" action="#">
-                            <input className="chat__message--input__field" placeholder="Type a message here......." type="text" />
-                            <button className="chat__message--btn__option one" aria-label="chat button">
-                                <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <input
+                                className="chat__message--input__field"
+                                placeholder="Type a message here......."
+                                type="text"
+                            />
+                            <button
+                                className="chat__message--btn__option one"
+                                aria-label="chat button"
+                            >
+                                <svg
+                                    width={16}
+                                    height={16}
+                                    viewBox="0 0 16 16"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
                                     <path
                                         d="M6.00016 14.6666H10.0002C13.3335 14.6666 14.6668 13.3333 14.6668 9.99992V5.99992C14.6668 2.66659 13.3335 1.33325 10.0002 1.33325H6.00016C2.66683 1.33325 1.3335 2.66659 1.3335 5.99992V9.99992C1.3335 13.3333 2.66683 14.6666 6.00016 14.6666Z"
                                         stroke="currentColor"
@@ -1016,8 +1615,17 @@ export default function Message() {
                                     />
                                 </svg>
                             </button>
-                            <button className="chat__message--btn__option two" aria-label="chat button">
-                                <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <button
+                                className="chat__message--btn__option two"
+                                aria-label="chat button"
+                            >
+                                <svg
+                                    width={16}
+                                    height={16}
+                                    viewBox="0 0 16 16"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
                                     <path
                                         d="M8.22012 8.09995L6.57345 9.74661C5.66012 10.6599 5.66012 12.1333 6.57345 13.0466C7.48678 13.9599 8.96012 13.9599 9.87345 13.0466L12.4668 10.4533C14.2868 8.63328 14.2868 5.67328 12.4668 3.85328C10.6468 2.03328 7.68678 2.03328 5.86678 3.85328L3.04012 6.67995C1.48012 8.23995 1.48012 10.7733 3.04012 12.3399"
                                         stroke="currentColor"
@@ -1027,8 +1635,17 @@ export default function Message() {
                                     />
                                 </svg>
                             </button>
-                            <button className="chat__message--btn__option three" aria-label="chat button">
-                                <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <button
+                                className="chat__message--btn__option three"
+                                aria-label="chat button"
+                            >
+                                <svg
+                                    width={16}
+                                    height={16}
+                                    viewBox="0 0 16 16"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
                                     <path
                                         d="M8.00016 10.3333C9.4735 10.3333 10.6668 9.13992 10.6668 7.66659V3.99992C10.6668 2.52659 9.4735 1.33325 8.00016 1.33325C6.52683 1.33325 5.3335 2.52659 5.3335 3.99992V7.66659C5.3335 9.13992 6.52683 10.3333 8.00016 10.3333Z"
                                         stroke="currentColor"
@@ -1074,20 +1691,32 @@ export default function Message() {
                         <div className="chat__profile--header">
                             <div className="chat__message--author d-flex align-items-center">
                                 <div className="chat__message--author__thumbnail">
-                                    <img src="./assets/img/dashboard/message-author.png" alt="img" />
+                                    <img
+                                        src="./assets/img/dashboard/message-author.png"
+                                        alt="img"
+                                    />
                                     <span className="chat__message--author__badge" />
                                 </div>
                                 <div className="chat__message--author__text">
-                                    <h3 className="chat__message--author__title">Marie Prohaska</h3>
-                                    <span className="chat__message--author__subtitle">Online</span>
+                                    <h3 className="chat__message--author__title">
+                                        Marie Prohaska
+                                    </h3>
+                                    <span className="chat__message--author__subtitle">
+                                        Online
+                                    </span>
                                 </div>
                             </div>
                         </div>
                         <div className="chat__profile--box__wrapper">
                             <div className="chat__profile--step mb-30">
                                 <div className="chat__profile--step__header d-flex align-items-center justify-content-between">
-                                    <h3 className="chat__profile--step__title">Shared Files&nbsp;</h3>
-                                    <a className="chat__profile--view__all" href="#">
+                                    <h3 className="chat__profile--step__title">
+                                        Shared Files&nbsp;
+                                    </h3>
+                                    <a
+                                        className="chat__profile--view__all"
+                                        href="#"
+                                    >
                                         View All
                                     </a>
                                 </div>
@@ -1095,7 +1724,13 @@ export default function Message() {
                                     <li className="chat__profile--download__list d-flex align-items-center justify-content-between">
                                         <div className="chat__profile--download__left d-flex align-items-center">
                                             <span className="chat__profile--download__file--icon">
-                                                <svg width={18} height={18} viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <svg
+                                                    width={18}
+                                                    height={18}
+                                                    viewBox="0 0 18 18"
+                                                    fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                >
                                                     <path
                                                         d="M6.75 16.5H11.25C15 16.5 16.5 15 16.5 11.25V6.75C16.5 3 15 1.5 11.25 1.5H6.75C3 1.5 1.5 3 1.5 6.75V11.25C1.5 15 3 16.5 6.75 16.5Z"
                                                         stroke="currentColor"
@@ -1112,19 +1747,38 @@ export default function Message() {
                                                 </svg>
                                             </span>
                                             <div className="chat__profile--download__file--text">
-                                                <h4 className="chat__profile--download__file--name">Project Details.pdf</h4>
-                                                <span className="chat__profile--download__file--date">24,Oct 2022 - 14:24PM</span>
+                                                <h4 className="chat__profile--download__file--name">
+                                                    Project Details.pdf
+                                                </h4>
+                                                <span className="chat__profile--download__file--date">
+                                                    24,Oct 2022 - 14:24PM
+                                                </span>
                                             </div>
                                         </div>
-                                        <button className="chat__profile--download__btn" type="submit" aria-label="download button">
-                                            <svg width={18} height={18} viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <button
+                                            className="chat__profile--download__btn"
+                                            type="submit"
+                                            aria-label="download button"
+                                        >
+                                            <svg
+                                                width={18}
+                                                height={18}
+                                                viewBox="0 0 18 18"
+                                                fill="none"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
                                                 <path
                                                     d="M12.3299 6.67505C15.0299 6.90755 16.1324 8.29505 16.1324 11.3325V11.43C16.1324 14.7825 14.7899 16.125 11.4374 16.125H6.55486C3.20236 16.125 1.85986 14.7825 1.85986 11.43V11.3325C1.85986 8.31755 2.94736 6.93005 5.60236 6.68255"
                                                     stroke="currentColor"
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
                                                 />
-                                                <path d="M9 1.5V11.16" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                                                <path
+                                                    d="M9 1.5V11.16"
+                                                    stroke="currentColor"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                />
                                                 <path
                                                     d="M11.5123 9.48755L8.9998 12L6.4873 9.48755"
                                                     stroke="currentColor"
@@ -1137,7 +1791,13 @@ export default function Message() {
                                     <li className="chat__profile--download__list d-flex align-items-center justify-content-between">
                                         <div className="chat__profile--download__left d-flex align-items-center">
                                             <span className="chat__profile--download__file--icon">
-                                                <svg width={18} height={18} viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <svg
+                                                    width={18}
+                                                    height={18}
+                                                    viewBox="0 0 18 18"
+                                                    fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                >
                                                     <path
                                                         d="M6.75 16.5H11.25C15 16.5 16.5 15 16.5 11.25V6.75C16.5 3 15 1.5 11.25 1.5H6.75C3 1.5 1.5 3 1.5 6.75V11.25C1.5 15 3 16.5 6.75 16.5Z"
                                                         stroke="currentColor"
@@ -1159,19 +1819,38 @@ export default function Message() {
                                                 </svg>
                                             </span>
                                             <div className="chat__profile--download__file--text">
-                                                <h4 className="chat__profile--download__file--name">Img_02.Jpg</h4>
-                                                <span className="chat__profile--download__file--date">24,Oct 2022 - 14:24PM</span>
+                                                <h4 className="chat__profile--download__file--name">
+                                                    Img_02.Jpg
+                                                </h4>
+                                                <span className="chat__profile--download__file--date">
+                                                    24,Oct 2022 - 14:24PM
+                                                </span>
                                             </div>
                                         </div>
-                                        <button className="chat__profile--download__btn" type="submit" aria-label="download button">
-                                            <svg width={18} height={18} viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <button
+                                            className="chat__profile--download__btn"
+                                            type="submit"
+                                            aria-label="download button"
+                                        >
+                                            <svg
+                                                width={18}
+                                                height={18}
+                                                viewBox="0 0 18 18"
+                                                fill="none"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
                                                 <path
                                                     d="M12.3299 6.67505C15.0299 6.90755 16.1324 8.29505 16.1324 11.3325V11.43C16.1324 14.7825 14.7899 16.125 11.4374 16.125H6.55486C3.20236 16.125 1.85986 14.7825 1.85986 11.43V11.3325C1.85986 8.31755 2.94736 6.93005 5.60236 6.68255"
                                                     stroke="currentColor"
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
                                                 />
-                                                <path d="M9 1.5V11.16" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                                                <path
+                                                    d="M9 1.5V11.16"
+                                                    stroke="currentColor"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                />
                                                 <path
                                                     d="M11.5123 9.48755L8.9998 12L6.4873 9.48755"
                                                     stroke="currentColor"
@@ -1184,7 +1863,13 @@ export default function Message() {
                                     <li className="chat__profile--download__list d-flex align-items-center justify-content-between">
                                         <div className="chat__profile--download__left d-flex align-items-center">
                                             <span className="chat__profile--download__file--icon">
-                                                <svg width={18} height={18} viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <svg
+                                                    width={18}
+                                                    height={18}
+                                                    viewBox="0 0 18 18"
+                                                    fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                >
                                                     <path
                                                         d="M6.75 16.5H11.25C15 16.5 16.5 15 16.5 11.25V6.75C16.5 3 15 1.5 11.25 1.5H6.75C3 1.5 1.5 3 1.5 6.75V11.25C1.5 15 3 16.5 6.75 16.5Z"
                                                         stroke="currentColor"
@@ -1206,19 +1891,38 @@ export default function Message() {
                                                 </svg>
                                             </span>
                                             <div className="chat__profile--download__file--text">
-                                                <h4 className="chat__profile--download__file--name">Img_15.Jpg</h4>
-                                                <span className="chat__profile--download__file--date">24,Oct 2022 - 14:24PM</span>
+                                                <h4 className="chat__profile--download__file--name">
+                                                    Img_15.Jpg
+                                                </h4>
+                                                <span className="chat__profile--download__file--date">
+                                                    24,Oct 2022 - 14:24PM
+                                                </span>
                                             </div>
                                         </div>
-                                        <button className="chat__profile--download__btn" type="submit" aria-label="download button">
-                                            <svg width={18} height={18} viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <button
+                                            className="chat__profile--download__btn"
+                                            type="submit"
+                                            aria-label="download button"
+                                        >
+                                            <svg
+                                                width={18}
+                                                height={18}
+                                                viewBox="0 0 18 18"
+                                                fill="none"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
                                                 <path
                                                     d="M12.3299 6.67505C15.0299 6.90755 16.1324 8.29505 16.1324 11.3325V11.43C16.1324 14.7825 14.7899 16.125 11.4374 16.125H6.55486C3.20236 16.125 1.85986 14.7825 1.85986 11.43V11.3325C1.85986 8.31755 2.94736 6.93005 5.60236 6.68255"
                                                     stroke="currentColor"
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
                                                 />
-                                                <path d="M9 1.5V11.16" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                                                <path
+                                                    d="M9 1.5V11.16"
+                                                    stroke="currentColor"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                />
                                                 <path
                                                     d="M11.5123 9.48755L8.9998 12L6.4873 9.48755"
                                                     stroke="currentColor"
@@ -1231,7 +1935,13 @@ export default function Message() {
                                     <li className="chat__profile--download__list d-flex align-items-center justify-content-between">
                                         <div className="chat__profile--download__left d-flex align-items-center">
                                             <span className="chat__profile--download__file--icon">
-                                                <svg width={18} height={18} viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <svg
+                                                    width={18}
+                                                    height={18}
+                                                    viewBox="0 0 18 18"
+                                                    fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                >
                                                     <path
                                                         d="M6.75 16.5H11.25C15 16.5 16.5 15 16.5 11.25V6.75C16.5 3 15 1.5 11.25 1.5H6.75C3 1.5 1.5 3 1.5 6.75V11.25C1.5 15 3 16.5 6.75 16.5Z"
                                                         stroke="currentColor"
@@ -1248,19 +1958,38 @@ export default function Message() {
                                                 </svg>
                                             </span>
                                             <div className="chat__profile--download__file--text">
-                                                <h4 className="chat__profile--download__file--name">Video_15_02_2022.MP4</h4>
-                                                <span className="chat__profile--download__file--date">24,Oct 2022 - 14:24PM</span>
+                                                <h4 className="chat__profile--download__file--name">
+                                                    Video_15_02_2022.MP4
+                                                </h4>
+                                                <span className="chat__profile--download__file--date">
+                                                    24,Oct 2022 - 14:24PM
+                                                </span>
                                             </div>
                                         </div>
-                                        <button className="chat__profile--download__btn" type="submit" aria-label="download button">
-                                            <svg width={18} height={18} viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <button
+                                            className="chat__profile--download__btn"
+                                            type="submit"
+                                            aria-label="download button"
+                                        >
+                                            <svg
+                                                width={18}
+                                                height={18}
+                                                viewBox="0 0 18 18"
+                                                fill="none"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
                                                 <path
                                                     d="M12.3299 6.67505C15.0299 6.90755 16.1324 8.29505 16.1324 11.3325V11.43C16.1324 14.7825 14.7899 16.125 11.4374 16.125H6.55486C3.20236 16.125 1.85986 14.7825 1.85986 11.43V11.3325C1.85986 8.31755 2.94736 6.93005 5.60236 6.68255"
                                                     stroke="currentColor"
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
                                                 />
-                                                <path d="M9 1.5V11.16" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                                                <path
+                                                    d="M9 1.5V11.16"
+                                                    stroke="currentColor"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                />
                                                 <path
                                                     d="M11.5123 9.48755L8.9998 12L6.4873 9.48755"
                                                     stroke="currentColor"
@@ -1274,8 +2003,13 @@ export default function Message() {
                             </div>
                             <div className="chat__profile--step">
                                 <div className="chat__profile--step__header d-flex align-items-center justify-content-between">
-                                    <h3 className="chat__profile--step__title">Shared Files&nbsp;</h3>
-                                    <a className="chat__profile--view__all" href="#">
+                                    <h3 className="chat__profile--step__title">
+                                        Shared Files&nbsp;
+                                    </h3>
+                                    <a
+                                        className="chat__profile--view__all"
+                                        href="#"
+                                    >
                                         View All
                                     </a>
                                 </div>
@@ -1333,7 +2067,10 @@ export default function Message() {
                                         </a>
                                     </li>
                                 </ul>
-                                <a className="chat__profile--see__more--btn" href="#">
+                                <a
+                                    className="chat__profile--see__more--btn"
+                                    href="#"
+                                >
                                     See more
                                 </a>
                             </div>

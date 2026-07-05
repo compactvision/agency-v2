@@ -152,7 +152,7 @@ export default function FavoriteProperties({
         <>
             <div className="space-y-6">
                 {/* Header Section */}
-                <div className="rounded-2xl bg-gradient-to-r from-orange-400 to-orange-600 p-6 text-white">
+                <div className="rounded-2xl bg-gradient-to-r from-[#1E3A5F] to-[#0d2340] p-6 text-white">
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div>
                             <h2 className="mb-2 flex items-center gap-2 text-2xl font-bold">
@@ -208,7 +208,7 @@ export default function FavoriteProperties({
                                 }
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full rounded-xl border border-gray-300 py-3 pr-4 pl-10 focus:border-transparent focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-xl border border-gray-300 py-3 pr-4 pl-10 focus:border-transparent focus:ring-2 focus:ring-[#C9A84C]"
                             />
                         </div>
                         <div className="flex gap-2">
@@ -216,7 +216,7 @@ export default function FavoriteProperties({
                                 onClick={() => handleSort('date')}
                                 className={`flex items-center gap-2 rounded-xl border px-4 py-3 transition-colors ${
                                     sortBy === 'date'
-                                        ? 'border-orange-500 bg-orange-50 text-orange-600'
+                                        ? 'border-[#C9A84C] bg-slate-50 text-slate-600'
                                         : 'border-gray-300 hover:border-gray-400'
                                 }`}
                             >
@@ -232,7 +232,7 @@ export default function FavoriteProperties({
                                 onClick={() => handleSort('price')}
                                 className={`flex items-center gap-2 rounded-xl border px-4 py-3 transition-colors ${
                                     sortBy === 'price'
-                                        ? 'border-orange-500 bg-orange-50 text-orange-600'
+                                        ? 'border-[#C9A84C] bg-slate-50 text-slate-600'
                                         : 'border-gray-300 hover:border-gray-400'
                                 }`}
                             >
@@ -248,7 +248,7 @@ export default function FavoriteProperties({
                                 onClick={() => handleSort('name')}
                                 className={`flex items-center gap-2 rounded-xl border px-4 py-3 transition-colors ${
                                     sortBy === 'name'
-                                        ? 'border-orange-500 bg-orange-50 text-orange-600'
+                                        ? 'border-[#C9A84C] bg-slate-50 text-slate-600'
                                         : 'border-gray-300 hover:border-gray-400'
                                 }`}
                             >
@@ -316,7 +316,7 @@ export default function FavoriteProperties({
                                     {/* Status Badges */}
                                     <div className="absolute top-2 left-2 flex gap-2">
                                         {property.is_featured && (
-                                            <span className="flex items-center gap-1 rounded-full bg-amber-500 px-2 py-1 text-xs font-semibold text-white">
+                                            <span className="flex items-center gap-1 rounded-full bg-[#C9A84C] px-2 py-1 text-xs font-semibold text-white">
                                                 <Star size={12} />
                                                 {t('featured') || 'Vedette'}
                                             </span>
@@ -382,7 +382,7 @@ export default function FavoriteProperties({
                                                         'dashboard.properties.show',
                                                         property.id,
                                                     )}
-                                                    className="transition-colors hover:text-orange-600"
+                                                    className="transition-colors hover:text-slate-600"
                                                 >
                                                     {property.title}
                                                 </a>
@@ -395,7 +395,7 @@ export default function FavoriteProperties({
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-xl font-bold text-orange-600">
+                                            <div className="text-xl font-bold text-slate-600">
                                                 {formatPrice(property.price)}
                                             </div>
                                             {property.sale_type === 'rent' && (
@@ -466,7 +466,7 @@ export default function FavoriteProperties({
                         </p>
                         <a
                             href={route('properties')}
-                            className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-6 py-3 font-medium text-white transition-colors hover:bg-orange-600"
+                            className="inline-flex items-center gap-2 rounded-xl bg-[#C9A84C] px-6 py-3 font-medium text-white transition-colors hover:bg-slate-600"
                         >
                             <Home size={18} />
                             {t('browse_properties') ||

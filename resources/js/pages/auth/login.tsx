@@ -89,7 +89,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     <div className="overflow-hidden rounded-3xl bg-white shadow-2xl">
                         <div className="grid grid-cols-1 lg:grid-cols-2">
                             {/* Left Side - Visual */}
-                            <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 p-8 lg:p-12">
+                            <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-[#0d2340] via-[#152C47] to-[#0d2340] p-8 lg:p-12">
                                 {/* Decorative Elements */}
                                 <div className="absolute top-0 right-0 -mt-32 -mr-32 h-64 w-64 rounded-full bg-white/10"></div>
                                 <div className="absolute bottom-0 left-0 -mb-24 -ml-24 h-48 w-48 rounded-full bg-white/10"></div>
@@ -200,7 +200,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                                 }
                                                 className={`flex-1 rounded-lg px-4 py-2 font-medium transition-all duration-300 ${
                                                     loginMethod === 'email'
-                                                        ? 'bg-white text-orange-600 shadow-sm'
+                                                        ? 'bg-white text-[#C9A84C] shadow-sm'
                                                         : 'text-gray-600 hover:text-gray-900'
                                                 }`}
                                             >
@@ -212,7 +212,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                                 }
                                                 className={`flex-1 rounded-lg px-4 py-2 font-medium transition-all duration-300 ${
                                                     loginMethod === 'social'
-                                                        ? 'bg-white text-orange-600 shadow-sm'
+                                                        ? 'bg-white text-[#C9A84C] shadow-sm'
                                                         : 'text-gray-600 hover:text-gray-900'
                                                 }`}
                                             >
@@ -242,10 +242,10 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                                     </div>
                                                     <input
                                                         type="email"
-                                                        className={`w-full rounded-xl border py-3 pr-3 pl-10 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-orange-500 ${
+                                                        className={`w-full rounded-xl border py-3 pr-3 pl-10 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-[#C9A84C] ${
                                                             focusedField ===
                                                             'email'
-                                                                ? 'border-orange-500'
+                                                                ? 'border-[#C9A84C]'
                                                                 : 'border-gray-300'
                                                         } ${errors.email ? 'border-red-500' : ''}`}
                                                         placeholder={t(
@@ -298,10 +298,10 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                                                 ? 'text'
                                                                 : 'password'
                                                         }
-                                                        className={`w-full rounded-xl border py-3 pr-12 pl-10 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-orange-500 ${
+                                                        className={`w-full rounded-xl border py-3 pr-12 pl-10 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-[#C9A84C] ${
                                                             focusedField ===
                                                             'password'
-                                                                ? 'border-orange-500'
+                                                                ? 'border-[#C9A84C]'
                                                                 : 'border-gray-300'
                                                         } ${errors.password ? 'border-red-500' : ''}`}
                                                         placeholder={t(
@@ -360,7 +360,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                                     <input
                                                         id="remember"
                                                         type="checkbox"
-                                                        className="h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                                                        className="h-4 w-4 rounded border-gray-300 text-[#C9A84C] focus:ring-[#C9A84C]"
                                                         checked={data.remember}
                                                         onChange={(e) =>
                                                             setData(
@@ -381,7 +381,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                                     href={route(
                                                         'password.request',
                                                     )}
-                                                    className="text-sm font-medium text-orange-600 transition-colors hover:text-orange-500"
+                                                    className="text-sm font-medium text-[#C9A84C] transition-colors hover:text-[#A8882E]"
                                                 >
                                                     {t('forgot_password')}
                                                 </Link>
@@ -391,7 +391,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                                 <button
                                                     type="submit"
                                                     disabled={processing}
-                                                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-3 font-medium text-white transition-all duration-300 hover:from-orange-600 hover:to-orange-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
+                                                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-4 py-3 font-medium text-white transition-all duration-300 hover:from-[#A8882E] hover:to-[#8A6E22] focus:ring-2 focus:ring-[#C9A84C] focus:ring-offset-2 focus:outline-none disabled:opacity-50"
                                                 >
                                                     {processing ? (
                                                         <>
@@ -549,9 +549,9 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                                 <div className="mt-6 text-center">
                                                     <Link
                                                         href={route(
-                                                            'forgot.password',
+                                                            'password.request',
                                                         )}
-                                                        className="text-sm font-medium text-orange-600 hover:text-orange-500"
+                                                        className="text-sm font-medium text-[#C9A84C] hover:text-[#A8882E]"
                                                     >
                                                         {t('forgot_password')}
                                                     </Link>
@@ -577,7 +577,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                                 {t('dont_have_an_account')}{' '}
                                                 <Link
                                                     href={route('register')}
-                                                    className="font-medium text-orange-600 hover:text-orange-500"
+                                                    className="font-medium text-[#C9A84C] hover:text-[#A8882E]"
                                                 >
                                                     {t('sign_up')}
                                                 </Link>

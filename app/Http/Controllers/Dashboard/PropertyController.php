@@ -10,6 +10,7 @@ use App\Domains\Ads\Services\AdService;
 use App\Domains\Ads\Requests\StoreAdRequest;
 use App\Domains\Ads\Requests\UpdateAdRequest;
 use App\Domains\Ads\Resources\AdResource;
+use Illuminate\Validation\ValidationException;
 
 class PropertyController extends Controller
 {
@@ -112,10 +113,18 @@ class PropertyController extends Controller
 
     public function store(StoreAdRequest $request, AdService $service)
     {
-        $ad = $service->create($request->validated(), auth()->id());
+        try {
+            $ad = $service->create($request->validated(), auth()->id());
 
-        if ($request->boolean('is_published')) {
-            $service->submit($ad);
+            if ($request->boolean('is_published')) {
+                $service->submit($ad);
+            }
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            return back()
+                ->withErrors(['is_published' => $this->propertySubmissionErrorMessage($e)])
+                ->withInput();
         }
 
         return redirect()->route('dashboard.properties.index')
@@ -145,10 +154,18 @@ class PropertyController extends Controller
             abort(403);
         }
 
-        $service->update($ad, $request->validated());
+        try {
+            $service->update($ad, $request->validated());
 
-        if ($request->boolean('is_published') && $ad->status === 'draft') {
-            $service->submit($ad);
+            if ($request->boolean('is_published') && $ad->status === 'draft') {
+                $service->submit($ad);
+            }
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            return back()
+                ->withErrors(['is_published' => $this->propertySubmissionErrorMessage($e)])
+                ->withInput();
         }
 
         return redirect()->route('dashboard.properties.index')
@@ -302,5 +319,15 @@ class PropertyController extends Controller
             }),
             'hasActiveSubscription' => auth()->user()->hasActiveSubscription(),
         ];
+    }
+
+    protected function propertySubmissionErrorMessage(\Exception $e): string
+    {
+        return match ($e->getMessage()) {
+            'User has no active subscription' => 'Vous devez avoir un abonnement actif pour soumettre une propriété à la validation.',
+            'Quota exceeded: not enough remaining slots',
+            'QUOTA_EXCEEDED' => 'Votre quota de publications est atteint. Vous pouvez continuer à enregistrer des brouillons ou changer de forfait.',
+            default => $e->getMessage(),
+        };
     }
 }

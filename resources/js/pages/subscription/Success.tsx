@@ -1,12 +1,23 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Head, Link, usePage } from '@inertiajs/react';
-import { CheckCircle, Home, Receipt, Download, Share2, Mail, Calendar, CreditCard, Shield, ArrowRight, Zap, Sparkles } from 'lucide-react';
+import { Head, usePage } from '@inertiajs/react';
+import {
+    ArrowRight,
+    CheckCircle,
+    CreditCard,
+    Download,
+    Home,
+    Receipt,
+    Share2,
+    Shield,
+    Sparkles,
+    Zap,
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function PaymentSuccess() {
     const { props } = usePage();
     const { payment, order } = props as any;
-    
+
     const [showDetails, setShowDetails] = useState(false);
     const [copied, setCopied] = useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -16,7 +27,7 @@ export default function PaymentSuccess() {
     useEffect(() => {
         setIsLoaded(true);
         setTimeout(() => setShowBoom(true), 300);
-        
+
         // Generate explosion particles
         const newParticles = [...Array(20)].map((_, i) => ({
             id: i,
@@ -26,7 +37,9 @@ export default function PaymentSuccess() {
             vy: (Math.random() - 0.5) * 15,
             size: Math.random() * 4 + 2,
             opacity: 1,
-            color: ['#10b981', '#3b82f6', '#8b5cf6', '#ec4899'][Math.floor(Math.random() * 4)]
+            color: ['#10b981', '#3b82f6', '#8b5cf6', '#ec4899'][
+                Math.floor(Math.random() * 4)
+            ],
         }));
         setParticles(newParticles);
     }, []);
@@ -37,7 +50,7 @@ export default function PaymentSuccess() {
             month: 'long',
             year: 'numeric',
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
         });
     };
 
@@ -45,7 +58,7 @@ export default function PaymentSuccess() {
         return new Intl.NumberFormat('fr-FR', {
             style: 'currency',
             currency: 'USD',
-            minimumFractionDigits: 2
+            minimumFractionDigits: 2,
         }).format(amount);
     };
 
@@ -65,7 +78,7 @@ export default function PaymentSuccess() {
                 await navigator.share({
                     title: 'Paiement réussi !',
                     text: `J'ai effectué un paiement de ${formatPrice(payment?.amount || 0)} avec succès !`,
-                    url: window.location.href
+                    url: window.location.href,
                 });
             } catch (err) {
                 console.log('Share failed:', err);
@@ -76,18 +89,18 @@ export default function PaymentSuccess() {
     return (
         <>
             <Head title="Paiement Réussi - The AgencyDRC" />
-            
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+
+            <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
                 {/* Subtle Background Pattern */}
                 <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-5"></div>
-                
+
                 {/* Explosion Particles */}
                 {showBoom && (
-                    <div className="absolute inset-0 pointer-events-none z-50">
+                    <div className="pointer-events-none absolute inset-0 z-50">
                         {particles.map((particle) => (
                             <div
                                 key={particle.id}
-                                className="absolute w-2 h-2 rounded-full"
+                                className="absolute h-2 w-2 rounded-full"
                                 style={{
                                     backgroundColor: particle.color,
                                     left: '50%',
@@ -105,45 +118,65 @@ export default function PaymentSuccess() {
 
                 {/* Main Content */}
                 <div className="relative z-10 container mx-auto px-4 py-12 sm:py-16 lg:py-20">
-                    <div className="max-w-4xl mx-auto">
-                        
+                    <div className="mx-auto max-w-4xl">
                         {/* Success Card */}
-                        <div className={`bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl shadow-black/20 border border-white/10 p-8 sm:p-12 lg:p-16 transform transition-all duration-1000 ${isLoaded ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-8 opacity-0 scale-95'}`}>
-                            
+                        <div
+                            className={`transform rounded-3xl border border-white/10 bg-white/95 p-8 shadow-2xl shadow-black/20 backdrop-blur-xl transition-all duration-1000 sm:p-12 lg:p-16 ${isLoaded ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-8 scale-95 opacity-0'}`}
+                        >
                             {/* Success Icon with Boom Animation */}
-                            <div className="flex justify-center mb-8">
-                                <div className={`relative ${showBoom ? 'animate-bounce-in' : ''}`}>
-                                    <div className="w-24 h-24 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center shadow-2xl">
-                                        <CheckCircle size={48} className="text-white" />
+                            <div className="mb-8 flex justify-center">
+                                <div
+                                    className={`relative ${showBoom ? 'animate-bounce-in' : ''}`}
+                                >
+                                    <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-2xl">
+                                        <CheckCircle
+                                            size={48}
+                                            className="text-white"
+                                        />
                                     </div>
                                     {showBoom && (
-                                        <div className="absolute inset-0 w-24 h-24 bg-emerald-400 rounded-full animate-ping opacity-30"></div>
+                                        <div className="absolute inset-0 h-24 w-24 animate-ping rounded-full bg-emerald-400 opacity-30"></div>
                                     )}
-                                    <Sparkles className="absolute -top-4 -right-4 w-8 h-8 text-emerald-400 animate-spin" size={32} />
+                                    <Sparkles
+                                        className="absolute -top-4 -right-4 h-8 w-8 animate-spin text-emerald-400"
+                                        size={32}
+                                    />
                                 </div>
                             </div>
 
                             {/* Success Message */}
-                            <div className="text-center mb-8">
-                                <h1 className={`text-5xl sm:text-6xl lg:text-7xl font-bold text-slate-900 mb-4 ${showBoom ? 'animate-slide-up' : ''}`}>
+                            <div className="mb-8 text-center">
+                                <h1
+                                    className={`mb-4 text-5xl font-bold text-slate-900 sm:text-6xl lg:text-7xl ${showBoom ? 'animate-slide-up' : ''}`}
+                                >
                                     Paiement
-                                    <span className="block text-emerald-600">Réussi</span>
+                                    <span className="block text-emerald-600">
+                                        Réussi
+                                    </span>
                                 </h1>
-                                <p className={`text-xl text-slate-600 max-w-2xl mx-auto ${showBoom ? 'animate-slide-up animation-delay-200' : ''}`}>
+                                <p
+                                    className={`mx-auto max-w-2xl text-xl text-slate-600 ${showBoom ? 'animate-slide-up animation-delay-200' : ''}`}
+                                >
                                     Votre paiement a été traité avec succès
                                 </p>
                             </div>
 
                             {/* Amount Display */}
-                            <div className={`bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-8 mb-8 border border-emerald-100 ${showBoom ? 'animate-scale-in animation-delay-400' : ''}`}>
+                            <div
+                                className={`mb-8 rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 to-teal-50 p-8 ${showBoom ? 'animate-scale-in animation-delay-400' : ''}`}
+                            >
                                 <div className="text-center">
-                                    <p className="text-sm font-medium text-emerald-700 mb-2 uppercase tracking-wider">Montant payé</p>
-                                    <p className="text-5xl lg:text-6xl font-bold text-slate-900">
+                                    <p className="mb-2 text-sm font-medium tracking-wider text-emerald-700 uppercase">
+                                        Montant payé
+                                    </p>
+                                    <p className="text-5xl font-bold text-slate-900 lg:text-6xl">
                                         {formatPrice(payment?.amount || 29.99)}
                                     </p>
                                     <div className="mt-4 flex items-center justify-center gap-2">
-                                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                                        <span className="text-sm text-emerald-600">Transaction sécurisée</span>
+                                        <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></div>
+                                        <span className="text-sm text-emerald-600">
+                                            Transaction sécurisée
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -152,30 +185,55 @@ export default function PaymentSuccess() {
                             <div className="mb-8">
                                 <button
                                     onClick={() => setShowDetails(!showDetails)}
-                                    className="w-full flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors duration-200"
+                                    className="flex w-full items-center justify-between rounded-xl bg-slate-50 p-4 transition-colors duration-200 hover:bg-slate-100"
                                 >
-                                    <span className="font-semibold text-slate-800">Détails de la transaction</span>
-                                    <ArrowRight className={`text-slate-600 transition-transform duration-200 ${showDetails ? 'rotate-90' : ''}`} size={20} />
+                                    <span className="font-semibold text-slate-800">
+                                        Détails de la transaction
+                                    </span>
+                                    <ArrowRight
+                                        className={`text-slate-600 transition-transform duration-200 ${showDetails ? 'rotate-90' : ''}`}
+                                        size={20}
+                                    />
                                 </button>
-                                
+
                                 {showDetails && (
-                                    <div className="mt-4 p-6 bg-slate-50 rounded-xl space-y-4 animate-fade-in">
+                                    <div className="animate-fade-in mt-4 space-y-4 rounded-xl bg-slate-50 p-6">
                                         <div className="flex justify-between">
-                                            <span className="text-slate-600">Référence</span>
-                                            <span className="font-mono text-slate-900">{payment?.reference || 'N/A'}</span>
+                                            <span className="text-slate-600">
+                                                Référence
+                                            </span>
+                                            <span className="font-mono text-slate-900">
+                                                {payment?.reference || 'N/A'}
+                                            </span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-slate-600">Date</span>
-                                            <span className="text-slate-900">{formatDate(payment?.created_at || new Date())}</span>
+                                            <span className="text-slate-600">
+                                                Date
+                                            </span>
+                                            <span className="text-slate-900">
+                                                {formatDate(
+                                                    payment?.created_at ||
+                                                        new Date(),
+                                                )}
+                                            </span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-slate-600">Méthode</span>
-                                            <span className="text-slate-900">{payment?.method || 'RdCard'}</span>
+                                            <span className="text-slate-600">
+                                                Méthode
+                                            </span>
+                                            <span className="text-slate-900">
+                                                {payment?.method || 'RdCard'}
+                                            </span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-slate-600">Statut</span>
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800">
-                                                <CheckCircle size={14} className="mr-1" />
+                                            <span className="text-slate-600">
+                                                Statut
+                                            </span>
+                                            <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800">
+                                                <CheckCircle
+                                                    size={14}
+                                                    className="mr-1"
+                                                />
                                                 Complété
                                             </span>
                                         </div>
@@ -184,34 +242,41 @@ export default function PaymentSuccess() {
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                            <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                                 <button
-                                    onClick={() => window.location.href = route('dashboard')}
-                                    className="flex items-center justify-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+                                    onClick={() =>
+                                        (window.location.href =
+                                            route('dashboard'))
+                                    }
+                                    className="flex transform items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3 font-medium text-white transition-all duration-200 hover:scale-105 hover:bg-slate-800 hover:shadow-lg"
                                 >
                                     <Home size={18} />
                                     <span>Accueil</span>
                                 </button>
-                                
+
                                 <button
-                                    onClick={() => copyToClipboard(payment?.reference || '')}
-                                    className="flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 font-medium rounded-xl transition-all duration-200 transform hover:scale-105"
+                                    onClick={() =>
+                                        copyToClipboard(
+                                            payment?.reference || '',
+                                        )
+                                    }
+                                    className="flex transform items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-6 py-3 font-medium text-slate-700 transition-all duration-200 hover:scale-105 hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700"
                                 >
                                     <Receipt size={18} />
                                     <span>{copied ? 'Copié!' : 'Copier'}</span>
                                 </button>
-                                
+
                                 <button
                                     onClick={sharePayment}
-                                    className="flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-medium rounded-xl transition-all duration-200 transform hover:scale-105"
+                                    className="flex transform items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-6 py-3 font-medium text-slate-700 transition-all duration-200 hover:scale-105 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700"
                                 >
                                     <Share2 size={18} />
                                     <span>Partager</span>
                                 </button>
-                                
+
                                 <button
                                     onClick={() => window.print()}
-                                    className="flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-slate-200 hover:border-purple-500 hover:bg-purple-50 text-slate-700 hover:text-purple-700 font-medium rounded-xl transition-all duration-200 transform hover:scale-105"
+                                    className="flex transform items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-6 py-3 font-medium text-slate-700 transition-all duration-200 hover:scale-105 hover:border-purple-500 hover:bg-purple-50 hover:text-purple-700"
                                 >
                                     <Download size={18} />
                                     <span>Télécharger</span>
@@ -219,29 +284,50 @@ export default function PaymentSuccess() {
                             </div>
 
                             {/* Trust Indicators */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                                 <div className="text-center">
-                                    <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                                        <Shield size={32} className="text-slate-600" />
+                                    <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
+                                        <Shield
+                                            size={32}
+                                            className="text-slate-600"
+                                        />
                                     </div>
-                                    <h4 className="font-semibold text-slate-900 mb-1">Sécurisé</h4>
-                                    <p className="text-sm text-slate-600">Paiement 100% sécurisé</p>
+                                    <h4 className="mb-1 font-semibold text-slate-900">
+                                        Sécurisé
+                                    </h4>
+                                    <p className="text-sm text-slate-600">
+                                        Paiement 100% sécurisé
+                                    </p>
                                 </div>
-                                
+
                                 <div className="text-center">
-                                    <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                                        <CreditCard size={32} className="text-slate-600" />
+                                    <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
+                                        <CreditCard
+                                            size={32}
+                                            className="text-slate-600"
+                                        />
                                     </div>
-                                    <h4 className="font-semibold text-slate-900 mb-1">Rapide</h4>
-                                    <p className="text-sm text-slate-600">Transaction instantanée</p>
+                                    <h4 className="mb-1 font-semibold text-slate-900">
+                                        Rapide
+                                    </h4>
+                                    <p className="text-sm text-slate-600">
+                                        Transaction instantanée
+                                    </p>
                                 </div>
-                                
+
                                 <div className="text-center">
-                                    <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                                        <Zap size={32} className="text-slate-600" />
+                                    <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
+                                        <Zap
+                                            size={32}
+                                            className="text-slate-600"
+                                        />
                                     </div>
-                                    <h4 className="font-semibold text-slate-900 mb-1">Efficace</h4>
-                                    <p className="text-sm text-slate-600">Processus optimisé</p>
+                                    <h4 className="mb-1 font-semibold text-slate-900">
+                                        Efficace
+                                    </h4>
+                                    <p className="text-sm text-slate-600">
+                                        Processus optimisé
+                                    </p>
                                 </div>
                             </div>
                         </div>

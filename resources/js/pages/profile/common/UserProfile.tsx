@@ -134,7 +134,7 @@ export default function UserProfile({ user }: { user: User }) {
     return (
         <div className="space-y-6">
             {/* Profile Header */}
-            <div className="rounded-2xl bg-gradient-to-r from-orange-400 to-orange-600 p-8 text-white">
+            <div className="rounded-2xl bg-gradient-to-r from-[#1E3A5F] to-[#0d2340] p-8 text-white">
                 <div className="flex flex-col items-center gap-6 md:flex-row">
                     <div className="relative">
                         {user?.avatar ? (
@@ -148,7 +148,7 @@ export default function UserProfile({ user }: { user: User }) {
                                 <User size={48} className="text-white" />
                             </div>
                         )}
-                        <button className="absolute right-0 bottom-0 flex h-10 w-10 items-center justify-center rounded-full bg-white text-orange-600 shadow-lg transition-colors hover:bg-orange-50">
+                        <button className="absolute right-0 bottom-0 flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1E3A5F] shadow-lg transition-colors hover:bg-slate-50">
                             <Camera size={18} />
                         </button>
                     </div>
@@ -256,7 +256,7 @@ export default function UserProfile({ user }: { user: User }) {
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex flex-1 items-center justify-center gap-2 px-6 py-4 font-medium transition-colors ${
                                     activeTab === tab.id
-                                        ? 'border-b-2 border-orange-600 bg-orange-50 text-orange-600'
+                                        ? 'border-b-2 border-[#1E3A5F] bg-slate-50 text-[#1E3A5F]'
                                         : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                 }`}
                             >
@@ -275,7 +275,7 @@ export default function UserProfile({ user }: { user: User }) {
                                 <h3 className="mb-4 flex items-center gap-2 text-xl font-bold text-gray-900">
                                     <User
                                         size={20}
-                                        className="text-orange-600"
+                                        className="text-[#1E3A5F]"
                                     />
                                     {t('personal_information') ||
                                         'Informations personnelles'}
@@ -344,7 +344,7 @@ export default function UserProfile({ user }: { user: User }) {
                                 <h3 className="mb-4 flex items-center gap-2 text-xl font-bold text-gray-900">
                                     <Shield
                                         size={20}
-                                        className="text-orange-600"
+                                        className="text-[#1E3A5F]"
                                     />
                                     {t('account_security') ||
                                         'Sécurité du compte'}
@@ -375,7 +375,7 @@ export default function UserProfile({ user }: { user: User }) {
                                 <h3 className="mb-4 flex items-center gap-2 text-xl font-bold text-gray-900">
                                     <Calendar
                                         size={20}
-                                        className="text-orange-600"
+                                        className="text-[#1E3A5F]"
                                     />
                                     {t('account_activity') ||
                                         'Activité du compte'}
@@ -419,7 +419,7 @@ export default function UserProfile({ user }: { user: User }) {
                                 <h3 className="mb-4 flex items-center gap-2 text-xl font-bold text-gray-900">
                                     <MessageSquare
                                         size={20}
-                                        className="text-orange-600"
+                                        className="text-[#1E3A5F]"
                                     />
                                     {t('send_message') || 'Envoyer un message'}
                                 </h3>
@@ -475,7 +475,7 @@ export default function UserProfile({ user }: { user: User }) {
                                             <input
                                                 type="text"
                                                 id="name"
-                                                className="w-full rounded-xl border border-gray-300 py-3 pr-3 pl-10 focus:border-transparent focus:ring-2 focus:ring-orange-500"
+                                                className="w-full rounded-xl border border-gray-300 py-3 pr-3 pl-10 focus:border-transparent focus:ring-2 focus:ring-[#C9A84C]"
                                                 placeholder={
                                                     t('enter_name') ||
                                                     'Entrez votre nom'
@@ -509,7 +509,7 @@ export default function UserProfile({ user }: { user: User }) {
                                             <input
                                                 type="email"
                                                 id="email"
-                                                className="w-full rounded-xl border border-gray-300 py-3 pr-3 pl-10 focus:border-transparent focus:ring-2 focus:ring-orange-500"
+                                                className="w-full rounded-xl border border-gray-300 py-3 pr-3 pl-10 focus:border-transparent focus:ring-2 focus:ring-[#C9A84C]"
                                                 placeholder={
                                                     t('enter_email') ||
                                                     'Entrez votre email'
@@ -543,7 +543,7 @@ export default function UserProfile({ user }: { user: User }) {
                                             <input
                                                 type="tel"
                                                 id="phone"
-                                                className="w-full rounded-xl border border-gray-300 py-3 pr-3 pl-10 focus:border-transparent focus:ring-2 focus:ring-orange-500"
+                                                className="w-full rounded-xl border border-gray-300 py-3 pr-3 pl-10 focus:border-transparent focus:ring-2 focus:ring-[#C9A84C]"
                                                 placeholder={
                                                     t('enter_phone') ||
                                                     'Entrez votre téléphone'
@@ -577,7 +577,7 @@ export default function UserProfile({ user }: { user: User }) {
                                             <input
                                                 type="text"
                                                 id="subject"
-                                                className="w-full rounded-xl border border-gray-300 py-3 pr-3 pl-10 focus:border-transparent focus:ring-2 focus:ring-orange-500"
+                                                className="w-full rounded-xl border border-gray-300 py-3 pr-3 pl-10 focus:border-transparent focus:ring-2 focus:ring-[#C9A84C]"
                                                 placeholder={
                                                     t('enter_subject') ||
                                                     'Entrez le sujet'
@@ -612,7 +612,7 @@ export default function UserProfile({ user }: { user: User }) {
                                         <textarea
                                             id="message"
                                             rows={5}
-                                            className="w-full resize-none rounded-xl border border-gray-300 py-3 pr-3 pl-10 focus:border-transparent focus:ring-2 focus:ring-orange-500"
+                                            className="w-full resize-none rounded-xl border border-gray-300 py-3 pr-3 pl-10 focus:border-transparent focus:ring-2 focus:ring-[#C9A84C]"
                                             placeholder={
                                                 t('enter_message') ||
                                                 'Entrez votre message'
@@ -633,7 +633,7 @@ export default function UserProfile({ user }: { user: User }) {
                                     <input
                                         id="remember"
                                         type="checkbox"
-                                        className="h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                                        className="h-4 w-4 rounded border-gray-300 text-[#1E3A5F] focus:ring-[#C9A84C]"
                                     />
                                     <label
                                         htmlFor="remember"
@@ -648,7 +648,7 @@ export default function UserProfile({ user }: { user: User }) {
                                     <button
                                         type="submit"
                                         disabled={processing}
-                                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-3 font-medium text-white transition-all duration-300 hover:from-orange-600 hover:to-orange-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
+                                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-4 py-3 font-medium text-white transition-all duration-300 hover:from-[#1E3A5F] hover:to-[#0d2340] focus:ring-2 focus:ring-[#C9A84C] focus:ring-offset-2 focus:outline-none disabled:opacity-50"
                                     >
                                         {processing ? (
                                             <>
@@ -695,7 +695,7 @@ export default function UserProfile({ user }: { user: User }) {
                                 <h3 className="mb-4 flex items-center gap-2 text-xl font-bold text-gray-900">
                                     <Clock
                                         size={20}
-                                        className="text-orange-600"
+                                        className="text-[#1E3A5F]"
                                     />
                                     {t('recent_activity') || 'Activité récente'}
                                 </h3>

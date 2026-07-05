@@ -133,6 +133,7 @@ type Property = {
     existing_images?: Array<{ id: number; url: string }>;
     slug?: string;
     land_surface?: string;
+    land_type?: string;
 };
 
 interface Props {
@@ -237,7 +238,7 @@ const PropertyForm: React.FC<Props> = ({
             cellar: false,
             attic: false,
             urgency: 'normal',
-            is_published: true,
+            is_published: false,
             is_featured: false,
             images: [] as File[],
             amenities: [] as number[],
@@ -247,6 +248,7 @@ const PropertyForm: React.FC<Props> = ({
                 position?: number;
             }>,
             land_surface: '',
+            land_type: 'constructible',
             slug: '',
             images_to_delete: [] as number[],
             image_positions: [] as number[],
@@ -345,6 +347,7 @@ const PropertyForm: React.FC<Props> = ({
                 amenities: amenityIds,
                 existing_images: existingImages,
                 land_surface: rawProp.details?.land_surface?.toString() || '',
+                land_type: rawProp.details?.land_type || 'constructible',
                 slug: rawProp.slug || '',
                 images_to_delete: [] as number[],
                 image_positions: [] as number[],
@@ -646,13 +649,18 @@ const PropertyForm: React.FC<Props> = ({
                 {
                     type: data.type,
                     sale_type: data.sale_type,
+                    title: data.title,
                     municipality: municipalityName,
+                    quarter: data.quarter,
+                    address: data.address,
                     price: data.price,
                     surface: data.surface,
                     bedrooms: data.bedrooms,
                     bathrooms: data.bathrooms,
                     rooms: data.rooms,
                     kitchens: data.kitchens,
+                    condition: data.condition,
+                    furnished: data.furnished,
                     amenities: selectedAmenities,
                 },
             );
@@ -693,11 +701,16 @@ const PropertyForm: React.FC<Props> = ({
                 const response = await axios.get(
                     `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
                         query,
-                    )}&countrycodes=cd`,
+                    )}&countrycodes=cd&addressdetails=1&limit=6`,
                 );
                 setSearchResults(response.data);
             } catch (error) {
                 console.error('Error searching location:', error);
+                setSearchResults([]);
+                setSubmitStatus('error');
+                setSubmitMessage(
+                    'La recherche de lieu a échoué. Réessayez ou placez le point directement sur la carte.',
+                );
             } finally {
                 setIsSearching(false);
             }
@@ -714,6 +727,7 @@ const PropertyForm: React.FC<Props> = ({
                 latitude: lat.toFixed(6),
                 longitude: lon.toFixed(6),
                 address: result.display_name, // Update address with selected location name
+                map_location: result.display_name,
             }));
 
             setSearchResults([]);
@@ -739,6 +753,86 @@ const PropertyForm: React.FC<Props> = ({
                 return cat?.id || categories[0]?.id || 1;
             };
 
+            const toInt = (value: string, fallback = 0) =>
+                Number.isFinite(parseInt(value)) ? parseInt(value) : fallback;
+            const toNumber = (value: string) =>
+                value ? parseFloat(value) : null;
+            const pruneEmptyDetails = (details: Record<string, any>) =>
+                Object.fromEntries(
+                    Object.entries(details).filter(
+                        ([, value]) =>
+                            value !== null &&
+                            value !== undefined &&
+                            value !== '',
+                    ),
+                );
+            const commonDetails = {
+                quarter: data.quarter,
+                address: data.address,
+            };
+            const residentialDetails = {
+                ...commonDetails,
+                bedrooms: toInt(data.bedrooms),
+                bathrooms: toInt(data.bathrooms),
+                kitchens: toInt(data.kitchens),
+                rooms: toInt(data.rooms),
+                floor: data.total_floors === '1' ? 0 : toInt(data.floor),
+                total_floors: toInt(data.total_floors, 1),
+                furnished: data.furnished,
+                condition: data.condition,
+                year_built: data.year_built ? toInt(data.year_built) : null,
+                construction_year: data.construction_year
+                    ? toInt(data.construction_year)
+                    : null,
+                renovation_year: data.renovation_year
+                    ? toInt(data.renovation_year)
+                    : null,
+                elevator: !!data.elevator,
+                parking: !!data.parking,
+                garden: !!data.garden,
+                swimming_pool: !!data.swimming_pool,
+                cellar: !!data.cellar,
+                attic: !!data.attic,
+                garage_size: data.garage_size || null,
+                ...(data.sale_type === 'rent'
+                    ? { guarantee_months: toInt(data.rental_guarantee) }
+                    : {}),
+            };
+            const detailsByType: Record<string, any> = {
+                maison: residentialDetails,
+                appartement: residentialDetails,
+                terrain: {
+                    ...commonDetails,
+                    land_type: data.land_type || 'constructible',
+                    plot_surface: toNumber(data.surface),
+                    surface_unit: 'm2',
+                },
+                immeuble: {
+                    ...commonDetails,
+                    floors: Math.max(toInt(data.total_floors, 1), 1),
+                    apartments: Math.max(toInt(data.rooms, 1), 1),
+                    year_built: data.year_built ? toInt(data.year_built) : null,
+                    total_surface: toNumber(data.surface),
+                    condition: data.condition,
+                },
+                bureau: {
+                    ...commonDetails,
+                    rooms: toInt(data.rooms),
+                    floor: toInt(data.floor),
+                    total_floors: toInt(data.total_floors, 1),
+                    surface_working: toNumber(data.surface),
+                    condition: data.condition,
+                    ...(data.sale_type === 'rent'
+                        ? { guarantee_months: toInt(data.rental_guarantee) }
+                        : {}),
+                },
+                entrepot: {
+                    ...commonDetails,
+                    storage_surface: toNumber(data.surface),
+                    condition: data.condition,
+                },
+            };
+
             // Extract IDs from imagePreviews to send order
             const currentImageOrderIds = imagePreviews
                 .filter((img) => img.isExisting && img.id)
@@ -757,41 +851,9 @@ const PropertyForm: React.FC<Props> = ({
                 latitude: data.latitude ? parseFloat(data.latitude) : null,
                 longitude: data.longitude ? parseFloat(data.longitude) : null,
                 is_published: shouldPublish,
-                details: {
-                    quarter: data.quarter,
-                    address: data.address,
-                    bedrooms: parseInt(data.bedrooms) || 0,
-                    bathrooms: parseInt(data.bathrooms) || 0,
-                    kitchens: parseInt(data.kitchens) || 0,
-                    rooms: parseInt(data.rooms) || 0,
-                    floor:
-                        data.total_floors === '1'
-                            ? 0
-                            : data.floor
-                              ? parseInt(data.floor)
-                              : 0,
-                    total_floors: data.total_floors
-                        ? parseInt(data.total_floors)
-                        : 1,
-                    furnished: data.furnished,
-                    condition: data.condition,
-                    year_built: data.year_built
-                        ? parseInt(data.year_built)
-                        : null,
-                    construction_year: data.construction_year
-                        ? parseInt(data.construction_year)
-                        : null,
-                    renovation_year: data.renovation_year
-                        ? parseInt(data.renovation_year)
-                        : null,
-                    elevator: !!data.elevator,
-                    parking: !!data.parking,
-                    garden: !!data.garden,
-                    swimming_pool: !!data.swimming_pool,
-                    cellar: !!data.cellar,
-                    attic: !!data.attic,
-                    garage_size: data.garage_size || null,
-                },
+                details: pruneEmptyDetails(
+                    detailsByType[data.type] || residentialDetails,
+                ),
                 amenities: data.amenities,
                 // Reconstruct 'images' array from imagePreviews to match visual order of NEW files
                 // And build 'image_order' array for backend
@@ -849,11 +911,18 @@ const PropertyForm: React.FC<Props> = ({
             };
 
             const onErrorCallback = (errors: any) => {
+                const firstField = Object.keys(errors)[0];
+                if (firstField && errorSections[firstField]) {
+                    setActiveSection(errorSections[firstField]);
+                }
+
                 setSubmitStatus('error');
                 setSubmitMessage(
-                    isEditMode
-                        ? 'Erreur lors de la mise à jour de la propriété. Veuillez vérifier les champs.'
-                        : 'Erreur lors de la création de la propriété. Veuillez vérifier les champs.',
+                    firstField
+                        ? formatError(firstField, errors[firstField])
+                        : isEditMode
+                          ? 'Impossible de mettre à jour la propriété. Vérifiez les champs indiqués.'
+                          : 'Impossible de créer la propriété. Vérifiez les champs indiqués.',
                 );
                 console.error('Erreurs:', errors);
             };
@@ -921,10 +990,73 @@ const PropertyForm: React.FC<Props> = ({
     const canGenerateDescription =
         data.type &&
         data.sale_type &&
-        data.municipality_id &&
-        data.price &&
-        data.surface &&
-        data.bedrooms;
+        (data.municipality_id || data.quarter || data.address) &&
+        (data.price || data.surface || data.title);
+
+    const fieldLabels: Record<string, string> = {
+        title: 'Titre de la propriété',
+        category_id: 'Type de propriété',
+        type: 'Type de propriété',
+        ad_type: 'Type de transaction',
+        sale_type: 'Type de transaction',
+        price: 'Prix',
+        surface: 'Surface',
+        municipality_id: 'Commune',
+        country_id: 'Pays',
+        city_id: 'Ville',
+        latitude: 'Latitude',
+        longitude: 'Longitude',
+        description: 'Description',
+        images: 'Photos',
+        'images.0': 'Photo',
+        is_published: 'Publication',
+        details: 'Détails du bien',
+        'details.bedrooms': 'Chambres',
+        'details.bathrooms': 'Salles de bain',
+        'details.kitchens': 'Cuisines',
+        'details.rooms': 'Nombre de pièces',
+        'details.floor': 'Étage',
+        'details.total_floors': "Nombre total d'étages",
+        'details.condition': 'État du bien',
+    };
+
+    const errorSections: Record<string, string> = {
+        title: 'basic',
+        category_id: 'basic',
+        type: 'basic',
+        ad_type: 'basic',
+        sale_type: 'basic',
+        description: 'basic',
+        price: 'pricing',
+        surface: 'features',
+        details: 'features',
+        'details.bedrooms': 'features',
+        'details.bathrooms': 'features',
+        'details.kitchens': 'features',
+        municipality_id: 'location',
+        country_id: 'location',
+        city_id: 'location',
+        latitude: 'location',
+        longitude: 'location',
+        images: 'media',
+        is_published: 'publication',
+    };
+
+    const formatError = (field: string, error: string) => {
+        const label = fieldLabels[field] || field.replace('details.', '');
+        const normalized = String(error)
+            .replace('The ', '')
+            .replace(' field is required.', ' est obligatoire.')
+            .replace(' is required.', ' est obligatoire.')
+            .replace(' must be a number.', ' doit être un nombre.')
+            .replace(' must be an integer.', ' doit être un nombre entier.')
+            .replace(
+                ' must be at least 0.',
+                ' doit être supérieur ou égal à 0.',
+            );
+
+        return `${label}: ${normalized}`;
+    };
 
     // Vérifier si les champs requis sont remplis
     const requiredFieldsFilled =
@@ -984,9 +1116,9 @@ const PropertyForm: React.FC<Props> = ({
 
     return (
         <Dashboard>
-            <div className="min-h-screen bg-gradient-to-br from-amber-50/30 via-white to-amber-50/20">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 {/* Header responsive */}
-                <div className="sticky top-0 z-1 border-b border-amber-200/30 bg-white/80 shadow-lg shadow-amber-500/5 backdrop-blur-xl">
+                <div className="sticky top-0 z-1 border-b border-slate-200 bg-white/80 shadow-lg shadow-sm backdrop-blur-xl">
                     <div className="px-3 py-3 sm:px-4 sm:py-4 lg:px-8">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <button
@@ -995,7 +1127,7 @@ const PropertyForm: React.FC<Props> = ({
                                         route('dashboard.properties.index'),
                                     )
                                 }
-                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-100/50 px-3 py-2 text-amber-700 transition-colors duration-200 hover:bg-amber-100 sm:w-auto"
+                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1E3A5F]/10 px-3 py-2 text-[#0d2340] transition-colors duration-200 hover:bg-slate-100 sm:w-auto"
                             >
                                 <ArrowLeft size={16} />
                                 <span className="text-sm sm:text-base">
@@ -1004,7 +1136,7 @@ const PropertyForm: React.FC<Props> = ({
                             </button>
 
                             <div className="flex-1 text-center sm:text-left">
-                                <h1 className="bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-xl font-bold text-transparent sm:text-2xl lg:text-3xl">
+                                <h1 className="bg-gradient-to-r from-slate-100 to-slate-100 bg-clip-text text-xl font-bold text-transparent sm:text-2xl lg:text-3xl">
                                     {isEditMode ? 'Modifier' : 'Publier'} une
                                     propriété
                                 </h1>
@@ -1030,7 +1162,7 @@ const PropertyForm: React.FC<Props> = ({
                     )}
 
                     {!hasActiveSubscription && (
-                        <div className="flex flex-col items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-100 p-3 text-amber-800 sm:flex-row sm:p-4">
+                        <div className="flex flex-col items-center justify-between gap-3 rounded-xl border border-slate-200 bg-[#1E3A5F]/10 p-3 text-[#0d2340] sm:flex-row sm:p-4">
                             <div className="flex items-center gap-2">
                                 <AlertCircle size={20} />
                                 <span className="text-sm sm:text-base">
@@ -1039,7 +1171,7 @@ const PropertyForm: React.FC<Props> = ({
                             </div>
                             <a
                                 href={route('dashboard.subscriptions.index')}
-                                className="rounded-lg bg-amber-500 px-4 py-2 text-center text-sm text-white transition-colors hover:bg-amber-600 sm:text-base"
+                                className="rounded-lg bg-slate-500 px-4 py-2 text-center text-sm text-white transition-colors hover:bg-[#A8882E] sm:text-base"
                             >
                                 {t('subscribe_now')}
                             </a>
@@ -1051,21 +1183,24 @@ const PropertyForm: React.FC<Props> = ({
                             <div className="flex items-start gap-3">
                                 <AlertCircle size={20} />
                                 <div className="flex-1">
-                                    <span className="text-sm sm:text-base">
+                                    <span className="text-sm font-semibold sm:text-base">
                                         {submitMessage}
                                     </span>
                                     {Object.keys(errors).length > 0 && (
-                                        <ul className="mt-2 list-inside list-disc text-xs sm:text-sm">
-                                            {Object.entries(errors).map(
-                                                ([field, error]) => (
-                                                    <li key={field}>
-                                                        <span className="font-medium">
-                                                            {field}:
-                                                        </span>{' '}
-                                                        {error}
-                                                    </li>
-                                                ),
-                                            )}
+                                        <ul className="mt-3 space-y-1 text-xs sm:text-sm">
+                                            {Object.entries(
+                                                errors as Record<
+                                                    string,
+                                                    string
+                                                >,
+                                            ).map(([field, error]) => (
+                                                <li
+                                                    key={field}
+                                                    className="rounded-lg bg-white/60 px-3 py-2"
+                                                >
+                                                    {formatError(field, error)}
+                                                </li>
+                                            ))}
                                         </ul>
                                     )}
                                 </div>
@@ -1079,14 +1214,14 @@ const PropertyForm: React.FC<Props> = ({
                     onSubmit={handleSubmit}
                     className="px-3 pb-8 sm:px-4 lg:px-8"
                 >
-                    <div className="relative overflow-hidden rounded-xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10 sm:rounded-2xl">
+                    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-sm sm:rounded-2xl">
                         {/* Overlay de désactivation */}
                         {false && (
                             <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/90 backdrop-blur-sm">
                                 <div className="mx-4 w-full max-w-sm rounded-xl bg-white p-6 text-center shadow-xl">
                                     <AlertCircle
                                         size={48}
-                                        className="mx-auto mb-4 text-amber-500"
+                                        className="mx-auto mb-4 text-[#C9A84C]"
                                     />
                                     <h3 className="mb-2 text-xl font-semibold text-slate-900">
                                         Abonnement requis
@@ -1101,7 +1236,7 @@ const PropertyForm: React.FC<Props> = ({
                                         href={route(
                                             'dashboard.subscriptions.index',
                                         )}
-                                        className="inline-flex items-center rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-6 py-3 font-medium text-white transition-all duration-300 hover:from-amber-500 hover:to-amber-700"
+                                        className="inline-flex items-center rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-6 py-3 font-medium text-white transition-all duration-300 hover:from-[#A8882E] hover:to-[#8a6e22]"
                                     >
                                         {t('subscribe_now')}
                                     </a>
@@ -1110,7 +1245,7 @@ const PropertyForm: React.FC<Props> = ({
                         )}
 
                         {/* Navigation par sections - Ultra responsive */}
-                        <div className="border-b border-amber-200/30">
+                        <div className="border-b border-slate-200">
                             {/* Version desktop */}
                             <div className="hidden overflow-x-auto p-1 md:flex">
                                 {sections.map((section) => (
@@ -1122,8 +1257,8 @@ const PropertyForm: React.FC<Props> = ({
                                         }
                                         className={`flex items-center gap-2 rounded-lg px-3 py-2 font-medium whitespace-nowrap transition-all duration-200 ${
                                             activeSection === section.id
-                                                ? 'bg-amber-100 text-amber-700'
-                                                : 'text-slate-600 hover:bg-amber-50 hover:text-slate-900'
+                                                ? 'bg-[#1E3A5F]/10 text-[#0d2340]'
+                                                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                                         }`}
                                     >
                                         <section.icon size={16} />
@@ -1145,8 +1280,8 @@ const PropertyForm: React.FC<Props> = ({
                                         }
                                         className={`flex flex-col items-center gap-1 rounded-lg px-3 py-2 font-medium whitespace-nowrap transition-all duration-200 ${
                                             activeSection === section.id
-                                                ? 'bg-amber-100 text-amber-700'
-                                                : 'text-slate-600 hover:bg-amber-50 hover:text-slate-900'
+                                                ? 'bg-[#1E3A5F]/10 text-[#0d2340]'
+                                                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                                         }`}
                                     >
                                         <section.icon size={18} />
@@ -1159,7 +1294,7 @@ const PropertyForm: React.FC<Props> = ({
 
                             {/* Version mobile - Menu déroulant */}
                             <div className="sm:hidden">
-                                <div className="flex items-center justify-between border-b border-amber-200/30 p-3">
+                                <div className="flex items-center justify-between border-b border-slate-200 p-3">
                                     <div className="flex items-center gap-2">
                                         {sections.find(
                                             (s) => s.id === activeSection,
@@ -1171,7 +1306,7 @@ const PropertyForm: React.FC<Props> = ({
                                                 ).icon,
                                                 {
                                                     size: 20,
-                                                    className: 'text-amber-500',
+                                                    className: 'text-[#C9A84C]',
                                                 },
                                             )}
 
@@ -1191,7 +1326,7 @@ const PropertyForm: React.FC<Props> = ({
                                                 !isMobileMenuOpen,
                                             )
                                         }
-                                        className="rounded-md p-1 transition-colors hover:bg-amber-50"
+                                        className="rounded-md p-1 transition-colors hover:bg-slate-100"
                                     >
                                         {isMobileMenuOpen ? (
                                             <ChevronDown size={20} />
@@ -1202,7 +1337,7 @@ const PropertyForm: React.FC<Props> = ({
                                 </div>
 
                                 {isMobileMenuOpen && (
-                                    <div className="bg-amber-50/50 p-2">
+                                    <div className="bg-slate-50 p-2">
                                         {sections.map((section) => (
                                             <button
                                                 key={section.id}
@@ -1215,8 +1350,8 @@ const PropertyForm: React.FC<Props> = ({
                                                 }}
                                                 className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 font-medium transition-all duration-200 ${
                                                     activeSection === section.id
-                                                        ? 'bg-amber-100 text-amber-700'
-                                                        : 'text-slate-600 hover:bg-amber-50 hover:text-slate-900'
+                                                        ? 'bg-[#1E3A5F]/10 text-[#0d2340]'
+                                                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                                                 }`}
                                             >
                                                 <section.icon size={16} />
@@ -1238,7 +1373,7 @@ const PropertyForm: React.FC<Props> = ({
                                     <div className="mb-4 flex items-center gap-2">
                                         <Home
                                             size={20}
-                                            className="text-amber-500"
+                                            className="text-[#C9A84C]"
                                         />
                                         <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
                                             Informations principales
@@ -1255,7 +1390,7 @@ const PropertyForm: React.FC<Props> = ({
                                             </label>
                                             <input
                                                 type="text"
-                                                className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
                                                 placeholder="Ex: Villa moderne avec piscine à Gombe"
                                                 value={data.title}
                                                 onChange={(e) =>
@@ -1279,9 +1414,10 @@ const PropertyForm: React.FC<Props> = ({
                                             </label>
                                             <input
                                                 type="text"
-                                                className="w-full rounded-lg border border-amber-200/50 bg-amber-50 px-3 py-2.5 text-sm text-slate-600 sm:text-base"
+                                                className="w-full cursor-not-allowed rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-600 disabled:opacity-100 sm:text-base"
                                                 value={data.reference_number}
                                                 readOnly
+                                                disabled
                                             />
                                         </div>
 
@@ -1293,7 +1429,7 @@ const PropertyForm: React.FC<Props> = ({
                                                 </span>
                                             </label>
                                             <select
-                                                className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
                                                 value={data.sale_type}
                                                 onChange={(e) =>
                                                     handleInputChange(
@@ -1328,7 +1464,7 @@ const PropertyForm: React.FC<Props> = ({
                                                 </span>
                                             </label>
                                             <select
-                                                className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
                                                 value={data.type}
                                                 onChange={(e) =>
                                                     handleInputChange(
@@ -1365,7 +1501,7 @@ const PropertyForm: React.FC<Props> = ({
                                                 </span>
                                             </label>
                                             <select
-                                                className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
                                                 value={data.urgency}
                                                 onChange={(e) =>
                                                     handleInputChange(
@@ -1398,15 +1534,18 @@ const PropertyForm: React.FC<Props> = ({
                                             </label>
                                             <div className="relative">
                                                 <textarea
-                                                    className="w-full resize-none rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                    className="w-full resize-none rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
                                                     placeholder="Décrivez votre propriété en détail..."
                                                     value={data.description}
-                                                    onChange={(e) =>
+                                                    onChange={(e) => {
+                                                        setIsDescriptionGenerated(
+                                                            false,
+                                                        );
                                                         handleInputChange(
                                                             'description',
                                                             e.target.value,
-                                                        )
-                                                    }
+                                                        );
+                                                    }}
                                                     rows={4}
                                                     disabled={false}
                                                 />
@@ -1426,21 +1565,19 @@ const PropertyForm: React.FC<Props> = ({
                                                         className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 sm:text-base ${
                                                             !canGenerateDescription ||
                                                             loading ||
-                                                            isDescriptionGenerated ||
                                                             false
                                                                 ? 'cursor-not-allowed bg-gray-100 text-gray-400 opacity-50'
-                                                                : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                                                                : 'bg-[#1E3A5F]/10 text-[#0d2340] hover:bg-slate-200'
                                                         }`}
                                                         disabled={
                                                             !canGenerateDescription ||
                                                             loading ||
-                                                            isDescriptionGenerated ||
                                                             false
                                                         }
                                                     >
                                                         {loading ? (
                                                             <>
-                                                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-amber-500 border-t-transparent"></div>
+                                                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-transparent"></div>
                                                                 Génération en
                                                                 cours...
                                                             </>
@@ -1449,8 +1586,8 @@ const PropertyForm: React.FC<Props> = ({
                                                                 <CheckCircle
                                                                     size={16}
                                                                 />
-                                                                Description
-                                                                générée
+                                                                Régénérer la
+                                                                description
                                                             </>
                                                         ) : (
                                                             <>
@@ -1466,7 +1603,7 @@ const PropertyForm: React.FC<Props> = ({
                                                     {!canGenerateDescription &&
                                                         !loading &&
                                                         !isDescriptionGenerated && (
-                                                            <div className="mt-1 flex items-center gap-1 text-xs text-amber-600">
+                                                            <div className="mt-1 flex items-center gap-1 text-xs text-[#1E3A5F]">
                                                                 <AlertTriangle
                                                                     size={12}
                                                                 />
@@ -1491,7 +1628,7 @@ const PropertyForm: React.FC<Props> = ({
                                     <div className="mb-4 flex items-center gap-2">
                                         <DollarSign
                                             size={20}
-                                            className="text-amber-500"
+                                            className="text-[#C9A84C]"
                                         />
                                         <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
                                             Prix et transaction
@@ -1512,7 +1649,7 @@ const PropertyForm: React.FC<Props> = ({
                                                 <input
                                                     type="number"
                                                     step="0.01"
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                    className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
                                                     placeholder={
                                                         data.sale_type ===
                                                         'rent'
@@ -1538,13 +1675,13 @@ const PropertyForm: React.FC<Props> = ({
                                             {data.sale_type === 'rent' && (
                                                 <div>
                                                     <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                        Garantie locative (USD)
+                                                        Garantie locative (mois)
                                                     </label>
                                                     <input
                                                         type="number"
                                                         step="0.01"
-                                                        className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
-                                                        placeholder="Ex: 160000 (2 mois de loyer)"
+                                                        className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
+                                                        placeholder="Ex: 2"
                                                         value={
                                                             data.rental_guarantee
                                                         }
@@ -1566,47 +1703,6 @@ const PropertyForm: React.FC<Props> = ({
                                                 </div>
                                             )}
                                         </div>
-
-                                        <div>
-                                            <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                État du bien{' '}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
-                                            </label>
-                                            <select
-                                                className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
-                                                value={data.condition}
-                                                onChange={(e) =>
-                                                    handleInputChange(
-                                                        'condition',
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                disabled={false}
-                                            >
-                                                <option value="">
-                                                    Sélectionner l'état
-                                                </option>
-                                                <option value="new">
-                                                    Neuf
-                                                </option>
-                                                <option value="old">
-                                                    Ancien
-                                                </option>
-                                                <option value="renovated">
-                                                    Rénové
-                                                </option>
-                                                <option value="renovation_needed">
-                                                    À rénover
-                                                </option>
-                                            </select>
-                                            {errors.condition && (
-                                                <div className="mt-1 text-sm text-red-600">
-                                                    {errors.condition}
-                                                </div>
-                                            )}
-                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -1617,7 +1713,7 @@ const PropertyForm: React.FC<Props> = ({
                                     <div className="mb-4 flex items-center gap-2">
                                         <Building
                                             size={20}
-                                            className="text-amber-500"
+                                            className="text-[#C9A84C]"
                                         />
                                         <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
                                             Caractéristiques
@@ -1625,10 +1721,18 @@ const PropertyForm: React.FC<Props> = ({
                                     </div>
 
                                     <div className="space-y-4">
-                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                        <div
+                                            className={`grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 ${
+                                                data.type === 'terrain'
+                                                    ? '[&>*:nth-child(n+3)]:hidden'
+                                                    : ''
+                                            }`}
+                                        >
                                             <div>
                                                 <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                    Surface habitable (m²){' '}
+                                                    {data.type === 'terrain'
+                                                        ? 'Surface du terrain (m²)'
+                                                        : 'Surface habitable (m²)'}{' '}
                                                     <span className="text-red-500">
                                                         *
                                                     </span>
@@ -1636,7 +1740,7 @@ const PropertyForm: React.FC<Props> = ({
                                                 <input
                                                     type="number"
                                                     step="0.01"
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                    className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
                                                     placeholder="Ex: 120"
                                                     value={data.surface}
                                                     onChange={(e) =>
@@ -1654,6 +1758,44 @@ const PropertyForm: React.FC<Props> = ({
                                                 )}
                                             </div>
 
+                                            <div
+                                                className={
+                                                    data.type === 'terrain'
+                                                        ? ''
+                                                        : 'hidden'
+                                                }
+                                            >
+                                                <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
+                                                    Type de terrain{' '}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                <select
+                                                    className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
+                                                    value={data.land_type}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            'land_type',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                >
+                                                    <option value="constructible">
+                                                        Constructible
+                                                    </option>
+                                                    <option value="agricole">
+                                                        Agricole
+                                                    </option>
+                                                    <option value="industriel">
+                                                        Industriel
+                                                    </option>
+                                                    <option value="viabilisé">
+                                                        Viabilisé
+                                                    </option>
+                                                </select>
+                                            </div>
+
                                             <div>
                                                 <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
                                                     Chambres{' '}
@@ -1662,7 +1804,7 @@ const PropertyForm: React.FC<Props> = ({
                                                     </span>
                                                 </label>
                                                 <select
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                    className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
                                                     value={data.bedrooms}
                                                     onChange={(e) =>
                                                         handleInputChange(
@@ -1697,7 +1839,7 @@ const PropertyForm: React.FC<Props> = ({
                                                     </span>
                                                 </label>
                                                 <select
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                    className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
                                                     value={data.bathrooms}
                                                     onChange={(e) =>
                                                         handleInputChange(
@@ -1731,7 +1873,7 @@ const PropertyForm: React.FC<Props> = ({
                                                     </span>
                                                 </label>
                                                 <select
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                    className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
                                                     value={data.kitchens}
                                                     onChange={(e) =>
                                                         handleInputChange(
@@ -1761,7 +1903,7 @@ const PropertyForm: React.FC<Props> = ({
                                                     </span>
                                                 </label>
                                                 <select
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                    className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
                                                     value={data.rooms}
                                                     onChange={(e) =>
                                                         handleInputChange(
@@ -1796,7 +1938,7 @@ const PropertyForm: React.FC<Props> = ({
                                                     </span>
                                                 </label>
                                                 <select
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                    className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
                                                     value={data.balconies}
                                                     onChange={(e) =>
                                                         handleInputChange(
@@ -1829,7 +1971,7 @@ const PropertyForm: React.FC<Props> = ({
                                                     </span>
                                                 </label>
                                                 <select
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                    className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
                                                     value={data.terraces}
                                                     onChange={(e) =>
                                                         handleInputChange(
@@ -1862,7 +2004,7 @@ const PropertyForm: React.FC<Props> = ({
                                                     </span>
                                                 </label>
                                                 <select
-                                                    className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                    className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
                                                     value={data.total_floors}
                                                     onChange={(e) =>
                                                         handleInputChange(
@@ -1905,7 +2047,7 @@ const PropertyForm: React.FC<Props> = ({
                                                         </span>
                                                     </label>
                                                     <select
-                                                        className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                        className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
                                                         value={data.floor}
                                                         onChange={(e) =>
                                                             handleInputChange(
@@ -1949,7 +2091,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             État du bien
                                                         </label>
                                                         <select
-                                                            className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                            className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
                                                             value={
                                                                 data.condition
                                                             }
@@ -1982,7 +2124,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             type="number"
                                                             min="1800"
                                                             max={new Date().getFullYear()}
-                                                            className="w-full rounded-lg border border-amber-200/50 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:text-base"
+                                                            className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
                                                             placeholder="Ex: 2020"
                                                             value={
                                                                 data.year_built
@@ -2001,7 +2143,7 @@ const PropertyForm: React.FC<Props> = ({
                                                         <label className="flex cursor-pointer items-center gap-2">
                                                             <input
                                                                 type="checkbox"
-                                                                className="h-5 w-5 rounded border-amber-300 text-amber-500 focus:ring-amber-500"
+                                                                className="h-5 w-5 rounded border-slate-200 text-[#C9A84C] focus:ring-slate-200"
                                                                 checked={
                                                                     data.furnished
                                                                 }
@@ -2032,7 +2174,7 @@ const PropertyForm: React.FC<Props> = ({
                                     <div className="mb-2 flex items-start gap-3">
                                         <MapPin
                                             size={22}
-                                            className="mt-0.5 shrink-0 text-amber-500"
+                                            className="mt-0.5 shrink-0 text-[#C9A84C]"
                                         />
                                         <div>
                                             <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
@@ -2049,8 +2191,8 @@ const PropertyForm: React.FC<Props> = ({
 
                                     <div className="space-y-5">
                                         {/* Zone 1 — Administrative */}
-                                        <div className="space-y-4 rounded-xl border border-amber-100 bg-gradient-to-br from-amber-50/60 to-transparent p-4">
-                                            <p className="text-xs font-bold tracking-widest text-amber-500 uppercase">
+                                        <div className="space-y-4 rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-transparent p-4">
+                                            <p className="text-xs font-bold tracking-widest text-[#C9A84C] uppercase">
                                                 1 — Zone administrative
                                             </p>
                                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -2062,7 +2204,7 @@ const PropertyForm: React.FC<Props> = ({
                                                         </span>
                                                     </label>
                                                     <select
-                                                        className="w-full rounded-lg border border-amber-200/50 bg-white px-3 py-2.5 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                                                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none"
                                                         value={data.country}
                                                         onChange={(e) =>
                                                             handleInputChange(
@@ -2095,7 +2237,7 @@ const PropertyForm: React.FC<Props> = ({
                                                         </span>
                                                     </label>
                                                     <select
-                                                        className="w-full rounded-lg border border-amber-200/50 bg-white px-3 py-2.5 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none disabled:opacity-50"
+                                                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none disabled:opacity-50"
                                                         value={data.city}
                                                         onChange={(e) =>
                                                             handleInputChange(
@@ -2133,7 +2275,7 @@ const PropertyForm: React.FC<Props> = ({
                                                         </span>
                                                     </label>
                                                     <select
-                                                        className="w-full rounded-lg border border-amber-200/50 bg-white px-3 py-2.5 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none disabled:opacity-50"
+                                                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none disabled:opacity-50"
                                                         value={
                                                             data.municipality_id ||
                                                             ''
@@ -2194,7 +2336,7 @@ const PropertyForm: React.FC<Props> = ({
                                                     </label>
                                                     <input
                                                         type="text"
-                                                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                                                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none"
                                                         placeholder="Ex: Avenue du Tribunal, Rue Lukusa..."
                                                         value={data.address}
                                                         onChange={(e) =>
@@ -2211,7 +2353,7 @@ const PropertyForm: React.FC<Props> = ({
                                                     </label>
                                                     <input
                                                         type="text"
-                                                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                                                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none"
                                                         placeholder="Ex: 42"
                                                         value={data.postal_code}
                                                         onChange={(e) =>
@@ -2229,7 +2371,7 @@ const PropertyForm: React.FC<Props> = ({
                                                 </label>
                                                 <input
                                                     type="text"
-                                                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                                                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none"
                                                     placeholder="Ex: Gombe, Lemba, Ngaliema..."
                                                     value={data.quarter}
                                                     onChange={(e) =>
@@ -2332,7 +2474,7 @@ const PropertyForm: React.FC<Props> = ({
                                                             data.address
                                                         )
                                                             ? 'cursor-not-allowed bg-slate-100 text-slate-400'
-                                                            : 'bg-gradient-to-r from-amber-400 to-amber-500 text-white shadow-md shadow-amber-200/60 hover:from-amber-500 hover:to-amber-600 active:scale-95'
+                                                            : 'bg-gradient-to-r from-slate-100 to-slate-100 text-white shadow-md shadow-sm hover:from-slate-100 hover:to-slate-100 active:scale-95'
                                                     }`}
                                                 >
                                                     {isSearching ? (
@@ -2360,6 +2502,98 @@ const PropertyForm: React.FC<Props> = ({
                                             </div>
                                         </div>
 
+                                        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                                            <div className="mb-3 flex items-start justify-between gap-3">
+                                                <div>
+                                                    <p className="text-sm font-semibold text-slate-800">
+                                                        Recherche intelligente
+                                                        sur la carte
+                                                    </p>
+                                                    <p className="text-xs text-slate-500">
+                                                        Recherchez un quartier,
+                                                        une avenue ou un repère
+                                                        connu en RDC, puis
+                                                        sélectionnez le bon
+                                                        résultat.
+                                                    </p>
+                                                </div>
+                                                {data.latitude &&
+                                                    data.longitude && (
+                                                        <span className="hidden rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200 sm:inline-flex">
+                                                            Point placé
+                                                        </span>
+                                                    )}
+                                            </div>
+                                            <div className="relative">
+                                                <MapPin className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#C9A84C]" />
+                                                <input
+                                                    type="text"
+                                                    value={searchQuery}
+                                                    onChange={(e) =>
+                                                        handleMapSearch(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pr-4 pl-10 text-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none"
+                                                    placeholder="Ex: Gombe, Avenue Kasa-Vubu, UPN, Limete..."
+                                                />
+                                            </div>
+
+                                            {(isSearching ||
+                                                searchResults.length > 0) && (
+                                                <div className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-white">
+                                                    {isSearching ? (
+                                                        <div className="flex items-center gap-2 px-4 py-3 text-sm text-slate-500">
+                                                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-transparent" />
+                                                            Recherche en
+                                                            cours...
+                                                        </div>
+                                                    ) : (
+                                                        searchResults.map(
+                                                            (result) => (
+                                                                <button
+                                                                    type="button"
+                                                                    key={
+                                                                        result.place_id
+                                                                    }
+                                                                    onClick={() =>
+                                                                        handleSelectLocation(
+                                                                            result,
+                                                                        )
+                                                                    }
+                                                                    className="flex w-full items-start gap-3 border-b border-slate-100 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-slate-100"
+                                                                >
+                                                                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#C9A84C]" />
+                                                                    <span>
+                                                                        <span className="block text-sm font-medium text-slate-800">
+                                                                            {
+                                                                                result.display_name
+                                                                            }
+                                                                        </span>
+                                                                        <span className="mt-1 block text-xs text-slate-500">
+                                                                            Lat{' '}
+                                                                            {Number(
+                                                                                result.lat,
+                                                                            ).toFixed(
+                                                                                5,
+                                                                            )}{' '}
+                                                                            ·
+                                                                            Lng{' '}
+                                                                            {Number(
+                                                                                result.lon,
+                                                                            ).toFixed(
+                                                                                5,
+                                                                            )}
+                                                                        </span>
+                                                                    </span>
+                                                                </button>
+                                                            ),
+                                                        )
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+
                                         {/* Map Preview */}
                                         <div className="space-y-2">
                                             <div className="flex items-center justify-between">
@@ -2371,7 +2605,7 @@ const PropertyForm: React.FC<Props> = ({
                                                     sur la carte pour ajuster
                                                 </p>
                                             </div>
-                                            <div className="relative z-0 h-[300px] w-full overflow-hidden rounded-xl border border-amber-200 shadow-sm sm:h-[380px]">
+                                            <div className="relative z-0 h-[300px] w-full overflow-hidden rounded-xl border border-slate-200 shadow-sm sm:h-[380px]">
                                                 <MapContainer
                                                     center={
                                                         data.latitude &&
@@ -2487,7 +2721,7 @@ const PropertyForm: React.FC<Props> = ({
                                     <div className="mb-4 flex items-center gap-2">
                                         <CheckSquare
                                             size={20}
-                                            className="text-amber-500"
+                                            className="text-[#C9A84C]"
                                         />
                                         <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
                                             Équipements
@@ -2504,26 +2738,7 @@ const PropertyForm: React.FC<Props> = ({
                                                     <label className="flex cursor-pointer items-center">
                                                         <input
                                                             type="checkbox"
-                                                            className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                                                            checked={
-                                                                data.furnished
-                                                            }
-                                                            onChange={() =>
-                                                                handleCheckboxChange(
-                                                                    'furnished',
-                                                                )
-                                                            }
-                                                            disabled={false}
-                                                        />
-                                                        <span className="ml-3 text-sm sm:text-base">
-                                                            Meublé
-                                                        </span>
-                                                    </label>
-
-                                                    <label className="flex cursor-pointer items-center">
-                                                        <input
-                                                            type="checkbox"
-                                                            className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                                                            className="h-5 w-5 rounded border-slate-200 text-[#1E3A5F] focus:ring-slate-200"
                                                             checked={
                                                                 data.elevator
                                                             }
@@ -2542,7 +2757,7 @@ const PropertyForm: React.FC<Props> = ({
                                                     <label className="flex cursor-pointer items-center">
                                                         <input
                                                             type="checkbox"
-                                                            className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                                                            className="h-5 w-5 rounded border-slate-200 text-[#1E3A5F] focus:ring-slate-200"
                                                             checked={
                                                                 data.parking
                                                             }
@@ -2561,7 +2776,7 @@ const PropertyForm: React.FC<Props> = ({
                                                     <label className="flex cursor-pointer items-center">
                                                         <input
                                                             type="checkbox"
-                                                            className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                                                            className="h-5 w-5 rounded border-slate-200 text-[#1E3A5F] focus:ring-slate-200"
                                                             checked={
                                                                 data.garden
                                                             }
@@ -2580,7 +2795,7 @@ const PropertyForm: React.FC<Props> = ({
                                                     <label className="flex cursor-pointer items-center">
                                                         <input
                                                             type="checkbox"
-                                                            className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                                                            className="h-5 w-5 rounded border-slate-200 text-[#1E3A5F] focus:ring-slate-200"
                                                             checked={
                                                                 data.swimming_pool
                                                             }
@@ -2599,7 +2814,7 @@ const PropertyForm: React.FC<Props> = ({
                                                     <label className="flex cursor-pointer items-center">
                                                         <input
                                                             type="checkbox"
-                                                            className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                                                            className="h-5 w-5 rounded border-slate-200 text-[#1E3A5F] focus:ring-slate-200"
                                                             checked={
                                                                 data.cellar
                                                             }
@@ -2618,7 +2833,7 @@ const PropertyForm: React.FC<Props> = ({
                                                     <label className="flex cursor-pointer items-center">
                                                         <input
                                                             type="checkbox"
-                                                            className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                                                            className="h-5 w-5 rounded border-slate-200 text-[#1E3A5F] focus:ring-slate-200"
                                                             checked={data.attic}
                                                             onChange={() =>
                                                                 handleCheckboxChange(
@@ -2650,19 +2865,13 @@ const PropertyForm: React.FC<Props> = ({
                                                                     ).includes(
                                                                         amenity.id,
                                                                     )
-                                                                        ? 'border-amber-300 bg-amber-50'
-                                                                        : 'border-gray-200 hover:border-amber-200'
+                                                                        ? 'border-slate-200 bg-slate-50'
+                                                                        : 'border-gray-200 hover:border-slate-200'
                                                                 } ${false ? 'cursor-not-allowed opacity-50' : ''}`}
-                                                                onClick={() =>
-                                                                    hasActiveSubscription &&
-                                                                    handleAmenityChange(
-                                                                        amenity.id,
-                                                                    )
-                                                                }
                                                             >
                                                                 <input
                                                                     type="checkbox"
-                                                                    className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                                                                    className="h-5 w-5 rounded border-slate-200 text-[#1E3A5F] focus:ring-slate-200"
                                                                     checked={(
                                                                         data.amenities ||
                                                                         []
@@ -2670,7 +2879,6 @@ const PropertyForm: React.FC<Props> = ({
                                                                         amenity.id,
                                                                     )}
                                                                     onChange={() =>
-                                                                        hasActiveSubscription &&
                                                                         handleAmenityChange(
                                                                             amenity.id,
                                                                         )
@@ -2705,7 +2913,7 @@ const PropertyForm: React.FC<Props> = ({
                                     <div className="mb-4 flex items-center gap-2">
                                         <Image
                                             size={20}
-                                            className="text-amber-500"
+                                            className="text-[#C9A84C]"
                                         />
                                         <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
                                             Photos
@@ -2792,16 +3000,7 @@ const PropertyForm: React.FC<Props> = ({
                                                                                 size={
                                                                                     16
                                                                                 }
-                                                                            />{' '}
-                                                                            //
-                                                                            Assuming
-                                                                            ArrowRight
-                                                                            is
-                                                                            imported
-                                                                            or
-                                                                            use
-                                                                            ArrowLeft
-                                                                            rotated
+                                                                            />
                                                                         </button>
                                                                     )}
                                                                 </div>
@@ -2817,10 +3016,10 @@ const PropertyForm: React.FC<Props> = ({
                                             )}
 
                                             <div className="flex w-full items-center justify-center">
-                                                <label className="flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-amber-300 transition-colors hover:bg-amber-50">
+                                                <label className="flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200 transition-colors hover:bg-slate-100">
                                                     <Upload
                                                         size={24}
-                                                        className="mb-2 text-amber-500"
+                                                        className="mb-2 text-[#C9A84C]"
                                                     />
                                                     <span className="text-sm text-slate-600 sm:text-base">
                                                         Cliquez pour télécharger
@@ -2858,7 +3057,7 @@ const PropertyForm: React.FC<Props> = ({
                                     <div className="mb-4 flex items-center gap-2">
                                         <FileText
                                             size={20}
-                                            className="text-amber-500"
+                                            className="text-[#C9A84C]"
                                         />
                                         <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
                                             Publication
@@ -2866,56 +3065,48 @@ const PropertyForm: React.FC<Props> = ({
                                     </div>
 
                                     <div className="space-y-4">
-                                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                                            <div>
-                                                <label className="flex cursor-pointer items-center">
-                                                    <input
-                                                        type="checkbox"
-                                                        className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                                                        checked={
-                                                            data.is_published
-                                                        }
-                                                        onChange={() =>
-                                                            handleCheckboxChange(
-                                                                'is_published',
-                                                            )
-                                                        }
-                                                        disabled={false}
-                                                    />
-                                                    <span className="ml-3 text-sm sm:text-base">
-                                                        Publier immédiatement
-                                                    </span>
-                                                </label>
-                                                <p className="mt-1 ml-8 text-xs text-slate-500">
-                                                    Cochez cette case pour
-                                                    publier la propriété
-                                                    immédiatement
+                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                                <p className="text-xs font-semibold tracking-wide text-slate-500 uppercase">
+                                                    Brouillon
+                                                </p>
+                                                <p className="mt-2 text-sm text-slate-700">
+                                                    Enregistre l'annonce sans
+                                                    consommer de quota. Vous
+                                                    pourrez la compléter plus
+                                                    tard.
                                                 </p>
                                             </div>
-
-                                            <div>
-                                                <label className="flex cursor-pointer items-center">
-                                                    <input
-                                                        type="checkbox"
-                                                        className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                                                        checked={
-                                                            data.is_featured
-                                                        }
-                                                        onChange={() =>
-                                                            handleCheckboxChange(
-                                                                'is_featured',
-                                                            )
-                                                        }
-                                                        disabled={false}
-                                                    />
-                                                    <span className="ml-3 text-sm sm:text-base">
-                                                        Mettre en vedette
-                                                    </span>
-                                                </label>
-                                                <p className="mt-1 ml-8 text-xs text-slate-500">
-                                                    Cochez cette case pour
-                                                    mettre en avant cette
-                                                    propriété
+                                            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                                <p className="text-xs font-semibold tracking-wide text-[#1E3A5F] uppercase">
+                                                    Validation
+                                                </p>
+                                                <p className="mt-2 text-sm text-slate-700">
+                                                    Soumet l'annonce à l'équipe
+                                                    et consomme un quota de
+                                                    publication.
+                                                </p>
+                                            </div>
+                                            <div
+                                                className={`rounded-xl border p-4 ${
+                                                    hasActiveSubscription
+                                                        ? 'border-emerald-200 bg-emerald-50'
+                                                        : 'border-red-200 bg-red-50'
+                                                }`}
+                                            >
+                                                <p
+                                                    className={`text-xs font-semibold tracking-wide uppercase ${
+                                                        hasActiveSubscription
+                                                            ? 'text-emerald-700'
+                                                            : 'text-red-700'
+                                                    }`}
+                                                >
+                                                    Abonnement
+                                                </p>
+                                                <p className="mt-2 text-sm text-slate-700">
+                                                    {hasActiveSubscription
+                                                        ? 'Votre compte peut soumettre cette annonce à la validation.'
+                                                        : 'Sans abonnement actif, vous pouvez sauvegarder en brouillon uniquement.'}
                                                 </p>
                                             </div>
                                         </div>
@@ -2924,7 +3115,7 @@ const PropertyForm: React.FC<Props> = ({
                             )}
 
                             {/* Boutons d'action - Ultra responsive */}
-                            <div className="sticky bottom-0 mt-6 border-t border-amber-200/30 bg-white/95 p-4 backdrop-blur-sm">
+                            <div className="sticky bottom-0 mt-6 border-t border-slate-200 bg-white/95 p-4 backdrop-blur-sm">
                                 <div className="flex flex-col justify-end gap-3 sm:flex-row">
                                     <button
                                         type="button"
@@ -2938,7 +3129,7 @@ const PropertyForm: React.FC<Props> = ({
                                     <button
                                         type="button"
                                         onClick={(e) => handleSubmit(e, false)}
-                                        className="flex w-full items-center justify-center gap-2 rounded-lg border border-amber-200 bg-white px-4 py-2.5 text-sm text-amber-700 transition-all duration-300 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-base"
+                                        className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-[#0d2340] transition-all duration-300 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-base"
                                         disabled={processing || false}
                                     >
                                         <Save size={16} />
@@ -2947,7 +3138,7 @@ const PropertyForm: React.FC<Props> = ({
                                     <button
                                         type="button"
                                         onClick={(e) => handleSubmit(e, true)}
-                                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-amber-400 to-amber-600 px-4 py-2.5 text-sm text-white transition-all duration-300 hover:from-amber-500 hover:to-amber-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-base"
+                                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-4 py-2.5 text-sm text-white transition-all duration-300 hover:from-[#A8882E] hover:to-[#8a6e22] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-base"
                                         disabled={
                                             processing || !hasActiveSubscription
                                         }

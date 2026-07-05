@@ -54,10 +54,13 @@ export function useSubscription({ currentPlanId }: UseSubscriptionProps) {
             if (responseData?.errors) {
                 setServerErrors(responseData.errors);
             }
-            
+
             if (responseData?.code === 'ALREADY_HAS_SUBSCRIPTION') {
                 // Special code handled by the UI
-                return { error_code: 'ALREADY_HAS_SUBSCRIPTION', message: responseData.message };
+                return {
+                    error_code: 'ALREADY_HAS_SUBSCRIPTION',
+                    message: responseData.message,
+                };
             }
 
             if (responseData?.message) {

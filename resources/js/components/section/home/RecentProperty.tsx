@@ -5,354 +5,230 @@ import {
     LucideArrowRight,
     LucideBuilding,
     LucideBuilding2,
-    LucideFilter,
     LucideGrid,
     LucideHome,
     LucideList,
-    LucideSearch,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { route } from 'ziggy-js';
 
+const PROPERTY_TYPES = [
+    { id: 'all', label_fr: 'Tous', label_en: 'All', icon: LucideGrid },
+    { id: 'villa', label_fr: 'Villas', label_en: 'Villas', icon: LucideHome },
+    {
+        id: 'apartment',
+        label_fr: 'Appartements',
+        label_en: 'Apartments',
+        icon: LucideBuilding,
+    },
+    {
+        id: 'house',
+        label_fr: 'Maisons',
+        label_en: 'Houses',
+        icon: LucideBuilding2,
+    },
+];
+
+function PropertySkeleton() {
+    return (
+        <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/8">
+            <div
+                className="skeleton h-52 w-full"
+                style={{
+                    background:
+                        'linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.05) 75%)',
+                    backgroundSize: '200% 100%',
+                }}
+            />
+            <div className="space-y-3 p-5">
+                <div
+                    className="skeleton h-5 w-3/4 rounded"
+                    style={{ background: 'rgba(255,255,255,0.1)' }}
+                />
+                <div
+                    className="skeleton h-4 w-1/2 rounded"
+                    style={{ background: 'rgba(255,255,255,0.07)' }}
+                />
+                <div className="flex gap-4 pt-2">
+                    <div
+                        className="skeleton h-4 w-16 rounded"
+                        style={{ background: 'rgba(255,255,255,0.07)' }}
+                    />
+                    <div
+                        className="skeleton h-4 w-16 rounded"
+                        style={{ background: 'rgba(255,255,255,0.07)' }}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function RecentProperty({ favorites }: { favorites: number[] }) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [selectedType, setSelectedType] = useState('all');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-    const [searchTerm, setSearchTerm] = useState('');
-    const [sortBy, setSortBy] = useState('newest');
     const [visible, setVisible] = useState(false);
     const sectionRef = useRef<HTMLDivElement>(null);
 
-    // Initialisation des filtres pour le hook useAds
-    const adsFilters = {
+    const { ads, loading: isLoading } = useAds({
         type: selectedType === 'all' ? '' : selectedType,
-        search: searchTerm,
-        sort: sortBy,
+        sort: 'newest',
         limit: 6,
-    };
-
-    const { ads, loading: isLoading, error } = useAds(adsFilters);
+    });
     const properties = ads?.data || [];
 
-    const types = [
-        {
-            id: 'all',
-            label: t('all_types') || 'Tous',
-            icon: LucideGrid,
-            color: 'from-gray-400 to-gray-600',
-        },
-        {
-            id: 'villa',
-            label: t('villa'),
-            icon: LucideHome,
-            color: 'from-blue-400 to-blue-600',
-        },
-        {
-            id: 'apartment',
-            label: t('apartment'),
-            icon: LucideBuilding,
-            color: 'from-purple-400 to-purple-600',
-        },
-        {
-            id: 'house',
-            label: t('house'),
-            icon: LucideBuilding2,
-            color: 'from-green-400 to-green-600',
-        },
-    ];
-
-    const sortOptions = [
-        { id: 'newest', label: t('newest_first') },
-        { id: 'price_low', label: t('price_low_to_high') },
-        { id: 'price_high', label: t('price_high_to_low') },
-        { id: 'popular', label: t('most_popular') },
-    ];
-
-    // Animation au scroll
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => {
-                if (entry.isIntersecting) {
-                    setVisible(true);
-                }
+                if (entry.isIntersecting) setVisible(true);
             },
             { threshold: 0.1 },
         );
-
-        if (sectionRef.current) {
-            observer.observe(sectionRef.current);
-        }
-
+        if (sectionRef.current) observer.observe(sectionRef.current);
         return () => {
-            if (sectionRef.current) {
-                observer.unobserve(sectionRef.current);
-            }
+            if (sectionRef.current) observer.unobserve(sectionRef.current);
         };
     }, []);
-
-    const sortedProperties = properties;
 
     return (
         <section
             ref={sectionRef}
-            className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-20 lg:py-32"
+            className="relative overflow-hidden bg-[#152C47] py-20 lg:py-28"
         >
-            {/* Formes décoratives de fond */}
-            <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-amber-300/10 blur-3xl filter"></div>
-                <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-blue-300/10 blur-3xl filter"></div>
-                <div className="absolute top-1/2 left-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-purple-300/5 blur-3xl filter"></div>
+            {/* Blobs décoratifs statiques */}
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                <div className="absolute -top-40 right-0 h-[500px] w-[500px] rounded-full bg-[#C9A84C]/6 blur-[120px]" />
+                <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-[#1E3A5F]/60 blur-[100px]" />
             </div>
 
-            <div className="relative z-10 container mx-auto px-4">
-                {/* En-tête avec animation */}
+            <div className="relative z-10 mx-auto max-w-7xl px-4">
+                {/* ── Header ── */}
                 <div
-                    className={`mb-16 grid transform gap-12 transition-all duration-1000 lg:grid-cols-2 ${
-                        visible
-                            ? 'translate-y-0 opacity-100'
-                            : 'translate-y-10 opacity-0'
-                    }`}
+                    className={`mb-12 flex flex-col gap-6 transition-all duration-700 lg:flex-row lg:items-end lg:justify-between ${visible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
                 >
                     <div>
-                        <div className="inline-block">
-                            <span className="text-sm font-medium tracking-wider text-amber-400 uppercase">
-                                {t('recent_properties')}
-                            </span>
-                        </div>
-                        <h2 className="mt-4 text-4xl leading-tight font-bold text-white lg:text-5xl xl:text-6xl">
+                        <span className="section-label text-[#E8C882]">
+                            <span className="h-px w-8 bg-[#C9A84C]" />
+                            {t('recent_properties')}
+                        </span>
+                        <h2 className="section-title-white mt-2">
                             {t('find_apartment')}
                         </h2>
-                        <p className="mt-6 max-w-lg text-lg text-gray-300">
+                        <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/55">
                             {t('find_apartment_description') ||
-                                'Découvrez notre sélection exclusive de propriétés de qualité, soigneusement choisies pour répondre à vos besoins les plus exigeants.'}
+                                'Découvrez notre sélection exclusive de propriétés soigneusement choisies.'}
                         </p>
                     </div>
 
-                    <div className="flex flex-col justify-center space-y-6">
-                        {/* Tabs de types avec design moderne */}
-                        <div className="rounded-xl border border-white/20 bg-white/10 p-2 backdrop-blur-md">
-                            <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-                                {types.map((type) => {
-                                    const Icon = type.icon;
-                                    return (
-                                        <button
-                                            key={type.id}
-                                            onClick={() =>
-                                                setSelectedType(type.id)
-                                            }
-                                            className={`relative rounded-lg px-4 py-3 font-medium transition-all duration-300 ${
-                                                selectedType === type.id
-                                                    ? 'text-white'
-                                                    : 'text-gray-300 hover:bg-white/10 hover:text-white'
-                                            }`}
-                                        >
-                                            {selectedType === type.id && (
-                                                <div
-                                                    className={`absolute inset-0 bg-gradient-to-r ${type.color} rounded-lg`}
-                                                ></div>
-                                            )}
-                                            <div className="relative flex items-center justify-center gap-2">
-                                                <Icon className="h-5 w-5" />
-                                                <span className="hidden md:inline">
-                                                    {type.label}
-                                                </span>
-                                            </div>
-                                        </button>
-                                    );
-                                })}
-                            </div>
+                    {/* Contrôles */}
+                    <div className="flex items-center gap-3">
+                        {/* Filtre type */}
+                        <div className="flex rounded-xl border border-white/12 bg-white/8 p-1 backdrop-blur-sm">
+                            {PROPERTY_TYPES.map((tp) => {
+                                const Icon = tp.icon;
+                                const label =
+                                    i18n.language === 'fr'
+                                        ? tp.label_fr
+                                        : tp.label_en;
+                                return (
+                                    <button
+                                        key={tp.id}
+                                        onClick={() => setSelectedType(tp.id)}
+                                        title={label}
+                                        className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 ${
+                                            selectedType === tp.id
+                                                ? 'bg-[#C9A84C] text-white shadow-sm'
+                                                : 'text-white/50 hover:text-white'
+                                        }`}
+                                    >
+                                        <Icon className="h-3.5 w-3.5" />
+                                        <span className="hidden sm:inline">
+                                            {label}
+                                        </span>
+                                    </button>
+                                );
+                            })}
                         </div>
 
-                        {/* Barre de recherche et filtres */}
-                        <div className="flex flex-col gap-3 sm:flex-row">
-                            <div className="relative flex-1">
-                                <LucideSearch className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
-                                <input
-                                    type="text"
-                                    placeholder={
-                                        t('search_properties') ||
-                                        'Rechercher des propriétés...'
-                                    }
-                                    value={searchTerm}
-                                    onChange={(e) =>
-                                        setSearchTerm(e.target.value)
-                                    }
-                                    className="w-full rounded-lg border border-white/20 bg-white/10 py-3 pr-4 pl-10 text-white placeholder-gray-400 backdrop-blur-md transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-amber-400/50 focus:outline-none"
-                                />
-                            </div>
-
-                            <div className="relative">
-                                <select
-                                    value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value)}
-                                    className="appearance-none rounded-lg border border-white/20 bg-white/10 px-4 py-3 pr-10 text-white backdrop-blur-md transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-amber-400/50 focus:outline-none"
-                                >
-                                    {sortOptions.map((option: any) => (
-                                        <option
-                                            key={option.id}
-                                            value={option.id}
-                                            className="bg-slate-800"
-                                        >
-                                            {option.label}
-                                        </option>
-                                    ))}
-                                </select>
-                                <LucideFilter className="pointer-events-none absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
-                            </div>
-
-                            {/* Boutons de vue */}
-                            <div className="flex rounded-lg border border-white/20 bg-white/10 p-1 backdrop-blur-md">
-                                <button
-                                    onClick={() => setViewMode('grid')}
-                                    className={`rounded p-2 transition-all duration-300 ${
-                                        viewMode === 'grid'
-                                            ? 'bg-white/20 text-white'
-                                            : 'text-gray-400 hover:text-white'
-                                    }`}
-                                >
-                                    <LucideGrid className="h-5 w-5" />
-                                </button>
-                                <button
-                                    onClick={() => setViewMode('list')}
-                                    className={`rounded p-2 transition-all duration-300 ${
-                                        viewMode === 'list'
-                                            ? 'bg-white/20 text-white'
-                                            : 'text-gray-400 hover:text-white'
-                                    }`}
-                                >
-                                    <LucideList className="h-5 w-5" />
-                                </button>
-                            </div>
+                        {/* Vue grille / liste */}
+                        <div className="flex rounded-xl border border-white/12 bg-white/8 p-1">
+                            <button
+                                onClick={() => setViewMode('grid')}
+                                className={`rounded-lg p-2 transition-all duration-200 ${viewMode === 'grid' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white'}`}
+                            >
+                                <LucideGrid className="h-4 w-4" />
+                            </button>
+                            <button
+                                onClick={() => setViewMode('list')}
+                                className={`rounded-lg p-2 transition-all duration-200 ${viewMode === 'list' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white'}`}
+                            >
+                                <LucideList className="h-4 w-4" />
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                {/* Grille de propriétés avec animation de chargement */}
+                {/* ── Grille de biens ── */}
                 <div
-                    className={`transition-all duration-700 ${
-                        visible
-                            ? 'translate-y-0 opacity-100'
-                            : 'translate-y-10 opacity-0'
-                    }`}
+                    className={`transition-all delay-200 duration-700 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
                 >
                     {isLoading ? (
-                        <div className="flex items-center justify-center py-20">
-                            <div className="relative">
-                                <div className="h-16 w-16 rounded-full border-4 border-amber-400/20"></div>
-                                <div className="absolute top-0 left-0 h-16 w-16 animate-spin rounded-full border-4 border-amber-400 border-t-transparent"></div>
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="h-8 w-8 animate-pulse rounded-full bg-gradient-to-r from-amber-400 to-amber-500"></div>
-                                </div>
-                            </div>
+                        <div
+                            className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}
+                        >
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <PropertySkeleton key={i} />
+                            ))}
+                        </div>
+                    ) : properties.length > 0 ? (
+                        <div
+                            className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}
+                        >
+                            {properties
+                                .slice(0, 6)
+                                .map((property: any, index: number) => (
+                                    <div
+                                        key={property.id}
+                                        className={`transition-all duration-500 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
+                                        style={{
+                                            transitionDelay: `${index * 80}ms`,
+                                        }}
+                                    >
+                                        <PropertyCardHome
+                                            property={property}
+                                            favorites={favorites}
+                                            viewMode={viewMode}
+                                        />
+                                    </div>
+                                ))}
                         </div>
                     ) : (
-                        <div
-                            className={`grid gap-6 ${
-                                viewMode === 'grid'
-                                    ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-                                    : 'grid-cols-1'
-                            }`}
-                        >
-                            {sortedProperties.length > 0 ? (
-                                sortedProperties
-                                    .slice(0, 6)
-                                    .map((property: any, index: number) => (
-                                        <div
-                                            key={property.id}
-                                            className={`transform transition-all duration-700 ${
-                                                visible
-                                                    ? 'translate-y-0 opacity-100'
-                                                    : 'translate-y-10 opacity-0'
-                                            }`}
-                                            style={{
-                                                transitionDelay: `${index * 100}ms`,
-                                            }}
-                                        >
-                                            <PropertyCardHome
-                                                property={property}
-                                                favorites={favorites}
-                                                viewMode={viewMode}
-                                            />
-                                        </div>
-                                    ))
-                            ) : (
-                                <div className="col-span-full py-20 text-center">
-                                    <div className="inline-flex flex-col items-center">
-                                        <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white/10 backdrop-blur-md">
-                                            <LucideSearch className="h-10 w-10 text-gray-400" />
-                                        </div>
-                                        <h3 className="mb-2 text-xl font-semibold text-white">
-                                            {t('no_properties_found')}
-                                        </h3>
-                                        <p className="max-w-md text-gray-400">
-                                            {t('no_properties_description') ||
-                                                'Essayez de modifier vos filtres ou votre recherche pour trouver des propriétés correspondantes.'}
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
+                        <div className="py-20 text-center">
+                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/8">
+                                <LucideHome className="h-8 w-8 text-white/30" />
+                            </div>
+                            <p className="text-white/50">
+                                {t('no_properties_found')}
+                            </p>
                         </div>
                     )}
                 </div>
 
-                {/* Bouton CTA avec effet de brillance */}
+                {/* ── CTA ── */}
                 <div
-                    className={`mt-16 transform text-center transition-all delay-300 duration-1000 ${
-                        visible
-                            ? 'translate-y-0 opacity-100'
-                            : 'translate-y-10 opacity-0'
-                    }`}
+                    className={`mt-12 text-center transition-all delay-300 duration-700 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
                 >
                     <Link
                         href={route('properties')}
-                        className="group relative inline-flex transform items-center gap-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-8 py-4 font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-amber-500 hover:to-amber-700 hover:shadow-xl hover:shadow-amber-500/25"
+                        className="group inline-flex items-center gap-2.5 rounded-xl border-2 border-[#C9A84C] px-8 py-3.5 font-semibold text-[#E8C882] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#C9A84C] hover:text-white hover:shadow-lg hover:shadow-[#C9A84C]/20"
                     >
-                        <span>{t('find_properties')}</span>
-                        <LucideArrowRight className="h-5 w-5 transform transition-transform duration-300 group-hover:translate-x-1" />
-                        <div className="absolute inset-0 rounded-xl bg-white opacity-0 transition-opacity duration-300 group-hover:opacity-20"></div>
-                        <div className="absolute inset-0 -translate-x-full -skew-x-12 transform rounded-xl bg-gradient-to-r from-transparent via-white to-transparent transition-transform duration-1000 group-hover:translate-x-full"></div>
+                        {t('find_properties')}
+                        <LucideArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                     </Link>
                 </div>
             </div>
-
-            {/* Particules flottantes pour l'effet visuel */}
-            <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                {[...Array(15)].map((_, i) => (
-                    <div
-                        key={i}
-                        className="animate-float absolute h-2 w-2 rounded-full bg-amber-400/10"
-                        style={{
-                            left: `${Math.random() * 100}%`,
-                            top: `${Math.random() * 100}%`,
-                            animationDelay: `${Math.random() * 5}s`,
-                            animationDuration: `${15 + Math.random() * 10}s`,
-                        }}
-                    ></div>
-                ))}
-            </div>
-
-            {/* Styles personnalisés pour les animations */}
-            <style>{`
-                @keyframes float {
-                    0%, 100% {
-                        transform: translateY(0) translateX(0);
-                    }
-                    25% {
-                        transform: translateY(-20px) translateX(10px);
-                    }
-                    50% {
-                        transform: translateY(10px) translateX(-10px);
-                    }
-                    75% {
-                        transform: translateY(-10px) translateX(20px);
-                    }
-                }
-                
-                .animate-float {
-                    animation: float 20s infinite ease-in-out;
-                }
-            `}</style>
         </section>
     );
 }

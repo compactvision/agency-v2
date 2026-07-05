@@ -19,7 +19,6 @@ import {
     MapPin,
     Monitor,
     Moon,
-    Palette,
     Phone,
     Save,
     Settings as SettingsIcon,
@@ -145,8 +144,8 @@ const Toggle = ({
             type="button"
             disabled={disabled}
             onClick={() => onChange(!value)}
-            className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
-                value ? 'bg-amber-600' : 'bg-gray-200'
+            className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-slate-200 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
+                value ? 'bg-[#A8882E]' : 'bg-gray-200'
             }`}
         >
             <span
@@ -227,7 +226,7 @@ const ThemeSelector = () => {
                         onClick={() => setSelectedTheme(theme.id)}
                         className={`relative cursor-pointer rounded-xl border-2 p-4 transition-all ${
                             selectedTheme === theme.id
-                                ? 'border-amber-500 shadow-md'
+                                ? 'border-slate-200 shadow-md'
                                 : 'border-gray-200 hover:border-gray-300'
                         }`}
                     >
@@ -240,7 +239,7 @@ const ThemeSelector = () => {
                             {theme.name}
                         </div>
                         {selectedTheme === theme.id && (
-                            <div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500">
+                            <div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-slate-500">
                                 <Check size={12} className="text-white" />
                             </div>
                         )}
@@ -493,7 +492,6 @@ export default function Settings() {
         { id: 'profile', label: 'Profil', icon: <User size={18} /> },
         { id: 'password', label: 'Mot de passe', icon: <Lock size={18} /> },
         { id: 'preferences', label: 'Préférences', icon: <Bell size={18} /> },
-        { id: 'appearance', label: 'Apparence', icon: <Palette size={18} /> },
         ...(isAdmin
             ? [
                   {
@@ -519,7 +517,7 @@ export default function Settings() {
 
                                 <div className="flex flex-col items-center gap-6 md:flex-row md:items-start">
                                     <div className="group relative">
-                                        <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 opacity-25 blur transition duration-300 group-hover:opacity-40"></div>
+                                        <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-[#C9A84C] to-[#A8882E] opacity-25 blur transition duration-300 group-hover:opacity-40"></div>
                                         {preview ? (
                                             <img
                                                 src={preview}
@@ -527,7 +525,7 @@ export default function Settings() {
                                                 className="relative h-32 w-32 rounded-full border-4 border-white object-cover shadow-lg"
                                             />
                                         ) : (
-                                            <div className="relative flex h-32 w-32 items-center justify-center rounded-full border-4 border-white bg-gradient-to-br from-amber-400 to-amber-600 text-4xl font-bold text-white shadow-lg">
+                                            <div className="relative flex h-32 w-32 items-center justify-center rounded-full border-4 border-white bg-gradient-to-br from-[#C9A84C] to-[#A8882E] text-4xl font-bold text-white shadow-lg">
                                                 {getInitial(user.name)}
                                             </div>
                                         )}
@@ -556,7 +554,7 @@ export default function Settings() {
                                                 </button>
                                             )}
 
-                                            <label className="inline-flex cursor-pointer items-center rounded-lg bg-amber-50 px-4 py-2 font-medium text-amber-600 transition-colors hover:bg-amber-100">
+                                            <label className="inline-flex cursor-pointer items-center rounded-lg bg-slate-50 px-4 py-2 font-medium text-[#1E3A5F] transition-colors hover:bg-slate-100">
                                                 <Upload
                                                     size={16}
                                                     className="mr-2"
@@ -630,7 +628,7 @@ export default function Settings() {
                                             {t('bio')}
                                         </label>
                                         <textarea
-                                            className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                            className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                             rows={4}
                                             placeholder={t('type_bio_here')}
                                             value={profileForm.data.bio}
@@ -680,7 +678,7 @@ export default function Settings() {
                                                 {t('name')}
                                             </label>
                                             <input
-                                                className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                 type="text"
                                                 placeholder={t('name')}
                                                 value={profileForm.data.name}
@@ -709,7 +707,7 @@ export default function Settings() {
                                                 {t('phone')}
                                             </label>
                                             <input
-                                                className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                 type="tel"
                                                 placeholder="Ex : +33 6 12 34 56 78"
                                                 value={profileForm.data.phone}
@@ -739,7 +737,7 @@ export default function Settings() {
                                                     {t('company')}
                                                 </label>
                                                 <input
-                                                    className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                    className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                     type="text"
                                                     placeholder={t('company')}
                                                     value={
@@ -775,7 +773,7 @@ export default function Settings() {
                                                     {t('address')}
                                                 </label>
                                                 <input
-                                                    className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                    className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                     type="text"
                                                     placeholder={t('address')}
                                                     value={
@@ -809,7 +807,7 @@ export default function Settings() {
                                                             {t('rc_number')}
                                                         </label>
                                                         <input
-                                                            className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                            className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                             type="text"
                                                             placeholder={t(
                                                                 'rc_number',
@@ -847,7 +845,7 @@ export default function Settings() {
                                                             {t('tax_number')}
                                                         </label>
                                                         <input
-                                                            className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                            className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                             type="text"
                                                             placeholder={t(
                                                                 'tax_number',
@@ -897,7 +895,7 @@ export default function Settings() {
                                                     />
                                                 </div>
                                                 <input
-                                                    className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                    className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                     type="text"
                                                     placeholder="Nom d'utilisateur Instagram"
                                                     value={
@@ -938,7 +936,7 @@ export default function Settings() {
                                                     />
                                                 </div>
                                                 <input
-                                                    className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                    className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                     type="text"
                                                     placeholder="Nom d'utilisateur Twitter"
                                                     value={
@@ -977,7 +975,7 @@ export default function Settings() {
                                                     />
                                                 </div>
                                                 <input
-                                                    className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                    className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                     type="text"
                                                     placeholder="URL du profil LinkedIn"
                                                     value={
@@ -1018,7 +1016,7 @@ export default function Settings() {
                                                     />
                                                 </div>
                                                 <input
-                                                    className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                    className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                     type="text"
                                                     placeholder="URL du profil Facebook"
                                                     value={
@@ -1051,7 +1049,7 @@ export default function Settings() {
                                     <div className="flex justify-end">
                                         <button
                                             type="submit"
-                                            className={`inline-flex items-center rounded-lg bg-gradient-to-r from-amber-400 to-amber-600 px-6 py-3 font-medium text-white transition-all hover:from-amber-500 hover:to-amber-700 focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:outline-none ${
+                                            className={`inline-flex items-center rounded-lg bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-6 py-3 font-medium text-white transition-all hover:from-[#A8882E] hover:to-[#8a6e22] focus:ring-2 focus:ring-slate-200 focus:ring-offset-2 focus:outline-none ${
                                                 profileForm.processing
                                                     ? 'cursor-not-allowed opacity-75'
                                                     : ''
@@ -1119,7 +1117,7 @@ export default function Settings() {
                                     </label>
                                     <div className="relative">
                                         <input
-                                            className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                            className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                             type={
                                                 showCurrentPassword
                                                     ? 'text'
@@ -1180,7 +1178,7 @@ export default function Settings() {
                                         </label>
                                         <div className="relative">
                                             <input
-                                                className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                 type={
                                                     showNewPassword
                                                         ? 'text'
@@ -1236,7 +1234,7 @@ export default function Settings() {
                                         </label>
                                         <div className="relative">
                                             <input
-                                                className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                 type={
                                                     showConfirmPassword
                                                         ? 'text'
@@ -1297,7 +1295,7 @@ export default function Settings() {
                                 <div className="flex justify-end">
                                     <button
                                         type="submit"
-                                        className={`inline-flex items-center rounded-lg bg-gradient-to-r from-amber-400 to-amber-600 px-6 py-3 font-medium text-white transition-all hover:from-amber-500 hover:to-amber-700 focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:outline-none ${
+                                        className={`inline-flex items-center rounded-lg bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-6 py-3 font-medium text-white transition-all hover:from-[#A8882E] hover:to-[#8a6e22] focus:ring-2 focus:ring-slate-200 focus:ring-offset-2 focus:outline-none ${
                                             passwordForm.processing
                                                 ? 'cursor-not-allowed opacity-75'
                                                 : ''
@@ -1364,7 +1362,7 @@ export default function Settings() {
                                         />
                                     </div>
                                     <select
-                                        className="w-full appearance-none rounded-lg border border-gray-300 bg-white py-3 pr-4 pl-10 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                        className="w-full appearance-none rounded-lg border border-gray-300 bg-white py-3 pr-4 pl-10 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                         onChange={(e) =>
                                             changeLanguage(e.target.value)
                                         }
@@ -1396,7 +1394,7 @@ export default function Settings() {
                                             {t('site_name')}
                                         </label>
                                         <input
-                                            className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                            className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                             type="text"
                                             value={appForm.data.site_name}
                                             onChange={(e) =>
@@ -1429,7 +1427,7 @@ export default function Settings() {
                                                 />
                                             </div>
                                             <input
-                                                className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                 type="email"
                                                 value={appForm.data.app_email}
                                                 onChange={(e) =>
@@ -1464,7 +1462,7 @@ export default function Settings() {
                                             />
                                         </div>
                                         <input
-                                            className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                            className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                             type="text"
                                             value={appForm.data.numero}
                                             onChange={(e) =>
@@ -1505,7 +1503,7 @@ export default function Settings() {
                                                 />
                                             </div>
                                             <input
-                                                className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                 type="text"
                                                 value={adresseParts.avenue}
                                                 onChange={(e) =>
@@ -1530,7 +1528,7 @@ export default function Settings() {
                                                 />
                                             </div>
                                             <input
-                                                className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                 type="text"
                                                 value={adresseParts.numero}
                                                 onChange={(e) =>
@@ -1557,7 +1555,7 @@ export default function Settings() {
                                                 />
                                             </div>
                                             <input
-                                                className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                 type="text"
                                                 value={adresseParts.quartier}
                                                 onChange={(e) =>
@@ -1582,7 +1580,7 @@ export default function Settings() {
                                                 />
                                             </div>
                                             <input
-                                                className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                 type="text"
                                                 value={adresseParts.commune}
                                                 onChange={(e) =>
@@ -1609,7 +1607,7 @@ export default function Settings() {
                                                 />
                                             </div>
                                             <input
-                                                className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                 type="url"
                                                 value={appForm.data.facebook}
                                                 onChange={(e) =>
@@ -1634,7 +1632,7 @@ export default function Settings() {
                                                 />
                                             </div>
                                             <input
-                                                className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                 type="url"
                                                 value={appForm.data.instagram}
                                                 onChange={(e) =>
@@ -1661,7 +1659,7 @@ export default function Settings() {
                                                 />
                                             </div>
                                             <input
-                                                className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                 type="url"
                                                 value={appForm.data.twitter}
                                                 onChange={(e) =>
@@ -1686,7 +1684,7 @@ export default function Settings() {
                                                 />
                                             </div>
                                             <input
-                                                className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                                                className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-slate-200 focus:ring-2 focus:ring-slate-200"
                                                 type="url"
                                                 value={appForm.data.linkedin}
                                                 onChange={(e) =>
@@ -1710,7 +1708,7 @@ export default function Settings() {
                                     </button>
                                     <button
                                         type="submit"
-                                        className={`inline-flex items-center rounded-lg bg-gradient-to-r from-amber-400 to-amber-600 px-6 py-3 font-medium text-white transition-all hover:from-amber-500 hover:to-amber-700 focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:outline-none ${
+                                        className={`inline-flex items-center rounded-lg bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-6 py-3 font-medium text-white transition-all hover:from-[#A8882E] hover:to-[#8a6e22] focus:ring-2 focus:ring-slate-200 focus:ring-offset-2 focus:outline-none ${
                                             appForm.processing
                                                 ? 'cursor-not-allowed opacity-75'
                                                 : ''
@@ -1761,9 +1759,9 @@ export default function Settings() {
                 return (
                     <div className="space-y-6">
                         <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-                            <div className="border-b border-gray-100 bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-5">
+                            <div className="border-b border-gray-100 bg-gradient-to-r from-slate-100 to-slate-50 px-6 py-5">
                                 <div className="flex items-center gap-3">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1E3A5F]/10 text-[#1E3A5F]">
                                         <Bell size={20} />
                                     </div>
                                     <div>
@@ -1816,9 +1814,9 @@ export default function Settings() {
                         </div>
 
                         <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-                            <div className="border-b border-gray-100 bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-5">
+                            <div className="border-b border-gray-100 bg-gradient-to-r from-slate-100 to-slate-50 px-6 py-5">
                                 <div className="flex items-center gap-3">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1E3A5F]/10 text-[#1E3A5F]">
                                         <Globe size={20} />
                                     </div>
                                     <div>
@@ -1859,8 +1857,8 @@ export default function Settings() {
                                         className={`relative flex flex-col items-center gap-3 rounded-xl border-2 p-6 transition-all duration-200 ${
                                             profileForm.data.language ===
                                             lang.code
-                                                ? 'border-amber-500 bg-amber-50'
-                                                : 'border-gray-100 hover:border-amber-200'
+                                                ? 'border-slate-200 bg-slate-50'
+                                                : 'border-gray-100 hover:border-slate-200'
                                         }`}
                                     >
                                         <span className="text-3xl">
@@ -1874,7 +1872,7 @@ export default function Settings() {
                                             <div className="absolute top-2 right-2">
                                                 <Check
                                                     size={16}
-                                                    className="text-amber-500"
+                                                    className="text-[#C9A84C]"
                                                 />
                                             </div>
                                         )}
@@ -1887,7 +1885,7 @@ export default function Settings() {
                             <button
                                 onClick={handleUserSubmit}
                                 disabled={profileForm.processing}
-                                className="inline-flex items-center rounded-lg bg-gradient-to-r from-amber-400 to-amber-600 px-6 py-3 font-medium text-white transition-all hover:from-amber-500 hover:to-amber-700 disabled:opacity-50"
+                                className="inline-flex items-center rounded-lg bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-6 py-3 font-medium text-white transition-all hover:from-[#A8882E] hover:to-[#8a6e22] disabled:opacity-50"
                             >
                                 {profileForm.processing ? (
                                     <>
@@ -1915,7 +1913,7 @@ export default function Settings() {
 
     return (
         <Dashboard>
-            <div className="min-h-screen bg-gradient-to-br from-amber-50/30 via-white to-amber-50/20">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div className="mb-8">
@@ -1941,7 +1939,7 @@ export default function Settings() {
                                         onClick={() => setActiveTab(tab.id)}
                                         className={`flex items-center gap-2 border-b-2 px-6 py-4 text-sm font-medium transition-colors ${
                                             activeTab === tab.id
-                                                ? 'border-amber-500 bg-amber-50 text-amber-600'
+                                                ? 'border-slate-200 bg-slate-50 text-[#1E3A5F]'
                                                 : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                                         }`}
                                     >

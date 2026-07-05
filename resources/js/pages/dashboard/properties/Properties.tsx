@@ -149,9 +149,7 @@ export default function Properties() {
     };
 
     const handleViewStatistics = (property: Property) => {
-        router.visit(
-            route('dashboard.analytics.show', { id: property.id }),
-        );
+        router.visit(route('dashboard.analytics.show', { id: property.id }));
         setDropdownOpen(null);
     };
 
@@ -191,7 +189,7 @@ export default function Properties() {
         switch (property.status) {
             case 'pending_validation':
                 return (
-                    <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800">
+                    <span className="inline-flex items-center rounded-full border border-slate-200 bg-[#1E3A5F]/10 px-2 py-1 text-xs font-medium text-[#0d2340]">
                         <Clock size={10} className="mr-1" />
                         En attente
                     </span>
@@ -246,15 +244,15 @@ export default function Properties() {
 
     return (
         <Dashboard>
-            <div className="min-h-screen bg-gradient-to-br from-amber-50/30 via-white to-amber-50/20">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 {/* Header Section */}
-                <div className="sticky top-0 z-1 border-b border-amber-200/30 bg-white/80 shadow-lg shadow-amber-500/5 backdrop-blur-xl">
+                <div className="sticky top-0 z-1 border-b border-slate-200 bg-white/80 shadow-lg shadow-sm backdrop-blur-xl">
                     <div className="px-4 py-4 sm:px-6 lg:px-8">
                         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                             <BackButton />
 
                             <div className="flex-1 text-center sm:text-left">
-                                <h1 className="bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
+                                <h1 className="bg-gradient-to-r from-slate-100 to-slate-100 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
                                     Propriétés
                                 </h1>
                                 <p className="mt-1 text-sm text-slate-600 sm:text-base">
@@ -265,13 +263,13 @@ export default function Properties() {
 
                             <div className="flex items-center gap-3">
                                 {/* View Mode Toggle */}
-                                <div className="hidden items-center rounded-xl bg-amber-100/50 p-1 sm:flex">
+                                <div className="hidden items-center rounded-xl bg-[#1E3A5F]/10 p-1 sm:flex">
                                     <button
                                         onClick={() => setViewMode('grid')}
                                         className={`rounded-lg p-2 transition-colors ${
                                             viewMode === 'grid'
-                                                ? 'bg-amber-500 text-white'
-                                                : 'text-amber-600 hover:bg-amber-200'
+                                                ? 'bg-slate-500 text-white'
+                                                : 'text-[#1E3A5F] hover:bg-slate-200'
                                         }`}
                                         title="Vue grille"
                                     >
@@ -281,8 +279,8 @@ export default function Properties() {
                                         onClick={() => setViewMode('list')}
                                         className={`rounded-lg p-2 transition-colors ${
                                             viewMode === 'list'
-                                                ? 'bg-amber-500 text-white'
-                                                : 'text-amber-600 hover:bg-amber-200'
+                                                ? 'bg-slate-500 text-white'
+                                                : 'text-[#1E3A5F] hover:bg-slate-200'
                                         }`}
                                         title="Vue liste"
                                     >
@@ -293,7 +291,7 @@ export default function Properties() {
                                 {/* Create Button */}
                                 <Link
                                     href={route('dashboard.properties.create')}
-                                    className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-4 py-2.5 font-medium text-white shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-105 hover:from-amber-500 hover:to-amber-700"
+                                    className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-4 py-2.5 font-medium text-white shadow-lg shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22]"
                                 >
                                     <Plus size={18} className="mr-2" />
                                     <span className="hidden sm:inline">
@@ -309,12 +307,12 @@ export default function Properties() {
                             <div className="relative flex-1">
                                 <Search
                                     size={20}
-                                    className="absolute top-1/2 left-3 -translate-y-1/2 text-amber-500"
+                                    className="absolute top-1/2 left-3 -translate-y-1/2 text-[#C9A84C]"
                                 />
                                 <input
                                     type="text"
                                     placeholder="Rechercher par titre, type, localisation..."
-                                    className="w-full rounded-xl border border-amber-200/50 bg-white/80 py-3 pr-4 pl-10 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                                    className="w-full rounded-xl border border-slate-200 bg-white/80 py-3 pr-4 pl-10 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none"
                                     value={searchQuery}
                                     onChange={(e) =>
                                         setSearchQuery(e.target.value)
@@ -323,7 +321,7 @@ export default function Properties() {
                                 {searchQuery && (
                                     <button
                                         onClick={() => setSearchQuery('')}
-                                        className="absolute top-1/2 right-3 -translate-y-1/2 text-amber-400 transition-colors hover:text-amber-600"
+                                        className="absolute top-1/2 right-3 -translate-y-1/2 text-[#1E3A5F] transition-colors hover:text-[#1E3A5F]"
                                         aria-label="Effacer"
                                     >
                                         <XCircle size={16} />
@@ -341,7 +339,7 @@ export default function Properties() {
                                         setSortBy(field);
                                         setSortOrder(order);
                                     }}
-                                    className="cursor-pointer appearance-none rounded-xl border border-amber-200/50 bg-white px-4 py-3 pr-10 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                                    className="cursor-pointer appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none"
                                 >
                                     <option value="created_at-desc">
                                         Plus récentes
@@ -362,7 +360,7 @@ export default function Properties() {
                                 </select>
                                 <TrendingUp
                                     size={16}
-                                    className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-amber-500"
+                                    className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[#C9A84C]"
                                 />
                             </div>
                         </div>
@@ -372,9 +370,9 @@ export default function Properties() {
                 {/* Stats Cards */}
                 <div className="px-4 py-6 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <div className="rounded-2xl border border-amber-200/30 bg-white p-4 shadow-lg shadow-amber-500/10 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/20">
+                        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-lg shadow-sm transition-all duration-300 hover:shadow-sm hover:shadow-xl">
                             <div className="mb-2 flex items-center justify-between">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 shadow-lg shadow-amber-500/30">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#C9A84C] to-[#A8882E] shadow-lg shadow-sm">
                                     <Building
                                         size={20}
                                         className="text-white"
@@ -393,7 +391,7 @@ export default function Properties() {
                             </div>
                         </div>
 
-                        <div className="rounded-2xl border border-amber-200/30 bg-white p-4 shadow-lg shadow-amber-500/10 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/20">
+                        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-lg shadow-sm transition-all duration-300 hover:shadow-sm hover:shadow-xl">
                             <div className="mb-2 flex items-center justify-between">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/30">
                                     <CheckCircle
@@ -401,7 +399,7 @@ export default function Properties() {
                                         className="text-white"
                                     />
                                 </div>
-                                <div className="flex items-center text-sm font-medium text-amber-600">
+                                <div className="flex items-center text-sm font-medium text-[#1E3A5F]">
                                     <Clock size={16} className="mr-1" />
                                     En attente
                                 </div>
@@ -418,7 +416,7 @@ export default function Properties() {
                             </div>
                         </div>
 
-                        <div className="rounded-2xl border border-amber-200/30 bg-white p-4 shadow-lg shadow-amber-500/10 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/20">
+                        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-lg shadow-sm transition-all duration-300 hover:shadow-sm hover:shadow-xl">
                             <div className="mb-2 flex items-center justify-between">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg shadow-blue-500/30">
                                     <Eye size={20} className="text-white" />
@@ -442,12 +440,12 @@ export default function Properties() {
                             </div>
                         </div>
 
-                        <div className="rounded-2xl border border-amber-200/30 bg-white p-4 shadow-lg shadow-amber-500/10 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/20">
+                        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-lg shadow-sm transition-all duration-300 hover:shadow-sm hover:shadow-xl">
                             <div className="mb-2 flex items-center justify-between">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-400 to-red-600 shadow-lg shadow-red-500/30">
                                     <Heart size={20} className="text-white" />
                                 </div>
-                                <div className="flex items-center text-sm font-medium text-amber-600">
+                                <div className="flex items-center text-sm font-medium text-[#1E3A5F]">
                                     <TrendingUp size={16} className="mr-1" />
                                     +8%
                                 </div>
@@ -469,10 +467,10 @@ export default function Properties() {
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             {(properties?.data || []).length === 0 ? (
                                 <div className="col-span-full py-16 text-center">
-                                    <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-amber-100/50">
+                                    <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-[#1E3A5F]/10">
                                         <Home
                                             size={32}
-                                            className="text-amber-500"
+                                            className="text-[#C9A84C]"
                                         />
                                     </div>
                                     <h3 className="mb-2 text-xl font-semibold text-slate-900">
@@ -486,7 +484,7 @@ export default function Properties() {
                                         href={route(
                                             'dashboard.properties.create',
                                         )}
-                                        className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-6 py-3 font-medium text-white shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-105 hover:from-amber-500 hover:to-amber-700"
+                                        className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-6 py-3 font-medium text-white shadow-lg shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22]"
                                     >
                                         <Plus size={20} className="mr-2" />
                                         Créer une propriété
@@ -497,7 +495,7 @@ export default function Properties() {
                                     (property: any, index: number) => (
                                         <div
                                             key={property.id}
-                                            className="group relative transform overflow-hidden rounded-2xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/20"
+                                            className="group relative transform overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-sm hover:shadow-xl"
                                             style={{
                                                 animationDelay: `${index * 0.1}s`,
                                             }}
@@ -512,10 +510,10 @@ export default function Properties() {
                                                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                                                     />
                                                 ) : (
-                                                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-100 to-amber-200">
+                                                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-100">
                                                         <ImageOff
                                                             size={32}
-                                                            className="text-amber-400"
+                                                            className="text-[#1E3A5F]"
                                                         />
                                                     </div>
                                                 )}
@@ -527,7 +525,7 @@ export default function Properties() {
 
                                                 {/* Price Badge */}
                                                 <div className="absolute bottom-3 left-3 rounded-lg bg-white/90 px-2 py-1 backdrop-blur-sm">
-                                                    <span className="text-sm font-bold text-amber-600">
+                                                    <span className="text-sm font-bold text-[#1E3A5F]">
                                                         {formatPrice(
                                                             property.price,
                                                         )}
@@ -537,7 +535,7 @@ export default function Properties() {
 
                                             {/* Content */}
                                             <div className="p-4">
-                                                <h3 className="mb-2 font-semibold text-slate-900 transition-colors group-hover:text-amber-700">
+                                                <h3 className="mb-2 font-semibold text-slate-900 transition-colors group-hover:text-[#0d2340]">
                                                     {property.title}
                                                 </h3>
 
@@ -545,7 +543,7 @@ export default function Properties() {
                                                     <span className="flex items-center">
                                                         <MapPin
                                                             size={14}
-                                                            className="mr-1 text-amber-500"
+                                                            className="mr-1 text-[#C9A84C]"
                                                         />
                                                         {property.location ||
                                                             'Non spécifié'}
@@ -553,7 +551,7 @@ export default function Properties() {
                                                     <span className="flex items-center">
                                                         <Building
                                                             size={14}
-                                                            className="mr-1 text-amber-500"
+                                                            className="mr-1 text-[#C9A84C]"
                                                         />
                                                         {property.type}
                                                     </span>
@@ -589,7 +587,7 @@ export default function Properties() {
                                                                     property,
                                                                 )
                                                             }
-                                                            className="rounded-lg p-2 text-amber-600 transition-colors hover:bg-amber-100"
+                                                            className="rounded-lg p-2 text-[#1E3A5F] transition-colors hover:bg-slate-100"
                                                             title="Voir détails"
                                                         >
                                                             <Eye size={16} />
@@ -622,14 +620,14 @@ export default function Properties() {
 
                                                             {dropdownOpen ===
                                                                 property.id && (
-                                                                <div className="absolute right-0 bottom-full z-[100] mb-2 w-48 overflow-hidden rounded-xl border border-amber-200/50 bg-white shadow-2xl shadow-amber-500/20">
+                                                                <div className="absolute right-0 bottom-full z-[100] mb-2 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl shadow-sm">
                                                                     <button
                                                                         onClick={() =>
                                                                             handleEditProperty(
                                                                                 property,
                                                                             )
                                                                         }
-                                                                        className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-amber-50"
+                                                                        className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-slate-100"
                                                                     >
                                                                         <Edit3
                                                                             size={
@@ -646,7 +644,7 @@ export default function Properties() {
                                                                                 property,
                                                                             )
                                                                         }
-                                                                        className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-amber-50"
+                                                                        className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-slate-100"
                                                                     >
                                                                         <BarChart3
                                                                             size={
@@ -687,13 +685,13 @@ export default function Properties() {
                         </div>
                     ) : (
                         /* List View */
-                        <div className="overflow-hidden rounded-2xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10">
+                        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-sm">
                             {(properties?.data || []).length === 0 ? (
                                 <div className="py-16 text-center">
-                                    <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-amber-100/50">
+                                    <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-[#1E3A5F]/10">
                                         <Home
                                             size={32}
-                                            className="text-amber-500"
+                                            className="text-[#C9A84C]"
                                         />
                                     </div>
                                     <h3 className="mb-2 text-xl font-semibold text-slate-900">
@@ -707,7 +705,7 @@ export default function Properties() {
                                         href={route(
                                             'dashboard.properties.create',
                                         )}
-                                        className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-6 py-3 font-medium text-white shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-105 hover:from-amber-500 hover:to-amber-700"
+                                        className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-6 py-3 font-medium text-white shadow-lg shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22]"
                                     >
                                         <Plus size={20} className="mr-2" />
                                         Créer une propriété
@@ -716,7 +714,7 @@ export default function Properties() {
                             ) : (
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
-                                        <thead className="bg-amber-50/30">
+                                        <thead className="bg-slate-50">
                                             <tr>
                                                 <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
                                                     Image
@@ -738,7 +736,7 @@ export default function Properties() {
                                                 </th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-amber-200/30">
+                                        <tbody className="divide-y divide-slate-200">
                                             {(properties?.data || []).map(
                                                 (
                                                     property: any,
@@ -746,7 +744,7 @@ export default function Properties() {
                                                 ) => (
                                                     <tr
                                                         key={property.id}
-                                                        className="transition-colors hover:bg-amber-50/30"
+                                                        className="transition-colors hover:bg-slate-50"
                                                         style={{
                                                             animationDelay: `${index * 0.05}s`,
                                                         }}
@@ -765,12 +763,12 @@ export default function Properties() {
                                                                         className="h-full w-full object-cover"
                                                                     />
                                                                 ) : (
-                                                                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-100 to-amber-200">
+                                                                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-100">
                                                                         <ImageOff
                                                                             size={
                                                                                 20
                                                                             }
-                                                                            className="text-amber-400"
+                                                                            className="text-[#1E3A5F]"
                                                                         />
                                                                     </div>
                                                                 )}
@@ -789,7 +787,7 @@ export default function Properties() {
                                                                             size={
                                                                                 12
                                                                             }
-                                                                            className="mr-1 text-amber-500"
+                                                                            className="mr-1 text-[#C9A84C]"
                                                                         />
                                                                         {property.location ||
                                                                             'Non spécifié'}
@@ -799,7 +797,7 @@ export default function Properties() {
                                                                             size={
                                                                                 12
                                                                             }
-                                                                            className="mr-1 text-amber-500"
+                                                                            className="mr-1 text-[#C9A84C]"
                                                                         />
                                                                         {
                                                                             property.type
@@ -814,7 +812,7 @@ export default function Properties() {
                                                             )}
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <span className="font-semibold text-amber-600">
+                                                            <span className="font-semibold text-[#1E3A5F]">
                                                                 {formatPrice(
                                                                     property.price,
                                                                 )}
@@ -832,7 +830,7 @@ export default function Properties() {
                                                                             property,
                                                                         )
                                                                     }
-                                                                    className="rounded-lg p-2 text-amber-600 transition-colors hover:bg-amber-100"
+                                                                    className="rounded-lg p-2 text-[#1E3A5F] transition-colors hover:bg-slate-100"
                                                                     title="Voir détails"
                                                                 >
                                                                     <Eye
@@ -873,14 +871,14 @@ export default function Properties() {
 
                                                                     {dropdownOpen ===
                                                                         property.id && (
-                                                                        <div className="absolute top-full right-0 z-[100] mt-1 w-48 overflow-hidden rounded-xl border border-amber-200/50 bg-white shadow-2xl shadow-amber-500/20">
+                                                                        <div className="absolute top-full right-0 z-[100] mt-1 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl shadow-sm">
                                                                             <button
                                                                                 onClick={() =>
                                                                                     handleEditProperty(
                                                                                         property,
                                                                                     )
                                                                                 }
-                                                                                className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-amber-50"
+                                                                                className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-slate-100"
                                                                             >
                                                                                 <Edit3
                                                                                     size={
@@ -897,7 +895,7 @@ export default function Properties() {
                                                                                         property,
                                                                                     )
                                                                                 }
-                                                                                className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-amber-50"
+                                                                                className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-slate-100"
                                                                             >
                                                                                 <BarChart3
                                                                                     size={
@@ -962,8 +960,8 @@ export default function Properties() {
                                     href={link.url ?? '#'}
                                     className={`rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
                                         link.active
-                                            ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30'
-                                            : 'text-slate-600 hover:bg-amber-100 hover:text-amber-700'
+                                            ? 'bg-slate-500 text-white shadow-lg shadow-sm'
+                                            : 'text-slate-600 hover:bg-slate-100 hover:text-[#0d2340]'
                                     } ${!link.url ? 'cursor-not-allowed opacity-50' : ''}`}
                                     preserveScroll
                                     dangerouslySetInnerHTML={{

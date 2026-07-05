@@ -391,27 +391,27 @@ export default function Sidebar({
         <>
             {/* Mobile Overlay */}
             <div
-                className={`fixed inset-0 z-40 bg-gradient-to-br from-amber-900/20 to-amber-800/20 backdrop-blur-md transition-all duration-500 ease-in-out lg:hidden ${isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} `}
+                className={`fixed inset-0 z-40 bg-[#0d2340]/20 backdrop-blur-md transition-all duration-500 ease-in-out lg:hidden ${isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'} `}
                 onClick={onClose}
             />
 
             {/* Sidebar */}
             <aside
-                className={`fixed top-0 left-0 z-50 h-screen border-r border-amber-200/40 bg-gradient-to-b from-amber-50 via-white to-amber-50/30 transition-all duration-500 ease-in-out ${isCollapsed ? 'w-20' : 'w-72'} ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} flex flex-col shadow-2xl backdrop-blur-xl before:pointer-events-none before:absolute before:inset-0 before:bg-gradient-to-br before:from-amber-400/5 before:to-transparent lg:shadow-none`}
+                className={`fixed top-0 left-0 z-50 h-screen border-r border-slate-200 bg-white transition-all duration-500 ease-in-out ${isCollapsed ? 'w-20' : 'w-72'} ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} flex flex-col shadow-2xl backdrop-blur-xl lg:shadow-none`}
             >
                 {/* Header */}
-                <div className="relative flex h-20 items-center justify-between border-b border-amber-200/40 bg-white/60 px-6 backdrop-blur-sm">
+                <div className="relative flex h-20 items-center justify-between border-b border-slate-100 bg-white px-6">
                     <div className="flex items-center space-x-4 overflow-hidden">
-                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-xl font-bold text-white shadow-lg ring-2 shadow-amber-500/25 ring-amber-500/20">
+                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0d2340] text-xl font-bold text-white shadow-sm ring-2 ring-slate-100">
                             <LayoutDashboard size={24} />
                         </div>
                         <div
                             className={`transition-all duration-500 ease-in-out ${isCollapsed ? 'translate-x-4 opacity-0' : 'translate-x-0 opacity-100'} `}
                         >
-                            <h1 className="bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-2xl font-bold text-transparent">
+                            <h1 className="text-2xl font-bold text-[#0d2340]">
                                 AgencyDRC
                             </h1>
-                            <p className="text-xs font-medium text-amber-600/70">
+                            <p className="text-xs font-medium text-[#C9A84C]">
                                 Premium Dashboard
                             </p>
                         </div>
@@ -419,7 +419,7 @@ export default function Sidebar({
 
                     {/* Toggle Button - Desktop Only */}
                     <button
-                        className="hidden h-10 w-10 transform items-center justify-center rounded-xl text-amber-600/60 transition-all duration-300 hover:scale-105 hover:bg-amber-100 hover:text-amber-700 focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:outline-none lg:flex"
+                        className="hidden h-10 w-10 transform items-center justify-center rounded-xl text-slate-400 transition-all duration-300 hover:scale-105 hover:bg-slate-100 hover:text-[#0d2340] focus:ring-2 focus:ring-[#C9A84C] focus:ring-offset-2 focus:outline-none lg:flex"
                         onClick={onToggleCollapse}
                         aria-label={
                             isCollapsed
@@ -444,7 +444,7 @@ export default function Sidebar({
                 </div>
 
                 {/* Scrollable Content */}
-                <div className="scrollbar-thin scrollbar-thumb-amber-300 scrollbar-track-transparent flex-1 overflow-y-auto py-6">
+                <div className="scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent flex-1 overflow-y-auto py-6">
                     <div className="space-y-6 px-6">
                         {Object.entries(groupedMenuItems).map(
                             ([section, items]) => (
@@ -452,9 +452,9 @@ export default function Sidebar({
                                     {/* Section Title */}
                                     {section !== 'main' && (
                                         <h3
-                                            className={`text-xs font-bold tracking-widest text-amber-700/80 uppercase transition-all duration-500 ease-in-out ${isCollapsed ? 'h-0 opacity-0' : 'h-auto opacity-100'} mb-2 flex items-center`}
+                                            className={`text-xs font-bold tracking-widest text-slate-400 uppercase transition-all duration-500 ease-in-out ${isCollapsed ? 'h-0 opacity-0' : 'h-auto opacity-100'} mb-2 flex items-center`}
                                         >
-                                            <span className="mr-2 h-4 w-1 rounded-full bg-gradient-to-b from-amber-400 to-amber-600"></span>
+                                            <span className="mr-2 h-4 w-1 rounded-full bg-[#C9A84C]"></span>
                                             {section}
                                         </h3>
                                     )}
@@ -469,8 +469,8 @@ export default function Sidebar({
                                                     className={`group/menu-item relative flex w-full items-center rounded-xl px-3 py-2.5 transition-all duration-300 ease-in-out ${
                                                         activeMenuItem ===
                                                         item.id
-                                                            ? 'scale-[1.02] transform border border-amber-400/30 bg-gradient-to-r from-amber-400/20 to-amber-500/20 text-amber-800 shadow-lg shadow-amber-500/20'
-                                                            : 'text-slate-700 hover:bg-amber-100/50 hover:text-amber-800 hover:shadow-md hover:shadow-amber-500/10'
+                                                            ? 'bg-slate-50 text-[#0d2340]'
+                                                            : 'text-slate-600 hover:bg-slate-50 hover:text-[#0d2340]'
                                                     } ${isCollapsed ? 'justify-center px-3 py-2.5' : ''} `}
                                                     onClick={() =>
                                                         handleMenuClick(
@@ -489,8 +489,8 @@ export default function Sidebar({
                                                         className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg transition-all duration-300 ${
                                                             activeMenuItem ===
                                                             item.id
-                                                                ? 'bg-gradient-to-br from-amber-400 to-amber-500 text-white shadow-lg shadow-amber-500/30'
-                                                                : 'bg-amber-100/50 text-amber-600 group-hover/menu-item:bg-amber-200/70 group-hover/menu-item:text-amber-700'
+                                                                ? 'bg-[#1E3A5F] text-white shadow-sm'
+                                                                : 'bg-slate-100/50 text-slate-500 group-hover/menu-item:bg-slate-100 group-hover/menu-item:text-[#1E3A5F]'
                                                         } ${isCollapsed ? 'h-8 w-8' : 'mr-3 h-8 w-8'} `}
                                                     >
                                                         <Icon size={16} />
@@ -516,7 +516,7 @@ export default function Sidebar({
                                                     {activeMenuItem ===
                                                         item.id &&
                                                         !isCollapsed && (
-                                                            <span className="ml-auto h-2 w-2 animate-pulse rounded-full bg-gradient-to-r from-amber-400 to-amber-600 shadow-lg shadow-amber-500/50"></span>
+                                                            <span className="ml-auto h-2 w-2 rounded-full bg-[#C9A84C] shadow-sm"></span>
                                                         )}
                                                 </button>
                                             );
@@ -530,7 +530,7 @@ export default function Sidebar({
 
                 {/* Profile Progress Footer */}
                 {!isCollapsed && (
-                    <div className="border-t border-amber-200/40 bg-gradient-to-b from-white/80 to-amber-50/60 p-6 backdrop-blur-sm">
+                    <div className="border-t border-slate-100 bg-white p-6">
                         <ProfileProgress user={user} />
                     </div>
                 )}

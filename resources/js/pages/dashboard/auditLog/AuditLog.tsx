@@ -64,7 +64,7 @@ export default function AuditLog({
             case 'info':
                 return <Info size={12} className="text-emerald-600" />;
             case 'warning':
-                return <AlertTriangle size={12} className="text-amber-600" />;
+                return <AlertTriangle size={12} className="text-[#1E3A5F]" />;
             case 'error':
                 return <XCircle size={12} className="text-red-600" />;
             case 'critical':
@@ -85,7 +85,7 @@ export default function AuditLog({
                 );
             case 'warning':
                 return (
-                    <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                    <span className="inline-flex items-center rounded-full border border-slate-200 bg-[#1E3A5F]/10 px-2 py-0.5 text-xs font-medium text-[#0d2340]">
                         {getLevelIcon(level)}
                         <span className="ml-1">{level.toUpperCase()}</span>
                     </span>
@@ -163,16 +163,16 @@ export default function AuditLog({
 
     return (
         <Dashboard>
-            <div className="min-h-screen bg-gradient-to-br from-amber-50/30 via-white to-amber-50/20">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 {/* Header Section */}
-                <div className="sticky top-0 z-10 border-b border-amber-200/30 bg-white/80 shadow-lg shadow-amber-500/5 backdrop-blur-xl">
+                <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 shadow-lg shadow-sm backdrop-blur-xl">
                     <div className="px-3 py-3 sm:px-4 sm:py-4 lg:px-8">
                         <div className="flex flex-col gap-3 sm:gap-4">
                             <div className="flex items-start justify-between sm:items-center">
                                 <BackButton />
 
                                 <div className="ml-0 flex-1 text-center sm:ml-4 sm:text-left">
-                                    <h1 className="bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-xl font-bold text-transparent sm:text-2xl lg:text-3xl">
+                                    <h1 className="bg-gradient-to-r from-slate-100 to-slate-100 bg-clip-text text-xl font-bold text-transparent sm:text-2xl lg:text-3xl">
                                         Audit Logs
                                     </h1>
                                     <p className="mt-1 text-xs text-slate-600 sm:text-sm lg:text-base">
@@ -187,12 +187,12 @@ export default function AuditLog({
                                 <div className="relative w-full flex-1 sm:max-w-md">
                                     <Search
                                         size={16}
-                                        className="absolute top-1/2 left-3 -translate-y-1/2 text-amber-500"
+                                        className="absolute top-1/2 left-3 -translate-y-1/2 text-[#C9A84C]"
                                     />
                                     <input
                                         type="text"
                                         placeholder="Rechercher dans les logs..."
-                                        className={`w-full rounded-lg border border-amber-200/50 bg-white/80 py-2.5 pr-8 pl-9 text-xs shadow-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:rounded-xl sm:py-3 sm:pr-10 sm:pl-10 sm:text-sm ${isSearching ? 'opacity-70' : ''}`}
+                                        className={`w-full rounded-lg border border-slate-200 bg-white/80 py-2.5 pr-8 pl-9 text-xs shadow-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:rounded-xl sm:py-3 sm:pr-10 sm:pl-10 sm:text-sm ${isSearching ? 'opacity-70' : ''}`}
                                         value={searchQuery}
                                         onChange={(e) =>
                                             setSearchQuery(e.target.value)
@@ -201,7 +201,7 @@ export default function AuditLog({
                                     {searchQuery && (
                                         <button
                                             onClick={() => setSearchQuery('')}
-                                            className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-amber-400 transition-colors hover:text-amber-600 sm:right-3"
+                                            className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-[#1E3A5F] transition-colors hover:text-[#1E3A5F] sm:right-3"
                                             aria-label="Effacer"
                                         >
                                             <XCircle size={14} />
@@ -210,7 +210,7 @@ export default function AuditLog({
                                     {isSearching && (
                                         <div className="absolute top-1/2 right-8 -translate-y-1/2 sm:right-12">
                                             <svg
-                                                className="h-3 w-3 animate-spin text-amber-500 sm:h-4 sm:w-4"
+                                                className="h-3 w-3 animate-spin text-[#C9A84C] sm:h-4 sm:w-4"
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 fill="none"
                                                 viewBox="0 0 24 24"
@@ -248,7 +248,7 @@ export default function AuditLog({
                 {/* Stats Cards */}
                 <div className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8">
                     <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-                        <div className="transform rounded-xl border border-amber-200/30 bg-white p-3 shadow-lg shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/20 sm:rounded-2xl sm:p-5">
+                        <div className="transform rounded-xl border border-slate-200 bg-white p-3 shadow-lg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-sm hover:shadow-xl sm:rounded-2xl sm:p-5">
                             <div className="mb-2 flex items-center justify-between sm:mb-3">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/30 sm:h-10 sm:w-10 sm:rounded-xl">
                                     <Info
@@ -272,15 +272,15 @@ export default function AuditLog({
                             </div>
                         </div>
 
-                        <div className="transform rounded-xl border border-amber-200/30 bg-white p-3 shadow-lg shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/20 sm:rounded-2xl sm:p-5">
+                        <div className="transform rounded-xl border border-slate-200 bg-white p-3 shadow-lg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-sm hover:shadow-xl sm:rounded-2xl sm:p-5">
                             <div className="mb-2 flex items-center justify-between sm:mb-3">
-                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 shadow-lg shadow-amber-500/30 sm:h-10 sm:w-10 sm:rounded-xl">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#C9A84C] to-[#A8882E] shadow-lg shadow-sm sm:h-10 sm:w-10 sm:rounded-xl">
                                     <AlertTriangle
                                         size={14}
                                         className="text-white sm:size-18"
                                     />
                                 </div>
-                                <div className="hidden items-center rounded-lg bg-amber-50 px-2 py-1 text-xs font-medium text-amber-600 sm:flex sm:text-sm">
+                                <div className="hidden items-center rounded-lg bg-slate-50 px-2 py-1 text-xs font-medium text-[#1E3A5F] sm:flex sm:text-sm">
                                     <AlertCircle
                                         size={10}
                                         className="mr-1 sm:size-12"
@@ -296,7 +296,7 @@ export default function AuditLog({
                             </div>
                         </div>
 
-                        <div className="transform rounded-xl border border-amber-200/30 bg-white p-3 shadow-lg shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/20 sm:rounded-2xl sm:p-5">
+                        <div className="transform rounded-xl border border-slate-200 bg-white p-3 shadow-lg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-sm hover:shadow-xl sm:rounded-2xl sm:p-5">
                             <div className="mb-2 flex items-center justify-between sm:mb-3">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-red-400 to-red-600 shadow-lg shadow-red-500/30 sm:h-10 sm:w-10 sm:rounded-xl">
                                     <XCircle
@@ -320,7 +320,7 @@ export default function AuditLog({
                             </div>
                         </div>
 
-                        <div className="transform rounded-xl border border-amber-200/30 bg-white p-3 shadow-lg shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/20 sm:rounded-2xl sm:p-5">
+                        <div className="transform rounded-xl border border-slate-200 bg-white p-3 shadow-lg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-sm hover:shadow-xl sm:rounded-2xl sm:p-5">
                             <div className="mb-2 flex items-center justify-between sm:mb-3">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-400 to-purple-600 shadow-lg shadow-purple-500/30 sm:h-10 sm:w-10 sm:rounded-xl">
                                     <AlertCircle
@@ -348,11 +348,11 @@ export default function AuditLog({
 
                 {/* Table Section */}
                 <div className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8">
-                    <div className="overflow-hidden rounded-xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10 sm:rounded-2xl">
+                    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-sm sm:rounded-2xl">
                         <div className="overflow-x-auto">
                             {/* Desktop Table */}
                             <table className="hidden w-full lg:table">
-                                <thead className="bg-amber-50/30">
+                                <thead className="bg-slate-50">
                                     <tr>
                                         <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-slate-700 uppercase lg:px-6 lg:py-4">
                                             #
@@ -383,11 +383,11 @@ export default function AuditLog({
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-amber-200/30">
+                                <tbody className="divide-y divide-slate-200">
                                     {logs?.data?.map((log, index) => (
                                         <tr
                                             key={log.id}
-                                            className="transition-colors hover:bg-amber-50/30"
+                                            className="transition-colors hover:bg-slate-50"
                                             style={{
                                                 animationDelay: `${index * 0.05}s`,
                                             }}
@@ -403,7 +403,7 @@ export default function AuditLog({
                                             </td>
                                             <td className="px-4 py-3 whitespace-nowrap lg:px-6 lg:py-4">
                                                 <div className="flex items-center">
-                                                    <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-xs font-bold text-white sm:h-7 sm:w-7">
+                                                    <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#C9A84C] to-[#A8882E] text-xs font-bold text-white sm:h-7 sm:w-7">
                                                         {log.user
                                                             .charAt(0)
                                                             .toUpperCase()}
@@ -452,11 +452,11 @@ export default function AuditLog({
                                 {logs?.data?.map((log, index) => (
                                     <div
                                         key={log.id}
-                                        className="border-b border-amber-200/30 p-3 last:border-b-0 sm:p-4"
+                                        className="border-b border-slate-200 p-3 last:border-b-0 sm:p-4"
                                     >
                                         <div className="mb-3 flex items-start justify-between">
                                             <div className="flex min-w-0 flex-1 items-center">
-                                                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-xs font-bold text-white sm:h-7 sm:w-7">
+                                                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#C9A84C] to-[#A8882E] text-xs font-bold text-white sm:h-7 sm:w-7">
                                                     {log.user
                                                         .charAt(0)
                                                         .toUpperCase()}
@@ -533,10 +533,10 @@ export default function AuditLog({
 
                                 {logs?.data?.length === 0 && (
                                     <div className="py-8 text-center sm:py-12">
-                                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-amber-100/50 sm:mb-6 sm:h-20 sm:w-20 sm:rounded-2xl">
+                                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-[#1E3A5F]/10 sm:mb-6 sm:h-20 sm:w-20 sm:rounded-2xl">
                                             <Activity
                                                 size={20}
-                                                className="text-amber-500 sm:size-24"
+                                                className="text-[#C9A84C] sm:size-24"
                                             />
                                         </div>
                                         <h3 className="mb-2 text-lg font-semibold text-slate-900 sm:text-xl">
@@ -574,8 +574,8 @@ export default function AuditLog({
                                     key={index}
                                     className={`rounded-lg px-2 py-1.5 text-xs font-medium transition-all duration-200 sm:px-3 sm:py-2 sm:text-sm ${
                                         link.active
-                                            ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30'
-                                            : 'text-slate-600 hover:bg-amber-100 hover:text-amber-700'
+                                            ? 'bg-slate-500 text-white shadow-lg shadow-sm'
+                                            : 'text-slate-600 hover:bg-slate-100 hover:text-[#0d2340]'
                                     } ${!link.url ? 'cursor-not-allowed opacity-50' : ''}`}
                                     disabled={!link.url}
                                     onClick={() => goTo(link.url)}

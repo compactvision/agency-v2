@@ -282,124 +282,125 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
 
     return (
         <div
-            className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}
+            className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 transition-opacity duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="seller-popup__title"
             onKeyDown={handleKeyDown}
             onClick={handleOverlayClick}
         >
-            {/* Overlay with blur effect */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+            <div className="absolute inset-0 bg-[#0d2340]/80 backdrop-blur-sm" />
 
-            {/* Popup container */}
             <div
-                className={`relative flex max-h-[90vh] w-full max-w-2xl transform flex-col overflow-hidden rounded-2xl bg-white shadow-2xl transition-all duration-300 ${isAnimating ? 'translate-y-4 scale-95 opacity-0' : 'translate-y-0 scale-100 opacity-100'}`}
+                className={`relative flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl shadow-2xl transition-all duration-300 ${
+                    isAnimating
+                        ? 'translate-y-4 scale-95 opacity-0'
+                        : 'translate-y-0 scale-100 opacity-100'
+                }`}
             >
-                {/* Header */}
-                <header className="z-10 flex shrink-0 items-center justify-between border-b border-gray-100 bg-white px-6 py-5">
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-                            {selectedTab === 'simpleSeller' ? (
-                                <User className="h-5 w-5" />
-                            ) : (
-                                <Building className="h-5 w-5" />
-                            )}
+                {/* Header navy */}
+                <div className="relative shrink-0 overflow-hidden bg-[#0d2340] px-6 pt-6 pb-0">
+                    <div className="pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full bg-[#C9A84C]/10 blur-2xl" />
+                    <div className="relative flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#C9A84C] shadow-lg shadow-[#C9A84C]/30">
+                                {selectedTab === 'simpleSeller' ? (
+                                    <User className="h-5 w-5 text-white" />
+                                ) : (
+                                    <Building className="h-5 w-5 text-white" />
+                                )}
+                            </div>
+                            <div>
+                                <h2
+                                    id="seller-popup__title"
+                                    className="text-lg font-bold text-white"
+                                >
+                                    {selectedTab === 'simpleSeller'
+                                        ? 'Devenir Vendeur'
+                                        : 'Inscrire votre Agence'}
+                                </h2>
+                                <p className="text-xs text-white/50">
+                                    Complétez votre profil pour publier des
+                                    annonces
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h2
-                                id="seller-popup__title"
-                                className="text-xl font-bold text-gray-900"
-                            >
-                                {selectedTab === 'simpleSeller'
-                                    ? 'Vendeur Particulier'
-                                    : 'Inscription Agence'}
-                            </h2>
-                            <p className="text-xs text-gray-500">
-                                Complétez votre profil pour commencer
-                            </p>
-                        </div>
+                        <button
+                            className="flex h-9 w-9 items-center justify-center rounded-full text-white/40 transition-all hover:bg-white/10 hover:text-white"
+                            onClick={onClose}
+                            aria-label="Fermer"
+                            type="button"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
                     </div>
-                    <button
-                        className="rounded-full p-2 text-gray-400 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-600"
-                        onClick={onClose}
-                        aria-label="Fermer"
-                        type="button"
-                    >
-                        <X className="h-5 w-5" />
-                    </button>
-                </header>
 
-                {/* Tabs */}
-                <nav
-                    className="flex shrink-0 border-b border-gray-200 bg-gray-50 px-6"
-                    role="tablist"
-                >
-                    <button
-                        className={`mr-2 -mb-px flex items-center gap-2 rounded-t-lg border-b-2 px-4 py-3 text-sm font-medium transition-all duration-200 ${
-                            selectedTab === 'simpleSeller'
-                                ? 'border-amber-500 bg-white text-amber-600'
-                                : 'border-transparent text-gray-500 hover:bg-gray-100/50 hover:text-gray-700'
-                        }`}
-                        onClick={() => handleTabChange('simpleSeller')}
-                        role="tab"
-                        aria-selected={selectedTab === 'simpleSeller'}
-                        type="button"
-                    >
-                        <User className="h-4 w-4" />
-                        Particulier
-                    </button>
-                    <button
-                        className={`-mb-px flex items-center gap-2 rounded-t-lg border-b-2 px-4 py-3 text-sm font-medium transition-all duration-200 ${
-                            selectedTab === 'agency'
-                                ? 'border-amber-500 bg-white text-amber-600'
-                                : 'border-transparent text-gray-500 hover:bg-gray-100/50 hover:text-gray-700'
-                        }`}
-                        onClick={() => handleTabChange('agency')}
-                        role="tab"
-                        aria-selected={selectedTab === 'agency'}
-                        type="button"
-                    >
-                        <Building className="h-4 w-4" />
-                        Agence Immobilière
-                    </button>
-                </nav>
+                    {/* Tabs */}
+                    <nav className="relative mt-5 flex gap-1" role="tablist">
+                        {(
+                            [
+                                {
+                                    key: 'simpleSeller',
+                                    label: 'Particulier',
+                                    Icon: User,
+                                },
+                                {
+                                    key: 'agency',
+                                    label: 'Agence Immobilière',
+                                    Icon: Building,
+                                },
+                            ] as const
+                        ).map(({ key, label, Icon }) => (
+                            <button
+                                key={key}
+                                onClick={() => handleTabChange(key)}
+                                role="tab"
+                                aria-selected={selectedTab === key}
+                                type="button"
+                                className={`relative flex items-center gap-2 rounded-t-xl px-5 py-2.5 text-sm font-semibold transition-all duration-200 ${
+                                    selectedTab === key
+                                        ? 'bg-white text-[#1E3A5F]'
+                                        : 'text-white/50 hover:bg-white/10 hover:text-white/80'
+                                }`}
+                            >
+                                <Icon className="h-3.5 w-3.5" />
+                                {label}
+                                {selectedTab === key && (
+                                    <span className="absolute top-2.5 right-3 h-1.5 w-1.5 rounded-full bg-[#C9A84C]" />
+                                )}
+                            </button>
+                        ))}
+                    </nav>
+                </div>
 
-                {/* Scrollable Form Content */}
-                <div className="overflow-y-auto bg-gray-50/50 p-6 md:p-8">
+                {/* Form */}
+                <div className="overflow-y-auto bg-white p-6 md:p-8">
                     <form
                         id="seller-popup__form"
                         onSubmit={handleSubmit}
-                        className="space-y-6"
+                        className="space-y-5"
                         role="tabpanel"
                         noValidate
                     >
                         {selectedTab === 'simpleSeller' ? (
                             <div className="space-y-5">
-                                {/* Nom complet */}
                                 <div>
                                     <label
-                                        className="mb-1.5 block text-sm font-medium text-gray-700"
+                                        className="mb-1.5 block text-xs font-bold tracking-wider text-gray-400 uppercase"
                                         htmlFor="name"
                                     >
                                         Nom complet{' '}
-                                        <span className="text-red-500">*</span>
+                                        <span className="text-red-400">*</span>
                                     </label>
                                     <div className="relative">
-                                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                                            <User className="h-5 w-5" />
-                                        </div>
+                                        <User className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-300" />
                                         <input
                                             id="name"
                                             type="text"
                                             name="name"
                                             value={data.name}
                                             onChange={handleInputChange}
-                                            className={`w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 text-sm placeholder-gray-400 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none ${
-                                                errors.name
-                                                    ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                                                    : ''
-                                            }`}
+                                            className={`w-full rounded-xl border py-3 pr-4 pl-10 text-sm font-medium text-gray-900 placeholder-gray-300 transition-all focus:ring-2 focus:outline-none ${errors.name ? 'border-red-300 focus:ring-red-200' : 'border-gray-200 focus:border-[#1E3A5F] focus:ring-[#1E3A5F]/10'}`}
                                             placeholder="Ex: Jean Dupont"
                                             required
                                         />
@@ -408,44 +409,39 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                 </div>
 
                                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                                    {/* Email (Read only) */}
                                     <div>
                                         <label
-                                            className="mb-1.5 block text-sm font-medium text-gray-700"
+                                            className="mb-1.5 block text-xs font-bold tracking-wider text-gray-400 uppercase"
                                             htmlFor="email"
                                         >
                                             Email
                                         </label>
                                         <div className="relative">
-                                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                                                <Mail className="h-5 w-5" />
-                                            </div>
+                                            <Mail className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-300" />
                                             <input
                                                 id="email"
                                                 type="email"
                                                 name="email"
                                                 value={data.email}
                                                 readOnly
-                                                className="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 py-3 pr-4 pl-10 text-sm text-gray-500 focus:outline-none"
+                                                className="w-full cursor-not-allowed rounded-xl border border-gray-100 bg-gray-50 py-3 pr-4 pl-10 text-sm text-gray-400 focus:outline-none"
                                             />
                                         </div>
                                     </div>
-
-                                    {/* Téléphone - Séparé */}
                                     <div>
                                         <label
-                                            className="mb-1.5 block text-sm font-medium text-gray-700"
+                                            className="mb-1.5 block text-xs font-bold tracking-wider text-gray-400 uppercase"
                                             htmlFor="phone"
                                         >
                                             Téléphone
                                         </label>
-                                        <div className="flex rounded-lg border border-gray-300 transition-shadow focus-within:border-amber-500 focus-within:ring-1 focus-within:ring-amber-500">
+                                        <div className="flex overflow-hidden rounded-xl border border-gray-200 transition-all focus-within:border-[#1E3A5F] focus-within:ring-2 focus-within:ring-[#1E3A5F]/10">
                                             <select
                                                 value={selectedCountryCode}
                                                 onChange={
                                                     handleCountryCodeChange
                                                 }
-                                                className="flex cursor-pointer items-center rounded-l-lg border-r border-gray-300 bg-gray-50 px-2 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none"
+                                                className="cursor-pointer border-r border-gray-200 bg-gray-50 px-2 py-3 text-xs font-semibold text-gray-600 focus:outline-none"
                                             >
                                                 {COUNTRY_CODES.map((c) => (
                                                     <option
@@ -457,14 +453,11 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                                 ))}
                                             </select>
                                             <div className="relative flex-1">
-                                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                                                    <Phone className="h-4 w-4" />
-                                                </div>
+                                                <Phone className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-300" />
                                                 <input
                                                     id="phone"
                                                     type="tel"
                                                     name="phone"
-                                                    // On affiche seulement le numéro sans l'indicatif
                                                     value={
                                                         data.phone.startsWith(
                                                             selectedCountryCode,
@@ -475,7 +468,7 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                                             : data.phone
                                                     }
                                                     onChange={handlePhoneChange}
-                                                    className="w-full rounded-r-lg border-none py-3 pr-4 pl-10 text-sm placeholder-gray-400 focus:ring-0 focus:outline-none"
+                                                    className="w-full border-none py-3 pr-4 pl-9 text-sm font-medium placeholder-gray-300 focus:ring-0 focus:outline-none"
                                                     placeholder="000 000 000"
                                                 />
                                             </div>
@@ -484,10 +477,9 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                     </div>
                                 </div>
 
-                                {/* Bio */}
                                 <div>
                                     <label
-                                        className="mb-1.5 block text-sm font-medium text-gray-700"
+                                        className="mb-1.5 block text-xs font-bold tracking-wider text-gray-400 uppercase"
                                         htmlFor="bio"
                                     >
                                         À propos de vous
@@ -498,7 +490,7 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                         value={data.bio}
                                         onChange={handleInputChange}
                                         rows={3}
-                                        className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none"
+                                        className="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium placeholder-gray-300 transition-all focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/10 focus:outline-none"
                                         placeholder="Décrivez brièvement qui vous êtes..."
                                     />
                                     <ErrorText error={errors.bio} />
@@ -507,52 +499,47 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                         ) : (
                             <div className="space-y-5">
                                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                                    {/* Nom Agence */}
                                     <div>
                                         <label
-                                            className="mb-1.5 block text-sm font-medium text-gray-700"
+                                            className="mb-1.5 block text-xs font-bold tracking-wider text-gray-400 uppercase"
                                             htmlFor="company"
                                         >
                                             Nom de l'agence{' '}
-                                            <span className="text-red-500">
+                                            <span className="text-red-400">
                                                 *
                                             </span>
                                         </label>
                                         <div className="relative">
-                                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                                                <Building className="h-5 w-5" />
-                                            </div>
+                                            <Building className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-300" />
                                             <input
                                                 id="company"
                                                 type="text"
                                                 name="company"
                                                 value={data.company}
                                                 onChange={handleInputChange}
-                                                className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 text-sm placeholder-gray-400 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none"
+                                                className="w-full rounded-xl border border-gray-200 py-3 pr-4 pl-10 text-sm font-medium placeholder-gray-300 transition-all focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/10 focus:outline-none"
                                                 placeholder="Ex: Immo Congo"
                                             />
                                         </div>
                                         <ErrorText error={errors.company} />
                                     </div>
-
-                                    {/* Téléphone - Séparé */}
                                     <div>
                                         <label
-                                            className="mb-1.5 block text-sm font-medium text-gray-700"
+                                            className="mb-1.5 block text-xs font-bold tracking-wider text-gray-400 uppercase"
                                             htmlFor="agency-phone"
                                         >
                                             Téléphone{' '}
-                                            <span className="text-red-500">
+                                            <span className="text-red-400">
                                                 *
                                             </span>
                                         </label>
-                                        <div className="flex rounded-lg border border-gray-300 transition-shadow focus-within:border-amber-500 focus-within:ring-1 focus-within:ring-amber-500">
+                                        <div className="flex overflow-hidden rounded-xl border border-gray-200 transition-all focus-within:border-[#1E3A5F] focus-within:ring-2 focus-within:ring-[#1E3A5F]/10">
                                             <select
                                                 value={selectedCountryCode}
                                                 onChange={
                                                     handleCountryCodeChange
                                                 }
-                                                className="flex cursor-pointer items-center rounded-l-lg border-r border-gray-300 bg-gray-50 px-2 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none"
+                                                className="cursor-pointer border-r border-gray-200 bg-gray-50 px-2 py-3 text-xs font-semibold text-gray-600 focus:outline-none"
                                             >
                                                 {COUNTRY_CODES.map((c) => (
                                                     <option
@@ -564,9 +551,7 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                                 ))}
                                             </select>
                                             <div className="relative flex-1">
-                                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                                                    <Phone className="h-4 w-4" />
-                                                </div>
+                                                <Phone className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-300" />
                                                 <input
                                                     id="agency-phone"
                                                     type="tel"
@@ -581,7 +566,7 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                                             : data.phone
                                                     }
                                                     onChange={handlePhoneChange}
-                                                    className="w-full rounded-r-lg border-none py-3 pr-4 pl-10 text-sm placeholder-gray-400 focus:ring-0 focus:outline-none"
+                                                    className="w-full border-none py-3 pr-4 pl-9 text-sm font-medium placeholder-gray-300 focus:ring-0 focus:outline-none"
                                                     placeholder="000 000 000"
                                                 />
                                             </div>
@@ -590,25 +575,22 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                     </div>
                                 </div>
 
-                                {/* Adresse */}
                                 <div>
                                     <label
-                                        className="mb-1.5 block text-sm font-medium text-gray-700"
+                                        className="mb-1.5 block text-xs font-bold tracking-wider text-gray-400 uppercase"
                                         htmlFor="address"
                                     >
                                         Adresse physique
                                     </label>
                                     <div className="relative">
-                                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                                            <MapPin className="h-5 w-5" />
-                                        </div>
+                                        <MapPin className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-300" />
                                         <input
                                             id="address"
                                             type="text"
                                             name="address"
                                             value={data.address}
                                             onChange={handleInputChange}
-                                            className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 text-sm placeholder-gray-400 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none"
+                                            className="w-full rounded-xl border border-gray-200 py-3 pr-4 pl-10 text-sm font-medium placeholder-gray-300 transition-all focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/10 focus:outline-none"
                                             placeholder="Ex: Av. de l'Indépendance, Kinshasa"
                                         />
                                     </div>
@@ -616,10 +598,9 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                 </div>
 
                                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                                    {/* RC Number */}
                                     <div>
                                         <label
-                                            className="mb-1.5 block text-sm font-medium text-gray-700"
+                                            className="mb-1.5 block text-xs font-bold tracking-wider text-gray-400 uppercase"
                                             htmlFor="rc_number"
                                         >
                                             Numéro RC
@@ -630,18 +611,16 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                             name="rc_number"
                                             value={data.rc_number}
                                             onChange={handleInputChange}
-                                            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none"
+                                            className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium placeholder-gray-300 transition-all focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/10 focus:outline-none"
                                             placeholder="CD/KIN/..."
                                         />
                                     </div>
-
-                                    {/* Tax Number */}
                                     <div>
                                         <label
-                                            className="mb-1.5 block text-sm font-medium text-gray-700"
+                                            className="mb-1.5 block text-xs font-bold tracking-wider text-gray-400 uppercase"
                                             htmlFor="tax_number"
                                         >
-                                            Numéro d'impôt (NIF)
+                                            Numéro NIF
                                         </label>
                                         <input
                                             id="tax_number"
@@ -649,16 +628,15 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                             name="tax_number"
                                             value={data.tax_number}
                                             onChange={handleInputChange}
-                                            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none"
+                                            className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium placeholder-gray-300 transition-all focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/10 focus:outline-none"
                                             placeholder="0000000000"
                                         />
                                     </div>
                                 </div>
 
-                                {/* Bio Agence */}
                                 <div>
                                     <label
-                                        className="mb-1.5 block text-sm font-medium text-gray-700"
+                                        className="mb-1.5 block text-xs font-bold tracking-wider text-gray-400 uppercase"
                                         htmlFor="agency-bio"
                                     >
                                         Description de l'agence
@@ -669,36 +647,35 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                         value={data.bio}
                                         onChange={handleInputChange}
                                         rows={3}
-                                        className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none"
+                                        className="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium placeholder-gray-300 transition-all focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/10 focus:outline-none"
                                         placeholder="Présentez vos services..."
                                     />
                                 </div>
                             </div>
                         )}
 
-                        {/* Photo Upload (Pour les deux onglets) */}
+                        {/* Photo Upload */}
                         <div>
-                            <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                            <label className="mb-2 block text-xs font-bold tracking-wider text-gray-400 uppercase">
                                 {selectedTab === 'simpleSeller'
                                     ? 'Photo de profil'
                                     : "Logo de l'agence"}
                             </label>
-
-                            {/* Zone de prévisualisation */}
                             {previewImage ? (
-                                <div className="relative flex h-32 w-32 items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
-                                    <img
-                                        src={previewImage}
-                                        alt="Preview"
-                                        className="h-full w-full object-cover"
-                                    />
+                                <div className="relative inline-flex">
+                                    <div className="h-24 w-24 overflow-hidden rounded-2xl border-2 border-[#C9A84C]/30 shadow-md">
+                                        <img
+                                            src={previewImage}
+                                            alt="Preview"
+                                            className="h-full w-full object-cover"
+                                        />
+                                    </div>
                                     <button
                                         type="button"
                                         onClick={handleRemoveImage}
-                                        className="absolute top-1.5 right-1.5 rounded-full bg-red-500 p-1.5 text-white shadow-sm transition-opacity hover:opacity-90"
-                                        title="Supprimer l'image"
+                                        className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-md transition-transform hover:scale-110"
                                     >
-                                        <X className="h-4 w-4" />
+                                        <X className="h-3 w-3" />
                                     </button>
                                 </div>
                             ) : (
@@ -713,17 +690,19 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                                     />
                                     <label
                                         htmlFor="profile_photo"
-                                        className="group flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-white px-4 py-8 transition-all hover:border-amber-400 hover:bg-amber-50/30"
+                                        className="group flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 py-8 transition-all hover:border-[#C9A84C]/50 hover:bg-[#C9A84C]/5"
                                     >
-                                        <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 transition-colors group-hover:bg-amber-100">
-                                            <Camera className="h-5 w-5 text-gray-500 group-hover:text-amber-600" />
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm transition-all group-hover:bg-[#C9A84C]/10">
+                                            <Camera className="h-5 w-5 text-gray-400 transition-colors group-hover:text-[#C9A84C]" />
                                         </div>
-                                        <span className="text-sm font-medium text-gray-600 group-hover:text-amber-700">
-                                            Choisir une image
-                                        </span>
-                                        <span className="mt-1 text-xs text-gray-400">
-                                            PNG, JPG jusqu'à 2MB
-                                        </span>
+                                        <div className="text-center">
+                                            <p className="text-sm font-semibold text-gray-600 group-hover:text-[#1E3A5F]">
+                                                Choisir une image
+                                            </p>
+                                            <p className="text-xs text-gray-400">
+                                                PNG, JPG jusqu'à 2MB
+                                            </p>
+                                        </div>
                                     </label>
                                 </div>
                             )}
@@ -732,35 +711,41 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                     </form>
                 </div>
 
-                {/* Footer Sticky - Boutons d'action */}
-                <div className="flex shrink-0 items-center justify-end gap-3 border-t border-gray-100 bg-white p-4 md:p-6">
-                    <button
-                        type="button"
-                        className="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-amber-500 focus:outline-none"
-                        onClick={onClose}
-                    >
-                        Annuler
-                    </button>
-                    <button
-                        type="submit"
-                        form="seller-popup__form"
-                        className={`flex items-center gap-2 rounded-lg bg-amber-500 px-6 py-2.5 text-sm font-medium text-white shadow-lg shadow-amber-500/20 transition-all duration-200 hover:bg-amber-600 hover:shadow-amber-500/30 focus:ring-2 focus:ring-amber-500 focus:ring-offset-1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70 ${
-                            processing ? 'cursor-wait' : ''
-                        }`}
-                        disabled={processing}
-                    >
-                        {processing ? (
-                            <>
-                                <Loader className="h-4 w-4 animate-spin" />
-                                <span>Enregistrement...</span>
-                            </>
-                        ) : (
-                            <>
-                                <CheckCircle className="h-4 w-4" />
-                                <span>Enregistrer</span>
-                            </>
-                        )}
-                    </button>
+                {/* Footer */}
+                <div className="flex shrink-0 items-center justify-between gap-3 border-t border-gray-100 bg-white px-6 py-4">
+                    <p className="hidden text-xs text-gray-400 sm:block">
+                        Vos informations sont{' '}
+                        <span className="font-semibold text-[#1E3A5F]">
+                            sécurisées
+                        </span>
+                    </p>
+                    <div className="flex w-full items-center justify-end gap-3 sm:w-auto">
+                        <button
+                            type="button"
+                            className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 transition-all hover:bg-gray-50"
+                            onClick={onClose}
+                        >
+                            Annuler
+                        </button>
+                        <button
+                            type="submit"
+                            form="seller-popup__form"
+                            className={`flex items-center gap-2 rounded-xl bg-[#C9A84C] px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#C9A84C]/25 transition-all hover:bg-[#A8882E] disabled:cursor-not-allowed disabled:opacity-60 ${processing ? 'cursor-wait' : ''}`}
+                            disabled={processing}
+                        >
+                            {processing ? (
+                                <>
+                                    <Loader className="h-4 w-4 animate-spin" />
+                                    <span>Enregistrement...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <CheckCircle className="h-4 w-4" />
+                                    <span>Enregistrer</span>
+                                </>
+                            )}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

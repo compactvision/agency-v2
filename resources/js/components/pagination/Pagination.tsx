@@ -1,6 +1,10 @@
 import { router } from '@inertiajs/react';
 
-export default function Pagination({ links }: { links: { url: string | null; label: string; active: boolean }[] }) {
+export default function Pagination({
+    links,
+}: {
+    links: { url: string | null; label: string; active: boolean }[];
+}) {
     return (
         <div className="pagination__area">
             <nav className="pagination justify-content-center">
@@ -13,14 +17,28 @@ export default function Pagination({ links }: { links: { url: string | null; lab
                                 className="pagination__arrow-icon link"
                                 onClick={(e) => {
                                     e.preventDefault();
-                                    if (links[0].url) router.visit(links[0].url);
+                                    if (links[0].url)
+                                        router.visit(links[0].url);
                                 }}
-                                dangerouslySetInnerHTML={{ __html: links[0].label }}
+                                dangerouslySetInnerHTML={{
+                                    __html: links[0].label,
+                                }}
                             />
                         )}
                         <span className="pagination__arrow-icon">
-                            <svg width={3} height={22} viewBox="0 0 3 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1.50098 1L1.50098 21" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
+                            <svg
+                                width={3}
+                                height={22}
+                                viewBox="0 0 3 22"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M1.50098 1L1.50098 21"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                    strokeLinecap="round"
+                                />
                             </svg>
                         </span>
                         {links[1] && (
@@ -29,9 +47,12 @@ export default function Pagination({ links }: { links: { url: string | null; lab
                                 className="pagination__arrow-icon link"
                                 onClick={(e) => {
                                     e.preventDefault();
-                                    if (links[1].url) router.visit(links[1].url);
+                                    if (links[1].url)
+                                        router.visit(links[1].url);
                                 }}
-                                dangerouslySetInnerHTML={{ __html: links[1].label }}
+                                dangerouslySetInnerHTML={{
+                                    __html: links[1].label,
+                                }}
                             />
                         )}
                     </li>
@@ -59,14 +80,30 @@ export default function Pagination({ links }: { links: { url: string | null; lab
                                 className="pagination__arrow-icon link"
                                 onClick={(e) => {
                                     e.preventDefault();
-                                    if (links[links.length - 2].url) router.visit(links[links.length - 2].url);
+                                    if (links[links.length - 2].url)
+                                        router.visit(
+                                            links[links.length - 2].url,
+                                        );
                                 }}
-                                dangerouslySetInnerHTML={{ __html: links[links.length - 2].label }}
+                                dangerouslySetInnerHTML={{
+                                    __html: links[links.length - 2].label,
+                                }}
                             />
                         )}
                         <span className="pagination__arrow-icon">
-                            <svg width={3} height={22} viewBox="0 0 3 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1.50098 1L1.50098 21" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
+                            <svg
+                                width={3}
+                                height={22}
+                                viewBox="0 0 3 22"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M1.50098 1L1.50098 21"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                    strokeLinecap="round"
+                                />
                             </svg>
                         </span>
                         {links[links.length - 1] && (
@@ -75,9 +112,14 @@ export default function Pagination({ links }: { links: { url: string | null; lab
                                 className="pagination__arrow-icon link"
                                 onClick={(e) => {
                                     e.preventDefault();
-                                    if (links[links.length - 1].url) router.visit(links[links.length - 1].url);
+                                    if (links[links.length - 1].url)
+                                        router.visit(
+                                            links[links.length - 1].url,
+                                        );
                                 }}
-                                dangerouslySetInnerHTML={{ __html: links[links.length - 1].label }}
+                                dangerouslySetInnerHTML={{
+                                    __html: links[links.length - 1].label,
+                                }}
                             />
                         )}
                     </li>

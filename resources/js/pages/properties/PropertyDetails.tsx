@@ -77,10 +77,12 @@ export default function PropertyDetails({
 }) {
     const { url } = usePage();
     // Extract ID from URL (last segment) or use prop ID if available
-    const propId = (usePage().props as any).id || window.location.pathname.split('/').pop();
-    
+    const propId =
+        (usePage().props as any).id ||
+        window.location.pathname.split('/').pop();
+
     const { ad: fetchedProperty, loading: adLoading } = useAd(propId);
-    
+
     // Use fetched property if available, otherwise fallback to initial prop
     const property = fetchedProperty || initialProperty;
 
@@ -100,7 +102,7 @@ export default function PropertyDetails({
     }
 
     if (!property) {
-         return (
+        return (
             <div className="flex min-h-screen items-center justify-center bg-gray-50">
                 <p className="text-gray-500">Property not found.</p>
             </div>
@@ -189,25 +191,21 @@ export default function PropertyDetails({
             icon: <LucideBed className="h-5 w-5" />,
             label: t('bedrooms'),
             value: property.bedrooms,
-            color: 'from-blue-500 to-blue-600',
         },
         {
             icon: <LucideBath className="h-5 w-5" />,
             label: t('bathrooms'),
             value: property.bathrooms,
-            color: 'from-cyan-500 to-cyan-600',
         },
         {
             icon: <LucideRuler className="h-5 w-5" />,
             label: t('surface'),
             value: `${property.surface} m²`,
-            color: 'from-emerald-500 to-emerald-600',
         },
         {
             icon: <LucideHome className="h-5 w-5" />,
             label: t('rooms'),
             value: property.rooms,
-            color: 'from-violet-500 to-violet-600',
         },
     ];
 
@@ -489,7 +487,11 @@ export default function PropertyDetails({
                                 <div className="lg:col-span-3">
                                     <div className="group relative h-[500px] overflow-hidden lg:h-[700px]">
                                         <img
-                                            src={property.images?.[0]?.url ? `/storage/${property.images[0].url}` : '/assets/images/placeholder.jpg'}
+                                            src={
+                                                property.images?.[0]?.url
+                                                    ? `/storage/${property.images[0].url}`
+                                                    : '/assets/images/placeholder.jpg'
+                                            }
                                             alt={property.title}
                                             className="h-full w-full object-cover transition-all duration-1000 group-hover:scale-105"
                                             onLoad={() => setImageLoaded(true)}
@@ -556,13 +558,13 @@ export default function PropertyDetails({
                                         </div>
 
                                         {/* Status Badge */}
-                                        <div className="absolute top-6 left-6">
+                                        <div className="absolute top-6 left-6 flex gap-2">
                                             <span
-                                                className={`inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-bold text-white shadow-xl ${
+                                                className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold text-white shadow-xl ${
                                                     property.sale_type ===
                                                     'rent'
-                                                        ? 'bg-gradient-to-r from-blue-600 to-blue-700'
-                                                        : 'bg-gradient-to-r from-emerald-600 to-emerald-700'
+                                                        ? 'bg-[#152C47]'
+                                                        : 'bg-[#0d2340]'
                                                 }`}
                                             >
                                                 {property.sale_type === 'rent'
@@ -570,8 +572,8 @@ export default function PropertyDetails({
                                                     : t('for_sale')}
                                             </span>
                                             {property.featured && (
-                                                <span className="ml-3 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-5 py-3 text-sm font-bold text-white shadow-xl">
-                                                    <LucideAward size={18} />
+                                                <span className="inline-flex items-center gap-2 rounded-lg bg-[#C9A84C] px-4 py-2 text-xs font-bold text-white shadow-xl">
+                                                    <LucideAward size={16} />
                                                     {t('featured')}
                                                 </span>
                                             )}
@@ -582,7 +584,7 @@ export default function PropertyDetails({
                                             <span className="flex items-center gap-2 text-sm font-medium text-white">
                                                 <LucideCamera size={18} />
                                                 {currentIndex + 1} /{' '}
-                                                {(property.images?.length) || 0}{' '}
+                                                {property.images?.length || 0}{' '}
                                                 {t('photos')}
                                             </span>
                                         </div>
@@ -674,31 +676,33 @@ export default function PropertyDetails({
                                         </h1>
 
                                         <div className="flex flex-wrap items-center gap-6 text-gray-600">
-                                            <span className="flex items-center gap-2 text-lg">
+                                            <span className="flex items-center gap-2 text-sm font-medium">
                                                 <LucideMapPin
-                                                    size={20}
-                                                    className="text-orange-500"
+                                                    size={18}
+                                                    className="text-[#C9A84C]"
                                                 />
-                                                <span className="font-medium">
-                                                    {property.municipality?.name || t('unknown_location')}
+                                                <span>
+                                                    {property.municipality
+                                                        ?.name ||
+                                                        t('unknown_location')}
                                                 </span>
                                             </span>
-                                            <span className="flex items-center gap-2 text-lg">
+                                            <span className="flex items-center gap-2 text-sm font-medium">
                                                 <LucideEye
-                                                    size={20}
-                                                    className="text-orange-500"
+                                                    size={18}
+                                                    className="text-[#C9A84C]"
                                                 />
-                                                <span className="font-medium">
+                                                <span>
                                                     {viewCount || 0}{' '}
                                                     {t('views')}
                                                 </span>
                                             </span>
-                                            <span className="flex items-center gap-2 text-lg">
+                                            <span className="flex items-center gap-2 text-sm font-medium">
                                                 <LucideCalendar
-                                                    size={20}
-                                                    className="text-orange-500"
+                                                    size={18}
+                                                    className="text-[#C9A84C]"
                                                 />
-                                                <span className="font-medium">
+                                                <span>
                                                     {new Date(
                                                         property.created_at,
                                                     ).toLocaleDateString()}
@@ -713,17 +717,16 @@ export default function PropertyDetails({
                                             (feature, index) => (
                                                 <div
                                                     key={index}
-                                                    className={`relative overflow-hidden rounded-2xl bg-gradient-to-br p-6 ${feature.color} group text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl`}
+                                                    className="group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all duration-300 hover:border-[#C9A84C]/30 hover:shadow-md"
                                                 >
-                                                    <div className="absolute top-0 right-0 -mt-12 -mr-12 h-24 w-24 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-150"></div>
-                                                    <div className="relative z-10">
-                                                        <div className="mb-3 opacity-90">
-                                                            {feature.icon}
-                                                        </div>
-                                                        <div className="mb-1 text-3xl font-bold">
+                                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0d2340]/5 text-[#0d2340] transition-colors group-hover:bg-[#C9A84C] group-hover:text-white">
+                                                        {feature.icon}
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-xl font-bold text-gray-900">
                                                             {feature.value}
                                                         </div>
-                                                        <div className="text-sm opacity-90">
+                                                        <div className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
                                                             {feature.label}
                                                         </div>
                                                     </div>
@@ -747,21 +750,19 @@ export default function PropertyDetails({
                                         <button
                                             onClick={handleShowNumber}
                                             disabled={loading}
-                                            className="flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4 font-bold text-white shadow-xl transition-all duration-300 hover:-translate-y-1 hover:from-orange-600 hover:to-orange-700 hover:shadow-2xl disabled:opacity-50"
+                                            className="flex items-center justify-center gap-2 rounded-xl bg-[#0d2340] px-6 py-4 text-sm font-bold text-white transition-all duration-300 hover:bg-[#152C47] disabled:opacity-50"
                                         >
                                             {loading ? (
-                                                <>
-                                                    <LucideLoader
-                                                        size={22}
-                                                        className="animate-spin"
-                                                    />
-                                                    {t('loading')}
-                                                </>
+                                                <LucideLoader
+                                                    size={18}
+                                                    className="animate-spin"
+                                                />
                                             ) : (
                                                 <>
-                                                    <LucidePhone size={22} />
+                                                    <LucidePhone size={18} />
                                                     {showNumber
-                                                        ? property.user?.phone || 'N/A'
+                                                        ? property.user
+                                                              ?.phone || 'N/A'
                                                         : t('show_number')}
                                                 </>
                                             )}
@@ -769,35 +770,26 @@ export default function PropertyDetails({
 
                                         <a
                                             href={`https://wa.me/${property.user.phone?.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-                                                `Bonjour, je suis intéressé par votre propriété "${property.title}" publiée sur AgencyDRC.`,
+                                                `Bonjour, je suis intéressé par votre propriété "${property.title}" publiée sur Agency.`,
                                             )}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-green-500 to-green-600 px-6 py-4 font-bold text-white shadow-xl transition-all duration-300 hover:-translate-y-1 hover:from-green-600 hover:to-green-700 hover:shadow-2xl"
+                                            className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-4 text-sm font-bold text-white transition-all duration-300 hover:bg-green-700"
                                         >
-                                            <svg
-                                                className="h-6 w-6"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 256 258"
-                                            >
-                                                <path
-                                                    fill="currentColor"
-                                                    d="M5.463 127.456c-.006 21.677 5.658 42.843 16.428 61.499L4.433 252.697l65.232-17.104a123 123 0 0 0 58.8 14.97h.054c67.815 0 123.018-55.183 123.047-123.01c.013-32.867-12.775-63.773-36.009-87.025c-23.23-23.25-54.125-36.061-87.043-36.076c-67.823 0-123.022 55.18-123.05 123.004"
-                                                />
-                                            </svg>
+                                            <LucidePhone size={18} />
                                             {t('whatsapp')}
                                         </a>
 
-                                        <button className="flex items-center justify-center gap-3 rounded-2xl border-2 border-orange-500 bg-white px-6 py-4 font-bold text-orange-600 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:bg-orange-50 hover:shadow-2xl">
-                                            <LucideCalendar size={22} />
+                                        <button className="flex items-center justify-center gap-2 rounded-xl border-2 border-[#C9A84C] bg-white px-6 py-4 text-sm font-bold text-[#C9A84C] transition-all duration-300 hover:bg-[#C9A84C]/5">
+                                            <LucideCalendar size={18} />
                                             {t('schedule_visit')}
                                         </button>
                                     </div>
                                 </div>
 
                                 {/* Price & Agent Info */}
-                                <div className="lg:col-span-1">
-                                    <div className="rounded-3xl bg-gradient-to-br from-gray-900 to-gray-800 p-8 text-white shadow-2xl">
+                                <div className="h-max lg:sticky lg:top-32 lg:col-span-1">
+                                    <div className="rounded-3xl border border-[#C9A84C]/20 bg-[#0d2340] p-8 text-white shadow-2xl">
                                         <div className="mb-8 text-center">
                                             <div className="mb-2 text-4xl font-bold lg:text-5xl">
                                                 {new Intl.NumberFormat(
@@ -836,7 +828,7 @@ export default function PropertyDetails({
                                                 {t('contact_agent')}
                                             </h4>
                                             <div className="mb-6 flex items-center gap-4">
-                                                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 text-2xl font-bold text-white shadow-lg">
+                                                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#C9A84C]/20 text-2xl font-bold text-[#C9A84C] shadow-lg">
                                                     {property.user.name
                                                         ?.charAt(0)
                                                         .toUpperCase()}
@@ -883,14 +875,14 @@ export default function PropertyDetails({
                                             >
                                                 <input
                                                     type="text"
-                                                    className="w-full rounded-xl border border-gray-700 bg-gray-800 px-4 py-3 text-white placeholder-gray-500 focus:border-transparent focus:ring-2 focus:ring-orange-500"
+                                                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-400 focus:border-[#C9A84C] focus:ring-1 focus:ring-[#C9A84C] focus:outline-none"
                                                     placeholder={t('your_name')}
                                                     value={user?.name || ''}
                                                     readOnly
                                                 />
                                                 <input
                                                     type="email"
-                                                    className="w-full rounded-xl border border-gray-700 bg-gray-800 px-4 py-3 text-white placeholder-gray-500 focus:border-transparent focus:ring-2 focus:ring-orange-500"
+                                                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-400 focus:border-[#C9A84C] focus:ring-1 focus:ring-[#C9A84C] focus:outline-none"
                                                     placeholder={t(
                                                         'your_email',
                                                     )}
@@ -899,7 +891,7 @@ export default function PropertyDetails({
                                                 />
                                                 <input
                                                     type="tel"
-                                                    className="w-full rounded-xl border border-gray-700 bg-gray-800 px-4 py-3 text-white placeholder-gray-500 focus:border-transparent focus:ring-2 focus:ring-orange-500"
+                                                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-400 focus:border-[#C9A84C] focus:ring-1 focus:ring-[#C9A84C] focus:outline-none"
                                                     placeholder={t(
                                                         'your_phone',
                                                     )}
@@ -912,7 +904,7 @@ export default function PropertyDetails({
                                                     }
                                                 />
                                                 <textarea
-                                                    className="w-full resize-none rounded-xl border border-gray-700 bg-gray-800 px-4 py-3 text-white placeholder-gray-500 focus:border-transparent focus:ring-2 focus:ring-orange-500"
+                                                    className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-400 focus:border-[#C9A84C] focus:ring-1 focus:ring-[#C9A84C] focus:outline-none"
                                                     rows={3}
                                                     placeholder={t(
                                                         'your_message',
@@ -927,7 +919,7 @@ export default function PropertyDetails({
                                                 />
                                                 <button
                                                     type="submit"
-                                                    className="w-full rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-3 font-bold text-white shadow-lg transition-all duration-300 hover:from-orange-600 hover:to-orange-700 hover:shadow-xl disabled:opacity-50"
+                                                    className="w-full rounded-xl bg-[#C9A84C] px-6 py-3 font-bold text-white transition-all duration-300 hover:bg-[#A8882E] disabled:opacity-50"
                                                     disabled={
                                                         processing || !user
                                                     }
@@ -986,10 +978,10 @@ export default function PropertyDetails({
                                         <button
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
-                                            className={`flex-1 rounded-xl px-6 py-3 font-semibold transition-all duration-300 ${
+                                            className={`flex-1 rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-300 ${
                                                 activeTab === tab.id
-                                                    ? 'bg-white text-orange-600 shadow-lg'
-                                                    : 'text-gray-600 hover:text-gray-900'
+                                                    ? 'bg-[#0d2340] text-white shadow-md'
+                                                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                                             }`}
                                         >
                                             {tab.label}
@@ -1082,7 +1074,7 @@ export default function PropertyDetails({
                                                             key={index}
                                                             className="flex items-center gap-4 rounded-2xl bg-gradient-to-r from-gray-50 to-gray-100 p-4 transition-all duration-300 hover:shadow-md"
                                                         >
-                                                            <div className="rounded-xl bg-white p-3 text-orange-600 shadow-sm">
+                                                            <div className="rounded-xl bg-[#C9A84C]/10 p-3 text-[#C9A84C]">
                                                                 {item.icon}
                                                             </div>
                                                             <div>
@@ -1153,7 +1145,7 @@ export default function PropertyDetails({
                                                             key={index}
                                                             className="flex items-center gap-4 rounded-2xl bg-gradient-to-r from-blue-50 to-blue-100 p-4 transition-all duration-300 hover:shadow-md"
                                                         >
-                                                            <div className="rounded-xl bg-white p-3 text-blue-600 shadow-sm">
+                                                            <div className="rounded-xl bg-[#0d2340]/5 p-3 text-[#0d2340]">
                                                                 {item.icon}
                                                             </div>
                                                             <div>
@@ -1415,8 +1407,8 @@ export default function PropertyDetails({
                                     {t('similar_properties')}
                                 </h3>
                                 <div className="space-y-4">
-                                    {arroundProperties?.
-                                        slice(0, 3)
+                                    {arroundProperties
+                                        ?.slice(0, 3)
                                         .map((p: any) => (
                                             <Link
                                                 key={p.id}

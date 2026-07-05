@@ -307,7 +307,7 @@ export default function Profile() {
                 return (
                     <div className="space-y-6">
                         {/* Welcome Section */}
-                        <div className="rounded-2xl bg-gradient-to-r from-orange-400 to-orange-600 p-8 text-white">
+                        <div className="rounded-2xl bg-gradient-to-r from-[#1E3A5F] to-[#0d2340] p-8 text-white">
                             <div className="flex flex-col items-center justify-between md:flex-row">
                                 <div>
                                     <h2 className="mb-2 text-3xl font-bold">
@@ -387,7 +387,7 @@ export default function Profile() {
                                     <h3 className="mb-6 flex items-center text-xl font-bold text-gray-900">
                                         <Zap
                                             size={20}
-                                            className="mr-2 text-orange-500"
+                                            className="mr-2 text-[#C9A84C]"
                                         />
                                         {t('quick_actions') ||
                                             'Actions rapides'}
@@ -428,7 +428,7 @@ export default function Profile() {
                                     <h3 className="mb-6 flex items-center text-xl font-bold text-gray-900">
                                         <Activity
                                             size={20}
-                                            className="mr-2 text-orange-500"
+                                            className="mr-2 text-[#C9A84C]"
                                         />
                                         {t('recent_activities') ||
                                             'Activités récentes'}
@@ -474,7 +474,7 @@ export default function Profile() {
                             <h3 className="mb-6 flex items-center text-xl font-bold text-gray-900">
                                 <Users
                                     size={20}
-                                    className="mr-2 text-orange-500"
+                                    className="mr-2 text-[#C9A84C]"
                                 />
                                 {t('account_info') || 'Informations du compte'}
                             </h3>
@@ -637,12 +637,15 @@ export default function Profile() {
                         <div className="w-full lg:w-1/4">
                             <div className="sticky top-6 overflow-hidden rounded-2xl bg-white shadow-lg">
                                 {/* User Profile Card */}
-                                <div className="bg-gradient-to-r from-orange-400 to-orange-600 p-6 text-white">
+                                <div className="bg-gradient-to-r from-[#1E3A5F] to-[#0d2340] p-6 text-white">
                                     <div className="flex flex-col items-center">
                                         <div className="relative mb-4">
                                             {user?.profile_photo ? (
                                                 <img
-                                                    src={'/storage/' + user.profile_photo}
+                                                    src={
+                                                        '/storage/' +
+                                                        user.profile_photo
+                                                    }
                                                     alt={user.name}
                                                     className="h-24 w-24 rounded-full border-4 border-white/30 object-cover"
                                                 />
@@ -657,7 +660,7 @@ export default function Profile() {
                                             <button className="absolute right-0 bottom-0 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-lg">
                                                 <Camera
                                                     size={16}
-                                                    className="text-orange-600"
+                                                    className="text-[#1E3A5F]"
                                                 />
                                             </button>
                                         </div>
@@ -689,7 +692,7 @@ export default function Profile() {
                                                         className={`flex w-full items-center justify-between rounded-xl p-3 transition-colors ${
                                                             activeTab ===
                                                             item.id
-                                                                ? 'bg-orange-50 text-orange-600'
+                                                                ? 'bg-slate-50 text-[#1E3A5F]'
                                                                 : 'text-gray-700 hover:bg-gray-100'
                                                         }`}
                                                     >
@@ -756,7 +759,7 @@ export default function Profile() {
             <div className="fixed right-8 bottom-22 z-50 lg:hidden">
                 <button
                     onClick={() => setShowMobileMenu(!showMobileMenu)}
-                    className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-500 text-white shadow-lg"
+                    className="flex h-12 w-12 items-center justify-center rounded-full bg-[#C9A84C] text-white shadow-lg"
                 >
                     {showMobileMenu ? (
                         <XCircle size={24} />
@@ -792,7 +795,7 @@ export default function Profile() {
                                             }
                                             className={`flex w-full items-center justify-between rounded-xl p-3 transition-colors ${
                                                 activeTab === item.id
-                                                    ? 'bg-orange-50 text-orange-600'
+                                                    ? 'bg-slate-50 text-[#1E3A5F]'
                                                     : 'text-gray-700 hover:bg-gray-100'
                                             }`}
                                         >

@@ -146,9 +146,6 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
 
     return (
         <div className="relative flex min-h-screen bg-slate-50 font-sans text-slate-900">
-            {/* Background Pattern */}
-            <div className="bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'\>%3Cg fill=\'none\' fill-rule=\'evenodd\'\>%3Cg fill=\'%23D6A643\' fill-opacity=\'0.05\'\>%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] pointer-events-none absolute inset-0 opacity-30"></div>
-
             <Sidebar
                 isOpen={isSidebarOpen}
                 onClose={closeSidebar}
@@ -169,7 +166,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
             >
                 {/* Header */}
                 <header
-                    className={`sticky top-0 z-20 border-b border-amber-200/20 bg-white/80 backdrop-blur-xl transition-all duration-300 ${isScrolled ? 'py-2 shadow-md' : 'py-4'} `}
+                    className={`sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur-xl transition-all duration-300 ${isScrolled ? 'py-2 shadow-sm' : 'py-4'} `}
                 >
                     <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
                         <div className="flex items-center justify-between gap-4">
@@ -177,7 +174,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                             <div className="flex items-center lg:hidden">
                                 <button
                                     onClick={toggleSidebar}
-                                    className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-amber-100/50"
+                                    className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100"
                                 >
                                     <Menu size={24} />
                                 </button>
@@ -189,11 +186,11 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                     <Link
                                         key={link.path}
                                         href={route(link.path)}
-                                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-all hover:bg-amber-50 hover:text-amber-600"
+                                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-all hover:bg-slate-100 hover:text-[#0d2340]"
                                     >
                                         <link.icon
                                             size={16}
-                                            className="text-amber-500/70"
+                                            className="text-slate-400"
                                         />
                                         {link.label}
                                     </Link>
@@ -206,14 +203,14 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                 <div className="notifications-menu relative">
                                     <button
                                         onClick={toggleNotifications}
-                                        className="group relative rounded-2xl border border-slate-200 bg-white p-2.5 text-slate-600 transition-all hover:border-amber-400 hover:text-amber-600"
+                                        className="group relative rounded-2xl border border-slate-200 bg-white p-2.5 text-slate-600 transition-all hover:border-[#1E3A5F] hover:text-[#1E3A5F]"
                                     >
                                         <Bell
                                             size={20}
                                             className="transition-transform group-hover:rotate-12"
                                         />
                                         {unreadCount > 0 && (
-                                            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-white shadow-lg ring-4 ring-white">
+                                            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#C9A84C] text-[10px] font-bold text-white shadow-sm ring-4 ring-white">
                                                 {unreadCount}
                                             </span>
                                         )}
@@ -225,7 +222,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                                 <h3 className="flex items-center gap-2 font-bold text-slate-800">
                                                     <BellRing
                                                         size={18}
-                                                        className="text-amber-500"
+                                                        className="text-[#C9A84C]"
                                                     />
                                                     {t('notifications')}
                                                 </h3>
@@ -238,7 +235,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                                                 ),
                                                             )
                                                         }
-                                                        className="text-xs font-semibold text-amber-600 hover:text-amber-700"
+                                                        className="text-xs font-semibold text-[#1E3A5F] hover:text-[#0d2340]"
                                                     >
                                                         {t('mark_all_as_read')}
                                                     </button>
@@ -253,7 +250,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                                         (notif) => (
                                                             <div
                                                                 key={notif.id}
-                                                                className={`group cursor-pointer border-b border-slate-50 p-4 transition-colors hover:bg-slate-50 ${!notif.read_at ? 'bg-amber-50/30' : ''}`}
+                                                                className={`group cursor-pointer border-b border-slate-50 p-4 transition-colors hover:bg-slate-50 ${!notif.read_at ? 'bg-slate-100/50' : ''}`}
                                                                 onClick={() =>
                                                                     notif.data
                                                                         .action_url &&
@@ -266,7 +263,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                                             >
                                                                 <div className="flex gap-3">
                                                                     <div
-                                                                        className={`mt-1 h-2 w-2 flex-shrink-0 rounded-full ${!notif.read_at ? 'bg-amber-500' : 'bg-slate-300'}`}
+                                                                        className={`mt-1 h-2 w-2 flex-shrink-0 rounded-full ${!notif.read_at ? 'bg-[#C9A84C]' : 'bg-slate-300'}`}
                                                                     />
                                                                     <div className="flex-1">
                                                                         <div className="mb-1 flex items-start justify-between">
@@ -300,7 +297,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                                                                         e,
                                                                                     )
                                                                                 }
-                                                                                className="text-[10px] font-bold tracking-wider text-amber-600 uppercase hover:text-amber-700"
+                                                                                className="text-[10px] font-bold tracking-wider text-[#1E3A5F] uppercase hover:text-[#0d2340]"
                                                                             >
                                                                                 {t(
                                                                                     'mark_as_read',
@@ -333,7 +330,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                                 href={route(
                                                     'dashboard.notifications',
                                                 )}
-                                                className="block border-t border-slate-100 p-3 text-center text-sm font-bold text-slate-600 transition-colors hover:bg-slate-50 hover:text-amber-600"
+                                                className="block border-t border-slate-100 p-3 text-center text-sm font-bold text-slate-600 transition-colors hover:bg-slate-50 hover:text-[#1E3A5F]"
                                             >
                                                 {t('view_all_notifications')}
                                             </Link>
@@ -345,7 +342,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                 <div className="profile-menu relative">
                                     <button
                                         onClick={toggleProfileMenu}
-                                        className="group flex items-center gap-2 rounded-2xl border border-slate-200 bg-white p-1.5 pl-3 transition-all hover:border-amber-400 hover:shadow-lg hover:shadow-amber-500/5"
+                                        className="group flex items-center gap-2 rounded-2xl border border-slate-200 bg-white p-1.5 pl-3 transition-all hover:border-[#1E3A5F] hover:shadow-sm"
                                     >
                                         <div className="hidden text-right sm:block">
                                             <p className="line-clamp-1 text-xs font-bold text-slate-800">
@@ -355,7 +352,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                                 Tableau de bord
                                             </p>
                                         </div>
-                                        <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 font-bold text-white shadow-lg ring-2 shadow-amber-500/20 ring-white">
+                                        <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-[#1E3A5F] font-bold text-white shadow-sm ring-2 ring-white">
                                             {user.avatar ? (
                                                 <img
                                                     src={user.avatar}
@@ -369,14 +366,14 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                         </div>
                                         <ChevronDown
                                             size={14}
-                                            className={`text-slate-400 transition-transform group-hover:text-amber-500 ${isProfileMenuOpen ? 'rotate-180' : ''}`}
+                                            className={`text-slate-400 transition-transform group-hover:text-[#1E3A5F] ${isProfileMenuOpen ? 'rotate-180' : ''}`}
                                         />
                                     </button>
 
                                     {isProfileMenuOpen && (
                                         <div className="scale-in-95 absolute right-0 mt-3 w-64 origin-top-right animate-in overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-200/50 fade-in">
                                             <div className="flex items-center gap-3 border-b border-slate-100 bg-slate-50 p-4">
-                                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 font-bold text-amber-600">
+                                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1E3A5F]/10 font-bold text-[#1E3A5F]">
                                                     {user.name
                                                         .charAt(0)
                                                         .toUpperCase()}
@@ -393,7 +390,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                             <div className="p-2">
                                                 <Link
                                                     href={route('home')}
-                                                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-amber-50 hover:text-amber-600"
+                                                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-[#1E3A5F]"
                                                 >
                                                     <Home size={18} />
                                                     {t('home')}
@@ -402,7 +399,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                                     href={route(
                                                         'dashboard.profile',
                                                     )}
-                                                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-amber-50 hover:text-amber-600"
+                                                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-[#1E3A5F]"
                                                 >
                                                     <User size={18} />
                                                     Profil

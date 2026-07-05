@@ -204,7 +204,7 @@ export default function FavoriteProperties() {
     const getStatusBadge = (property: Property) => {
         if (!property.is_approved) {
             return (
-                <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800">
+                <span className="inline-flex items-center rounded-full border border-slate-200 bg-[#1E3A5F]/10 px-2 py-1 text-xs font-medium text-[#0d2340]">
                     En attente
                 </span>
             );
@@ -237,21 +237,21 @@ export default function FavoriteProperties() {
 
     return (
         <Dashboard>
-            <div className="min-h-screen bg-gradient-to-br from-amber-50/30 via-white to-amber-50/20">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 {/* Header Section */}
-                <div className="sticky top-0 z-1 border-b border-amber-200/30 bg-white/80 shadow-lg shadow-amber-500/5 backdrop-blur-xl">
+                <div className="sticky top-0 z-1 border-b border-slate-200 bg-white/80 shadow-lg shadow-sm backdrop-blur-xl">
                     <div className="px-4 py-4 sm:px-6 lg:px-8">
                         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                             <button
                                 onClick={() => router.visit(route('dashboard'))}
-                                className="flex items-center gap-2 rounded-xl bg-amber-100/50 px-4 py-2 text-amber-700 transition-colors duration-200 hover:bg-amber-100"
+                                className="flex items-center gap-2 rounded-xl bg-[#1E3A5F]/10 px-4 py-2 text-[#0d2340] transition-colors duration-200 hover:bg-slate-100"
                             >
                                 <ArrowLeft size={18} />
                                 <span>Retour</span>
                             </button>
 
                             <div className="flex-1 text-center sm:text-left">
-                                <h1 className="bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
+                                <h1 className="bg-gradient-to-r from-slate-100 to-slate-100 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
                                     Propriétés Favorites
                                 </h1>
                                 <p className="mt-1 text-sm text-slate-600 sm:text-base">
@@ -262,13 +262,13 @@ export default function FavoriteProperties() {
 
                             <div className="flex items-center gap-3">
                                 {/* View Mode Toggle */}
-                                <div className="hidden items-center rounded-xl bg-amber-100/50 p-1 sm:flex">
+                                <div className="hidden items-center rounded-xl bg-[#1E3A5F]/10 p-1 sm:flex">
                                     <button
                                         onClick={() => setViewMode('grid')}
                                         className={`rounded-lg p-2 transition-colors ${
                                             viewMode === 'grid'
-                                                ? 'bg-amber-500 text-white'
-                                                : 'text-amber-600 hover:bg-amber-200'
+                                                ? 'bg-slate-500 text-white'
+                                                : 'text-[#1E3A5F] hover:bg-slate-200'
                                         }`}
                                         title="Vue grille"
                                     >
@@ -278,8 +278,8 @@ export default function FavoriteProperties() {
                                         onClick={() => setViewMode('list')}
                                         className={`rounded-lg p-2 transition-colors ${
                                             viewMode === 'list'
-                                                ? 'bg-amber-500 text-white'
-                                                : 'text-amber-600 hover:bg-amber-200'
+                                                ? 'bg-slate-500 text-white'
+                                                : 'text-[#1E3A5F] hover:bg-slate-200'
                                         }`}
                                         title="Vue liste"
                                     >
@@ -288,19 +288,19 @@ export default function FavoriteProperties() {
                                 </div>
 
                                 {/* Stats Badge */}
-                                <div className="hidden items-center rounded-xl bg-amber-100/50 px-4 py-2 sm:flex">
+                                <div className="hidden items-center rounded-xl bg-[#1E3A5F]/10 px-4 py-2 sm:flex">
                                     <Heart
                                         size={18}
-                                        className="mr-2 text-amber-600"
+                                        className="mr-2 text-[#1E3A5F]"
                                     />
-                                    <span className="font-semibold text-amber-700">
+                                    <span className="font-semibold text-[#0d2340]">
                                         {total}
                                     </span>
                                 </div>
 
                                 <button
                                     onClick={handleOpenProperties}
-                                    className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-4 py-2.5 font-medium text-white shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-105 hover:from-amber-500 hover:to-amber-700"
+                                    className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-4 py-2.5 font-medium text-white shadow-lg shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22]"
                                 >
                                     <Plus size={18} className="mr-2" />
                                     <span className="hidden sm:inline">
@@ -316,12 +316,12 @@ export default function FavoriteProperties() {
                             <div className="relative flex-1">
                                 <Search
                                     size={20}
-                                    className="absolute top-1/2 left-3 -translate-y-1/2 text-amber-500"
+                                    className="absolute top-1/2 left-3 -translate-y-1/2 text-[#C9A84C]"
                                 />
                                 <input
                                     type="text"
                                     placeholder="Rechercher par titre, type, localisation..."
-                                    className="w-full rounded-xl border border-amber-200/50 bg-white/80 py-3 pr-4 pl-10 text-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                                    className="w-full rounded-xl border border-slate-200 bg-white/80 py-3 pr-4 pl-10 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none"
                                     value={searchQuery}
                                     onChange={(e) =>
                                         setSearchQuery(e.target.value)
@@ -330,7 +330,7 @@ export default function FavoriteProperties() {
                                 {searchQuery && (
                                     <button
                                         onClick={() => setSearchQuery('')}
-                                        className="absolute top-1/2 right-3 -translate-y-1/2 text-amber-400 transition-colors hover:text-amber-600"
+                                        className="absolute top-1/2 right-3 -translate-y-1/2 text-[#1E3A5F] transition-colors hover:text-[#1E3A5F]"
                                         aria-label="Effacer"
                                     >
                                         <Filter size={16} />
@@ -348,7 +348,7 @@ export default function FavoriteProperties() {
                                         setSortBy(field);
                                         setSortOrder(order);
                                     }}
-                                    className="cursor-pointer appearance-none rounded-xl border border-amber-200/50 bg-white px-4 py-3 pr-10 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                                    className="cursor-pointer appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none"
                                 >
                                     <option value="created_at-desc">
                                         Plus récentes
@@ -369,7 +369,7 @@ export default function FavoriteProperties() {
                                 </select>
                                 <TrendingUp
                                     size={16}
-                                    className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-amber-500"
+                                    className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[#C9A84C]"
                                 />
                             </div>
                         </div>
@@ -380,8 +380,8 @@ export default function FavoriteProperties() {
                 <div className="px-4 py-6 sm:px-6 lg:px-8">
                     {properties.data.length === 0 ? (
                         <div className="py-16 text-center">
-                            <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-amber-100/50">
-                                <Heart size={32} className="text-amber-500" />
+                            <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-[#1E3A5F]/10">
+                                <Heart size={32} className="text-[#C9A84C]" />
                             </div>
                             <h3 className="mb-2 text-xl font-semibold text-slate-900">
                                 Aucune propriété favorite
@@ -392,7 +392,7 @@ export default function FavoriteProperties() {
                             </p>
                             <button
                                 onClick={handleOpenProperties}
-                                className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-6 py-3 font-medium text-white shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-105 hover:from-amber-500 hover:to-amber-700"
+                                className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-6 py-3 font-medium text-white shadow-lg shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22]"
                             >
                                 <Plus size={20} className="mr-2" />
                                 Explorer les propriétés
@@ -407,7 +407,7 @@ export default function FavoriteProperties() {
                                         (property: Property, index: number) => (
                                             <div
                                                 key={property.id}
-                                                className="group relative transform overflow-hidden rounded-2xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/20"
+                                                className="group relative transform overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-sm hover:shadow-xl"
                                                 style={{
                                                     animationDelay: `${index * 0.1}s`,
                                                 }}
@@ -423,10 +423,10 @@ export default function FavoriteProperties() {
                                                             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                                                         />
                                                     ) : (
-                                                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-100 to-amber-200">
+                                                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-100">
                                                             <ImageOff
                                                                 size={32}
-                                                                className="text-amber-400"
+                                                                className="text-[#1E3A5F]"
                                                             />
                                                         </div>
                                                     )}
@@ -440,7 +440,7 @@ export default function FavoriteProperties() {
 
                                                     {/* Price Badge */}
                                                     <div className="absolute bottom-3 left-3 rounded-lg bg-white/90 px-2 py-1 backdrop-blur-sm">
-                                                        <span className="text-sm font-bold text-amber-600">
+                                                        <span className="text-sm font-bold text-[#1E3A5F]">
                                                             {formatPrice(
                                                                 property.price,
                                                             )}
@@ -449,7 +449,7 @@ export default function FavoriteProperties() {
 
                                                     {/* Favorite Badge */}
                                                     <div className="absolute top-3 left-3">
-                                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500 shadow-lg">
+                                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-500 shadow-lg">
                                                             <Heart
                                                                 size={16}
                                                                 className="fill-white text-white"
@@ -460,7 +460,7 @@ export default function FavoriteProperties() {
 
                                                 {/* Content */}
                                                 <div className="p-4">
-                                                    <h3 className="mb-2 font-semibold text-slate-900 transition-colors group-hover:text-amber-700">
+                                                    <h3 className="mb-2 font-semibold text-slate-900 transition-colors group-hover:text-[#0d2340]">
                                                         {property.title}
                                                     </h3>
 
@@ -468,7 +468,7 @@ export default function FavoriteProperties() {
                                                         <span className="flex items-center">
                                                             <Building
                                                                 size={14}
-                                                                className="mr-1 text-amber-500"
+                                                                className="mr-1 text-[#C9A84C]"
                                                             />
                                                             {property.type}
                                                         </span>
@@ -476,7 +476,7 @@ export default function FavoriteProperties() {
                                                             <span className="flex items-center truncate">
                                                                 <MapPin
                                                                     size={14}
-                                                                    className="mr-1 text-amber-500"
+                                                                    className="mr-1 text-[#C9A84C]"
                                                                 />
                                                                 {
                                                                     property.location
@@ -515,7 +515,7 @@ export default function FavoriteProperties() {
                                                                         property,
                                                                     )
                                                                 }
-                                                                className="rounded-lg p-2 text-amber-600 transition-colors hover:bg-amber-100"
+                                                                className="rounded-lg p-2 text-[#1E3A5F] transition-colors hover:bg-slate-100"
                                                                 title="Voir détails"
                                                             >
                                                                 <Eye
@@ -554,14 +554,14 @@ export default function FavoriteProperties() {
 
                                                                 {dropdownOpen ===
                                                                     property.id && (
-                                                                    <div className="absolute right-0 bottom-full z-[100] mb-2 w-48 overflow-hidden rounded-xl border border-amber-200/50 bg-white shadow-2xl shadow-amber-500/20">
+                                                                    <div className="absolute right-0 bottom-full z-[100] mb-2 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl shadow-sm">
                                                                         <button
                                                                             onClick={() =>
                                                                                 handleEditProperty(
                                                                                     property,
                                                                                 )
                                                                             }
-                                                                            className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-amber-50"
+                                                                            className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-slate-100"
                                                                         >
                                                                             <Edit3
                                                                                 size={
@@ -578,7 +578,7 @@ export default function FavoriteProperties() {
                                                                                     property,
                                                                                 )
                                                                             }
-                                                                            className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-amber-50"
+                                                                            className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-slate-100"
                                                                         >
                                                                             <BarChart3
                                                                                 size={
@@ -637,10 +637,10 @@ export default function FavoriteProperties() {
                                 </div>
                             ) : (
                                 /* List View */
-                                <div className="overflow-hidden rounded-2xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10">
+                                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-sm">
                                     <div className="overflow-x-auto">
                                         <table className="w-full">
-                                            <thead className="bg-amber-50/30">
+                                            <thead className="bg-slate-50">
                                                 <tr>
                                                     <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
                                                         Image
@@ -662,7 +662,7 @@ export default function FavoriteProperties() {
                                                     </th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-amber-200/30">
+                                            <tbody className="divide-y divide-slate-200">
                                                 {properties.data.map(
                                                     (
                                                         property: Property,
@@ -670,7 +670,7 @@ export default function FavoriteProperties() {
                                                     ) => (
                                                         <tr
                                                             key={property.id}
-                                                            className="transition-colors hover:bg-amber-50/30"
+                                                            className="transition-colors hover:bg-slate-50"
                                                             style={{
                                                                 animationDelay: `${index * 0.05}s`,
                                                             }}
@@ -691,12 +691,12 @@ export default function FavoriteProperties() {
                                                                             className="h-full w-full object-cover"
                                                                         />
                                                                     ) : (
-                                                                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-100 to-amber-200">
+                                                                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-100">
                                                                             <ImageOff
                                                                                 size={
                                                                                     20
                                                                                 }
-                                                                                className="text-amber-400"
+                                                                                className="text-[#1E3A5F]"
                                                                             />
                                                                         </div>
                                                                     )}
@@ -715,7 +715,7 @@ export default function FavoriteProperties() {
                                                                                 size={
                                                                                     12
                                                                                 }
-                                                                                className="mr-1 text-amber-500"
+                                                                                className="mr-1 text-[#C9A84C]"
                                                                             />
                                                                             {
                                                                                 property.type
@@ -727,7 +727,7 @@ export default function FavoriteProperties() {
                                                                                     size={
                                                                                         12
                                                                                     }
-                                                                                    className="mr-1 text-amber-500"
+                                                                                    className="mr-1 text-[#C9A84C]"
                                                                                 />
                                                                                 {
                                                                                     property.location
@@ -743,7 +743,7 @@ export default function FavoriteProperties() {
                                                                 )}
                                                             </td>
                                                             <td className="px-6 py-4">
-                                                                <span className="font-semibold text-amber-600">
+                                                                <span className="font-semibold text-[#1E3A5F]">
                                                                     {formatPrice(
                                                                         property.price,
                                                                     )}
@@ -761,7 +761,7 @@ export default function FavoriteProperties() {
                                                                                 property,
                                                                             )
                                                                         }
-                                                                        className="rounded-lg p-2 text-amber-600 transition-colors hover:bg-amber-100"
+                                                                        className="rounded-lg p-2 text-[#1E3A5F] transition-colors hover:bg-slate-100"
                                                                         title="Voir détails"
                                                                     >
                                                                         <Eye
@@ -803,14 +803,14 @@ export default function FavoriteProperties() {
 
                                                                         {dropdownOpen ===
                                                                             property.id && (
-                                                                            <div className="absolute top-full right-0 z-[100] mt-1 w-48 overflow-hidden rounded-xl border border-amber-200/50 bg-white shadow-2xl shadow-amber-500/20">
+                                                                            <div className="absolute top-full right-0 z-[100] mt-1 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl shadow-sm">
                                                                                 <button
                                                                                     onClick={() =>
                                                                                         handleEditProperty(
                                                                                             property,
                                                                                         )
                                                                                     }
-                                                                                    className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-amber-50"
+                                                                                    className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-slate-100"
                                                                                 >
                                                                                     <Edit3
                                                                                         size={
@@ -827,7 +827,7 @@ export default function FavoriteProperties() {
                                                                                             property,
                                                                                         )
                                                                                     }
-                                                                                    className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-amber-50"
+                                                                                    className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-slate-100"
                                                                                 >
                                                                                     <BarChart3
                                                                                         size={
@@ -920,8 +920,8 @@ export default function FavoriteProperties() {
                                         }
                                         className={`rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
                                             link.active
-                                                ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30'
-                                                : 'text-slate-600 hover:bg-amber-100 hover:text-amber-700'
+                                                ? 'bg-slate-500 text-white shadow-lg shadow-sm'
+                                                : 'text-slate-600 hover:bg-slate-100 hover:text-[#0d2340]'
                                         } ${!link.url ? 'cursor-not-allowed opacity-50' : ''}`}
                                         disabled={!link.url}
                                         dangerouslySetInnerHTML={{

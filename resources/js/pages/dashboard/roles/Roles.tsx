@@ -1,10 +1,20 @@
-import { useState, useEffect } from 'react';
-import { ImageOff, Plus, Edit3, Trash2, ArrowLeft, Search, Check, Shield, Users, Key, Lock } from 'lucide-react';
-import Dashboard from '@/components/layouts/Dashboard/Dashboard';
-import { router, usePage } from '@inertiajs/react';
-import { toast } from 'sonner';
 import PermissionsPopup from '@/components/forms/PermissionsPopup';
+import Dashboard from '@/components/layouts/Dashboard/Dashboard';
 import BackButton from '@/components/ui/BackButton';
+import { router, usePage } from '@inertiajs/react';
+import {
+    Check,
+    Edit3,
+    Key,
+    Lock,
+    Plus,
+    Search,
+    Shield,
+    Trash2,
+    Users,
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { route } from 'ziggy-js';
 
 interface Role {
@@ -21,7 +31,12 @@ interface PageProps {
     roles: {
         data: Role[];
         links: { url: string | null; label: string; active: boolean }[];
-        meta?: { total: number; current_page: number; last_page: number; per_page: number };
+        meta?: {
+            total: number;
+            current_page: number;
+            last_page: number;
+            per_page: number;
+        };
     };
     permissions: Permission[];
     auth: {
@@ -33,7 +48,9 @@ export default function Roles({ roles, permissions }: PageProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
     const [currentRole, setCurrentRole] = useState<Role | null>(null);
-    const { filters } = usePage<{ filters?: { search?: string; per_page?: number } }>().props;
+    const { filters } = usePage<{
+        filters?: { search?: string; per_page?: number };
+    }>().props;
 
     const [searchQuery, setSearchQuery] = useState(filters?.search ?? '');
     const [perPage, setPerPage] = useState<number>(filters?.per_page ?? 20);
@@ -55,7 +72,7 @@ export default function Roles({ roles, permissions }: PageProps) {
                     replace: true,
                     preserveScroll: true,
                     only: ['roles', 'filters'],
-                }
+                },
             );
         }, 350);
         return () => clearTimeout(t);
@@ -89,7 +106,7 @@ export default function Roles({ roles, permissions }: PageProps) {
         const u = new URL(url, window.location.origin);
         if (searchQuery) u.searchParams.set('search', searchQuery);
         else u.searchParams.delete('search');
-        
+
         if (perPage) u.searchParams.set('per_page', perPage.toString());
         else u.searchParams.delete('per_page');
 
@@ -105,44 +122,49 @@ export default function Roles({ roles, permissions }: PageProps) {
         return new Date(dateString).toLocaleDateString('fr-FR', {
             day: '2-digit',
             month: 'short',
-            year: 'numeric'
+            year: 'numeric',
         });
     };
 
     return (
         <Dashboard>
-            <div className="min-h-screen bg-gradient-to-br from-amber-50/30 via-white to-amber-50/20">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 {/* Header Section */}
-                <div className="bg-white/80 backdrop-blur-xl shadow-lg shadow-amber-500/5 border-b border-amber-200/30 sticky top-0 z-10">
-                    <div className="px-4 sm:px-6 lg:px-8 py-4">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 shadow-lg shadow-sm backdrop-blur-xl">
+                    <div className="px-4 py-4 sm:px-6 lg:px-8">
+                        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                             <BackButton />
-                            
+
                             <div className="flex-1 text-center sm:text-left">
-                                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-transparent">
+                                <h1 className="bg-gradient-to-r from-slate-100 to-slate-100 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
                                     Gestion des Rôles
                                 </h1>
-                                <p className="text-sm sm:text-base text-slate-600 mt-1">
+                                <p className="mt-1 text-sm text-slate-600 sm:text-base">
                                     Gérez vos rôles et leurs permissions
                                 </p>
                             </div>
                         </div>
 
                         {/* Search and Filters */}
-                        <div className="mt-4 flex flex-col sm:flex-row gap-4 justify-between">
-                            <div className="relative flex-1 max-w-md">
-                                <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-500" />
+                        <div className="mt-4 flex flex-col justify-between gap-4 sm:flex-row">
+                            <div className="relative max-w-md flex-1">
+                                <Search
+                                    size={20}
+                                    className="absolute top-1/2 left-3 -translate-y-1/2 text-[#C9A84C]"
+                                />
                                 <input
                                     type="text"
                                     placeholder="Rechercher un rôle..."
-                                    className="w-full pl-10 pr-4 py-3 border border-amber-200/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm text-sm shadow-sm"
+                                    className="w-full rounded-xl border border-slate-200 bg-white/80 py-3 pr-4 pl-10 text-sm shadow-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none"
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onChange={(e) =>
+                                        setSearchQuery(e.target.value)
+                                    }
                                 />
                                 {searchQuery && (
-                                    <button 
-                                        onClick={() => setSearchQuery('')} 
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-400 hover:text-amber-600 transition-colors"
+                                    <button
+                                        onClick={() => setSearchQuery('')}
+                                        className="absolute top-1/2 right-3 -translate-y-1/2 text-[#1E3A5F] transition-colors hover:text-[#1E3A5F]"
                                         aria-label="Effacer"
                                     >
                                         <Trash2 size={16} />
@@ -152,9 +174,11 @@ export default function Roles({ roles, permissions }: PageProps) {
 
                             <div className="flex items-center gap-3">
                                 <select
-                                    className="px-4 py-3 border border-amber-200/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm text-sm shadow-sm"
+                                    className="rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-sm shadow-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none"
                                     value={perPage}
-                                    onChange={(e) => setPerPage(Number(e.target.value))}
+                                    onChange={(e) =>
+                                        setPerPage(Number(e.target.value))
+                                    }
                                 >
                                     <option value={10}>10</option>
                                     <option value={20}>20</option>
@@ -163,9 +187,11 @@ export default function Roles({ roles, permissions }: PageProps) {
                                 </select>
 
                                 <button
-                                    className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-medium py-3 px-6 rounded-xl flex items-center gap-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex transform items-center gap-2 rounded-xl bg-gradient-to-r from-slate-100 to-slate-100 px-6 py-3 font-medium text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:from-slate-100 hover:to-slate-100 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
                                     onClick={handleCreateOpen}
-                                    disabled={!userPermissions.includes('role.create')}
+                                    disabled={
+                                        !userPermissions.includes('role.create')
+                                    }
                                 >
                                     <Plus size={18} />
                                     <span>Nouveau rôle</span>
@@ -176,119 +202,166 @@ export default function Roles({ roles, permissions }: PageProps) {
                 </div>
 
                 {/* Stats Cards */}
-                <div className="px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div className="bg-white rounded-2xl shadow-lg shadow-amber-500/10 border border-amber-200/30 p-5 hover:shadow-xl hover:shadow-amber-500/20 transition-all duration-300 transform hover:-translate-y-1">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                <div className="px-4 py-6 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="transform rounded-2xl border border-slate-200 bg-white p-5 shadow-lg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-sm hover:shadow-xl">
+                            <div className="mb-3 flex items-center justify-between">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#C9A84C] to-[#A8882E] shadow-lg shadow-sm">
                                     <Shield size={24} className="text-white" />
                                 </div>
-                                <div className="flex items-center text-emerald-600 text-sm font-medium bg-emerald-50 px-2 py-1 rounded-lg">
+                                <div className="flex items-center rounded-lg bg-emerald-50 px-2 py-1 text-sm font-medium text-emerald-600">
                                     <Users size={16} className="mr-1" />
                                     Total
                                 </div>
                             </div>
-                            <div className="text-2xl font-bold text-slate-900">{roles.data.length}</div>
+                            <div className="text-2xl font-bold text-slate-900">
+                                {roles.data.length}
+                            </div>
                             <div className="text-sm text-slate-600">Rôles</div>
                         </div>
 
-                        <div className="bg-white rounded-2xl shadow-lg shadow-amber-500/10 border border-amber-200/30 p-5 hover:shadow-xl hover:shadow-amber-500/20 transition-all duration-300 transform hover:-translate-y-1">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                        <div className="transform rounded-2xl border border-slate-200 bg-white p-5 shadow-lg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-sm hover:shadow-xl">
+                            <div className="mb-3 flex items-center justify-between">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/30">
                                     <Key size={24} className="text-white" />
                                 </div>
-                                <div className="flex items-center text-amber-600 text-sm font-medium bg-amber-50 px-2 py-1 rounded-lg">
+                                <div className="flex items-center rounded-lg bg-slate-50 px-2 py-1 text-sm font-medium text-[#1E3A5F]">
                                     <Lock size={16} className="mr-1" />
                                     Actif
                                 </div>
                             </div>
                             <div className="text-2xl font-bold text-slate-900">
-                                {roles.data.filter((role) => role.permissions.length > 0).length}
+                                {
+                                    roles.data.filter(
+                                        (role) => role.permissions.length > 0,
+                                    ).length
+                                }
                             </div>
-                            <div className="text-sm text-slate-600">Avec permissions</div>
+                            <div className="text-sm text-slate-600">
+                                Avec permissions
+                            </div>
                         </div>
 
-                        <div className="bg-white rounded-2xl shadow-lg shadow-amber-500/10 border border-amber-200/30 p-5 hover:shadow-xl hover:shadow-amber-500/20 transition-all duration-300 transform hover:-translate-y-1">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                        <div className="transform rounded-2xl border border-slate-200 bg-white p-5 shadow-lg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-sm hover:shadow-xl">
+                            <div className="mb-3 flex items-center justify-between">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg shadow-blue-500/30">
                                     <Check size={24} className="text-white" />
                                 </div>
-                                <div className="flex items-center text-amber-600 text-sm font-medium bg-amber-50 px-2 py-1 rounded-lg">
+                                <div className="flex items-center rounded-lg bg-slate-50 px-2 py-1 text-sm font-medium text-[#1E3A5F]">
                                     <Shield size={16} className="mr-1" />
                                     Total
                                 </div>
                             </div>
                             <div className="text-2xl font-bold text-slate-900">
-                                {roles.data.reduce((acc, role) => acc + role.permissions.length, 0)}
+                                {roles.data.reduce(
+                                    (acc, role) =>
+                                        acc + role.permissions.length,
+                                    0,
+                                )}
                             </div>
-                            <div className="text-sm text-slate-600">Permissions</div>
+                            <div className="text-sm text-slate-600">
+                                Permissions
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Table Section */}
-                <div className="px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="bg-white rounded-2xl shadow-lg shadow-amber-500/10 border border-amber-200/30 overflow-hidden">
+                <div className="px-4 py-6 sm:px-6 lg:px-8">
+                    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-sm">
                         <div className="overflow-x-auto">
                             {/* Desktop Table */}
-                            <table className="w-full hidden md:table">
-                                <thead className="bg-amber-50/30">
+                            <table className="hidden w-full md:table">
+                                <thead className="bg-slate-50">
                                     <tr>
-                                        <th className="px-6 py-4 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Nom</th>
-                                        <th className="px-6 py-4 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Permissions</th>
-                                        <th className="px-6 py-4 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Actions</th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
+                                            Nom
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
+                                            Permissions
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
+                                            Actions
+                                        </th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-amber-200/30">
+                                <tbody className="divide-y divide-slate-200">
                                     {roles.data.map((role, index) => (
-                                        <tr 
-                                            key={role.id} 
-                                            className="hover:bg-amber-50/30 transition-colors"
-                                            style={{ animationDelay: `${index * 0.05}s` }}
+                                        <tr
+                                            key={role.id}
+                                            className="transition-colors hover:bg-slate-50"
+                                            style={{
+                                                animationDelay: `${index * 0.05}s`,
+                                            }}
                                         >
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
-                                                    <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-white font-bold">
-                                                        {role.name.charAt(0).toUpperCase()}
+                                                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#C9A84C] to-[#A8882E] font-bold text-white">
+                                                        {role.name
+                                                            .charAt(0)
+                                                            .toUpperCase()}
                                                     </div>
                                                     <div className="ml-4">
-                                                        <div className="text-sm font-medium text-slate-900">{role.name}</div>
-                                                        <div className="text-sm text-slate-500">ID: #{role.id}</div>
+                                                        <div className="text-sm font-medium text-slate-900">
+                                                            {role.name}
+                                                        </div>
+                                                        <div className="text-sm text-slate-500">
+                                                            ID: #{role.id}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-wrap gap-1">
-                                                    {role.permissions.slice(0, 3).map((perm) => (
-                                                        <span 
-                                                            key={perm.name} 
-                                                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200"
-                                                        >
-                                                            {perm.name}
-                                                        </span>
-                                                    ))}
-                                                    {role.permissions.length > 3 && (
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
-                                                            +{role.permissions.length - 3} plus
+                                                    {role.permissions
+                                                        .slice(0, 3)
+                                                        .map((perm) => (
+                                                            <span
+                                                                key={perm.name}
+                                                                className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800"
+                                                            >
+                                                                {perm.name}
+                                                            </span>
+                                                        ))}
+                                                    {role.permissions.length >
+                                                        3 && (
+                                                        <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
+                                                            +
+                                                            {role.permissions
+                                                                .length -
+                                                                3}{' '}
+                                                            plus
                                                         </span>
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                                                 <div className="flex space-x-2">
                                                     <button
-                                                        className="text-amber-600 hover:text-amber-900 p-1 rounded hover:bg-amber-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                        onClick={() => handleEditOpen(role)}
+                                                        className="rounded p-1 text-[#1E3A5F] transition-colors hover:bg-slate-100 hover:text-[#1E3A5F] disabled:cursor-not-allowed disabled:opacity-50"
+                                                        onClick={() =>
+                                                            handleEditOpen(role)
+                                                        }
                                                         title="Modifier"
-                                                        disabled={!userPermissions.includes('role.update')}
+                                                        disabled={
+                                                            !userPermissions.includes(
+                                                                'role.update',
+                                                            )
+                                                        }
                                                     >
                                                         <Edit3 size={18} />
                                                     </button>
                                                     <button
-                                                        className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                        onClick={() => deleteRole(role.id)}
+                                                        className="rounded p-1 text-red-600 transition-colors hover:bg-red-50 hover:text-red-900 disabled:cursor-not-allowed disabled:opacity-50"
+                                                        onClick={() =>
+                                                            deleteRole(role.id)
+                                                        }
                                                         title="Supprimer"
-                                                        disabled={!userPermissions.includes('role.delete')}
+                                                        disabled={
+                                                            !userPermissions.includes(
+                                                                'role.delete',
+                                                            )
+                                                        }
                                                     >
                                                         <Trash2 size={18} />
                                                     </button>
@@ -304,34 +377,49 @@ export default function Roles({ roles, permissions }: PageProps) {
                                 {roles.data.map((role, index) => (
                                     <div
                                         key={role.id}
-                                        className="p-4 border-b border-amber-200/30 last:border-b-0"
+                                        className="border-b border-slate-200 p-4 last:border-b-0"
                                     >
-                                        <div className="flex justify-between items-start mb-3">
+                                        <div className="mb-3 flex items-start justify-between">
                                             <div className="flex items-center">
-                                                <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-white font-bold">
-                                                    {role.name.charAt(0).toUpperCase()}
+                                                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#C9A84C] to-[#A8882E] font-bold text-white">
+                                                    {role.name
+                                                        .charAt(0)
+                                                        .toUpperCase()}
                                                 </div>
                                                 <div className="ml-3">
-                                                    <h3 className="text-base font-medium text-slate-900">{role.name}</h3>
-                                                    <p className="text-sm text-slate-500">ID: #{role.id}</p>
+                                                    <h3 className="text-base font-medium text-slate-900">
+                                                        {role.name}
+                                                    </h3>
+                                                    <p className="text-sm text-slate-500">
+                                                        ID: #{role.id}
+                                                    </p>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div className="mb-3">
-                                            <h4 className="text-sm font-medium text-slate-700 mb-2">Permissions ({role.permissions.length})</h4>
+                                            <h4 className="mb-2 text-sm font-medium text-slate-700">
+                                                Permissions (
+                                                {role.permissions.length})
+                                            </h4>
                                             <div className="flex flex-wrap gap-1">
-                                                {role.permissions.slice(0, 3).map((perm) => (
-                                                    <span 
-                                                        key={perm.name} 
-                                                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200"
-                                                    >
-                                                        {perm.name}
-                                                    </span>
-                                                ))}
-                                                {role.permissions.length > 3 && (
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
-                                                        +{role.permissions.length - 3} plus
+                                                {role.permissions
+                                                    .slice(0, 3)
+                                                    .map((perm) => (
+                                                        <span
+                                                            key={perm.name}
+                                                            className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800"
+                                                        >
+                                                            {perm.name}
+                                                        </span>
+                                                    ))}
+                                                {role.permissions.length >
+                                                    3 && (
+                                                    <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
+                                                        +
+                                                        {role.permissions
+                                                            .length - 3}{' '}
+                                                        plus
                                                     </span>
                                                 )}
                                             </div>
@@ -339,18 +427,30 @@ export default function Roles({ roles, permissions }: PageProps) {
 
                                         <div className="flex justify-end space-x-2">
                                             <button
-                                                className="text-amber-600 hover:text-amber-900 p-2 rounded-lg bg-amber-50 hover:bg-amber-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                onClick={() => handleEditOpen(role)}
+                                                className="rounded-lg bg-slate-50 p-2 text-[#1E3A5F] transition-colors hover:bg-slate-100 hover:text-[#1E3A5F] disabled:cursor-not-allowed disabled:opacity-50"
+                                                onClick={() =>
+                                                    handleEditOpen(role)
+                                                }
                                                 title="Modifier"
-                                                disabled={!userPermissions.includes('role.update')}
+                                                disabled={
+                                                    !userPermissions.includes(
+                                                        'role.update',
+                                                    )
+                                                }
                                             >
                                                 <Edit3 size={18} />
                                             </button>
                                             <button
-                                                className="text-red-600 hover:text-red-900 p-2 rounded-lg bg-red-50 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                onClick={() => deleteRole(role.id)}
+                                                className="rounded-lg bg-red-50 p-2 text-red-600 transition-colors hover:bg-red-100 hover:text-red-900 disabled:cursor-not-allowed disabled:opacity-50"
+                                                onClick={() =>
+                                                    deleteRole(role.id)
+                                                }
                                                 title="Supprimer"
-                                                disabled={!userPermissions.includes('role.delete')}
+                                                disabled={
+                                                    !userPermissions.includes(
+                                                        'role.delete',
+                                                    )
+                                                }
                                             >
                                                 <Trash2 size={18} />
                                             </button>
@@ -359,18 +459,29 @@ export default function Roles({ roles, permissions }: PageProps) {
                                 ))}
 
                                 {roles.data.length === 0 && (
-                                    <div className="text-center py-12">
-                                        <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-amber-100/50 flex items-center justify-center">
-                                            <Shield size={32} className="text-amber-500" />
+                                    <div className="py-12 text-center">
+                                        <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-[#1E3A5F]/10">
+                                            <Shield
+                                                size={32}
+                                                className="text-[#C9A84C]"
+                                            />
                                         </div>
-                                        <h3 className="text-xl font-semibold text-slate-900 mb-2">Aucun rôle trouvé</h3>
-                                        <p className="text-slate-600 mb-6">
-                                            {searchQuery ? 'Aucun rôle ne correspond à votre recherche' : 'Commencez par créer votre premier rôle'}
+                                        <h3 className="mb-2 text-xl font-semibold text-slate-900">
+                                            Aucun rôle trouvé
+                                        </h3>
+                                        <p className="mb-6 text-slate-600">
+                                            {searchQuery
+                                                ? 'Aucun rôle ne correspond à votre recherche'
+                                                : 'Commencez par créer votre premier rôle'}
                                         </p>
                                         <button
-                                            className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 mx-auto transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                                            className="mx-auto flex transform items-center gap-2 rounded-lg bg-gradient-to-r from-slate-100 to-slate-100 px-4 py-2 font-medium text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:from-slate-100 hover:to-slate-100 hover:shadow-xl"
                                             onClick={handleCreateOpen}
-                                            disabled={!userPermissions.includes('role.create')}
+                                            disabled={
+                                                !userPermissions.includes(
+                                                    'role.create',
+                                                )
+                                            }
                                         >
                                             <Plus size={18} />
                                             Créer un rôle
@@ -383,30 +494,34 @@ export default function Roles({ roles, permissions }: PageProps) {
                 </div>
 
                 {/* Pagination */}
-                <div className="px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="px-4 py-6 sm:px-6 lg:px-8">
+                    <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
                         <div className="text-sm text-slate-600">
                             {roles.data.length > 0 ? (
                                 <>
-                                    Affichage de {roles.data.length} sur {roles.meta?.total || roles.data.length} rôles
+                                    Affichage de {roles.data.length} sur{' '}
+                                    {roles.meta?.total || roles.data.length}{' '}
+                                    rôles
                                 </>
                             ) : (
                                 'Aucun rôle'
                             )}
                         </div>
-                        
+
                         <div className="flex items-center gap-2">
                             {roles.links.map((link, index) => (
                                 <button
                                     key={index}
-                                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                                        link.active 
-                                            ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30' 
-                                            : 'text-slate-600 hover:bg-amber-100 hover:text-amber-700'
-                                    } ${!link.url ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className={`rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                                        link.active
+                                            ? 'bg-slate-500 text-white shadow-lg shadow-sm'
+                                            : 'text-slate-600 hover:bg-slate-100 hover:text-[#0d2340]'
+                                    } ${!link.url ? 'cursor-not-allowed opacity-50' : ''}`}
                                     disabled={!link.url}
                                     onClick={() => goTo(link.url)}
-                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                    dangerouslySetInnerHTML={{
+                                        __html: link.label,
+                                    }}
                                 />
                             ))}
                         </div>
@@ -432,9 +547,14 @@ export default function Roles({ roles, permissions }: PageProps) {
                     setIsOpen={setEditOpen}
                     mode="edit"
                     initialRole={currentRole.name}
-                    initialPermissions={currentRole.permissions.map((perm) => perm.name)}
+                    initialPermissions={currentRole.permissions.map(
+                        (perm) => perm.name,
+                    )}
                     availablePermissions={permissions.map((perm) => perm.name)}
-                    submitRoute={route('dashboard.roles.update', currentRole.id)}
+                    submitRoute={route(
+                        'dashboard.roles.update',
+                        currentRole.id,
+                    )}
                 />
             )}
         </Dashboard>

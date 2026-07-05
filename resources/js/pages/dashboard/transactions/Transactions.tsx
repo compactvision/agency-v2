@@ -123,7 +123,7 @@ export default function Transactions() {
         switch (status) {
             case 'pending':
                 return (
-                    <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-100 px-2.5 py-1 text-xs font-medium whitespace-nowrap text-amber-800 shadow-sm">
+                    <span className="inline-flex items-center rounded-full border border-slate-200 bg-[#1E3A5F]/10 px-2.5 py-1 text-xs font-medium whitespace-nowrap text-[#0d2340] shadow-sm">
                         <Clock size={12} className="mr-1" />
                         En attente
                     </span>
@@ -170,15 +170,15 @@ export default function Transactions() {
 
     return (
         <Dashboard>
-            <div className="min-h-screen bg-gradient-to-br from-amber-50/30 via-white to-amber-50/20 pb-12">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 pb-12">
                 {/* Header Section */}
-                <div className="sticky top-0 z-1 border-b border-amber-200/30 bg-white/80 shadow-lg shadow-amber-500/5 backdrop-blur-xl">
+                <div className="sticky top-0 z-1 border-b border-slate-200 bg-white/80 shadow-lg shadow-sm backdrop-blur-xl">
                     <div className="px-4 py-4 sm:px-6 lg:px-8">
                         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                             <BackButton />
 
                             <div className="w-full flex-1 text-center sm:w-auto sm:text-left">
-                                <h1 className="bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
+                                <h1 className="bg-gradient-to-r from-slate-100 to-slate-100 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
                                     Transactions
                                 </h1>
                                 <p className="mt-1 text-sm text-slate-600 sm:text-base">
@@ -192,12 +192,12 @@ export default function Transactions() {
                             <div className="relative mx-auto w-full sm:mx-0 sm:max-w-md">
                                 <Search
                                     size={20}
-                                    className={`absolute top-1/2 left-3 -translate-y-1/2 transition-colors ${isSearching ? 'animate-pulse text-amber-300' : 'text-amber-500'}`}
+                                    className={`absolute top-1/2 left-3 -translate-y-1/2 transition-colors ${isSearching ? 'animate-pulse text-[#1E3A5F]' : 'text-[#C9A84C]'}`}
                                 />
                                 <input
                                     type="text"
                                     placeholder="Rechercher une transaction..."
-                                    className={`w-full rounded-xl border border-amber-200/50 bg-white/80 py-3 pr-10 pl-10 text-sm shadow-sm backdrop-blur-sm transition-all focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none ${isSearching ? 'opacity-70' : ''}`}
+                                    className={`w-full rounded-xl border border-slate-200 bg-white/80 py-3 pr-10 pl-10 text-sm shadow-sm backdrop-blur-sm transition-all focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none ${isSearching ? 'opacity-70' : ''}`}
                                     value={searchQuery}
                                     onChange={(e) =>
                                         setSearchQuery(e.target.value)
@@ -206,7 +206,7 @@ export default function Transactions() {
                                 {searchQuery && (
                                     <button
                                         onClick={() => setSearchQuery('')}
-                                        className="absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1 text-amber-400 transition-colors hover:bg-amber-50 hover:text-amber-600"
+                                        className="absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1 text-[#1E3A5F] transition-colors hover:bg-slate-100 hover:text-[#1E3A5F]"
                                         aria-label="Effacer"
                                     >
                                         <XCircle size={16} />
@@ -215,7 +215,7 @@ export default function Transactions() {
                                 {isSearching && (
                                     <Loader2
                                         size={18}
-                                        className="absolute top-1/2 right-10 -translate-y-1/2 animate-spin text-amber-500"
+                                        className="absolute top-1/2 right-10 -translate-y-1/2 animate-spin text-[#C9A84C]"
                                     />
                                 )}
                             </div>
@@ -226,9 +226,9 @@ export default function Transactions() {
                 {/* Stats Cards */}
                 <div className="px-4 py-6 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        <div className="transform rounded-2xl border border-amber-200/30 bg-white p-5 shadow-lg shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/20">
+                        <div className="transform rounded-2xl border border-slate-200 bg-white p-5 shadow-lg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-sm hover:shadow-xl">
                             <div className="mb-3 flex items-center justify-between">
-                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 shadow-lg shadow-amber-500/30">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#C9A84C] to-[#A8882E] shadow-lg shadow-sm">
                                     <CreditCard
                                         size={24}
                                         className="text-white"
@@ -247,12 +247,12 @@ export default function Transactions() {
                             </div>
                         </div>
 
-                        <div className="transform rounded-2xl border border-amber-200/30 bg-white p-5 shadow-lg shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/20">
+                        <div className="transform rounded-2xl border border-slate-200 bg-white p-5 shadow-lg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-sm hover:shadow-xl">
                             <div className="mb-3 flex items-center justify-between">
-                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 shadow-lg shadow-amber-500/30">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#C9A84C] to-[#A8882E] shadow-lg shadow-sm">
                                     <Clock size={24} className="text-white" />
                                 </div>
-                                <div className="flex items-center rounded-lg bg-amber-50 px-2 py-1 text-sm font-medium text-amber-600">
+                                <div className="flex items-center rounded-lg bg-slate-50 px-2 py-1 text-sm font-medium text-[#1E3A5F]">
                                     <Clock size={16} className="mr-1" />
                                     En attente
                                 </div>
@@ -267,7 +267,7 @@ export default function Transactions() {
                             </div>
                         </div>
 
-                        <div className="transform rounded-2xl border border-amber-200/30 bg-white p-5 shadow-lg shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/20">
+                        <div className="transform rounded-2xl border border-slate-200 bg-white p-5 shadow-lg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-sm hover:shadow-xl">
                             <div className="mb-3 flex items-center justify-between">
                                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/30">
                                     <CheckCircle
@@ -295,16 +295,16 @@ export default function Transactions() {
                 {/* Table Section */}
                 <div className="px-4 py-6 sm:px-6 lg:px-8">
                     <div
-                        className="overflow-hidden rounded-2xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10 transition-opacity duration-300"
+                        className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-sm transition-opacity duration-300"
                         style={{ opacity: isSearching ? 0.6 : 1 }}
                     >
                         {/* Empty State */}
                         {paymentRequests?.data?.length === 0 ? (
                             <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
-                                <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-amber-100">
+                                <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[#1E3A5F]/10">
                                     <CreditCard
                                         size={32}
-                                        className="text-amber-500"
+                                        className="text-[#C9A84C]"
                                     />
                                 </div>
                                 <h3 className="text-lg font-semibold text-slate-900">
@@ -320,7 +320,7 @@ export default function Transactions() {
                             <div className="overflow-x-auto">
                                 {/* Desktop Table */}
                                 <table className="hidden w-full md:table">
-                                    <thead className="border-b border-amber-100 bg-amber-50/30">
+                                    <thead className="border-b border-slate-200 bg-slate-50">
                                         <tr>
                                             <th className="px-6 py-4 text-left text-xs font-semibold tracking-wider text-slate-700 uppercase">
                                                 #ID
@@ -345,12 +345,12 @@ export default function Transactions() {
                                             </th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-amber-200/30">
+                                    <tbody className="divide-y divide-slate-200">
                                         {paymentRequests?.data?.map(
                                             (pay: any, index: number) => (
                                                 <tr
                                                     key={pay.id}
-                                                    className="group transition-colors hover:bg-amber-50/40"
+                                                    className="group transition-colors hover:bg-slate-50"
                                                 >
                                                     <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-slate-700">
                                                         #{pay.id}
@@ -457,7 +457,7 @@ export default function Transactions() {
                                     {paymentRequests?.data?.map((pay: any) => (
                                         <div
                                             key={pay.id}
-                                            className="last:border--0 border-b border-amber-100 p-4 transition-colors hover:bg-amber-50/30"
+                                            className="last:border--0 border-b border-slate-200 p-4 transition-colors hover:bg-slate-50"
                                         >
                                             <div className="mb-3 flex items-start justify-between">
                                                 <div>
@@ -509,7 +509,7 @@ export default function Transactions() {
 
                                             {isAdmin &&
                                                 pay.status === 'pending' && (
-                                                    <div className="flex gap-3 border-t border-dashed border-amber-200 pt-3">
+                                                    <div className="flex gap-3 border-t border-dashed border-slate-200 pt-3">
                                                         <button
                                                             className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-50 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
                                                             onClick={() =>
@@ -549,22 +549,22 @@ export default function Transactions() {
                 {/* Pagination */}
                 {paymentRequests?.data && paymentRequests.data.length > 0 && (
                     <div className="px-4 py-6 sm:px-6 lg:px-8">
-                        <div className="flex flex-col-reverse items-center justify-between gap-4 rounded-xl border border-amber-100 bg-white/50 p-4 backdrop-blur-sm sm:flex-row">
+                        <div className="flex flex-col-reverse items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white/50 p-4 backdrop-blur-sm sm:flex-row">
                             <div className="order-2 text-sm font-medium text-slate-600 sm:order-1">
                                 Affichage de{' '}
-                                <span className="text-amber-700">
+                                <span className="text-[#0d2340]">
                                     {(paymentRequests?.meta as any)?.from ??
                                         (paymentRequests as any)?.from ??
                                         0}
                                 </span>{' '}
                                 à{' '}
-                                <span className="text-amber-700">
+                                <span className="text-[#0d2340]">
                                     {(paymentRequests?.meta as any)?.to ??
                                         (paymentRequests as any)?.to ??
                                         0}
                                 </span>{' '}
                                 sur{' '}
-                                <span className="text-amber-700">
+                                <span className="text-[#0d2340]">
                                     {paymentRequests?.meta?.total ??
                                         (paymentRequests as any)?.total ??
                                         0}
@@ -580,8 +580,8 @@ export default function Transactions() {
                                                 key={index}
                                                 className={`flex-shrink-0 rounded-lg border px-4 py-2 text-sm font-medium transition-all duration-200 ${
                                                     link.active
-                                                        ? 'scale-105 transform border-amber-500 bg-amber-500 text-white shadow-md shadow-amber-500/30'
-                                                        : 'border-slate-200 bg-white text-slate-600 hover:border-amber-200 hover:bg-amber-50 hover:text-amber-700'
+                                                        ? 'scale-105 transform border-slate-200 bg-slate-500 text-white shadow-md shadow-sm'
+                                                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-200 hover:bg-slate-100 hover:text-[#0d2340]'
                                                 } ${!link.url ? 'cursor-not-allowed opacity-50 grayscale' : ''}`}
                                                 disabled={!link.url}
                                                 onClick={() => goTo(link.url)}

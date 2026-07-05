@@ -76,7 +76,7 @@ export default function ChatbotLogs({
             lowerIntent.includes('goodbye') ||
             lowerIntent.includes('bye')
         ) {
-            return <CheckCircle size={12} className="text-amber-500" />;
+            return <CheckCircle size={12} className="text-[#C9A84C]" />;
         } else if (
             lowerIntent.includes('error') ||
             lowerIntent.includes('problem')
@@ -112,7 +112,8 @@ export default function ChatbotLogs({
             lowerIntent.includes('goodbye') ||
             lowerIntent.includes('bye')
         ) {
-            badgeClass = 'bg-amber-100 text-amber-800 border border-amber-200';
+            badgeClass =
+                'bg-[#1E3A5F]/10 text-[#0d2340] border border-slate-200';
         } else if (
             lowerIntent.includes('error') ||
             lowerIntent.includes('problem')
@@ -174,16 +175,16 @@ export default function ChatbotLogs({
 
     return (
         <Dashboard>
-            <div className="min-h-screen bg-gradient-to-br from-amber-50/30 via-white to-amber-50/20">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 {/* Header Section - Mobile First */}
-                <div className="sticky top-0 z-10 border-b border-amber-200/30 bg-white/80 shadow-lg shadow-amber-500/5 backdrop-blur-xl">
+                <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 shadow-lg shadow-sm backdrop-blur-xl">
                     <div className="w-full px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-4 lg:px-8 lg:py-4">
                         <div className="flex flex-col gap-3 sm:gap-4">
                             <div className="flex items-center justify-between">
                                 <BackButton />
 
                                 <div className="ml-0 flex-1 text-center sm:ml-4 sm:text-left">
-                                    <h1 className="bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-lg font-bold text-transparent sm:text-xl md:text-2xl lg:text-3xl">
+                                    <h1 className="bg-gradient-to-r from-slate-100 to-slate-100 bg-clip-text text-lg font-bold text-transparent sm:text-xl md:text-2xl lg:text-3xl">
                                         Historique des conversations
                                     </h1>
                                     <p className="mt-1 text-xs text-slate-600 sm:text-sm md:text-base lg:text-base">
@@ -198,12 +199,12 @@ export default function ChatbotLogs({
                                 <div className="relative w-full sm:max-w-md sm:flex-1">
                                     <Search
                                         size={14}
-                                        className="absolute top-1/2 left-3 -translate-y-1/2 text-amber-500"
+                                        className="absolute top-1/2 left-3 -translate-y-1/2 text-[#C9A84C]"
                                     />
                                     <input
                                         type="text"
                                         placeholder="Rechercher une conversation..."
-                                        className={`w-full rounded-lg border border-amber-200/50 bg-white/80 py-2.5 pr-8 pl-9 text-xs shadow-sm backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:py-3 sm:pr-10 sm:pl-10 sm:text-sm ${isSearching ? 'opacity-70' : ''}`}
+                                        className={`w-full rounded-lg border border-slate-200 bg-white/80 py-2.5 pr-8 pl-9 text-xs shadow-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:py-3 sm:pr-10 sm:pl-10 sm:text-sm ${isSearching ? 'opacity-70' : ''}`}
                                         value={searchQuery}
                                         onChange={(e) =>
                                             setSearchQuery(e.target.value)
@@ -212,7 +213,7 @@ export default function ChatbotLogs({
                                     {searchQuery && (
                                         <button
                                             onClick={() => setSearchQuery('')}
-                                            className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-amber-400 transition-colors hover:text-amber-600"
+                                            className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-[#1E3A5F] transition-colors hover:text-[#1E3A5F]"
                                             aria-label="Effacer"
                                         >
                                             <XCircle size={12} />
@@ -221,7 +222,7 @@ export default function ChatbotLogs({
                                     {isSearching && (
                                         <div className="absolute top-1/2 right-8 -translate-y-1/2">
                                             <svg
-                                                className="h-3 w-3 animate-spin text-amber-500 sm:h-4 sm:w-4"
+                                                className="h-3 w-3 animate-spin text-[#C9A84C] sm:h-4 sm:w-4"
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 fill="none"
                                                 viewBox="0 0 24 24"
@@ -245,7 +246,7 @@ export default function ChatbotLogs({
                                 </div>
 
                                 <button
-                                    className="flex w-full transform items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-2.5 text-sm font-medium whitespace-nowrap text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:from-amber-600 hover:to-amber-700 hover:shadow-xl sm:w-auto sm:px-6 sm:py-3"
+                                    className="flex w-full transform items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-slate-100 to-slate-100 px-4 py-2.5 text-sm font-medium whitespace-nowrap text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:from-slate-100 hover:to-slate-100 hover:shadow-xl sm:w-auto sm:px-6 sm:py-3"
                                     onClick={exportLogs}
                                 >
                                     <Download size={14} />
@@ -259,7 +260,7 @@ export default function ChatbotLogs({
                 {/* Stats Cards - Mobile First Grid */}
                 <div className="w-full px-3 py-4 sm:px-4 sm:py-4 md:px-6 md:py-6 lg:px-8 lg:py-6">
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
-                        <div className="transform rounded-lg border border-amber-200/30 bg-white p-3 shadow-lg shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/20 sm:rounded-xl sm:p-4 md:rounded-2xl md:p-5">
+                        <div className="transform rounded-lg border border-slate-200 bg-white p-3 shadow-lg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-sm hover:shadow-xl sm:rounded-xl sm:p-4 md:rounded-2xl md:p-5">
                             <div className="mb-2 flex items-center justify-between sm:mb-3">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg shadow-blue-500/30 sm:h-10 sm:w-10 sm:rounded-xl md:h-12 md:w-12">
                                     <MessageSquare
@@ -283,7 +284,7 @@ export default function ChatbotLogs({
                             </div>
                         </div>
 
-                        <div className="transform rounded-lg border border-amber-200/30 bg-white p-3 shadow-lg shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/20 sm:rounded-xl sm:p-4 md:rounded-2xl md:p-5">
+                        <div className="transform rounded-lg border border-slate-200 bg-white p-3 shadow-lg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-sm hover:shadow-xl sm:rounded-xl sm:p-4 md:rounded-2xl md:p-5">
                             <div className="mb-2 flex items-center justify-between sm:mb-3">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/30 sm:h-10 sm:w-10 sm:rounded-xl md:h-12 md:w-12">
                                     <Bot
@@ -307,15 +308,15 @@ export default function ChatbotLogs({
                             </div>
                         </div>
 
-                        <div className="transform rounded-lg border border-amber-200/30 bg-white p-3 shadow-lg shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/20 sm:rounded-xl sm:p-4 md:rounded-2xl md:p-5">
+                        <div className="transform rounded-lg border border-slate-200 bg-white p-3 shadow-lg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-sm hover:shadow-xl sm:rounded-xl sm:p-4 md:rounded-2xl md:p-5">
                             <div className="mb-2 flex items-center justify-between sm:mb-3">
-                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 shadow-lg shadow-amber-500/30 sm:h-10 sm:w-10 sm:rounded-xl md:h-12 md:w-12">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#C9A84C] to-[#A8882E] shadow-lg shadow-sm sm:h-10 sm:w-10 sm:rounded-xl md:h-12 md:w-12">
                                     <User
                                         size={14}
                                         className="text-white sm:size-16 md:size-20"
                                     />
                                 </div>
-                                <div className="hidden items-center rounded-lg bg-amber-50 px-2 py-1 text-xs font-medium text-amber-600 sm:flex sm:text-sm">
+                                <div className="hidden items-center rounded-lg bg-slate-50 px-2 py-1 text-xs font-medium text-[#1E3A5F] sm:flex sm:text-sm">
                                     <User
                                         size={10}
                                         className="mr-1 sm:size-12"
@@ -331,7 +332,7 @@ export default function ChatbotLogs({
                             </div>
                         </div>
 
-                        <div className="transform rounded-lg border border-amber-200/30 bg-white p-3 shadow-lg shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/20 sm:rounded-xl sm:p-4 md:rounded-2xl md:p-5">
+                        <div className="transform rounded-lg border border-slate-200 bg-white p-3 shadow-lg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-sm hover:shadow-xl sm:rounded-xl sm:p-4 md:rounded-2xl md:p-5">
                             <div className="mb-2 flex items-center justify-between sm:mb-3">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-400 to-purple-600 shadow-lg shadow-purple-500/30 sm:h-10 sm:w-10 sm:rounded-xl md:h-12 md:w-12">
                                     <AlertCircle
@@ -359,11 +360,11 @@ export default function ChatbotLogs({
 
                 {/* Table Section - Mobile First */}
                 <div className="w-full px-3 py-4 sm:px-4 sm:py-4 md:px-6 md:py-6 lg:px-8 lg:py-6">
-                    <div className="overflow-hidden rounded-lg border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10 sm:rounded-xl md:rounded-2xl">
+                    <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg shadow-sm sm:rounded-xl md:rounded-2xl">
                         <div className="overflow-x-auto">
                             {/* Desktop Table - Hidden on Mobile */}
                             <table className="hidden w-full md:table lg:table">
-                                <thead className="bg-amber-50/30">
+                                <thead className="bg-slate-50">
                                     <tr>
                                         <th className="px-3 py-2 text-left text-xs font-medium tracking-wider text-slate-700 uppercase sm:px-4 sm:py-3 md:px-6">
                                             #
@@ -388,11 +389,11 @@ export default function ChatbotLogs({
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-amber-200/30">
+                                <tbody className="divide-y divide-slate-200">
                                     {logs.data.map((log, index) => (
                                         <tr
                                             key={log.id}
-                                            className="transition-colors hover:bg-amber-50/30"
+                                            className="transition-colors hover:bg-slate-50"
                                             style={{
                                                 animationDelay: `${index * 0.05}s`,
                                             }}
@@ -411,7 +412,7 @@ export default function ChatbotLogs({
                                             </td>
                                             <td className="px-3 py-2 whitespace-nowrap sm:px-4 sm:py-3 md:px-6">
                                                 <div className="flex items-center">
-                                                    <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-xs font-bold text-white sm:h-7 sm:w-7 md:h-8 md:w-8">
+                                                    <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#C9A84C] to-[#A8882E] text-xs font-bold text-white sm:h-7 sm:w-7 md:h-8 md:w-8">
                                                         {(log.user?.name || 'U')
                                                             .charAt(0)
                                                             .toUpperCase()}
@@ -456,11 +457,11 @@ export default function ChatbotLogs({
                                 {logs.data.map((log, index) => (
                                     <div
                                         key={log.id}
-                                        className="border-b border-amber-200/30 p-3 last:border-b-0 sm:p-4"
+                                        className="border-b border-slate-200 p-3 last:border-b-0 sm:p-4"
                                     >
                                         <div className="mb-3 flex items-start justify-between">
                                             <div className="flex min-w-0 flex-1 items-center">
-                                                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-xs font-bold text-white sm:h-7 sm:w-7">
+                                                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#C9A84C] to-[#A8882E] text-xs font-bold text-white sm:h-7 sm:w-7">
                                                     {(log.user?.name || 'U')
                                                         .charAt(0)
                                                         .toUpperCase()}
@@ -517,10 +518,10 @@ export default function ChatbotLogs({
 
                                 {logs.data.length === 0 && (
                                     <div className="py-8 text-center sm:py-12">
-                                        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-amber-100/50 sm:mb-6 sm:h-16 sm:w-16 sm:rounded-xl md:h-20 md:w-20 md:rounded-2xl">
+                                        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#1E3A5F]/10 sm:mb-6 sm:h-16 sm:w-16 sm:rounded-xl md:h-20 md:w-20 md:rounded-2xl">
                                             <MessageSquare
                                                 size={16}
-                                                className="text-amber-500 sm:size-20 md:size-24"
+                                                className="text-[#C9A84C] sm:size-20 md:size-24"
                                             />
                                         </div>
                                         <h3 className="mb-2 text-base font-semibold text-slate-900 sm:text-lg md:text-xl">
@@ -559,8 +560,8 @@ export default function ChatbotLogs({
                                     key={index}
                                     className={`rounded-lg px-2 py-1.5 text-xs font-medium transition-all duration-200 sm:px-3 sm:py-2 sm:text-sm ${
                                         link.active
-                                            ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30'
-                                            : 'text-slate-600 hover:bg-amber-100 hover:text-amber-700'
+                                            ? 'bg-slate-500 text-white shadow-lg shadow-sm'
+                                            : 'text-slate-600 hover:bg-slate-100 hover:text-[#0d2340]'
                                     } ${!link.url ? 'cursor-not-allowed opacity-50' : ''}`}
                                     disabled={!link.url}
                                     onClick={() => goTo(link.url)}

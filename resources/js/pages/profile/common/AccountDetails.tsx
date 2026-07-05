@@ -247,9 +247,9 @@ export default function AccountDetails() {
             )}
 
             {/* Carte d'informations du compte */}
-            <div className="rounded-2xl border border-orange-200 bg-gradient-to-r from-orange-50 to-orange-100 p-6">
+            <div className="rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100 p-6">
                 <div className="mb-4 flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#C9A84C]">
                         <Shield size={24} className="text-white" />
                     </div>
                     <div>
@@ -266,7 +266,7 @@ export default function AccountDetails() {
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="rounded-xl bg-white p-4">
                         <div className="mb-2 flex items-center gap-2">
-                            <Mail size={16} className="text-orange-500" />
+                            <Mail size={16} className="text-[#C9A84C]" />
                             <span className="text-sm font-medium text-gray-700">
                                 {t('email_verification') ||
                                     "Vérification de l'email"}
@@ -284,7 +284,7 @@ export default function AccountDetails() {
                             ) : (
                                 <button
                                     onClick={handleResendVerification}
-                                    className="rounded-full bg-orange-100 px-2 py-1 text-xs text-orange-800 transition-colors hover:bg-orange-200"
+                                    className="rounded-full bg-slate-100 px-2 py-1 text-xs text-[#0d2340] transition-colors hover:bg-slate-200"
                                 >
                                     {t('verify_now') || 'Vérifier maintenant'}
                                 </button>
@@ -294,7 +294,7 @@ export default function AccountDetails() {
 
                     <div className="rounded-xl bg-white p-4">
                         <div className="mb-2 flex items-center gap-2">
-                            <Calendar size={16} className="text-orange-500" />
+                            <Calendar size={16} className="text-[#C9A84C]" />
                             <span className="text-sm font-medium text-gray-700">
                                 {t('member_since') || 'Membre depuis'}
                             </span>
@@ -316,7 +316,7 @@ export default function AccountDetails() {
             {/* Formulaire de mise à jour */}
             <form onSubmit={handleSubmit} noValidate>
                 <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
-                    <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 text-white">
+                    <div className="bg-gradient-to-r from-[#C9A84C] to-slate-600 p-6 text-white">
                         <h3 className="flex items-center gap-2 text-2xl font-bold">
                             <Edit3 size={24} />
                             {t('personal_information') ||
@@ -330,7 +330,7 @@ export default function AccountDetails() {
 
                     <div className="flex items-center gap-6 border-b border-gray-100 p-6">
                         <div className="group relative">
-                            <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-4 border-orange-100 bg-gray-100">
+                            <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-4 border-slate-100 bg-gray-100">
                                 {photoPreview ? (
                                     <img
                                         src={photoPreview}
@@ -343,7 +343,7 @@ export default function AccountDetails() {
                             </div>
                             <label
                                 htmlFor="profile_photo"
-                                className="absolute right-0 bottom-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-orange-500 text-white shadow-lg transition-colors hover:bg-orange-600"
+                                className="absolute right-0 bottom-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#C9A84C] text-white shadow-lg transition-colors hover:bg-slate-600"
                             >
                                 <Camera size={16} />
                                 <input
@@ -381,7 +381,7 @@ export default function AccountDetails() {
                                 >
                                     <User
                                         size={16}
-                                        className="text-orange-500"
+                                        className="text-[#C9A84C]"
                                     />
                                     {t('name') || 'Nom'}{' '}
                                     <span className="text-red-500">*</span>
@@ -390,9 +390,9 @@ export default function AccountDetails() {
                                     <input
                                         type="text"
                                         id="name"
-                                        className={`w-full rounded-xl border px-4 py-3 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-orange-500 ${
+                                        className={`w-full rounded-xl border px-4 py-3 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-[#C9A84C] ${
                                             fieldFocus === 'name'
-                                                ? 'border-orange-500'
+                                                ? 'border-[#C9A84C]'
                                                 : 'border-gray-300'
                                         } ${errors.name ? 'border-red-500' : ''} ${profileData.name.trim() ? 'bg-green-50' : ''}`}
                                         value={profileData.name}
@@ -433,7 +433,7 @@ export default function AccountDetails() {
                                 >
                                     <Mail
                                         size={16}
-                                        className="text-orange-500"
+                                        className="text-[#C9A84C]"
                                     />
                                     {t('email') || 'Email'}{' '}
                                     <span className="text-red-500">*</span>
@@ -442,9 +442,9 @@ export default function AccountDetails() {
                                     <input
                                         type="email"
                                         id="email"
-                                        className={`w-full rounded-xl border px-4 py-3 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-orange-500 ${
+                                        className={`w-full rounded-xl border px-4 py-3 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-[#C9A84C] ${
                                             fieldFocus === 'email'
-                                                ? 'border-orange-500'
+                                                ? 'border-[#C9A84C]'
                                                 : 'border-gray-300'
                                         } ${errors.email ? 'border-red-500' : ''} ${validateEmail(profileData.email) ? 'bg-green-50' : ''}`}
                                         value={profileData.email}
@@ -488,7 +488,7 @@ export default function AccountDetails() {
                                 >
                                     <Phone
                                         size={16}
-                                        className="text-orange-500"
+                                        className="text-[#C9A84C]"
                                     />
                                     {t('phone') || 'Téléphone'}
                                 </label>
@@ -496,9 +496,9 @@ export default function AccountDetails() {
                                     <input
                                         type="tel"
                                         id="phone"
-                                        className={`w-full rounded-xl border px-4 py-3 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-orange-500 ${
+                                        className={`w-full rounded-xl border px-4 py-3 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-[#C9A84C] ${
                                             fieldFocus === 'phone'
-                                                ? 'border-orange-500'
+                                                ? 'border-[#C9A84C]'
                                                 : 'border-gray-300'
                                         } ${errors.phone ? 'border-red-500' : ''} ${validatePhone(profileData.phone) && profileData.phone ? 'bg-green-50' : ''}`}
                                         value={profileData.phone}
@@ -541,7 +541,7 @@ export default function AccountDetails() {
                                 >
                                     <MapPin
                                         size={16}
-                                        className="text-orange-500"
+                                        className="text-[#C9A84C]"
                                     />
                                     {t('address') || 'Adresse'}
                                 </label>
@@ -549,9 +549,9 @@ export default function AccountDetails() {
                                     <input
                                         type="text"
                                         id="address"
-                                        className={`w-full rounded-xl border px-4 py-3 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-orange-500 ${
+                                        className={`w-full rounded-xl border px-4 py-3 transition-all duration-300 focus:border-transparent focus:ring-2 focus:ring-[#C9A84C] ${
                                             fieldFocus === 'address'
-                                                ? 'border-orange-500'
+                                                ? 'border-[#C9A84C]'
                                                 : 'border-gray-300'
                                         }`}
                                         value={profileData.address}
@@ -577,7 +577,7 @@ export default function AccountDetails() {
                             <button
                                 type="submit"
                                 disabled={processing || !isFormValid}
-                                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-3 font-medium text-white transition-all duration-300 hover:from-orange-600 hover:to-orange-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
+                                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#C9A84C] to-slate-600 px-4 py-3 font-medium text-white transition-all duration-300 hover:from-slate-600 hover:to-[#0d2340] focus:ring-2 focus:ring-[#C9A84C] focus:ring-offset-2 focus:outline-none disabled:opacity-50"
                             >
                                 {processing ? (
                                     <>
@@ -692,8 +692,8 @@ export default function AccountDetails() {
                             }
                             className="flex items-center gap-3 rounded-xl bg-gray-50 p-4 transition-colors hover:bg-gray-100"
                         >
-                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100">
-                                <Award size={20} className="text-amber-600" />
+                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100">
+                                <Award size={20} className="text-slate-600" />
                             </div>
                             <div className="text-left">
                                 <h4 className="font-medium text-gray-900">

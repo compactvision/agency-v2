@@ -118,12 +118,12 @@ export default function Package({
 
     return (
         <Dashboard>
-            <div className="min-h-screen bg-gradient-to-br from-amber-50/30 via-white to-amber-50/20">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
                     {/* Header Section */}
                     <div className="mb-6">
                         <BackButton />
-                        <div className="mt-4 overflow-hidden rounded-xl border border-amber-200/30 bg-white shadow-sm">
+                        <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                             <div className="p-6">
                                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                                     <div className="mb-6 lg:mb-0">
@@ -136,8 +136,8 @@ export default function Package({
                                         </p>
                                     </div>
                                     <div className="flex gap-4">
-                                        <div className="min-w-[120px] rounded-lg bg-amber-50 p-4 text-center">
-                                            <span className="block text-2xl font-bold text-amber-600">
+                                        <div className="min-w-[120px] rounded-lg bg-slate-50 p-4 text-center">
+                                            <span className="block text-2xl font-bold text-[#1E3A5F]">
                                                 {subscriptions.data.length}
                                             </span>
                                             <span className="text-sm text-gray-600">
@@ -164,7 +164,7 @@ export default function Package({
 
                     {/* Controls Section */}
                     <div className="mb-6">
-                        <div className="rounded-xl border border-amber-200/30 bg-white p-4 shadow-sm">
+                        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                             <div className="flex flex-col gap-4 sm:flex-row">
                                 <div
                                     className={`relative flex-1 ${isSearching ? 'opacity-70' : ''}`}
@@ -176,7 +176,7 @@ export default function Package({
                                     <input
                                         type="text"
                                         placeholder="Rechercher un package..."
-                                        className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                                        className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none"
                                         value={searchQuery}
                                         onChange={(e) =>
                                             setSearchQuery(e.target.value)
@@ -186,7 +186,7 @@ export default function Package({
                                 <div className="flex items-center">
                                     {hasActiveSubscription ? (
                                         <button
-                                            className="inline-flex transform items-center rounded-lg bg-gradient-to-r from-amber-400 to-amber-600 px-4 py-3 font-medium text-white shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-105 hover:from-amber-500 hover:to-amber-700"
+                                            className="inline-flex transform items-center rounded-lg bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-4 py-3 font-medium text-white shadow-lg shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22]"
                                             onClick={openChangeSubscribePopup}
                                         >
                                             <Plus size={18} className="mr-2" />
@@ -194,7 +194,7 @@ export default function Package({
                                         </button>
                                     ) : (
                                         <button
-                                            className="inline-flex transform items-center rounded-lg bg-gradient-to-r from-amber-400 to-amber-600 px-4 py-3 font-medium text-white shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-105 hover:from-amber-500 hover:to-amber-700"
+                                            className="inline-flex transform items-center rounded-lg bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-4 py-3 font-medium text-white shadow-lg shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22]"
                                             onClick={openSubscribePopup}
                                         >
                                             <Plus size={18} className="mr-2" />
@@ -207,11 +207,11 @@ export default function Package({
                     </div>
 
                     {/* Table Section */}
-                    <div className="overflow-hidden rounded-xl border border-amber-200/30 bg-white shadow-sm">
+                    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                         <div className="overflow-x-auto">
                             {/* Desktop Table */}
                             <table className="hidden w-full md:table">
-                                <thead className="bg-amber-50/30">
+                                <thead className="bg-slate-50">
                                     <tr>
                                         <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
                                             ID
@@ -236,11 +236,11 @@ export default function Package({
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-amber-200/30">
+                                <tbody className="divide-y divide-slate-200">
                                     {subscriptions.data.map((sub, index) => (
                                         <tr
                                             key={sub.id}
-                                            className="transition-colors hover:bg-amber-50/30"
+                                            className="transition-colors hover:bg-slate-50"
                                             style={{
                                                 animationDelay: `${index * 0.05}s`,
                                             }}
@@ -250,10 +250,10 @@ export default function Package({
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
-                                                    <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-amber-100">
+                                                    <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-[#1E3A5F]/10">
                                                         <User
                                                             size={16}
-                                                            className="text-amber-600"
+                                                            className="text-[#1E3A5F]"
                                                         />
                                                     </div>
                                                     <div>
@@ -339,17 +339,17 @@ export default function Package({
                                 {subscriptions.data.map((sub, index) => (
                                     <div
                                         key={sub.id}
-                                        className="border-b border-amber-200/30 p-4 last:border-b-0"
+                                        className="border-b border-slate-200 p-4 last:border-b-0"
                                         style={{
                                             animationDelay: `${index * 0.05}s`,
                                         }}
                                     >
                                         <div className="mb-3 flex items-start justify-between">
                                             <div className="flex items-center">
-                                                <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-full bg-amber-100">
+                                                <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-full bg-[#1E3A5F]/10">
                                                     <User
                                                         size={20}
-                                                        className="text-amber-600"
+                                                        className="text-[#1E3A5F]"
                                                     />
                                                 </div>
                                                 <div>
@@ -429,10 +429,10 @@ export default function Package({
 
                                 {subscriptions.data.length === 0 && (
                                     <div className="py-12 text-center">
-                                        <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-amber-100/50">
+                                        <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-[#1E3A5F]/10">
                                             <ImageOff
                                                 size={32}
-                                                className="text-amber-500"
+                                                className="text-[#C9A84C]"
                                             />
                                         </div>
                                         <h3 className="mb-2 text-xl font-semibold text-gray-900">
@@ -459,7 +459,7 @@ export default function Package({
                                     key={index}
                                     className={`rounded-md px-3 py-2 text-sm font-medium ${
                                         link.active
-                                            ? 'bg-amber-500 text-white'
+                                            ? 'bg-slate-500 text-white'
                                             : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                                     } ${!link.url ? 'cursor-not-allowed opacity-50' : ''}`}
                                     disabled={!link.url}

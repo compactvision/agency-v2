@@ -58,7 +58,7 @@ export default function Notifications({ notifications }: Props) {
                         onClick={markAllAsRead}
                         className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-600 shadow-sm transition-all hover:bg-slate-50"
                     >
-                        <CheckCircle size={18} className="text-amber-500" />
+                        <CheckCircle size={18} className="text-[#C9A84C]" />
                         Tout marquer comme lu
                     </button>
                 </div>
@@ -70,10 +70,10 @@ export default function Notifications({ notifications }: Props) {
                         notifications.data.map((notif) => (
                             <div
                                 key={notif.id}
-                                className={`flex gap-4 p-6 transition-colors hover:bg-slate-50/50 ${!notif.read_at ? 'bg-amber-50/20' : ''}`}
+                                className={`flex gap-4 p-6 transition-colors hover:bg-slate-50/50 ${!notif.read_at ? 'bg-slate-50' : ''}`}
                             >
                                 <div
-                                    className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl ${!notif.read_at ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400'}`}
+                                    className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl ${!notif.read_at ? 'bg-[#1E3A5F]/10 text-[#1E3A5F]' : 'bg-slate-100 text-slate-400'}`}
                                 >
                                     <Bell size={24} />
                                 </div>
@@ -101,7 +101,7 @@ export default function Notifications({ notifications }: Props) {
                                                         notif.data.action_url!,
                                                     )
                                                 }
-                                                className="text-sm font-bold text-amber-600 hover:text-amber-700"
+                                                className="text-sm font-bold text-[#1E3A5F] hover:text-[#0d2340]"
                                             >
                                                 Voir les détails
                                             </button>
@@ -149,8 +149,8 @@ export default function Notifications({ notifications }: Props) {
                                     disabled={!link.url}
                                     className={`rounded-xl px-4 py-2 text-sm font-bold transition-all ${
                                         link.active
-                                            ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30'
-                                            : 'border border-slate-200 bg-white text-slate-600 hover:border-amber-400 hover:text-amber-600'
+                                            ? 'bg-slate-500 text-white shadow-lg shadow-sm'
+                                            : 'border border-slate-200 bg-white text-slate-600 hover:border-slate-200 hover:text-[#1E3A5F]'
                                     } ${!link.url ? 'cursor-not-allowed opacity-50' : ''}`}
                                     dangerouslySetInnerHTML={{
                                         __html: link.label,

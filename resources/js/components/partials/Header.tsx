@@ -3,11 +3,10 @@ import { Link, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import {
     ChevronDown,
-    LucideArrowRight,
     LucideGlobe,
     LucideMenu,
-    LucidePhoneCall,
     LucidePlus,
+    LucideUser,
 } from 'lucide-react';
 import { createContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,7 +27,7 @@ export const HeaderContext = createContext<HeaderContextType | undefined>(
 export default function Header() {
     const [active, setActive] = useState(false);
     const [sellerPopup, setSellerPopup] = useState(false);
-    const [isScrolled, setIsScrolled] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
     const { t, i18n } = useTranslation();
 
     const changeLanguage = async (lng: string) => {
@@ -40,12 +39,10 @@ export default function Header() {
         }
     };
 
-    const toggleActive = () => {
-        setActive(!active);
-    };
+    const toggleActive = () => setActive(!active);
+    const toggleSellerPopup = () => setSellerPopup(!sellerPopup);
 
     const { url } = usePage<SharedData>();
-    const isPropertiesActive = url.startsWith('/properties');
     const isActive = (path: string) =>
         url === path || url.startsWith(path + '/');
     const user = usePage<SharedData>().props.auth?.user;
@@ -58,601 +55,236 @@ export default function Header() {
         userRoles.includes('seller') ||
         userRoles.includes('agency') ||
         userRoles.includes('admin');
-    const isAdmin = userRoles.includes('admin');
-
-    const toggleSellerPopup = () => setSellerPopup(!sellerPopup);
 
     useEffect(() => {
-        if (active) {
-            document.body.classList.add('overflow-hidden');
-        } else {
-            document.body.classList.remove('overflow-hidden');
-        }
+        if (active) document.body.style.overflow = 'hidden';
+        else document.body.style.overflow = '';
+        return () => {
+            document.body.style.overflow = '';
+        };
     }, [active]);
 
     useEffect(() => {
-        const openPopup = () => setSellerPopup(true);
-
-        window.addEventListener('openSellerPopup', openPopup);
-
-        if (isBuyer && localStorage.getItem('afterLoginBecomeSeller')) {
-            setSellerPopup(true);
-            localStorage.removeItem('afterLoginBecomeSeller');
-        }
-
-        return () => {
-            window.removeEventListener('openSellerPopup', openPopup);
-        };
-    }, []);
-
-    useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 20);
-        };
-
+        const handleScroll = () => setScrolled(window.scrollY > 20);
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const { settings } = usePage<SharedData>().props as any;
+    const isHomePage = url === '/' || url === '/home' || url === '';
+    const isScrolled = scrolled || !isHomePage;
 
-    const numero = settings?.numero ?? 'Non défini';
-    const email = settings?.app_email ?? 'Non défini';
-    const facebook = settings?.facebook ?? '#';
-    const twitter = settings?.twitter ?? '#';
-    const linkedin = settings?.linkedin ?? '#';
-    const instagram = settings?.instagram ?? '#';
+    const { settings } = usePage<SharedData>().props as any;
+    const numero = settings?.numero ?? '+1 234 567 890';
 
     return (
         <HeaderContext.Provider
             value={{ active, toggleActive, toggleSellerPopup }}
         >
-            {/* Side Overlay with blur effect */}
+            {/* Seller Popup */}
+            <SellerPopup
+                active={sellerPopup}
+                onClose={toggleSellerPopup}
+                user={user ?? undefined}
+            />
+
+            {/* Overlay Mobile */}
             <div
-                className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-md transition-all duration-500 ease-out ${
+                className={`fixed inset-0 z-40 bg-[#0d2340]/60 backdrop-blur-sm transition-opacity duration-300 ${
                     active
                         ? 'visible opacity-100'
                         : 'pointer-events-none invisible opacity-0'
                 }`}
                 onClick={toggleActive}
-            ></div>
+            />
 
             <MobileMenu />
 
-            {/* Top Bar */}
+            {/* Header Principal */}
             <header
-                className={`relative z-20 hidden border-b border-slate-700/30 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 transition-all duration-300 lg:block ${
-                    isScrolled ? 'shadow-lg shadow-slate-900/50' : ''
-                }`}
-            >
-                <div className="container-fluid">
-                    <div className="flex items-center justify-between px-8 py-3 xl:px-12 2xl:px-16">
-                        {/* Left side - Contact Info */}
-                        <div className="flex items-center space-x-8">
-                            <div className="group flex items-center">
-                                <div className="mr-3 flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 transition-all duration-300 group-hover:bg-amber-500/20">
-                                    <LucidePhoneCall className="h-4.5 w-4.5 text-amber-400" />
-                                </div>
-                                <a
-                                    href={`tel:${numero}`}
-                                    className="text-sm font-medium tracking-wide text-slate-300 transition-colors duration-300 hover:text-amber-400"
-                                >
-                                    {numero}
-                                </a>
-                            </div>
-
-                            <div className="h-5 w-px bg-gradient-to-b from-transparent via-slate-600 to-transparent"></div>
-
-                            <div className="group flex items-center">
-                                <div className="mr-3 flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 transition-all duration-300 group-hover:bg-amber-500/20">
-                                    <svg
-                                        className="h-4.5 w-4.5 text-amber-400"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                        />
-                                    </svg>
-                                </div>
-                                <a
-                                    href={`mailto:${email}`}
-                                    className="text-sm font-medium tracking-wide text-slate-300 transition-colors duration-300 hover:text-amber-400"
-                                >
-                                    {email}
-                                </a>
-                            </div>
-                        </div>
-
-                        {/* Right side - User, Language, Social */}
-                        <div className="flex items-center space-x-6">
-                            {/* User Account */}
-                            <div className="group flex items-center">
-                                <div className="mr-3 flex h-9 w-9 items-center justify-center rounded-xl bg-slate-700/40 transition-all duration-300 group-hover:bg-slate-600/50">
-                                    <svg
-                                        className="h-4.5 w-4.5 text-slate-300"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                        />
-                                    </svg>
-                                </div>
-                                {user ? (
-                                    isBuyer ? (
-                                        <Link
-                                            href={route('profile')}
-                                            className="text-sm font-medium tracking-wide text-slate-300 transition-all duration-300 hover:text-amber-400"
-                                        >
-                                            {user.name}
-                                        </Link>
-                                    ) : (
-                                        <Link
-                                            href={route('dashboard')}
-                                            className="text-sm font-medium tracking-wide text-slate-300 transition-all duration-300 hover:text-amber-400"
-                                        >
-                                            {user.name}
-                                        </Link>
-                                    )
-                                ) : (
-                                    <Link
-                                        href={route('login')}
-                                        className="text-sm font-medium tracking-wide text-slate-300 transition-all duration-300 hover:text-amber-400"
-                                    >
-                                        {t('login_register')}
-                                    </Link>
-                                )}
-                            </div>
-
-                            {/* Language Selector */}
-                            <div className="group relative">
-                                <div className="flex cursor-pointer items-center space-x-2 rounded-xl border border-slate-600/30 bg-slate-700/30 px-4 py-2.5 transition-all duration-300 hover:border-slate-600/50 hover:bg-slate-700/50">
-                                    <img
-                                        src={
-                                            i18n.language === 'en'
-                                                ? '/assets/images/icons/en.svg'
-                                                : '/assets/images/icons/fr.svg'
-                                        }
-                                        alt="Language"
-                                        className="h-5 w-5 rounded-full object-cover ring-2 ring-slate-600/50"
-                                    />
-                                    <select
-                                        onChange={(e) =>
-                                            changeLanguage(e.target.value)
-                                        }
-                                        className="cursor-pointer appearance-none bg-transparent text-sm font-medium text-slate-300 focus:outline-none"
-                                        value={i18n.language}
-                                    >
-                                        <option
-                                            value="en"
-                                            className="bg-slate-800"
-                                        >
-                                            English
-                                        </option>
-                                        <option
-                                            value="fr"
-                                            className="bg-slate-800"
-                                        >
-                                            Français
-                                        </option>
-                                    </select>
-                                    <LucideGlobe className="h-4 w-4 text-slate-400" />
-                                </div>
-                            </div>
-
-                            {/* Social Links */}
-                            <div className="flex items-center space-x-3 border-l border-slate-600/50 pl-6">
-                                {[
-                                    { icon: 'facebook-f', href: facebook },
-                                    { icon: 'twitter', href: twitter },
-                                    { icon: 'linkedin-in', href: linkedin },
-                                    { icon: 'instagram', href: instagram },
-                                ].map((social, index) => (
-                                    <a
-                                        key={index}
-                                        href={social.href}
-                                        className="flex h-9 w-9 transform items-center justify-center rounded-xl border border-slate-600/30 bg-slate-700/30 text-slate-400 transition-all duration-300 hover:scale-110 hover:rotate-3 hover:border-amber-500 hover:bg-amber-500 hover:text-slate-900"
-                                        aria-label={`Social media link ${index + 1}`}
-                                    >
-                                        <i
-                                            className={`fab fa-${social.icon} text-sm`}
-                                        ></i>
-                                    </a>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            {/* Main Header */}
-            <header
-                className={`sticky top-0 z-30 transition-all duration-500 ${
+                className={`fixed top-0 right-0 left-0 z-50 border-b transition-all duration-300 ${
                     isScrolled
-                        ? 'border-b border-slate-700/30 bg-slate-900/95 shadow-2xl shadow-slate-900/50 backdrop-blur-xl'
-                        : 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900'
+                        ? 'border-gray-100 bg-white/95 py-3 shadow-sm backdrop-blur-md'
+                        : 'border-white/10 bg-transparent py-5'
                 }`}
             >
-                <div className="container-fluid">
-                    <nav className="flex items-center justify-between px-8 py-4 xl:px-12 2xl:px-16">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <nav className="flex items-center justify-between">
                         {/* Logo */}
-                        <div className="flex items-center">
+                        <div className="flex shrink-0 items-center">
                             <Link
                                 href={route('home')}
-                                className="group flex items-center"
+                                className="group flex items-center gap-2"
                             >
-                                <img
-                                    src="assets/images/logo/white-logo.png"
-                                    alt="Logo"
-                                    className="h-11 w-auto drop-shadow-lg filter transition-all duration-300 group-hover:scale-105"
-                                />
+                                {/* Pour simplifier, on utilise une icône/texte si logo manquant, ou l'image */}
+                                <div
+                                    className={`flex h-10 w-10 items-center justify-center rounded-xl bg-[#C9A84C] text-white shadow-lg`}
+                                >
+                                    <span className="text-xl font-black">
+                                        A
+                                    </span>
+                                </div>
+                                <span
+                                    className={`text-xl font-bold tracking-tight ${isScrolled ? 'text-[#1E3A5F]' : 'text-white'}`}
+                                >
+                                    Agency
+                                    <span className="text-[#C9A84C]">.</span>
+                                </span>
                             </Link>
                         </div>
 
-                        {/* Navigation Menu */}
-                        <div className="hidden items-center space-x-1 lg:flex">
+                        {/* Liens de navigation (Desktop) */}
+                        <div className="hidden md:flex md:items-center md:space-x-8 lg:space-x-10">
                             {[
                                 { path: 'home', label: t('home') },
-                                {
-                                    path: 'properties',
-                                    label: t('property'),
-                                    isMega: true,
-                                },
+                                { path: 'properties', label: t('property') },
                                 { path: 'about', label: t('about') },
-                                { path: 'tarifs', label: t('pricing') },
                                 { path: 'contact', label: t('contact') },
-                            ].map((item, index) =>
-                                item.isMega ? (
-                                    <div key={index} className="group relative">
-                                        <Link
-                                            href={route(item.path)}
-                                            className={`relative mx-1 flex items-center rounded-xl px-6 py-3 text-sm font-medium transition-all duration-300 ${
-                                                isActive('/properties')
-                                                    ? 'border border-amber-500/20 bg-gradient-to-r from-amber-500/10 to-amber-600/10 text-amber-400'
-                                                    : 'text-slate-300 hover:bg-slate-700/20 hover:text-amber-400'
-                                            }`}
-                                        >
-                                            {item.label}
-                                            <ChevronDown className="ml-1.5 h-4 w-4 transition-transform duration-300 group-hover:rotate-180" />
-                                            {isActive('/properties') && (
-                                                <span className="absolute bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 transform rounded-full bg-amber-400 shadow-lg shadow-amber-400/50"></span>
-                                            )}
-                                        </Link>
-
-                                        {/* Mega Menu Dropdown */}
-                                        <div className="invisible absolute top-full left-1/2 w-[600px] -translate-x-1/2 translate-y-4 opacity-0 transition-all duration-300 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
-                                            <div className="mt-4 overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-900/95 shadow-2xl backdrop-blur-xl">
-                                                <div className="grid grid-cols-2 p-6">
-                                                    {/* Categories Section */}
-                                                    <div className="space-y-4 border-r border-slate-700/50 pr-6">
-                                                        <h3 className="px-3 text-xs font-bold tracking-widest text-amber-500 uppercase">
-                                                            {t('categories')}
-                                                        </h3>
-                                                        <div className="grid gap-1">
-                                                            {[
-                                                                {
-                                                                    label: 'Appartements',
-                                                                    type: 'apartment',
-                                                                    icon: 'Building2',
-                                                                },
-                                                                {
-                                                                    label: 'Maisons',
-                                                                    type: 'house',
-                                                                    icon: 'Home',
-                                                                },
-                                                                {
-                                                                    label: 'Terrains',
-                                                                    type: 'land',
-                                                                    icon: 'Map',
-                                                                },
-                                                                {
-                                                                    label: 'Commerces',
-                                                                    type: 'commercial',
-                                                                    icon: 'ShoppingBag',
-                                                                },
-                                                            ].map((cat) => (
-                                                                <Link
-                                                                    key={
-                                                                        cat.type
-                                                                    }
-                                                                    href={route(
-                                                                        'properties',
-                                                                        {
-                                                                            type: cat.type,
-                                                                        },
-                                                                    )}
-                                                                    className="group/item flex items-center space-x-3 rounded-xl p-3 transition-all duration-200 hover:bg-amber-500/10"
-                                                                >
-                                                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 transition-colors group-hover/item:bg-amber-500/20">
-                                                                        {cat.icon ===
-                                                                        'Building2' ? (
-                                                                            <svg
-                                                                                className="h-5 w-5 text-slate-400 group-hover/item:text-amber-400"
-                                                                                fill="none"
-                                                                                viewBox="0 0 24 24"
-                                                                                stroke="currentColor"
-                                                                            >
-                                                                                <path
-                                                                                    strokeLinecap="round"
-                                                                                    strokeLinejoin="round"
-                                                                                    strokeWidth={
-                                                                                        2
-                                                                                    }
-                                                                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                                                                                />
-                                                                            </svg>
-                                                                        ) : cat.icon ===
-                                                                          'Home' ? (
-                                                                            <svg
-                                                                                className="h-5 w-5 text-slate-400 group-hover/item:text-amber-400"
-                                                                                fill="none"
-                                                                                viewBox="0 0 24 24"
-                                                                                stroke="currentColor"
-                                                                            >
-                                                                                <path
-                                                                                    strokeLinecap="round"
-                                                                                    strokeLinejoin="round"
-                                                                                    strokeWidth={
-                                                                                        2
-                                                                                    }
-                                                                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                                                                                />
-                                                                            </svg>
-                                                                        ) : cat.icon ===
-                                                                          'Map' ? (
-                                                                            <svg
-                                                                                className="h-5 w-5 text-slate-400 group-hover/item:text-amber-400"
-                                                                                fill="none"
-                                                                                viewBox="0 0 24 24"
-                                                                                stroke="currentColor"
-                                                                            >
-                                                                                <path
-                                                                                    strokeLinecap="round"
-                                                                                    strokeLinejoin="round"
-                                                                                    strokeWidth={
-                                                                                        2
-                                                                                    }
-                                                                                    d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
-                                                                                />
-                                                                            </svg>
-                                                                        ) : (
-                                                                            <svg
-                                                                                className="h-5 w-5 text-slate-400 group-hover/item:text-amber-400"
-                                                                                fill="none"
-                                                                                viewBox="0 0 24 24"
-                                                                                stroke="currentColor"
-                                                                            >
-                                                                                <path
-                                                                                    strokeLinecap="round"
-                                                                                    strokeLinejoin="round"
-                                                                                    strokeWidth={
-                                                                                        2
-                                                                                    }
-                                                                                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                                                                                />
-                                                                            </svg>
-                                                                        )}
-                                                                    </div>
-                                                                    <div>
-                                                                        <div className="text-sm font-bold text-slate-200 group-hover/item:text-amber-400">
-                                                                            {
-                                                                                cat.label
-                                                                            }
-                                                                        </div>
-                                                                        <div className="text-[11px] text-slate-500">
-                                                                            {t(
-                                                                                'explore_all',
-                                                                            )}{' '}
-                                                                            {cat.label.toLowerCase()}
-                                                                        </div>
-                                                                    </div>
-                                                                </Link>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Quick Links Section */}
-                                                    <div className="space-y-4 pl-6">
-                                                        <h3 className="px-3 text-xs font-bold tracking-widest text-amber-500 uppercase">
-                                                            {t('quick_links')}
-                                                        </h3>
-                                                        <div className="grid gap-2">
-                                                            {[
-                                                                {
-                                                                    label: 'Propriétés à vendre',
-                                                                    sale_type:
-                                                                        'sale',
-                                                                    color: 'from-amber-400 to-amber-600',
-                                                                },
-                                                                {
-                                                                    label: 'Propriétés à louer',
-                                                                    sale_type:
-                                                                        'rent',
-                                                                    color: 'from-emerald-400 to-emerald-600',
-                                                                },
-                                                            ].map((link) => (
-                                                                <Link
-                                                                    key={
-                                                                        link.sale_type
-                                                                    }
-                                                                    href={route(
-                                                                        'properties',
-                                                                        {
-                                                                            sale_type:
-                                                                                link.sale_type,
-                                                                        },
-                                                                    )}
-                                                                    className="group/btn relative overflow-hidden rounded-xl bg-slate-800 p-4 transition-all duration-300 hover:scale-[1.02]"
-                                                                >
-                                                                    <div
-                                                                        className={`absolute inset-y-0 left-0 w-1 bg-gradient-to-b ${link.color}`}
-                                                                    ></div>
-                                                                    <div className="relative flex items-center justify-between">
-                                                                        <span className="text-sm font-bold text-slate-200 group-hover/btn:text-white">
-                                                                            {
-                                                                                link.label
-                                                                            }
-                                                                        </span>
-                                                                        <LucideArrowRight className="h-4 w-4 transform text-slate-500 transition-transform group-hover/btn:translate-x-1 group-hover/btn:text-white" />
-                                                                    </div>
-                                                                </Link>
-                                                            ))}
-
-                                                            {/* Featured Preview Box */}
-                                                            <div className="mt-4 rounded-xl border border-indigo-500/20 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 p-4">
-                                                                <p className="text-xs font-medium text-slate-300 italic">
-                                                                    "Trouvez
-                                                                    l'endroit
-                                                                    idéal avec
-                                                                    nos filtres
-                                                                    multicritères
-                                                                    avancés."
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                {/* Bottom Footer */}
-                                                <div className="flex items-center justify-between border-t border-slate-700/50 bg-slate-800/50 px-6 py-3">
-                                                    <span className="text-[10px] font-bold tracking-widest text-slate-500 uppercase">
-                                                        {t('premium_service')}
-                                                    </span>
-                                                    <Link
-                                                        href={route(
-                                                            'properties',
-                                                        )}
-                                                        className="flex items-center text-xs font-bold text-amber-500 hover:text-amber-400"
-                                                    >
-                                                        {t('view_all')}
-                                                        <LucideArrowRight className="ml-1 h-3 w-3" />
-                                                    </Link>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : (
+                            ].map((item) => {
+                                const activeLink = isActive(
+                                    '/' +
+                                        (item.path === 'home' ? '' : item.path),
+                                );
+                                return (
                                     <Link
-                                        key={index}
+                                        key={item.path}
                                         href={route(item.path)}
-                                        className={`relative mx-1 rounded-xl px-6 py-3 text-sm font-medium transition-all duration-300 ${
-                                            isActive(
-                                                '/' +
-                                                    (item.path === 'home'
-                                                        ? ''
-                                                        : item.path),
-                                            )
-                                                ? 'border border-amber-500/20 bg-gradient-to-r from-amber-500/10 to-amber-600/10 text-amber-400'
-                                                : 'text-slate-300 hover:bg-slate-700/20 hover:text-amber-400'
+                                        className={`text-sm font-semibold transition-colors duration-200 ${
+                                            activeLink
+                                                ? 'text-[#C9A84C]'
+                                                : isScrolled
+                                                  ? 'text-gray-600 hover:text-[#1E3A5F]'
+                                                  : 'text-white/80 hover:text-white'
                                         }`}
                                     >
                                         {item.label}
-                                        {isActive(
-                                            '/' +
-                                                (item.path === 'home'
-                                                    ? ''
-                                                    : item.path),
-                                        ) && (
-                                            <span className="absolute bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 transform rounded-full bg-amber-400 shadow-lg shadow-amber-400/50"></span>
-                                        )}
                                     </Link>
-                                ),
+                                );
+                            })}
+                        </div>
+
+                        {/* Actions (Desktop) */}
+                        <div className="hidden md:flex md:items-center md:space-x-6">
+                            {/* Sélecteur de langue */}
+                            <div className="group relative flex cursor-pointer items-center gap-1">
+                                <LucideGlobe
+                                    className={`h-4 w-4 ${isScrolled ? 'text-gray-400' : 'text-white/60'}`}
+                                />
+                                <select
+                                    onChange={(e) =>
+                                        changeLanguage(e.target.value)
+                                    }
+                                    value={i18n.language}
+                                    className={`cursor-pointer appearance-none bg-transparent pr-4 text-sm font-semibold focus:outline-none ${
+                                        isScrolled
+                                            ? 'text-gray-600'
+                                            : 'text-white'
+                                    }`}
+                                >
+                                    <option
+                                        value="en"
+                                        className="bg-[#0d2340] text-white"
+                                    >
+                                        EN
+                                    </option>
+                                    <option
+                                        value="fr"
+                                        className="bg-[#0d2340] text-white"
+                                    >
+                                        FR
+                                    </option>
+                                </select>
+                                <ChevronDown
+                                    className={`pointer-events-none absolute right-0 h-3 w-3 ${isScrolled ? 'text-gray-400' : 'text-white/60'}`}
+                                />
+                            </div>
+
+                            <div
+                                className={`h-5 w-px ${isScrolled ? 'bg-gray-200' : 'bg-white/20'}`}
+                            />
+
+                            {/* User Account / Auth */}
+                            {user ? (
+                                <Link
+                                    href={
+                                        isBuyer
+                                            ? route('profile')
+                                            : route('dashboard')
+                                    }
+                                    className={`flex items-center gap-2 text-sm font-semibold transition-colors ${
+                                        isScrolled
+                                            ? 'text-[#1E3A5F] hover:text-[#C9A84C]'
+                                            : 'text-white hover:text-[#C9A84C]'
+                                    }`}
+                                >
+                                    <div
+                                        className={`flex h-8 w-8 items-center justify-center rounded-full ${isScrolled ? 'bg-[#1E3A5F]/10' : 'bg-white/20'}`}
+                                    >
+                                        <LucideUser className="h-4 w-4" />
+                                    </div>
+                                    <span>{user.name.split(' ')[0]}</span>
+                                </Link>
+                            ) : (
+                                <Link
+                                    href={route('login')}
+                                    className={`text-sm font-semibold transition-colors ${
+                                        isScrolled
+                                            ? 'text-gray-600 hover:text-[#1E3A5F]'
+                                            : 'text-white/80 hover:text-white'
+                                    }`}
+                                >
+                                    {t('login')}
+                                </Link>
+                            )}
+
+                            {/* CTA */}
+                            {user && !isSeller ? (
+                                <button
+                                    onClick={toggleSellerPopup}
+                                    className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg ${
+                                        isScrolled
+                                            ? 'bg-[#1E3A5F] text-white hover:bg-[#152C47]'
+                                            : 'bg-[#C9A84C] text-white hover:bg-[#A8882E]'
+                                    }`}
+                                >
+                                    {t('become_seller', 'Devenir vendeur')}
+                                </button>
+                            ) : (
+                                <Link
+                                    href={
+                                        !user
+                                            ? route('register')
+                                            : route(
+                                                  'dashboard.properties.create',
+                                              )
+                                    }
+                                    className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg ${
+                                        isScrolled
+                                            ? 'bg-[#1E3A5F] text-white hover:bg-[#152C47]'
+                                            : 'bg-[#C9A84C] text-white hover:bg-[#A8882E]'
+                                    }`}
+                                >
+                                    {user ? (
+                                        <LucidePlus className="h-4 w-4" />
+                                    ) : null}
+                                    {user
+                                        ? t('add_listing')
+                                        : t(
+                                              'become_seller',
+                                              'Publier une annonce',
+                                          )}
+                                </Link>
                             )}
                         </div>
 
-                        {/* Right Section */}
-                        <div className="flex items-center space-x-4">
-                            {/* Call Button - Desktop Only */}
-                            <div className="hidden items-center space-x-3 border-l border-slate-600/50 pl-6 xl:flex">
-                                <a
-                                    href={`tel:${numero}`}
-                                    className="group flex items-center space-x-3 rounded-xl border border-slate-600/30 bg-gradient-to-r from-slate-700/30 to-slate-700/20 px-5 py-3 transition-all duration-300 hover:border-amber-500/30 hover:from-amber-500/10 hover:to-amber-600/10"
-                                >
-                                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/20 transition-all duration-300 group-hover:from-amber-500 group-hover:to-amber-600">
-                                        <LucidePhoneCall className="h-5 w-5 text-amber-400 group-hover:text-slate-900" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-medium tracking-wide text-slate-400">
-                                            {t('call_us_now')}
-                                        </p>
-                                        <p className="text-sm font-semibold text-slate-200">
-                                            {numero}
-                                        </p>
-                                    </div>
-                                </a>
-                            </div>
-
-                            {/* CTA Button - IMPROVED */}
-                            <div className="hidden lg:block">
-                                {user ? (
-                                    isBuyer ? (
-                                        <button
-                                            onClick={toggleSellerPopup}
-                                            className="group relative inline-flex transform items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 px-8 py-4 font-bold text-slate-900 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 hover:from-amber-500 hover:via-amber-600 hover:to-amber-700 hover:shadow-2xl hover:shadow-amber-500/25 focus:ring-4 focus:ring-amber-500/50 focus:outline-none"
-                                        >
-                                            <span className="absolute inset-0 h-full w-full bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
-                                            <span className="relative flex items-center space-x-3">
-                                                <span className="text-base">
-                                                    {t('become_seller')}
-                                                </span>
-                                                <LucideArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-                                            </span>
-                                            <span className="absolute top-0 left-0 h-full w-full bg-white opacity-0 transition-opacity duration-300 group-hover:opacity-20"></span>
-                                        </button>
-                                    ) : isSeller ? (
-                                        <Link
-                                            href={route(
-                                                'dashboard.properties.create',
-                                            )}
-                                            className="group relative inline-flex transform items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600 px-8 py-4 font-bold text-slate-900 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 hover:from-emerald-500 hover:via-emerald-600 hover:to-emerald-700 hover:shadow-2xl hover:shadow-emerald-500/25 focus:ring-4 focus:ring-emerald-500/50 focus:outline-none"
-                                        >
-                                            <span className="absolute inset-0 h-full w-full bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
-                                            <span className="relative flex items-center space-x-3">
-                                                <LucidePlus className="h-5 w-5" />
-                                                <span className="text-base">
-                                                    {t('add_listing')}
-                                                </span>
-                                            </span>
-                                            <span className="absolute top-0 left-0 h-full w-full bg-white opacity-0 transition-opacity duration-300 group-hover:opacity-20"></span>
-                                        </Link>
-                                    ) : null
-                                ) : (
-                                    <Link
-                                        href={route('register')}
-                                        onClick={() =>
-                                            localStorage.setItem(
-                                                'afterLoginBecomeSeller',
-                                                '1',
-                                            )
-                                        }
-                                        className="group relative inline-flex transform items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 px-8 py-4 font-bold text-slate-900 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 hover:from-amber-500 hover:via-amber-600 hover:to-amber-700 hover:shadow-2xl hover:shadow-amber-500/25 focus:ring-4 focus:ring-amber-500/50 focus:outline-none"
-                                    >
-                                        <span className="absolute inset-0 h-full w-full bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
-                                        <span className="relative flex items-center space-x-3">
-                                            <span className="text-base">
-                                                {t('become_seller')}
-                                            </span>
-                                            <LucideArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-                                        </span>
-                                        <span className="absolute top-0 left-0 h-full w-full bg-white opacity-0 transition-opacity duration-300 group-hover:opacity-20"></span>
-                                    </Link>
-                                )}
-                            </div>
-
-                            {/* Mobile Menu Toggle */}
+                        {/* Hamburger Mobile */}
+                        <div className="flex items-center md:hidden">
                             <button
                                 onClick={toggleActive}
-                                type="button"
-                                className="rounded-xl p-3 text-slate-300 transition-all duration-300 hover:bg-slate-700/30 hover:text-amber-400 lg:hidden"
-                                aria-label="Toggle mobile menu"
+                                className={`rounded-lg p-2 transition-colors ${
+                                    isScrolled
+                                        ? 'text-gray-600 hover:bg-gray-100'
+                                        : 'text-white hover:bg-white/10'
+                                }`}
                             >
                                 <LucideMenu className="h-6 w-6" />
                             </button>
@@ -660,15 +292,6 @@ export default function Header() {
                     </nav>
                 </div>
             </header>
-
-            {/* Seller Popup */}
-            {sellerPopup && (
-                <SellerPopup
-                    onClose={toggleSellerPopup}
-                    user={user}
-                    active={sellerPopup}
-                />
-            )}
         </HeaderContext.Provider>
     );
 }

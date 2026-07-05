@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
-import Pagination from '@/components/pagination/Pagination';
-import { CheckCircle, XCircle, Search, Eye, Filter } from 'lucide-react';
 import DashboardLayout from '@/components/layouts/Dashboard/Dashboard';
+import Pagination from '@/components/pagination/Pagination';
+import { Head, Link, router } from '@inertiajs/react';
+import { CheckCircle, Eye, Search, XCircle } from 'lucide-react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface Filters {
@@ -25,15 +25,19 @@ export default function Validation({ properties, filters }: ValidationProps) {
         router.get(
             route('dashboard.properties.validation'),
             { search },
-            { preserveState: true }
+            { preserveState: true },
         );
     };
 
     const handleApprove = (id: number) => {
         if (confirm('Êtes-vous sûr de vouloir approuver cette propriété ?')) {
-            router.patch(route('dashboard.properties.approve', id), {}, {
-                preserveScroll: true,
-            });
+            router.patch(
+                route('dashboard.properties.approve', id),
+                {},
+                {
+                    preserveScroll: true,
+                },
+            );
         }
     };
 
@@ -52,7 +56,7 @@ export default function Validation({ properties, filters }: ValidationProps) {
                     setRejectingId(null);
                     setRejectReason('');
                 },
-            }
+            },
         );
     };
 
@@ -78,37 +82,37 @@ export default function Validation({ properties, filters }: ValidationProps) {
                     className="flex flex-col gap-4 md:flex-row"
                 >
                     <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                        <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-slate-400" />
                         <input
                             type="text"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Rechercher par titre, référence..."
-                            className="w-full rounded-xl border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm transition-colors focus:border-amber-500 focus:bg-white focus:ring-amber-500"
+                            className="w-full rounded-xl border-slate-200 bg-slate-50 py-2.5 pr-4 pl-10 text-sm transition-colors focus:border-slate-200 focus:bg-white focus:ring-slate-200"
                         />
                     </div>
                 </form>
             </div>
 
             {/* Liste des propriétés en attente */}
-            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                 <div className="overflow-x-auto">
                     <table className="w-full whitespace-nowrap">
                         <thead className="bg-slate-50">
                             <tr>
-                                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                <th className="px-6 py-4 text-left text-xs font-semibold tracking-wider text-slate-500 uppercase">
                                     Propriété
                                 </th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                <th className="px-6 py-4 text-left text-xs font-semibold tracking-wider text-slate-500 uppercase">
                                     Soumis par
                                 </th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                <th className="px-6 py-4 text-left text-xs font-semibold tracking-wider text-slate-500 uppercase">
                                     Prix
                                 </th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                <th className="px-6 py-4 text-left text-xs font-semibold tracking-wider text-slate-500 uppercase">
                                     Date
                                 </th>
-                                <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                <th className="px-6 py-4 text-right text-xs font-semibold tracking-wider text-slate-500 uppercase">
                                     Actions
                                 </th>
                             </tr>
@@ -122,7 +126,12 @@ export default function Validation({ properties, filters }: ValidationProps) {
                                                 <div className="flex items-center gap-4">
                                                     <div className="h-12 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100">
                                                         <img
-                                                            src={property.images[0] ? `/storage/${property.images[0].url}` : '/assets/images/defaults/no-image.jpg'}
+                                                            src={
+                                                                property
+                                                                    .images[0]
+                                                                    ? `/storage/${property.images[0].url}`
+                                                                    : '/assets/images/defaults/no-image.jpg'
+                                                            }
                                                             alt={property.title}
                                                             className="h-full w-full object-cover"
                                                         />
@@ -132,14 +141,16 @@ export default function Validation({ properties, filters }: ValidationProps) {
                                                             {property.title}
                                                         </div>
                                                         <div className="text-xs text-slate-500">
-                                                            Réf: {property.reference}
+                                                            Réf:{' '}
+                                                            {property.reference}
                                                         </div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="text-sm font-medium text-slate-900">
-                                                    {property.user?.name || 'Inconnu'}
+                                                    {property.user?.name ||
+                                                        'Inconnu'}
                                                 </div>
                                                 <div className="text-xs text-slate-500">
                                                     {property.user?.email || ''}
@@ -147,35 +158,51 @@ export default function Validation({ properties, filters }: ValidationProps) {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="text-sm font-medium text-slate-900">
-                                                    {property.price.toLocaleString()} {property.currency}
+                                                    {property.price.toLocaleString()}{' '}
+                                                    {property.currency}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="text-sm text-slate-500">
-                                                    {new Date(property.created_at).toLocaleDateString()}
+                                                    {new Date(
+                                                        property.created_at,
+                                                    ).toLocaleDateString()}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center space-x-2">
-                                                <Link
-                                                    href={route(
-                                                        'dashboard.properties.validation.show',
-                                                        property.id,
-                                                    )}
-                                                    className="p-1 text-slate-400 transition-colors hover:text-amber-500 rounded-md hover:bg-amber-50"
-                                                    title={t('view')}
-                                                >
-                                                    <Eye size={18} />
-                                                </Link>
-                                                <button
-                                                        onClick={() => handleApprove(property.id)}
+                                                    <Link
+                                                        href={route(
+                                                            'dashboard.properties.validation.show',
+                                                            property.id,
+                                                        )}
+                                                        className="rounded-md p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-[#C9A84C]"
+                                                        title={t('view')}
+                                                    >
+                                                        <Eye size={18} />
+                                                    </Link>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleApprove(
+                                                                property.id,
+                                                            )
+                                                        }
                                                         className="inline-flex items-center justify-center rounded-lg bg-emerald-50 p-2 text-emerald-600 transition-colors hover:bg-emerald-100"
                                                         title="Approuver"
                                                     >
-                                                        <CheckCircle size={18} />
+                                                        <CheckCircle
+                                                            size={18}
+                                                        />
                                                     </button>
                                                     <button
-                                                        onClick={() => setRejectingId(rejectingId === property.id ? null : property.id)}
+                                                        onClick={() =>
+                                                            setRejectingId(
+                                                                rejectingId ===
+                                                                    property.id
+                                                                    ? null
+                                                                    : property.id,
+                                                            )
+                                                        }
                                                         className="inline-flex items-center justify-center rounded-lg bg-red-50 p-2 text-red-600 transition-colors hover:bg-red-100"
                                                         title="Rejeter"
                                                     >
@@ -187,17 +214,30 @@ export default function Validation({ properties, filters }: ValidationProps) {
                                         {/* Ligne d'expansion pour le rejet */}
                                         {rejectingId === property.id && (
                                             <tr>
-                                                <td colSpan={5} className="bg-red-50/50 p-4">
+                                                <td
+                                                    colSpan={5}
+                                                    className="bg-red-50/50 p-4"
+                                                >
                                                     <div className="flex flex-col gap-3 md:flex-row md:items-end">
                                                         <div className="flex-1">
-                                                            <label htmlFor={`reject-reason-${property.id}`} className="mb-1 block text-sm font-medium text-red-800">
+                                                            <label
+                                                                htmlFor={`reject-reason-${property.id}`}
+                                                                className="mb-1 block text-sm font-medium text-red-800"
+                                                            >
                                                                 Motif du rejet
                                                             </label>
                                                             <input
                                                                 type="text"
                                                                 id={`reject-reason-${property.id}`}
-                                                                value={rejectReason}
-                                                                onChange={(e) => setRejectReason(e.target.value)}
+                                                                value={
+                                                                    rejectReason
+                                                                }
+                                                                onChange={(e) =>
+                                                                    setRejectReason(
+                                                                        e.target
+                                                                            .value,
+                                                                    )
+                                                                }
                                                                 placeholder="Veuillez spécifier un motif clair..."
                                                                 className="w-full rounded-lg border-red-200 py-2 text-sm focus:border-red-500 focus:ring-red-500"
                                                             />
@@ -205,18 +245,27 @@ export default function Validation({ properties, filters }: ValidationProps) {
                                                         <div className="flex gap-2">
                                                             <button
                                                                 onClick={() => {
-                                                                    setRejectingId(null);
-                                                                    setRejectReason('');
+                                                                    setRejectingId(
+                                                                        null,
+                                                                    );
+                                                                    setRejectReason(
+                                                                        '',
+                                                                    );
                                                                 }}
-                                                                className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-700 border border-slate-300 hover:bg-slate-50"
+                                                                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
                                                             >
                                                                 Annuler
                                                             </button>
                                                             <button
-                                                                onClick={() => handleReject(property.id)}
+                                                                onClick={() =>
+                                                                    handleReject(
+                                                                        property.id,
+                                                                    )
+                                                                }
                                                                 className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
                                                             >
-                                                                Confirmer le rejet
+                                                                Confirmer le
+                                                                rejet
                                                             </button>
                                                         </div>
                                                     </div>
@@ -234,10 +283,12 @@ export default function Validation({ properties, filters }: ValidationProps) {
                                         <div className="flex flex-col items-center justify-center">
                                             <CheckCircle className="mb-3 h-12 w-12 text-emerald-400 opacity-50" />
                                             <p className="text-base font-medium text-slate-600">
-                                                Aucune propriété en attente de validation
+                                                Aucune propriété en attente de
+                                                validation
                                             </p>
                                             <p className="mt-1 text-sm text-slate-400">
-                                                Toutes les soumissions ont été traitées.
+                                                Toutes les soumissions ont été
+                                                traitées.
                                             </p>
                                         </div>
                                     </td>

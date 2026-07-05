@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 const LocationInput = ({ data, handleInputChange, errors }) => {
     const [coordinates, setCoordinates] = useState({
         latitude: data.latitude || '',
         longitude: data.longitude || '',
-        address: data.mapLocation || ''
+        address: data.mapLocation || '',
     });
 
     // Fonction pour obtenir la position actuelle
@@ -18,7 +18,7 @@ const LocationInput = ({ data, handleInputChange, errors }) => {
                     setCoordinates({
                         latitude: lat,
                         longitude: lng,
-                        address: `${lat}, ${lng}`
+                        address: `${lat}, ${lng}`,
                     });
 
                     // Mettre à jour les données du formulaire
@@ -31,11 +31,13 @@ const LocationInput = ({ data, handleInputChange, errors }) => {
                 },
                 (error) => {
                     console.error('Erreur de géolocalisation:', error);
-                    alert('Impossible d\'obtenir votre position. Veuillez vérifier vos paramètres de localisation.');
-                }
+                    alert(
+                        "Impossible d'obtenir votre position. Veuillez vérifier vos paramètres de localisation.",
+                    );
+                },
             );
         } else {
-            alert('La géolocalisation n\'est pas supportée par ce navigateur.');
+            alert("La géolocalisation n'est pas supportée par ce navigateur.");
         }
     };
 
@@ -45,15 +47,15 @@ const LocationInput = ({ data, handleInputChange, errors }) => {
             // Vous pouvez utiliser l'API Google Geocoding ou une autre API
             // Ici, je montre un exemple conceptuel
             const response = await fetch(
-                `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=YOUR_API_KEY`
+                `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=YOUR_API_KEY`,
             );
             const data = await response.json();
 
             if (data.results && data.results[0]) {
                 const address = data.results[0].formatted_address;
-                setCoordinates(prev => ({
+                setCoordinates((prev) => ({
                     ...prev,
-                    address: address
+                    address: address,
                 }));
                 handleInputChange('mapLocation', address);
             }
@@ -75,16 +77,16 @@ const LocationInput = ({ data, handleInputChange, errors }) => {
             setCoordinates({
                 latitude: lat,
                 longitude: lng,
-                address: value
+                address: value,
             });
 
             handleInputChange('latitude', lat);
             handleInputChange('longitude', lng);
         } else {
             // Si ce n'est pas des coordonnées, c'est probablement une adresse
-            setCoordinates(prev => ({
+            setCoordinates((prev) => ({
                 ...prev,
-                address: value
+                address: value,
             }));
 
             // Vous pouvez implémenter le géocodage ici pour convertir l'adresse en coordonnées
@@ -96,16 +98,16 @@ const LocationInput = ({ data, handleInputChange, errors }) => {
     const geocodeAddress = async (address) => {
         try {
             const response = await fetch(
-                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=YOUR_API_KEY`
+                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=YOUR_API_KEY`,
             );
             const data = await response.json();
 
             if (data.results && data.results[0]) {
                 const location = data.results[0].geometry.location;
-                setCoordinates(prev => ({
+                setCoordinates((prev) => ({
                     ...prev,
                     latitude: location.lat,
-                    longitude: location.lng
+                    longitude: location.lng,
                 }));
 
                 handleInputChange('latitude', location.lat);
@@ -154,9 +156,9 @@ const LocationInput = ({ data, handleInputChange, errors }) => {
                         value={coordinates.latitude}
                         onChange={(e) => {
                             const lat = parseFloat(e.target.value) || '';
-                            setCoordinates(prev => ({
+                            setCoordinates((prev) => ({
                                 ...prev,
-                                latitude: lat
+                                latitude: lat,
                             }));
                             handleInputChange('latitude', lat);
                         }}
@@ -171,9 +173,9 @@ const LocationInput = ({ data, handleInputChange, errors }) => {
                         value={coordinates.longitude}
                         onChange={(e) => {
                             const lng = parseFloat(e.target.value) || '';
-                            setCoordinates(prev => ({
+                            setCoordinates((prev) => ({
                                 ...prev,
-                                longitude: lng
+                                longitude: lng,
                             }));
                             handleInputChange('longitude', lng);
                         }}
@@ -182,16 +184,23 @@ const LocationInput = ({ data, handleInputChange, errors }) => {
                 </div>
             </div>
 
-            {errors.mapLocation && <div className="property-form__error">{errors.mapLocation}</div>}
-            {errors.latitude && <div className="property-form__error">{errors.latitude}</div>}
-            {errors.longitude && <div className="property-form__error">{errors.longitude}</div>}
+            {errors.mapLocation && (
+                <div className="property-form__error">{errors.mapLocation}</div>
+            )}
+            {errors.latitude && (
+                <div className="property-form__error">{errors.latitude}</div>
+            )}
+            {errors.longitude && (
+                <div className="property-form__error">{errors.longitude}</div>
+            )}
 
             <div className="property-form__map-container">
                 <iframe
                     className="property-form__map"
-                    src={coordinates.latitude && coordinates.longitude
-                        ? `https://maps.google.com/maps?width=600&height=400&hl=fr&q=${coordinates.latitude},${coordinates.longitude}&t=&z=15&ie=UTF8&iwloc=B&output=embed`
-                        : "https://maps.google.com/maps?width=600&height=400&hl=fr&q=Paris&t=&z=12&ie=UTF8&iwloc=B&output=embed"
+                    src={
+                        coordinates.latitude && coordinates.longitude
+                            ? `https://maps.google.com/maps?width=600&height=400&hl=fr&q=${coordinates.latitude},${coordinates.longitude}&t=&z=15&ie=UTF8&iwloc=B&output=embed`
+                            : 'https://maps.google.com/maps?width=600&height=400&hl=fr&q=Paris&t=&z=12&ie=UTF8&iwloc=B&output=embed'
                     }
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"

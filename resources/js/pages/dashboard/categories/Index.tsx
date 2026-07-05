@@ -65,7 +65,7 @@ export default function Index() {
                                     setSelectedCategory(undefined);
                                     setIsOpen(true);
                                 }}
-                                className="inline-flex items-center rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-3 font-bold text-white shadow-lg shadow-amber-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                className="inline-flex items-center rounded-2xl bg-gradient-to-r from-slate-100 to-slate-100 px-6 py-3 font-bold text-white shadow-lg shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
                             >
                                 <Plus size={20} className="mr-2" />
                                 Nouvelle Catégorie
@@ -83,7 +83,7 @@ export default function Index() {
                             placeholder="Rechercher une catégorie..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full rounded-2xl border border-gray-200 bg-white py-4 pr-4 pl-12 shadow-sm transition-all outline-none focus:border-transparent focus:ring-2 focus:ring-amber-500"
+                            className="w-full rounded-2xl border border-gray-200 bg-white py-4 pr-4 pl-12 shadow-sm transition-all outline-none focus:border-transparent focus:ring-2 focus:ring-slate-200"
                         />
                     </div>
 
@@ -96,7 +96,7 @@ export default function Index() {
                                 <div className="absolute top-0 right-0 flex gap-2 p-4 opacity-0 transition-opacity group-hover:opacity-100">
                                     <button
                                         onClick={() => handleEdit(category)}
-                                        className="rounded-xl bg-amber-50 p-2 text-amber-600 transition-colors hover:bg-amber-100"
+                                        className="rounded-xl bg-slate-50 p-2 text-[#1E3A5F] transition-colors hover:bg-slate-100"
                                     >
                                         <Edit3 size={16} />
                                     </button>
@@ -110,7 +110,7 @@ export default function Index() {
                                     </button>
                                 </div>
 
-                                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 transition-transform duration-300 group-hover:scale-110">
+                                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-[#1E3A5F] transition-transform duration-300 group-hover:scale-110">
                                     <Layers size={28} />
                                 </div>
 

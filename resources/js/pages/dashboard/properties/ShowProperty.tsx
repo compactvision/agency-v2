@@ -115,7 +115,7 @@ export default function ShowProperty({ property }: { property: Property }) {
 
     return (
         <Dashboard>
-            <div className="min-h-screen bg-gradient-to-br from-amber-50/30 via-white to-amber-50/20 py-8">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 py-8">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -128,7 +128,7 @@ export default function ShowProperty({ property }: { property: Property }) {
                                 <div className="mt-1 flex items-center gap-2 text-slate-600">
                                     <MapPin
                                         size={16}
-                                        className="text-amber-500"
+                                        className="text-[#C9A84C]"
                                     />
                                     <span>
                                         {property.location ||
@@ -196,7 +196,7 @@ export default function ShowProperty({ property }: { property: Property }) {
                                         }
                                     }
                                 }}
-                                className="inline-flex items-center rounded-xl border border-amber-200 bg-white px-4 py-2 font-medium text-amber-700 shadow-lg shadow-amber-500/5 transition-all duration-300 hover:bg-amber-50"
+                                className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 font-medium text-[#0d2340] shadow-lg shadow-sm transition-all duration-300 hover:bg-slate-100"
                             >
                                 <Edit3 size={18} className="mr-2" />
                                 Modifier
@@ -208,7 +208,7 @@ export default function ShowProperty({ property }: { property: Property }) {
                         {/* Left Column: Images & Description */}
                         <div className="space-y-8 lg:col-span-2">
                             {/* Image Carousel */}
-                            <div className="relative aspect-video overflow-hidden rounded-3xl border border-amber-200/30 bg-white shadow-2xl shadow-amber-500/10">
+                            <div className="relative aspect-video overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl shadow-sm">
                                 {property.images &&
                                 property.images.length > 0 ? (
                                     <>
@@ -246,7 +246,7 @@ export default function ShowProperty({ property }: { property: Property }) {
                                                                 className={`h-2 rounded-full transition-all duration-300 ${
                                                                     idx ===
                                                                     currentImageIndex
-                                                                        ? 'w-8 bg-amber-500'
+                                                                        ? 'w-8 bg-slate-500'
                                                                         : 'w-2 bg-white/60 hover:bg-white'
                                                                 }`}
                                                             />
@@ -268,7 +268,7 @@ export default function ShowProperty({ property }: { property: Property }) {
                             </div>
 
                             {/* Description */}
-                            <div className="rounded-3xl border border-amber-200/30 bg-white p-8 shadow-xl shadow-amber-500/5">
+                            <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm shadow-xl">
                                 <h2 className="mb-4 text-xl font-bold text-slate-900">
                                     Description
                                 </h2>
@@ -280,9 +280,9 @@ export default function ShowProperty({ property }: { property: Property }) {
 
                             {/* Features Grid */}
                             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                                <div className="flex flex-col items-center rounded-2xl border border-amber-100 bg-white p-6 text-center shadow-sm">
+                                <div className="flex flex-col items-center rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
                                     <Home
-                                        className="mb-2 text-amber-500"
+                                        className="mb-2 text-[#C9A84C]"
                                         size={24}
                                     />
                                     <span className="text-xl font-bold text-slate-900">
@@ -292,9 +292,9 @@ export default function ShowProperty({ property }: { property: Property }) {
                                         Surface
                                     </span>
                                 </div>
-                                <div className="flex flex-col items-center rounded-2xl border border-amber-100 bg-white p-6 text-center shadow-sm">
+                                <div className="flex flex-col items-center rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
                                     <Bed
-                                        className="mb-2 text-amber-500"
+                                        className="mb-2 text-[#C9A84C]"
                                         size={24}
                                     />
                                     <span className="text-xl font-bold text-slate-900">
@@ -304,9 +304,9 @@ export default function ShowProperty({ property }: { property: Property }) {
                                         Chambres
                                     </span>
                                 </div>
-                                <div className="flex flex-col items-center rounded-2xl border border-amber-100 bg-white p-6 text-center shadow-sm">
+                                <div className="flex flex-col items-center rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
                                     <Bath
-                                        className="mb-2 text-amber-500"
+                                        className="mb-2 text-[#C9A84C]"
                                         size={24}
                                     />
                                     <span className="text-xl font-bold text-slate-900">
@@ -316,9 +316,9 @@ export default function ShowProperty({ property }: { property: Property }) {
                                         Salles de bain
                                     </span>
                                 </div>
-                                <div className="flex flex-col items-center rounded-2xl border border-amber-100 bg-white p-6 text-center shadow-sm">
+                                <div className="flex flex-col items-center rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
                                     <ForkKnife
-                                        className="mb-2 text-amber-500"
+                                        className="mb-2 text-[#C9A84C]"
                                         size={24}
                                     />
                                     <span className="text-xl font-bold text-slate-900">
@@ -334,8 +334,8 @@ export default function ShowProperty({ property }: { property: Property }) {
                         {/* Right Column: Pricing & Overview */}
                         <div className="space-y-8">
                             {/* Pricing Card */}
-                            <div className="rounded-3xl border border-amber-200/30 bg-white p-8 shadow-xl shadow-amber-500/10">
-                                <span className="mb-4 inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold tracking-wider text-amber-700 uppercase">
+                            <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm shadow-xl">
+                                <span className="mb-4 inline-block rounded-full bg-[#1E3A5F]/10 px-3 py-1 text-xs font-semibold tracking-wider text-[#0d2340] uppercase">
                                     {saleTypeLabels[property.sale_type] ||
                                         property.sale_type}
                                 </span>
@@ -393,10 +393,10 @@ export default function ShowProperty({ property }: { property: Property }) {
                             </div>
 
                             {/* Additional Details */}
-                            <div className="rounded-3xl border border-amber-200/30 bg-white p-8 shadow-xl shadow-amber-500/5">
+                            <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm shadow-xl">
                                 <h3 className="mb-6 flex items-center text-lg font-bold text-slate-900">
                                     <Building
-                                        className="mr-2 text-amber-500"
+                                        className="mr-2 text-[#C9A84C]"
                                         size={20}
                                     />
                                     Détails du bâtiment
@@ -449,7 +449,7 @@ export default function ShowProperty({ property }: { property: Property }) {
                             {/* Badges Section */}
                             <div className="flex flex-wrap gap-2">
                                 {property.is_featured && (
-                                    <div className="inline-flex items-center rounded-xl bg-amber-500 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-amber-500/20">
+                                    <div className="inline-flex items-center rounded-xl bg-slate-500 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-sm">
                                         <Star
                                             size={14}
                                             className="mr-2 fill-current"

@@ -101,4 +101,37 @@ class SubscriptionCheckTest extends TestCase
             'is_published' => 0,
         ]);
     }
+
+    public function test_user_without_subscription_cannot_submit_property_for_validation()
+    {
+        $user = User::factory()->create();
+
+        $data = [
+            'category_id' => 1,
+            'ad_type' => 'sale',
+            'title' => 'Test Property',
+            'description' => 'Description',
+            'price' => 100000,
+            'is_published' => true,
+            'details' => [
+                'bedrooms' => 2,
+                'bathrooms' => 1,
+                'kitchens' => 1,
+            ],
+            'municipality_id' => null,
+        ];
+
+        $response = $this->actingAs($user)
+            ->from(route('dashboard.properties.create'))
+            ->post(route('dashboard.properties.store'), $data);
+
+        $response->assertRedirect(route('dashboard.properties.create'));
+        $response->assertSessionHasErrors('is_published');
+        $this->assertDatabaseMissing('ads', [
+            'user_id' => $user->id,
+            'title' => 'Test Property',
+            'status' => 'pending_validation',
+            'is_published' => 1,
+        ]);
+    }
 }

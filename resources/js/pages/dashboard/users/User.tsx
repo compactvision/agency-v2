@@ -139,12 +139,12 @@ export default function User() {
 
     return (
         <Dashboard>
-            <div className="min-h-screen bg-gradient-to-br from-amber-50/30 via-white to-amber-50/20">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
                     {/* Header Section */}
                     <div className="mb-6">
                         <BackButton />
-                        <div className="mt-4 overflow-hidden rounded-xl border border-amber-200/30 bg-white shadow-sm">
+                        <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                             <div className="p-6">
                                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                                     <div className="mb-6 lg:mb-0">
@@ -157,8 +157,8 @@ export default function User() {
                                         </p>
                                     </div>
                                     <div className="flex gap-4">
-                                        <div className="min-w-[120px] rounded-lg bg-amber-50 p-4 text-center">
-                                            <span className="block text-2xl font-bold text-amber-600">
+                                        <div className="min-w-[120px] rounded-lg bg-slate-50 p-4 text-center">
+                                            <span className="block text-2xl font-bold text-[#1E3A5F]">
                                                 {usersData.length}
                                             </span>
                                             <span className="text-sm text-gray-600">
@@ -187,7 +187,7 @@ export default function User() {
 
                     {/* Controls Section */}
                     <div className="mb-6">
-                        <div className="rounded-xl border border-amber-200/30 bg-white p-4 shadow-sm">
+                        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                             <div className="flex flex-col gap-4 sm:flex-row">
                                 <div className="relative flex-1">
                                     <Search
@@ -197,7 +197,7 @@ export default function User() {
                                     <input
                                         type="text"
                                         placeholder="Rechercher un utilisateur..."
-                                        className={`w-full rounded-lg border border-gray-300 bg-white py-3 pr-4 pl-10 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none ${
+                                        className={`w-full rounded-lg border border-gray-300 bg-white py-3 pr-4 pl-10 text-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none ${
                                             isSearching ? 'opacity-70' : ''
                                         }`}
                                         value={searchQuery}
@@ -225,7 +225,7 @@ export default function User() {
                                                     e.target.value || null,
                                                 )
                                             }
-                                            className="cursor-pointer appearance-none rounded-lg border border-gray-300 bg-white px-4 py-3 pr-10 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                                            className="cursor-pointer appearance-none rounded-lg border border-gray-300 bg-white px-4 py-3 pr-10 text-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none"
                                         >
                                             <option value="">
                                                 Tous les rôles
@@ -250,7 +250,7 @@ export default function User() {
                                             setSelectedUser(null);
                                             setIsOpen(true);
                                         }}
-                                        className="inline-flex transform items-center rounded-lg bg-gradient-to-r from-amber-400 to-amber-600 px-4 py-3 font-medium text-white shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-105 hover:from-amber-500 hover:to-amber-700"
+                                        className="inline-flex transform items-center rounded-lg bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-4 py-3 font-medium text-white shadow-lg shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22]"
                                     >
                                         <Plus size={18} className="mr-2" />
                                         <span className="hidden sm:inline">
@@ -266,11 +266,11 @@ export default function User() {
                     </div>
 
                     {/* Table Section */}
-                    <div className="overflow-hidden rounded-xl border border-amber-200/30 bg-white shadow-sm">
+                    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                         <div className="overflow-x-auto">
                             {/* Desktop Table */}
                             <table className="hidden w-full md:table">
-                                <thead className="bg-amber-50/30">
+                                <thead className="bg-slate-50">
                                     <tr>
                                         <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
                                             Image
@@ -292,11 +292,11 @@ export default function User() {
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-amber-200/30">
+                                <tbody className="divide-y divide-slate-200">
                                     {usersData.map((user, index) => (
                                         <tr
                                             key={user.id}
-                                            className="transition-colors hover:bg-amber-50/30"
+                                            className="transition-colors hover:bg-slate-50"
                                             style={{
                                                 animationDelay: `${index * 0.05}s`,
                                             }}
@@ -310,7 +310,7 @@ export default function User() {
                                                             className="h-full w-full object-cover"
                                                         />
                                                     ) : (
-                                                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-400 to-amber-600">
+                                                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#C9A84C] to-[#A8882E]">
                                                             <UserIcon
                                                                 size={16}
                                                                 className="text-white"
@@ -346,7 +346,7 @@ export default function User() {
                                                 <div className="flex items-center">
                                                     <Shield
                                                         size={16}
-                                                        className="mr-2 text-amber-500"
+                                                        className="mr-2 text-[#C9A84C]"
                                                     />
                                                     <span className="text-sm text-gray-900">
                                                         {user.roles &&
@@ -367,7 +367,7 @@ export default function User() {
                                             <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                                                 <div className="flex space-x-2">
                                                     <button
-                                                        className="rounded-lg p-1 text-amber-600 transition-colors hover:bg-amber-50 hover:text-amber-900"
+                                                        className="rounded-lg p-1 text-[#1E3A5F] transition-colors hover:bg-slate-100 hover:text-[#1E3A5F]"
                                                         onClick={() =>
                                                             handleEdit(user)
                                                         }
@@ -396,7 +396,7 @@ export default function User() {
                                 {usersData.map((user, index) => (
                                     <div
                                         key={user.id}
-                                        className="border-b border-amber-200/30 p-4 last:border-b-0"
+                                        className="border-b border-slate-200 p-4 last:border-b-0"
                                         style={{
                                             animationDelay: `${index * 0.05}s`,
                                         }}
@@ -411,7 +411,7 @@ export default function User() {
                                                             className="h-full w-full object-cover"
                                                         />
                                                     ) : (
-                                                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-400 to-amber-600">
+                                                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#C9A84C] to-[#A8882E]">
                                                             <UserIcon
                                                                 size={20}
                                                                 className="text-white"
@@ -444,7 +444,7 @@ export default function User() {
                                             <div className="flex items-center">
                                                 <Shield
                                                     size={16}
-                                                    className="mr-2 text-amber-500"
+                                                    className="mr-2 text-[#C9A84C]"
                                                 />
                                                 <span className="text-sm text-gray-900">
                                                     {user.roles &&
@@ -462,7 +462,7 @@ export default function User() {
 
                                         <div className="flex justify-end space-x-2">
                                             <button
-                                                className="rounded-lg p-2 text-amber-600 transition-colors hover:bg-amber-50 hover:text-amber-900"
+                                                className="rounded-lg p-2 text-[#1E3A5F] transition-colors hover:bg-slate-100 hover:text-[#1E3A5F]"
                                                 onClick={() => handleEdit(user)}
                                                 title="Modifier"
                                             >
@@ -484,10 +484,10 @@ export default function User() {
 
                             {usersData.length === 0 && (
                                 <div className="py-12 text-center">
-                                    <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-amber-100/50">
+                                    <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-[#1E3A5F]/10">
                                         <Users
                                             size={32}
-                                            className="text-amber-500"
+                                            className="text-[#C9A84C]"
                                         />
                                     </div>
                                     <h3 className="mb-2 text-xl font-semibold text-gray-900">
@@ -502,7 +502,7 @@ export default function User() {
                                             setSelectedUser(null);
                                             setIsOpen(true);
                                         }}
-                                        className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-6 py-3 font-medium text-white shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-105 hover:from-amber-500 hover:to-amber-700"
+                                        className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-6 py-3 font-medium text-white shadow-lg shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22]"
                                     >
                                         <Plus size={20} className="mr-2" />
                                         Créer un utilisateur
@@ -532,8 +532,8 @@ export default function User() {
                                     key={index}
                                     className={`rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
                                         link.active
-                                            ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30'
-                                            : 'text-gray-600 hover:bg-amber-100 hover:text-amber-700'
+                                            ? 'bg-slate-500 text-white shadow-lg shadow-sm'
+                                            : 'text-gray-600 hover:bg-slate-100 hover:text-[#0d2340]'
                                     } ${!link.url ? 'cursor-not-allowed opacity-50' : ''}`}
                                     disabled={!link.url}
                                     onClick={() => goTo(link.url)}

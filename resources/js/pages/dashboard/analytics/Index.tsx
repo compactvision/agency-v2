@@ -189,21 +189,21 @@ export default function Index({
             blue: 'from-blue-400 to-blue-600',
             green: 'from-emerald-400 to-emerald-600',
             purple: 'from-purple-400 to-purple-600',
-            orange: 'from-amber-400 to-amber-600',
+            orange: 'from-slate-100 to-slate-100',
             cyan: 'from-cyan-400 to-cyan-600',
             emerald: 'from-emerald-400 to-emerald-600',
             teal: 'from-teal-400 to-teal-600',
             yellow: 'from-yellow-400 to-yellow-600',
             success: 'from-green-400 to-green-600',
             danger: 'from-red-400 to-red-600',
-            warning: 'from-amber-400 to-amber-600',
+            warning: 'from-slate-100 to-slate-100',
             indigo: 'from-indigo-400 to-indigo-600',
             default: 'from-gray-400 to-gray-600',
         };
 
         return (
             <article
-                className="transform overflow-hidden rounded-2xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/20"
+                className="transform overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-sm hover:shadow-xl"
                 style={{ animationDelay: `${delay}ms` }}
             >
                 <div className="p-6">
@@ -236,12 +236,12 @@ export default function Index({
             doughnut: Phone,
         };
         const Icon = iconMap[type];
-        return Icon ? <Icon size={size} className="text-amber-500" /> : null;
+        return Icon ? <Icon size={size} className="text-[#C9A84C]" /> : null;
     };
 
     return (
         <Dashboard>
-            <div className="min-h-screen bg-gradient-to-br from-amber-50/30 via-white to-amber-50/20">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div className="mb-8">
@@ -377,7 +377,7 @@ export default function Index({
                     {/* Charts Section */}
                     <section className="mb-8">
                         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                            <div className="overflow-hidden rounded-2xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10">
+                            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-sm">
                                 <div className="p-6">
                                     <div className="mb-6 flex items-center gap-3">
                                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-400 to-blue-600">
@@ -399,10 +399,10 @@ export default function Index({
                                 </div>
                             </div>
 
-                            <div className="overflow-hidden rounded-2xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10">
+                            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-sm">
                                 <div className="p-6">
                                     <div className="mb-6 flex items-center gap-3">
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-amber-600">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#C9A84C] to-[#A8882E]">
                                             <Phone
                                                 size={20}
                                                 className="text-white"
@@ -428,10 +428,10 @@ export default function Index({
 
                     {/* Top Properties Table */}
                     <section>
-                        <div className="overflow-hidden rounded-2xl border border-amber-200/30 bg-white shadow-lg shadow-amber-500/10">
+                        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-sm">
                             <div className="p-6">
                                 <div className="mb-6 flex items-center gap-3">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-amber-600">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#C9A84C] to-[#A8882E]">
                                         <Eye size={20} className="text-white" />
                                     </div>
                                     <h2 className="text-xl font-bold text-gray-900">
@@ -440,7 +440,7 @@ export default function Index({
                                 </div>
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
-                                        <thead className="bg-amber-50/30">
+                                        <thead className="bg-slate-50">
                                             <tr>
                                                 <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
                                                     ID
@@ -456,7 +456,7 @@ export default function Index({
                                                 </th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-amber-200/30">
+                                        <tbody className="divide-y divide-slate-200">
                                             {mostViewedProperties.map(
                                                 (
                                                     property: any,
@@ -464,7 +464,7 @@ export default function Index({
                                                 ) => (
                                                     <tr
                                                         key={property.id}
-                                                        className="transition-colors hover:bg-amber-50/30"
+                                                        className="transition-colors hover:bg-slate-50"
                                                         style={{
                                                             animationDelay: `${index * 50}ms`,
                                                         }}
@@ -484,7 +484,7 @@ export default function Index({
                                                             <div className="flex items-center gap-2">
                                                                 <Eye
                                                                     size={16}
-                                                                    className="text-amber-500"
+                                                                    className="text-[#C9A84C]"
                                                                 />
                                                                 {property.views_count?.toLocaleString() ||
                                                                     0}

@@ -1,102 +1,146 @@
-import React from 'react'
-import { ArrowRight, Bath, Bed, MapPin, Heart, Calendar, Home, Square, Star } from 'lucide-react'
-import { Link, router, usePage } from '@inertiajs/react'
+import { Link, router, usePage } from '@inertiajs/react';
+import { ArrowRight, Bath, Bed, Heart, Home, MapPin, Maximize2 } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-export default function PropertyCard({ property, favorites, isListView = false }: { 
-    property: any, 
-    favorites: number[], 
-    isListView?: boolean 
+interface PageProps {
+    auth?: { user?: any };
+    [key: string]: any;
+}
+
+function formatPrice(price: number, saleType: string): string {
+    const formatted = new Intl.NumberFormat('fr-FR', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    }).format(price);
+    return saleType === 'rent' ? `${formatted}/mois` : formatted;
+}
+
+export default function PropertyCard({
+    property,
+    favorites,
+    isListView = false,
+}: {
+    property: any;
+    favorites: number[];
+    isListView?: boolean;
 }) {
     const { t } = useTranslation();
     const { props } = usePage<PageProps>();
     const user = props.auth?.user;
+    const [isFavorite, setIsFavorite] = useState(favorites.includes(property.id));
+    const [hovered, setHovered] = useState(false);
 
-    const toggleFavorite = (id: number) => {
-        router.post(route('dashboard.properties.favorite', id), {}, { preserveScroll: true });
+    const toggleFavorite = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsFavorite(!isFavorite);
+        router.post(route('dashboard.properties.favorite', property.id), {}, {
+            preserveScroll: true,
+            onError: () => setIsFavorite(isFavorite),
+        });
     };
 
-    const formatPrice = (price: number, saleType: string) => {
-        return new Intl.NumberFormat('fr-FR', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-        }).format(price) + (saleType === 'rent' ? '/mois' : '');
-    };
+    const imageUrl = property.images?.[0]?.url
+        ? `/storage/${property.images[0].url}`
+        : null;
 
-    // Ancien design pour la grille
-    if (!isListView) {
+    const saleTypeBadge = property.sale_type === 'rent' ? (
+        <span className="badge-rent">{t('rent')}</span>
+    ) : (
+        <span className="badge-sale">{t('sale')}</span>
+    );
+
+    // ── Vue Liste ──
+    if (isListView) {
         return (
-            <div className="col-lg-4 col-sm-6">
-                <div className="overflow-hidden relative transition-all duration-200 hover:bg-gray-50 before:absolute before:bottom-0 before:left-1/2 before:transform before:-translate-x-1/2 before:w-0 before:h-1 before:bg-gradient-to-r before:from-orange-400 before:to-orange-600 hover:before:w-full before:transition-all before:duration-200">
-                    <div className="relative overflow-hidden max-h-[252px] flex rounded-t-md">
-                        <Link href={route('property.show', property.id)} className="block w-full">
-                            {property.images && property.images.length > 0 ? (
-                                property.images.slice(0, 1).map((i: any) => (
-                                    <img 
-                                        src={`/storage/${i.url}`} 
-                                        alt={`${property.title}`} 
-                                        width={400} 
-                                        height={400} 
-                                        key={i.id}
-                                        className="transition-transform duration-200 hover:scale-105 w-full h-full object-cover"
-                                    />
-                                ))
-                            ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center">
-                                    <Home size={48} className="text-amber-500" />
-                                </div>
-                            )}
-                        </Link>
-                    </div>
-                    <div className="p-4 md:p-6 lg:p-7 text-gray-800 flex-grow bg-white shadow-md rounded-b-md md:rounded-r-md md:rounded-b-none md:ml-10 md:-mt-20 md:relative lg:ml-10 lg:-mt-20 lg:relative">
-                        <h6 className="font-poppins font-semibold text-gray-800 mb-3 md:mb-4 lg:mb-5">
-                            <Link href={route('property.show', property.id)} className="link block line-clamp-2 overflow-hidden">
+            <div className="card-premium flex flex-col overflow-hidden md:flex-row">
+                {/* Image */}
+                <div className="relative h-52 w-full shrink-0 overflow-hidden md:h-auto md:w-72">
+                    <Link href={route('property.show', property.id)} className="block h-full w-full">
+                        {imageUrl ? (
+                            <img
+                                src={imageUrl}
+                                alt={property.title}
+                                className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                            />
+                        ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#1E3A5F]/10 to-[#C9A84C]/10">
+                                <Home size={40} className="text-[#1E3A5F]/30" />
+                            </div>
+                        )}
+                    </Link>
+                    {/* Badge */}
+                    <div className="absolute top-3 left-3">{saleTypeBadge}</div>
+                    {/* Favori */}
+                    {user && (
+                        <button
+                            onClick={toggleFavorite}
+                            className={`absolute top-3 right-3 flex h-9 w-9 items-center justify-center rounded-full shadow-md transition-all duration-200 ${
+                                isFavorite ? 'bg-red-500 text-white' : 'bg-white/90 text-gray-500 hover:bg-red-500 hover:text-white'
+                            }`}
+                        >
+                            <Heart className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
+                        </button>
+                    )}
+                </div>
+
+                {/* Contenu */}
+                <div className="flex flex-1 flex-col justify-between p-6">
+                    <div>
+                        <h3 className="mb-1.5 text-lg font-bold text-gray-900 line-clamp-1">
+                            <Link href={route('property.show', property.id)} className="hover:text-[#1E3A5F] transition-colors">
                                 {property.title}
                             </Link>
-                        </h6>
-                        <ul className="flex gap-5 mb-4">
-                            <li className="flex items-center gap-2.5 text-sm opacity-80 font-light">
-                                <span className="text-orange-500">
-                                    <Bed color='#F69220' />
-                                </span>
-                                <span>{property.bedrooms} {t("bedroom")}</span>
-                            </li>
-                            <li className="flex items-center gap-2.5 text-sm opacity-80 font-light">
-                                <span className="text-orange-500">
-                                    <Bath color='#F69220' />
-                                </span>
-                                <span>{property.bathrooms} {t("bathroom")}</span>
-                            </li>
-                        </ul>
-                        <div className="flex justify-between items-center mb-4">
-                            <h6 className="font-poppins font-semibold text-gray-800">
-                                {property.price}
-                                {property.sale_type === 'rent' ? <span className="text-xs opacity-80 font-light">$/per month</span> : <span className="text-xs opacity-80 font-light">$</span>}
-                            </h6>
-                            {user && (
-                                <button className="ml-2" onClick={() => toggleFavorite(property.id)} title="Ajouter aux favoris">
-                                    <Star
-                                        size={20}
-                                        fill={favorites.includes(property.id) ? '#facc15' : 'none'}
-                                        stroke="#facc15"
-                                        className="transition duration-200"
-                                    />
-                                </button>
+                        </h3>
+                        {property.location && (
+                            <div className="mb-4 flex items-center gap-1 text-sm text-gray-500">
+                                <MapPin className="h-3.5 w-3.5 text-[#C9A84C]" />
+                                <span>{property.location}</span>
+                            </div>
+                        )}
+                        {property.description && (
+                            <p className="mb-4 text-sm leading-relaxed text-gray-500 line-clamp-2">
+                                {property.description}
+                            </p>
+                        )}
+                        {/* Features */}
+                        <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                            <div className="flex items-center gap-1.5">
+                                <Bed className="h-4 w-4 text-[#C9A84C]" />
+                                <span className="font-medium">{property.bedrooms}</span>
+                                <span className="text-gray-400">{t('bedroom')}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <Bath className="h-4 w-4 text-[#C9A84C]" />
+                                <span className="font-medium">{property.bathrooms}</span>
+                                <span className="text-gray-400">{t('bathroom')}</span>
+                            </div>
+                            {property.area && (
+                                <div className="flex items-center gap-1.5">
+                                    <Maximize2 className="h-4 w-4 text-[#C9A84C]" />
+                                    <span className="font-medium">{property.area}</span>
+                                    <span className="text-gray-400">m²</span>
+                                </div>
                             )}
                         </div>
-                        <p className="text-gray-800 text-base md:text-lg font-normal mb-6 flex items-center gap-2">
-                            <span className="text-orange-500 text-sm md:text-base">
-                                <MapPin color='#F69220' />
+                    </div>
+
+                    {/* Prix + CTA */}
+                    <div className="mt-4 flex items-center justify-between">
+                        <div>
+                            <span className="text-2xl font-extrabold text-[#1E3A5F]">
+                                {formatPrice(property.price, property.sale_type)}
                             </span>
-                            {t("contact_the_owner")}
-                        </p>
-                        <Link href={route('property.show', property.id)} className="text-xs md:text-sm text-orange-500 font-semibold uppercase opacity-90 hover:opacity-100 flex items-center">
-                            {t("show_details")}
-                            <span className="ml-2.5 transition-all duration-200 hover:ml-3">
-                                <ArrowRight color='#F69220' />
-                            </span>
+                        </div>
+                        <Link
+                            href={route('property.show', property.id)}
+                            className="flex items-center gap-2 rounded-xl bg-[#1E3A5F] px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-[#152C47] hover:shadow-lg hover:-translate-y-0.5"
+                        >
+                            {t('show_details')}
+                            <ArrowRight className="h-4 w-4" />
                         </Link>
                     </div>
                 </div>
@@ -104,103 +148,117 @@ export default function PropertyCard({ property, favorites, isListView = false }
         );
     }
 
-    // Nouveau design pour la liste
+    // ── Vue Grille ──
     return (
-        <div className="w-full">
-            <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col md:flex-row">
-                {/* Image Section */}
-                <div className="relative overflow-hidden w-full md:w-80 h-48 md:h-auto">
-                    <Link href={route('property.show', property.id)} className="block w-full h-full">
-                        {property.images && property.images.length > 0 ? (
-                            <img 
-                                src={`/storage/${property.images[0].url}`} 
-                                alt={property.title} 
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            />
-                        ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center">
-                                <Home size={48} className="text-amber-500" />
-                            </div>
-                        )}
-                        
-                        {/* Badge for sale/rent */}
-                        <div className="absolute top-4 left-4 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-amber-600 shadow-md">
-                            {property.sale_type === 'rent' ? t('rent') : t('sale')}
-                        </div>
-                        
-                        {/* Favorite Button */}
-                        {user && (
-                            <button 
-                                className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:bg-white hover:scale-110"
-                                onClick={() => toggleFavorite(property.id)} 
-                                title={favorites.includes(property.id) ? t('remove_from_favorites') : t('add_to_favorites')}
-                            >
-                                <Heart
-                                    size={18}
-                                    fill={favorites.includes(property.id) ? '#f59e0b' : 'none'}
-                                    stroke="#f59e0b"
-                                    className="transition-all duration-300"
-                                />
-                            </button>
-                        )}
-                    </Link>
-                </div>
-
-                {/* Content Section */}
-                <div className="flex-1 p-5">
-                    {/* Title */}
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
-                        <Link href={route('property.show', property.id)} className="hover:text-amber-600 transition-colors">
-                            {property.title}
-                        </Link>
-                    </h3>
-
-                    {/* Location */}
-                    <div className="flex items-center text-gray-600 mb-4">
-                        <MapPin size={16} className="text-amber-500 mr-2" />
-                        <span className="text-sm">{property.location || t('location_not_specified')}</span>
-                    </div>
-
-                    {/* Features */}
-                    <div className="flex flex-wrap gap-4 mb-4">
-                        <div className="flex items-center text-gray-700">
-                            <Bed size={18} className="text-amber-500 mr-2" />
-                            <span className="text-sm font-medium">{property.bedrooms} {t("bedroom")}</span>
-                        </div>
-                        <div className="flex items-center text-gray-700">
-                            <Bath size={18} className="text-amber-500 mr-2" />
-                            <span className="text-sm font-medium">{property.bathrooms} {t("bathroom")}</span>
-                        </div>
-                        {property.area && (
-                            <div className="flex items-center text-gray-700">
-                                <Square size={18} className="text-amber-500 mr-2" />
-                                <span className="text-sm font-medium">{property.area} m²</span>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Price and CTA */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="text-2xl font-bold text-gray-900">
-                            {formatPrice(property.price, property.sale_type)}
-                        </div>
-                        
-                        <Link 
-                            href={route('property.show', property.id)} 
-                            className="inline-flex items-center px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
-                        >
-                            {t("show_details")}
-                            <ArrowRight size={16} className="ml-2 transition-transform duration-300 group-hover:translate-x-1" />
-                        </Link>
-                    </div>
-
-                    {/* Additional Info */}
-                    {property.created_at && (
-                        <div className="flex items-center text-gray-500 mt-4 text-xs">
-                            <Calendar size={14} className="mr-1" />
-                            {t('listed_on')}: {new Date(property.created_at).toLocaleDateString()}
+        <div
+            className="card-premium group relative flex flex-col overflow-hidden"
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+        >
+            {/* Image */}
+            <div className="relative h-52 overflow-hidden">
+                <Link href={route('property.show', property.id)} className="block h-full w-full">
+                    {imageUrl ? (
+                        <img
+                            src={imageUrl}
+                            alt={property.title}
+                            className={`h-full w-full object-cover transition-transform duration-500 ${hovered ? 'scale-108' : 'scale-100'}`}
+                            style={{ transform: hovered ? 'scale(1.08)' : 'scale(1)' }}
+                        />
+                    ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#1E3A5F]/10 to-[#C9A84C]/10">
+                            <Home size={40} className="text-[#1E3A5F]/30" />
                         </div>
                     )}
+                    {/* Overlay au hover */}
+                    <div
+                        className={`absolute inset-0 bg-gradient-to-t from-black/40 to-transparent transition-opacity duration-300 ${hovered ? 'opacity-100' : 'opacity-0'}`}
+                    />
+                </Link>
+
+                {/* Badge statut */}
+                <div className="absolute top-3 left-3 z-10">{saleTypeBadge}</div>
+
+                {/* Bouton favori */}
+                {user && (
+                    <button
+                        onClick={toggleFavorite}
+                        className={`absolute top-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full shadow-md transition-all duration-200 ${
+                            isFavorite
+                                ? 'bg-red-500 text-white'
+                                : 'bg-white/90 text-gray-400 opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white'
+                        }`}
+                        title={isFavorite ? t('remove_from_favorites') : t('add_to_favorites')}
+                    >
+                        <Heart className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
+                    </button>
+                )}
+            </div>
+
+            {/* Contenu */}
+            <div className="flex flex-1 flex-col p-5">
+                {/* Prix */}
+                <div className="mb-3 flex items-start justify-between">
+                    <span className="text-xl font-extrabold text-[#1E3A5F] leading-tight">
+                        {formatPrice(property.price, property.sale_type)}
+                    </span>
+                    {property.sale_type === 'rent' && (
+                        <span className="mt-1 text-xs text-gray-400">/mois</span>
+                    )}
+                </div>
+
+                {/* Titre */}
+                <h3 className="mb-2 text-base font-bold text-gray-900 line-clamp-2 group-hover:text-[#1E3A5F] transition-colors duration-200">
+                    <Link href={route('property.show', property.id)}>
+                        {property.title}
+                    </Link>
+                </h3>
+
+                {/* Localisation */}
+                {property.location && (
+                    <div className="mb-4 flex items-center gap-1.5 text-sm text-gray-500">
+                        <MapPin className="h-3.5 w-3.5 shrink-0 text-[#C9A84C]" />
+                        <span className="line-clamp-1">{property.location}</span>
+                    </div>
+                )}
+
+                {/* Séparateur */}
+                <div className="mb-4 h-px bg-gray-100" />
+
+                {/* Features */}
+                <div className="mb-4 flex items-center gap-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-1.5">
+                        <Bed className="h-4 w-4 text-[#C9A84C]" />
+                        <span className="font-semibold text-gray-800">{property.bedrooms ?? 0}</span>
+                        <span className="text-gray-400 text-xs">{t('bedroom')}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <Bath className="h-4 w-4 text-[#C9A84C]" />
+                        <span className="font-semibold text-gray-800">{property.bathrooms ?? 0}</span>
+                        <span className="text-gray-400 text-xs">{t('bathroom')}</span>
+                    </div>
+                    {(property.surface || property.area) && (
+                        <div className="flex items-center gap-1.5">
+                            <Maximize2 className="h-4 w-4 text-[#C9A84C]" />
+                            <span className="font-semibold text-gray-800">{property.surface || property.area}</span>
+                            <span className="text-gray-400 text-xs">m²</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* CTA */}
+                <div className="mt-auto">
+                    <Link
+                        href={route('property.show', property.id)}
+                        className={`flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all duration-200 ${
+                            hovered
+                                ? 'bg-[#1E3A5F] text-white shadow-lg'
+                                : 'bg-gray-50 text-gray-700 hover:bg-[#1E3A5F] hover:text-white'
+                        }`}
+                    >
+                        {t('show_details')}
+                        <ArrowRight className={`h-4 w-4 transition-transform duration-200 ${hovered ? 'translate-x-0.5' : ''}`} />
+                    </Link>
                 </div>
             </div>
         </div>

@@ -21,6 +21,7 @@ use App\Http\Controllers\Dashboard\AnalyticsController;
 use App\Http\Controllers\Dashboard\NotificationController;
 use App\Http\Controllers\Dashboard\CategoryController;
 use App\Http\Controllers\Dashboard\AmenityController;
+use App\Http\Controllers\Dashboard\PropertyDescriptionController;
 use App\Http\Controllers\NewsletterController;
 
 Route::get('/', [FrontPageController::class, 'home'])->name('home');
@@ -48,6 +49,8 @@ require __DIR__.'/settings.php';
 
 Route::middleware(['auth', 'verified'])->prefix('/dashboard')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::post('/properties/generate-description', [PropertyDescriptionController::class, 'generate'])
+        ->name('description.ai.generate-description');
 
     Route::name('dashboard.')->group(function () {
 

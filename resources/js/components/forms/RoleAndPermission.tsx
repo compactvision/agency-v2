@@ -1,23 +1,20 @@
 import { useForm } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
-import ErrorText from '../ui/ErrorText';
-import { toast } from 'sonner';
-import { 
-    X, 
-    User, 
-    Mail, 
-    Lock, 
-    Shield, 
-    Key, 
-    CheckCircle, 
-    AlertCircle, 
-    Save, 
-    Users,
-    UserPlus,
+import {
+    AlertCircle,
+    CheckCircle,
     Edit3,
     Eye,
-    EyeOff
+    EyeOff,
+    Lock,
+    Mail,
+    Save,
+    Shield,
+    User,
+    UserPlus,
+    X,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 type Role = { name: string };
 type UserLite = {
@@ -34,24 +31,30 @@ type Props = {
     readonly roles: Role[];
 };
 
-export default function RoleAndPermission({ isOpen, setIsOpen, user, roles }: Props) {
+export default function RoleAndPermission({
+    isOpen,
+    setIsOpen,
+    user,
+    roles,
+}: Props) {
     const isEdit = Boolean(user?.id);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm<{
-        name: string;
-        email: string;
-        password: string;
-        password_confirmation: string;
-        roles: string[];
-    }>({
-        name: user?.name ?? '',
-        email: user?.email ?? '',
-        password: '',
-        password_confirmation: '',
-        roles: user?.roles?.map(r => r.name) ?? [],
-    });
+    const { data, setData, post, put, processing, errors, reset, clearErrors } =
+        useForm<{
+            name: string;
+            email: string;
+            password: string;
+            password_confirmation: string;
+            roles: string[];
+        }>({
+            name: user?.name ?? '',
+            email: user?.email ?? '',
+            password: '',
+            password_confirmation: '',
+            roles: user?.roles?.map((r) => r.name) ?? [],
+        });
 
     // Sync quand on ouvre / change d'utilisateur
     useEffect(() => {
@@ -61,7 +64,7 @@ export default function RoleAndPermission({ isOpen, setIsOpen, user, roles }: Pr
             email: user?.email ?? '',
             password: '',
             password_confirmation: '',
-            roles: user?.roles?.map(r => r.name) ?? [],
+            roles: user?.roles?.map((r) => r.name) ?? [],
         });
         clearErrors();
     }, [isOpen, user?.id]);
@@ -73,10 +76,11 @@ export default function RoleAndPermission({ isOpen, setIsOpen, user, roles }: Pr
     };
 
     const toggleRole = (roleName: string) => {
-        setData('roles',
+        setData(
+            'roles',
             data.roles.includes(roleName)
-                ? data.roles.filter(r => r !== roleName)
-                : [...data.roles, roleName]
+                ? data.roles.filter((r) => r !== roleName)
+                : [...data.roles, roleName],
         );
     };
 
@@ -119,31 +123,39 @@ export default function RoleAndPermission({ isOpen, setIsOpen, user, roles }: Pr
         <div className="fixed inset-0 z-50 overflow-y-auto">
             <div className="flex min-h-screen items-center justify-center p-4">
                 {/* Overlay avec effet de flou */}
-                <div 
+                <div
                     className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
                     onClick={() => !processing && close()}
                 ></div>
-                
+
                 {/* Modal content */}
-                <div className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden transform transition-all">
+                <div className="relative max-h-[90vh] w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all">
                     {/* Header */}
                     <div className="bg-gradient-to-r from-amber-400 to-amber-600 p-6 text-white">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
                                     {isEdit ? (
-                                        <Edit3 size={24} className="text-white" />
+                                        <Edit3
+                                            size={24}
+                                            className="text-white"
+                                        />
                                     ) : (
-                                        <UserPlus size={24} className="text-white" />
+                                        <UserPlus
+                                            size={24}
+                                            className="text-white"
+                                        />
                                     )}
                                 </div>
                                 <h2 className="text-2xl font-bold">
-                                    {isEdit ? 'Modifier l\'utilisateur' : 'Créer un utilisateur'}
+                                    {isEdit
+                                        ? "Modifier l'utilisateur"
+                                        : 'Créer un utilisateur'}
                                 </h2>
                             </div>
                             <button
                                 type="button"
-                                className="p-2 rounded-full hover:bg-white/20 transition-colors"
+                                className="rounded-full p-2 transition-colors hover:bg-white/20"
                                 onClick={() => !processing && close()}
                             >
                                 <X size={24} className="text-white" />
@@ -152,29 +164,37 @@ export default function RoleAndPermission({ isOpen, setIsOpen, user, roles }: Pr
                     </div>
 
                     {/* Form content */}
-                    <form onSubmit={handleSave} className="p-6 space-y-6 overflow-y-auto max-h-[60vh]">
+                    <form
+                        onSubmit={handleSave}
+                        className="max-h-[60vh] space-y-6 overflow-y-auto p-6"
+                    >
                         {/* Nom */}
                         <div>
-                            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                            <label
+                                htmlFor="name"
+                                className="mb-2 block text-sm font-medium text-gray-700"
+                            >
                                 Nom complet
                             </label>
                             <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                     <User size={18} className="text-gray-400" />
                                 </div>
                                 <input
                                     id="name"
                                     type="text"
                                     value={data.name}
-                                    onChange={(e) => setData('name', e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900 placeholder-gray-500"
+                                    onChange={(e) =>
+                                        setData('name', e.target.value)
+                                    }
+                                    className="w-full rounded-lg border border-gray-300 bg-white py-3 pr-4 pl-10 text-gray-900 placeholder-gray-500 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
                                     placeholder="Jean Dupont"
                                     required
                                     disabled={processing}
                                 />
                             </div>
                             {errors.name && (
-                                <div className="mt-2 flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+                                <div className="mt-2 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-600">
                                     <AlertCircle size={16} />
                                     {errors.name}
                                 </div>
@@ -183,26 +203,31 @@ export default function RoleAndPermission({ isOpen, setIsOpen, user, roles }: Pr
 
                         {/* Email */}
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                            <label
+                                htmlFor="email"
+                                className="mb-2 block text-sm font-medium text-gray-700"
+                            >
                                 Adresse email
                             </label>
                             <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                     <Mail size={18} className="text-gray-400" />
                                 </div>
                                 <input
                                     id="email"
                                     type="email"
                                     value={data.email}
-                                    onChange={(e) => setData('email', e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900 placeholder-gray-500"
+                                    onChange={(e) =>
+                                        setData('email', e.target.value)
+                                    }
+                                    className="w-full rounded-lg border border-gray-300 bg-white py-3 pr-4 pl-10 text-gray-900 placeholder-gray-500 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
                                     placeholder="jean.dupont@example.com"
                                     required
                                     disabled={processing || isEdit}
                                 />
                             </div>
                             {errors.email && (
-                                <div className="mt-2 flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+                                <div className="mt-2 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-600">
                                     <AlertCircle size={16} />
                                     {errors.email}
                                 </div>
@@ -213,37 +238,60 @@ export default function RoleAndPermission({ isOpen, setIsOpen, user, roles }: Pr
                         {!isEdit && (
                             <>
                                 <div>
-                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label
+                                        htmlFor="password"
+                                        className="mb-2 block text-sm font-medium text-gray-700"
+                                    >
                                         Mot de passe
                                     </label>
                                     <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <Lock size={18} className="text-gray-400" />
+                                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                            <Lock
+                                                size={18}
+                                                className="text-gray-400"
+                                            />
                                         </div>
                                         <input
                                             id="password"
-                                            type={showPassword ? 'text' : 'password'}
+                                            type={
+                                                showPassword
+                                                    ? 'text'
+                                                    : 'password'
+                                            }
                                             value={data.password}
-                                            onChange={(e) => setData('password', e.target.value)}
-                                            className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900 placeholder-gray-500"
+                                            onChange={(e) =>
+                                                setData(
+                                                    'password',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full rounded-lg border border-gray-300 bg-white py-3 pr-12 pl-10 text-gray-900 placeholder-gray-500 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
                                             placeholder="•••••••••"
                                             required
                                             disabled={processing}
                                         />
                                         <button
                                             type="button"
-                                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute inset-y-0 right-0 flex items-center pr-3"
+                                            onClick={() =>
+                                                setShowPassword(!showPassword)
+                                            }
                                         >
                                             {showPassword ? (
-                                                <EyeOff size={18} className="text-gray-400" />
+                                                <EyeOff
+                                                    size={18}
+                                                    className="text-gray-400"
+                                                />
                                             ) : (
-                                                <Eye size={18} className="text-gray-400" />
+                                                <Eye
+                                                    size={18}
+                                                    className="text-gray-400"
+                                                />
                                             )}
                                         </button>
                                     </div>
                                     {errors.password && (
-                                        <div className="mt-2 flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+                                        <div className="mt-2 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-600">
                                             <AlertCircle size={16} />
                                             {errors.password}
                                         </div>
@@ -251,37 +299,62 @@ export default function RoleAndPermission({ isOpen, setIsOpen, user, roles }: Pr
                                 </div>
 
                                 <div>
-                                    <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label
+                                        htmlFor="password_confirmation"
+                                        className="mb-2 block text-sm font-medium text-gray-700"
+                                    >
                                         Confirmer le mot de passe
                                     </label>
                                     <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <Lock size={18} className="text-gray-400" />
+                                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                            <Lock
+                                                size={18}
+                                                className="text-gray-400"
+                                            />
                                         </div>
                                         <input
                                             id="password_confirmation"
-                                            type={showConfirmPassword ? 'text' : 'password'}
+                                            type={
+                                                showConfirmPassword
+                                                    ? 'text'
+                                                    : 'password'
+                                            }
                                             value={data.password_confirmation}
-                                            onChange={(e) => setData('password_confirmation', e.target.value)}
-                                            className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900 placeholder-gray-500"
+                                            onChange={(e) =>
+                                                setData(
+                                                    'password_confirmation',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full rounded-lg border border-gray-300 bg-white py-3 pr-12 pl-10 text-gray-900 placeholder-gray-500 focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
                                             placeholder="•••••••••"
                                             required
                                             disabled={processing}
                                         />
                                         <button
                                             type="button"
-                                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            className="absolute inset-y-0 right-0 flex items-center pr-3"
+                                            onClick={() =>
+                                                setShowConfirmPassword(
+                                                    !showConfirmPassword,
+                                                )
+                                            }
                                         >
                                             {showConfirmPassword ? (
-                                                <EyeOff size={18} className="text-gray-400" />
+                                                <EyeOff
+                                                    size={18}
+                                                    className="text-gray-400"
+                                                />
                                             ) : (
-                                                <Eye size={18} className="text-gray-400" />
+                                                <Eye
+                                                    size={18}
+                                                    className="text-gray-400"
+                                                />
                                             )}
                                         </button>
                                     </div>
                                     {errors.password_confirmation && (
-                                        <div className="mt-2 flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+                                        <div className="mt-2 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-600">
                                             <AlertCircle size={16} />
                                             {errors.password_confirmation}
                                         </div>
@@ -293,44 +366,65 @@ export default function RoleAndPermission({ isOpen, setIsOpen, user, roles }: Pr
                         {/* Roles - édition uniquement */}
                         {isEdit && (
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-4">
+                                <label className="mb-4 block text-sm font-medium text-gray-700">
                                     <div className="flex items-center gap-2">
-                                        <Shield size={18} className="text-amber-500" />
+                                        <Shield
+                                            size={18}
+                                            className="text-amber-500"
+                                        />
                                         Rôles assignés
                                     </div>
                                 </label>
                                 <div className="space-y-3">
                                     {roles.map((role) => (
-                                        <div key={role.name} className="flex items-center p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-amber-300 transition-colors">
+                                        <div
+                                            key={role.name}
+                                            className="flex items-center rounded-xl border border-gray-200 bg-gray-50 p-4 transition-colors hover:border-amber-300"
+                                        >
                                             <input
                                                 type="checkbox"
                                                 id={`role-${role.name}`}
-                                                checked={data.roles.includes(role.name)}
-                                                onChange={() => toggleRole(role.name)}
+                                                checked={data.roles.includes(
+                                                    role.name,
+                                                )}
+                                                onChange={() =>
+                                                    toggleRole(role.name)
+                                                }
                                                 disabled={processing}
-                                                className="w-5 h-5 text-amber-600 border-amber-300 rounded focus:ring-amber-500 focus:ring-offset-2 cursor-pointer"
+                                                className="h-5 w-5 cursor-pointer rounded border-amber-300 text-amber-600 focus:ring-amber-500 focus:ring-offset-2"
                                             />
-                                            <label 
+                                            <label
                                                 htmlFor={`role-${role.name}`}
                                                 className="ml-3 flex-1 cursor-pointer select-none"
                                             >
                                                 <div className="flex items-center justify-between">
-                                                    <span className="font-medium text-gray-900 capitalize">{role.name}</span>
-                                                    {data.roles.includes(role.name) && (
-                                                        <CheckCircle size={16} className="text-amber-500" />
+                                                    <span className="font-medium text-gray-900 capitalize">
+                                                        {role.name}
+                                                    </span>
+                                                    {data.roles.includes(
+                                                        role.name,
+                                                    ) && (
+                                                        <CheckCircle
+                                                            size={16}
+                                                            className="text-amber-500"
+                                                        />
                                                     )}
                                                 </div>
-                                                <p className="text-sm text-gray-500 mt-1">
-                                                    {role.name === 'Admin' && 'Accès complet à l\'administration'}
-                                                    {role.name === 'Agency' && 'Peut créer et gérer des propriétés'}
-                                                    {role.name === 'Simple_seller' && 'Peut vendre des propriétés'}
+                                                <p className="mt-1 text-sm text-gray-500">
+                                                    {role.name === 'Admin' &&
+                                                        "Accès complet à l'administration"}
+                                                    {role.name === 'Agency' &&
+                                                        'Peut créer et gérer des propriétés'}
+                                                    {role.name ===
+                                                        'Simple_seller' &&
+                                                        'Peut vendre des propriétés'}
                                                 </p>
                                             </label>
                                         </div>
                                     ))}
                                 </div>
                                 {errors.roles && (
-                                    <div className="mt-2 flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+                                    <div className="mt-2 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-600">
                                         <AlertCircle size={16} />
                                         {errors.roles}
                                     </div>
@@ -339,10 +433,10 @@ export default function RoleAndPermission({ isOpen, setIsOpen, user, roles }: Pr
                         )}
 
                         {/* Actions */}
-                        <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
+                        <div className="flex justify-end gap-4 border-t border-gray-200 pt-6">
                             <button
                                 type="button"
-                                className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+                                className="rounded-xl bg-gray-100 px-6 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-none"
                                 onClick={close}
                                 disabled={processing}
                             >
@@ -350,16 +444,34 @@ export default function RoleAndPermission({ isOpen, setIsOpen, user, roles }: Pr
                             </button>
                             <button
                                 type="submit"
-                                className="px-6 py-3 bg-gradient-to-r from-amber-400 to-amber-600 text-white rounded-xl font-medium hover:from-amber-500 hover:to-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-all disabled:opacity-75 disabled:cursor-not-allowed flex items-center gap-2"
+                                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-6 py-3 font-medium text-white transition-all hover:from-amber-500 hover:to-amber-700 focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-75"
                                 disabled={processing}
                             >
                                 {processing ? (
                                     <>
-                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        <svg
+                                            className="h-5 w-5 animate-spin text-white"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            ></circle>
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            ></path>
                                         </svg>
-                                        {isEdit ? 'Modification...' : 'Création...'}
+                                        {isEdit
+                                            ? 'Modification...'
+                                            : 'Création...'}
                                     </>
                                 ) : (
                                     <>

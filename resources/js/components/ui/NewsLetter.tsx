@@ -123,12 +123,12 @@ export default function NewsLetter() {
     ];
 
     return (
-        <section ref={sectionRef} className="relative py-20 lg:py-32 bg-gradient-to-br from-amber-50 via-white to-orange-50 overflow-hidden">
+        <section ref={sectionRef} className="relative py-20 lg:py-32 bg-gradient-to-br from-slate-50 via-white to-slate-50 overflow-hidden">
             {/* Formes décoratives de fond */}
             <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-amber-300/20 rounded-full filter blur-3xl"></div>
-                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-orange-300/20 rounded-full filter blur-3xl"></div>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-yellow-300/10 rounded-full filter blur-3xl"></div>
+                <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#C9A84C]/10 rounded-full filter blur-3xl"></div>
+                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-[#1E3A5F]/10 rounded-full filter blur-3xl"></div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#C9A84C]/5 rounded-full filter blur-3xl"></div>
             </div>
 
             {/* Particules flottantes */}
@@ -136,7 +136,7 @@ export default function NewsLetter() {
                 {[...Array(20)].map((_, i) => (
                     <div
                         key={i}
-                        className="absolute w-2 h-2 bg-amber-400/20 rounded-full animate-float"
+                        className="absolute w-2 h-2 bg-[#C9A84C]/20 rounded-full animate-float"
                         style={{
                             left: `${Math.random() * 100}%`,
                             top: `${Math.random() * 100}%`,
@@ -155,7 +155,7 @@ export default function NewsLetter() {
                     }`}>
                         {/* En-tête avec animation */}
                         <div className="mb-8">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100 text-amber-700 rounded-full text-sm font-semibold mb-4">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#C9A84C]/10 text-[#A8882E] rounded-full text-sm font-semibold mb-4">
                                 <Bell className="w-4 h-4" />
                                 {t('newsletter') || 'Newsletter'}
                             </div>
@@ -163,11 +163,11 @@ export default function NewsLetter() {
                             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4">
                                 {i18n.language === 'fr' ? (
                                     <>
-                                        Restez <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">connecté</span>
+                                        Restez <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C9A84C] to-[#A8882E]">connecté</span>
                                     </>
                                 ) : (
                                     <>
-                                        Stay <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">Connected</span>
+                                        Stay <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C9A84C] to-[#A8882E]">Connected</span>
                                     </>
                                 )}
                             </h2>
@@ -193,7 +193,7 @@ export default function NewsLetter() {
                                 }`}>
                                     <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
                                         <Mail className={`w-5 h-5 transition-colors duration-300 ${
-                                            emailFocused ? 'text-amber-500' : 'text-gray-400'
+                                            emailFocused ? 'text-[#1E3A5F]' : 'text-gray-400'
                                         }`} />
                                     </div>
                                     
@@ -204,7 +204,7 @@ export default function NewsLetter() {
                                         onFocus={() => setEmailFocused(true)}
                                         onBlur={() => setEmailFocused(false)}
                                         placeholder={t('enter_email') || 'Entrez votre email'}
-                                        className={`w-full px-12 py-4 bg-white border-2 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-amber-400/20 focus:border-amber-400 transition-all duration-300 ${
+                                        className={`w-full px-12 py-4 bg-white border-2 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#1E3A5F]/20 focus:border-[#1E3A5F] transition-all duration-300 ${
                                             error ? 'border-red-400' : 'border-gray-200'
                                         }`}
                                     />
@@ -239,7 +239,7 @@ export default function NewsLetter() {
                                 className={`w-full relative group/btn inline-flex items-center justify-center gap-3 px-8 py-4 font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 ${
                                     isSubscribed
                                         ? 'bg-green-500 text-white hover:bg-green-600'
-                                        : 'bg-gradient-to-r from-amber-400 to-amber-600 text-white hover:from-amber-500 hover:to-amber-700 shadow-lg hover:shadow-amber-500/25'
+                                        : 'bg-gradient-to-r from-[#C9A84C] to-[#A8882E] text-white hover:from-[#A8882E] hover:to-[#8a6e22] shadow-lg hover:shadow-md'
                                 } ${
                                     isLoading || isSubscribed ? 'cursor-not-allowed' : ''
                                 }`}
@@ -277,10 +277,10 @@ export default function NewsLetter() {
                                 return (
                                     <div
                                         key={index}
-                                        className="flex items-start gap-3 p-3 bg-white rounded-xl border border-gray-100 hover:border-amber-200 hover:shadow-md transition-all duration-300"
+                                        className="flex items-start gap-3 p-3 bg-white rounded-xl border border-gray-100 hover:border-slate-200 hover:shadow-md transition-all duration-300"
                                     >
-                                        <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                            <Icon className="w-5 h-5 text-amber-600" />
+                                        <div className="w-10 h-10 bg-[#C9A84C]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                            <Icon className="w-5 h-5 text-[#C9A84C]" />
                                         </div>
                                         <div>
                                             <h4 className="font-medium text-gray-900 text-sm">
@@ -341,9 +341,9 @@ export default function NewsLetter() {
                             {stats.map((stat, index) => (
                                 <div
                                     key={index}
-                                    className="text-center p-4 bg-white rounded-xl border border-gray-100 hover:border-amber-200 hover:shadow-md transition-all duration-300"
+                                    className="text-center p-4 bg-white rounded-xl border border-gray-100 hover:border-slate-200 hover:shadow-md transition-all duration-300"
                                 >
-                                    <div className="text-2xl font-bold text-amber-600 mb-1">
+                                    <div className="text-2xl font-bold text-[#C9A84C] mb-1">
                                         {stat.number}
                                     </div>
                                     <div className="text-xs text-gray-600">
@@ -354,7 +354,7 @@ export default function NewsLetter() {
                         </div>
 
                         {/* Témoignage */}
-                        <div className="mt-8 p-6 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-200">
+                        <div className="mt-8 p-6 bg-gradient-to-r from-slate-50 to-slate-50 rounded-2xl border border-slate-200">
                             <div className="flex items-start gap-4">
                                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0">
                                     <Heart className="w-6 h-6 text-red-500 fill-current" />
@@ -378,11 +378,11 @@ export default function NewsLetter() {
                 }`}>
                     <div className="inline-flex items-center gap-4 px-6 py-3 bg-white rounded-full shadow-lg border border-gray-100">
                         <div className="flex items-center gap-2">
-                            <Users className="w-5 h-5 text-amber-500" />
+                            <Users className="w-5 h-5 text-[#1E3A5F]" />
                             <span className="text-sm font-medium text-gray-700">
                                 {t('join_community') || 'Rejoignez notre communauté de'}
                             </span>
-                            <span className="text-lg font-bold text-amber-600">
+                            <span className="text-lg font-bold text-[#C9A84C]">
                                 50,000+
                             </span>
                             <span className="text-sm font-medium text-gray-700">
@@ -394,7 +394,7 @@ export default function NewsLetter() {
             </div>
 
             {/* Forme décorative du bas */}
-            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-amber-50 to-transparent pointer-events-none"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-slate-50 to-transparent pointer-events-none"></div>
 
             {/* Styles personnalisés pour les animations */}
             <style>{`
