@@ -26,6 +26,7 @@ import {
     XCircle,
     Zap,
 } from 'lucide-react';
+import { CircleFadingArrowUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -106,6 +107,17 @@ export default function Profile() {
     const [activeTab, setActiveTab] = useState<TabType>('home');
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
+    const [showScrollTop, setShowScrollTop] = useState(false);
+
+    // Scroll listener pour l'animation du bouton profil
+    useEffect(() => {
+        const handleScroll = () => setShowScrollTop(window.scrollY > 300);
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const scrollToTop = () =>
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
     // Récupération du tab actif depuis l'URL avec validation
     useEffect(() => {
@@ -755,17 +767,42 @@ export default function Profile() {
                 </div>
             </section>
 
-            {/* Mobile Menu Toggle */}
-            <div className="fixed right-8 bottom-22 z-50 lg:hidden">
+            {/* Mobile Menu Toggle — se soulève quand scroll-to-top apparaît */}
+            <div className="fixed right-6 z-50 lg:hidden" style={{ bottom: '2rem' }}>
+                {/* Bouton profil */}
                 <button
                     onClick={() => setShowMobileMenu(!showMobileMenu)}
-                    className="flex h-12 w-12 items-center justify-center rounded-full bg-[#C9A84C] text-white shadow-lg"
+                    className="flex h-12 w-12 items-center justify-center rounded-full bg-[#C9A84C] text-white shadow-xl ring-2 ring-white/20 transition-all active:scale-95"
+                    style={{
+                        transform: showScrollTop
+                            ? 'translateY(-64px)'
+                            : 'translateY(0)',
+                        transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    }}
                 >
                     {showMobileMenu ? (
                         <XCircle size={24} />
                     ) : (
                         <User size={24} />
                     )}
+                </button>
+
+                {/* Scroll-to-top mobile — apparaît sous le bouton profil */}
+                <button
+                    onClick={scrollToTop}
+                    aria-label="Retour en haut de la page"
+                    className="absolute bottom-0 flex h-12 w-12 items-center justify-center rounded-full bg-[#0099cc] text-white shadow-xl ring-2 ring-white/20 active:scale-95"
+                    style={{
+                        opacity: showScrollTop ? 1 : 0,
+                        transform: showScrollTop
+                            ? 'translateY(0) scale(1)'
+                            : 'translateY(16px) scale(0.8)',
+                        pointerEvents: showScrollTop ? 'auto' : 'none',
+                        transition:
+                            'opacity 0.35s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    }}
+                >
+                    <CircleFadingArrowUp size={20} />
                 </button>
             </div>
 

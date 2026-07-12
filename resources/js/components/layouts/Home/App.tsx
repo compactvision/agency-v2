@@ -1,8 +1,7 @@
-import { Toaster } from 'sonner';
-// import ChatBot from './ChatBot';
-
 import { CircleFadingArrowUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { Toaster } from 'sonner';
+// import ChatBot from './ChatBot';
 import Footer from '../../partials/Footer';
 import Header from '../../partials/Header';
 
@@ -12,14 +11,10 @@ const App = ({ children }: { children: React.ReactNode }) => {
     // Gérer l'affichage du bouton "retour en haut"
     useEffect(() => {
         const handleScroll = () => {
-            if (window.scrollY > 300) {
-                setShowScrollTop(true);
-            } else {
-                setShowScrollTop(false);
-            }
+            setShowScrollTop(window.scrollY > 300);
         };
 
-        window.addEventListener('scroll', handleScroll);
+        window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
@@ -44,10 +39,10 @@ const App = ({ children }: { children: React.ReactNode }) => {
             {/* <ChatBot /> */}
             <Toaster richColors position="top-right" />
 
-            {/* Bouton pour remonter en haut de la page */}
+            {/* Bouton scroll-to-top */}
             <button
                 onClick={scrollToTop}
-                className={`fixed right-8 bottom-8 z-50 rounded-full bg-[#0099cc] p-3 text-white shadow-lg transition-all duration-300 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none ${
+                className={`fixed right-8 bottom-8 z-50 hidden rounded-full bg-[#0099cc] p-3 text-white shadow-lg transition-all duration-300 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none lg:flex ${
                     showScrollTop
                         ? 'visible translate-y-0 opacity-100'
                         : 'invisible translate-y-4 opacity-0'
