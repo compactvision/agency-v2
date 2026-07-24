@@ -3,9 +3,12 @@
 namespace App\Domains\Billing\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Plan extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'name',
         'description',
@@ -17,7 +20,7 @@ class Plan extends Model
     ];
 
     protected $casts = [
-        'price'     => 'decimal:2',
+        'price' => 'decimal:2',
         'is_active' => 'boolean',
     ];
 

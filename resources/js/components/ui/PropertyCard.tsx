@@ -59,7 +59,7 @@ export default function PropertyCard({
             <div className="card-premium flex flex-col overflow-hidden md:flex-row">
                 {/* Image */}
                 <div className="relative h-52 w-full shrink-0 overflow-hidden md:h-auto md:w-72">
-                    <Link href={route('property.show', property.id)} className="block h-full w-full">
+                    <Link href={route('property.show', property.slug)} className="block h-full w-full">
                         {imageUrl ? (
                             <img
                                 src={imageUrl}
@@ -91,7 +91,7 @@ export default function PropertyCard({
                 <div className="flex flex-1 flex-col justify-between p-6">
                     <div>
                         <h3 className="mb-1.5 text-lg font-bold text-gray-900 line-clamp-1">
-                            <Link href={route('property.show', property.id)} className="hover:text-[#1E3A5F] transition-colors">
+                            <Link href={route('property.show', property.slug)} className="hover:text-[#1E3A5F] transition-colors">
                                 {property.title}
                             </Link>
                         </h3>
@@ -136,7 +136,7 @@ export default function PropertyCard({
                             </span>
                         </div>
                         <Link
-                            href={route('property.show', property.id)}
+                            href={route('property.show', property.slug)}
                             className="flex items-center gap-2 rounded-xl bg-[#1E3A5F] px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-[#152C47] hover:shadow-lg hover:-translate-y-0.5"
                         >
                             {t('show_details')}
@@ -157,7 +157,7 @@ export default function PropertyCard({
         >
             {/* Image */}
             <div className="relative h-52 overflow-hidden">
-                <Link href={route('property.show', property.id)} className="block h-full w-full">
+                <Link href={route('property.show', property.slug)} className="block h-full w-full">
                     {imageUrl ? (
                         <img
                             src={imageUrl}
@@ -209,7 +209,7 @@ export default function PropertyCard({
 
                 {/* Titre */}
                 <h3 className="mb-2 text-base font-bold text-gray-900 line-clamp-2 group-hover:text-[#1E3A5F] transition-colors duration-200">
-                    <Link href={route('property.show', property.id)}>
+                    <Link href={route('property.show', property.slug)}>
                         {property.title}
                     </Link>
                 </h3>
@@ -249,7 +249,7 @@ export default function PropertyCard({
                 {/* CTA */}
                 <div className="mt-auto">
                     <Link
-                        href={route('property.show', property.id)}
+                        href={route('property.show', property.slug)}
                         className={`flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all duration-200 ${
                             hovered
                                 ? 'bg-[#1E3A5F] text-white shadow-lg'

@@ -21,7 +21,7 @@ type Feature = { name: string };
 type Plan = {
     id?: number;
     name: string;
-    price: string;
+    price: string | number;
     duration: string;
     listing_limit: number | null;
     image_limit: number | null;
@@ -29,7 +29,7 @@ type Plan = {
     highlight_homepage: boolean;
     priority_support: boolean;
     analytics_access: boolean;
-    description: string;
+    description: string | null;
     features: Feature[];
     image?: string | null;
     payment_method: 'manual' | 'automatic';
@@ -129,10 +129,13 @@ export default function TarifPopup({
             HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
         >,
     ) => {
-        const { name, value, type, checked } = e.target as HTMLInputElement &
-            HTMLTextAreaElement &
-            HTMLSelectElement;
-        setData(name as any, type === 'checkbox' ? (checked as any) : value);
+        const target = e.target;
+        const checked =
+            target instanceof HTMLInputElement && target.type === 'checkbox';
+        setData(
+            target.name as any,
+            checked ? (target.checked as any) : target.value,
+        );
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -203,23 +206,27 @@ export default function TarifPopup({
     );
 
     return (
-        <div className="fixed inset-0 z-50" aria-modal="true" role="dialog">
+        <div
+            className="agency-modal-layer fixed inset-0 z-50"
+            aria-modal="true"
+            role="dialog"
+        >
             {/* container centers content */}
             <div className="flex min-h-screen items-center justify-center p-4">
                 {/* Overlay - CORRECTION: onClick appelle handleOverlayClick */}
                 <div
-                    className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity"
+                    className="agency-modal-overlay fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity"
                     onClick={handleOverlayClick}
                     aria-hidden="true"
                 />
 
                 {/* Modal content - CORRECTION: stopPropagation pour empêcher la fermeture */}
                 <div
-                    className="relative z-50 max-h-[90vh] w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all"
+                    className="agency-modal relative z-50 max-h-[90vh] w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-amber-400 to-amber-600 p-6 text-white">
+                    <div className="agency-modal-header bg-gradient-to-r from-amber-400 to-amber-600 p-6 text-white">
                         <div className="flex items-center justify-between">
                             <h2 className="text-2xl font-bold">
                                 {isEditing
@@ -260,7 +267,7 @@ export default function TarifPopup({
                     {/* Form */}
                     <form
                         onSubmit={handleSubmit}
-                        className="max-h-[60vh] space-y-6 overflow-y-auto p-6"
+                        className="agency-modal-body max-h-[60vh] space-y-6 overflow-y-auto p-6"
                     >
                         {/* Basic */}
                         {activeSection === 'basic' && (
@@ -646,7 +653,7 @@ export default function TarifPopup({
                         <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
                             <button
                                 type="button"
-                                className="rounded-lg bg-gray-100 px-4 py-2 font-medium text-gray-700 hover:bg-gray-200"
+                                className="agency-btn-secondary rounded-lg px-4 py-2 font-medium"
                                 onClick={onClose}
                                 disabled={processing}
                             >
@@ -656,7 +663,7 @@ export default function TarifPopup({
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-400 to-amber-600 px-4 py-2 font-medium text-white"
+                                className="agency-btn-primary flex items-center gap-2 rounded-lg px-4 py-2 font-medium"
                             >
                                 {processing ? (
                                     <>

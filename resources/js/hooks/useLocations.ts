@@ -4,15 +4,25 @@ import { useEffect, useState } from 'react';
 export interface Municipality {
     id: number;
     name: string;
+    image?: string;
+    properties?: number;
     [key: string]: any;
 }
 
-export function useLocations() {
-    const [municipalities, setMunicipalities] = useState<Municipality[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
+export function useLocations(initialMunicipalities: Municipality[] = []) {
+    const [municipalities, setMunicipalities] = useState<Municipality[]>(
+        initialMunicipalities,
+    );
+    const [loading, setLoading] = useState<boolean>(
+        initialMunicipalities.length === 0,
+    );
     const [error, setError] = useState<unknown>(null);
 
     useEffect(() => {
+        if (initialMunicipalities.length > 0) {
+            return;
+        }
+
         const fetchLocations = async () => {
             try {
                 const response = await axios.get('/api/municipalities');

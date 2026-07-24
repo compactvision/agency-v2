@@ -1,5 +1,7 @@
 import App from '@/components/layouts/Home/App';
+import PropertyGalleryDialog from '@/components/properties/PropertyGalleryDialog';
 import Breadcumb from '@/components/ui/Breadcumb';
+import ErrorText from '@/components/ui/ErrorText';
 import { useAd } from '@/hooks/useAd';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
@@ -21,7 +23,6 @@ import {
     LucideCoffee,
     LucideCopy,
     LucideDog,
-    LucideDownload,
     LucideDroplets,
     LucideEye,
     LucideFlame,
@@ -38,11 +39,8 @@ import {
     LucideMusic,
     LucideNavigation,
     LucideParkingCircle,
-    LucidePause,
     LucidePhone,
     LucidePlane,
-    LucidePlay,
-    LucideRotateCw,
     LucideRuler,
     LucideSchool,
     LucideShare2,
@@ -58,28 +56,62 @@ import {
     LucideWifi,
     LucideWine,
     LucideX,
-    LucideZoomIn,
-    LucideZoomOut,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+type PropertyImage = { id?: number | string; url: string };
+type Amenity = { name: string };
+type Municipality = { name?: string };
+type PropertyOwner = { name?: string; phone?: string };
+
+interface PropertyRecord {
+    id: number;
+    slug: string;
+    title: string;
+    description?: string;
+    price: number;
+    price_per_sqft?: number;
+    type?: string;
+    sale_type?: string;
+    surface?: number;
+    bedrooms?: number;
+    bathrooms?: number;
+    rooms?: number;
+    kitchens?: number;
+    capacity?: number;
+    floor?: number;
+    property_age?: number;
+    featured?: boolean;
+    created_at: string;
+    images: PropertyImage[];
+    amenities: Amenity[];
+    municipality?: Municipality;
+    user: PropertyOwner;
+}
+
+interface NearbyProperty {
+    id: number;
+    slug: string;
+    title: string;
+    price: number;
+    sale_type?: string;
+    images: PropertyImage[];
+    municipality?: Municipality;
+}
+
 export default function PropertyDetails({
     property: initialProperty,
-    properties,
     arroundProperties,
     viewCount,
 }: {
-    property: any;
-    properties: any;
-    arroundProperties: any;
+    property: PropertyRecord | null;
+    arroundProperties: NearbyProperty[];
     viewCount: number;
 }) {
-    const { url } = usePage();
     // Extract ID from URL (last segment) or use prop ID if available
-    const propId =
-        (usePage().props as any).id ||
-        window.location.pathname.split('/').pop();
+    const pageProps = usePage().props as { id?: number | string };
+    const propId = pageProps.id || window.location.pathname.split('/').pop();
 
     const { ad: fetchedProperty, loading: adLoading } = useAd(propId);
 
@@ -109,6 +141,24 @@ export default function PropertyDetails({
         );
     }
 
+    return (
+        <PropertyDetailsContent
+            property={property}
+            arroundProperties={arroundProperties}
+            viewCount={viewCount}
+        />
+    );
+}
+
+function PropertyDetailsContent({
+    property,
+    arroundProperties,
+    viewCount,
+}: {
+    property: PropertyRecord;
+    arroundProperties: NearbyProperty[];
+    viewCount: number;
+}) {
     const [showNumber, setShowNumber] = useState(false);
     // ... rest of state
     const [loading, setLoading] = useState(false);
@@ -120,11 +170,8 @@ export default function PropertyDetails({
     const [copiedToClipboard, setCopiedToClipboard] = useState(false);
     const [shareModal, setShareModal] = useState(false);
     const [activeImageIndex, setActiveImageIndex] = useState(0);
-    const [selectedFloorPlan, setSelectedFloorPlan] = useState(0);
     const [galleryView, setGalleryView] = useState('grid');
     const [zoomLevel, setZoomLevel] = useState(1);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [isMuted, setIsMuted] = useState(false);
     const [rotation, setRotation] = useState(0);
     const [imageLoaded, setImageLoaded] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
@@ -136,6 +183,7 @@ export default function PropertyDetails({
     const [isMobile, setIsMobile] = useState(false);
     const imageRef = useRef<HTMLImageElement>(null);
     const modalRef = useRef<HTMLDivElement>(null);
+    const previousFocusRef = useRef<HTMLElement | null>(null);
     const { t } = useTranslation();
 
     // Detect mobile device
@@ -210,6 +258,7 @@ export default function PropertyDetails({
     ];
 
     const openModal = (index: number) => {
+        previousFocusRef.current = document.activeElement as HTMLElement;
         setCurrentIndex(index);
         setIsModalOpen(true);
         document.body.style.overflow = 'hidden';
@@ -218,45 +267,71 @@ export default function PropertyDetails({
         setDragOffset({ x: 0, y: 0 });
     };
 
-    const closeModal = () => {
+    const closeModal = useCallback(() => {
         setIsModalOpen(false);
         document.body.style.overflow = 'unset';
         setZoomLevel(1);
         setRotation(0);
         setDragOffset({ x: 0, y: 0 });
-    };
+        requestAnimationFrame(() => previousFocusRef.current?.focus());
+    }, []);
+
+    useEffect(() => {
+        if (!isModalOpen || !modalRef.current) return;
+
+        const dialog = modalRef.current;
+        const selector =
+            'button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex="-1"])';
+        const focusable = dialog.querySelectorAll<HTMLElement>(selector);
+        focusable[0]?.focus();
+
+        const trapFocus = (event: KeyboardEvent) => {
+            if (event.key !== 'Tab' || focusable.length === 0) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        };
+
+        dialog.addEventListener('keydown', trapFocus);
+        return () => dialog.removeEventListener('keydown', trapFocus);
+    }, [isModalOpen]);
+
+    const imageCount = property.images.length;
 
     const nextImage = useCallback(() => {
-        if (!property?.images?.length) return;
-        setCurrentIndex((prev) => (prev + 1) % property.images.length);
+        if (!imageCount) return;
+        setCurrentIndex((prev) => (prev + 1) % imageCount);
         setZoomLevel(1);
         setRotation(0);
         setDragOffset({ x: 0, y: 0 });
-    }, [property?.images?.length]);
+    }, [imageCount]);
 
     const prevImage = useCallback(() => {
-        if (!property?.images?.length) return;
-        setCurrentIndex(
-            (prev) =>
-                (prev - 1 + property.images.length) % property.images.length,
-        );
+        if (!imageCount) return;
+        setCurrentIndex((prev) => (prev - 1 + imageCount) % imageCount);
         setZoomLevel(1);
         setRotation(0);
         setDragOffset({ x: 0, y: 0 });
-    }, [property?.images?.length]);
+    }, [imageCount]);
 
-    const handleZoomIn = () => {
+    const handleZoomIn = useCallback(() => {
         const maxZoom = isMobile ? 2 : 3;
         setZoomLevel((prev) => Math.min(prev + 0.25, maxZoom));
-    };
+    }, [isMobile]);
 
-    const handleZoomOut = () => {
+    const handleZoomOut = useCallback(() => {
         setZoomLevel((prev) => Math.max(prev - 0.25, 1));
-    };
+    }, []);
 
-    const handleRotate = () => {
+    const handleRotate = useCallback(() => {
         setRotation((prev) => (prev + 90) % 360);
-    };
+    }, []);
 
     const handleReset = () => {
         setZoomLevel(1);
@@ -360,7 +435,15 @@ export default function PropertyDetails({
                     break;
             }
         },
-        [isModalOpen, nextImage, prevImage],
+        [
+            closeModal,
+            handleRotate,
+            handleZoomIn,
+            handleZoomOut,
+            isModalOpen,
+            nextImage,
+            prevImage,
+        ],
     );
 
     useEffect(() => {
@@ -425,10 +508,8 @@ export default function PropertyDetails({
                 name?: string;
                 email?: string;
                 phone?: string;
-                [key: string]: any;
             } | null;
         };
-        [key: string]: any;
     }
 
     const user = (usePage().props as unknown as PageProps).auth.user;
@@ -470,7 +551,7 @@ export default function PropertyDetails({
 
         window.addEventListener('keydown', handleEscape);
         return () => window.removeEventListener('keydown', handleEscape);
-    }, [shareModal, isModalOpen]);
+    }, [closeModal, shareModal, isModalOpen]);
 
     return (
         <App>
@@ -563,8 +644,8 @@ export default function PropertyDetails({
                                                 className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold text-white shadow-xl ${
                                                     property.sale_type ===
                                                     'rent'
-                                                        ? 'bg-[#152C47]'
-                                                        : 'bg-[#0d2340]'
+                                                        ? 'bg-[#292625]'
+                                                        : 'bg-[#413D3C]'
                                                 }`}
                                             >
                                                 {property.sale_type === 'rent'
@@ -572,7 +653,7 @@ export default function PropertyDetails({
                                                     : t('for_sale')}
                                             </span>
                                             {property.featured && (
-                                                <span className="inline-flex items-center gap-2 rounded-lg bg-[#C9A84C] px-4 py-2 text-xs font-bold text-white shadow-xl">
+                                                <span className="inline-flex items-center gap-2 rounded-lg bg-[#CF8E19] px-4 py-2 text-xs font-bold text-[#292625] shadow-xl">
                                                     <LucideAward size={16} />
                                                     {t('featured')}
                                                 </span>
@@ -679,7 +760,7 @@ export default function PropertyDetails({
                                             <span className="flex items-center gap-2 text-sm font-medium">
                                                 <LucideMapPin
                                                     size={18}
-                                                    className="text-[#C9A84C]"
+                                                    className="text-[#CF8E19]"
                                                 />
                                                 <span>
                                                     {property.municipality
@@ -690,7 +771,7 @@ export default function PropertyDetails({
                                             <span className="flex items-center gap-2 text-sm font-medium">
                                                 <LucideEye
                                                     size={18}
-                                                    className="text-[#C9A84C]"
+                                                    className="text-[#CF8E19]"
                                                 />
                                                 <span>
                                                     {viewCount || 0}{' '}
@@ -700,7 +781,7 @@ export default function PropertyDetails({
                                             <span className="flex items-center gap-2 text-sm font-medium">
                                                 <LucideCalendar
                                                     size={18}
-                                                    className="text-[#C9A84C]"
+                                                    className="text-[#CF8E19]"
                                                 />
                                                 <span>
                                                     {new Date(
@@ -750,7 +831,7 @@ export default function PropertyDetails({
                                         <button
                                             onClick={handleShowNumber}
                                             disabled={loading}
-                                            className="flex items-center justify-center gap-2 rounded-xl bg-[#0d2340] px-6 py-4 text-sm font-bold text-white transition-all duration-300 hover:bg-[#152C47] disabled:opacity-50"
+                                            className="flex items-center justify-center gap-2 rounded-xl bg-[#413D3C] px-6 py-4 text-sm font-bold text-white transition-all duration-300 hover:bg-[#292625] disabled:opacity-50 dark:bg-[#CF8E19] dark:text-[#292625]"
                                         >
                                             {loading ? (
                                                 <LucideLoader
@@ -789,7 +870,7 @@ export default function PropertyDetails({
 
                                 {/* Price & Agent Info */}
                                 <div className="h-max lg:sticky lg:top-32 lg:col-span-1">
-                                    <div className="rounded-3xl border border-[#C9A84C]/20 bg-[#0d2340] p-8 text-white shadow-2xl">
+                                    <div className="rounded-3xl border border-[#CF8E19]/20 bg-[#413D3C] p-8 text-white shadow-2xl dark:bg-[#292625]">
                                         <div className="mb-8 text-center">
                                             <div className="mb-2 text-4xl font-bold lg:text-5xl">
                                                 {new Intl.NumberFormat(
@@ -828,7 +909,7 @@ export default function PropertyDetails({
                                                 {t('contact_agent')}
                                             </h4>
                                             <div className="mb-6 flex items-center gap-4">
-                                                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#C9A84C]/20 text-2xl font-bold text-[#C9A84C] shadow-lg">
+                                                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#CF8E19]/20 text-2xl font-bold text-[#CF8E19] shadow-lg">
                                                     {property.user.name
                                                         ?.charAt(0)
                                                         .toUpperCase()}
@@ -863,25 +944,54 @@ export default function PropertyDetails({
                                                     e.preventDefault();
                                                     if (!user) return;
                                                     post(
-                                                        route('contact.owner'),
+                                                        route(
+                                                            'contact.owner',
+                                                            property.slug,
+                                                        ),
                                                         {
                                                             preserveScroll: true,
                                                             onSuccess: () =>
                                                                 reset(),
+                                                            onError: () =>
+                                                                requestAnimationFrame(
+                                                                    () =>
+                                                                        document
+                                                                            .querySelector<HTMLElement>(
+                                                                                '#owner-contact-form [aria-invalid="true"]',
+                                                                            )
+                                                                            ?.focus(),
+                                                                ),
                                                         },
                                                     );
                                                 }}
+                                                id="owner-contact-form"
                                                 className="space-y-4"
                                             >
+                                                <label
+                                                    htmlFor="owner-contact-name"
+                                                    className="sr-only"
+                                                >
+                                                    {t('your_name')}
+                                                </label>
                                                 <input
+                                                    id="owner-contact-name"
                                                     type="text"
+                                                    autoComplete="name"
                                                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-400 focus:border-[#C9A84C] focus:ring-1 focus:ring-[#C9A84C] focus:outline-none"
                                                     placeholder={t('your_name')}
                                                     value={user?.name || ''}
                                                     readOnly
                                                 />
+                                                <label
+                                                    htmlFor="owner-contact-email"
+                                                    className="sr-only"
+                                                >
+                                                    {t('your_email')}
+                                                </label>
                                                 <input
+                                                    id="owner-contact-email"
                                                     type="email"
+                                                    autoComplete="email"
                                                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-400 focus:border-[#C9A84C] focus:ring-1 focus:ring-[#C9A84C] focus:outline-none"
                                                     placeholder={t(
                                                         'your_email',
@@ -889,8 +999,24 @@ export default function PropertyDetails({
                                                     value={user?.email || ''}
                                                     readOnly
                                                 />
+                                                <label
+                                                    htmlFor="owner-contact-phone"
+                                                    className="sr-only"
+                                                >
+                                                    {t('your_phone')}
+                                                </label>
                                                 <input
+                                                    id="owner-contact-phone"
                                                     type="tel"
+                                                    autoComplete="tel"
+                                                    aria-invalid={Boolean(
+                                                        errors.phone,
+                                                    )}
+                                                    aria-describedby={
+                                                        errors.phone
+                                                            ? 'owner-contact-phone-error'
+                                                            : undefined
+                                                    }
                                                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-400 focus:border-[#C9A84C] focus:ring-1 focus:ring-[#C9A84C] focus:outline-none"
                                                     placeholder={t(
                                                         'your_phone',
@@ -903,7 +1029,28 @@ export default function PropertyDetails({
                                                         )
                                                     }
                                                 />
+                                                <ErrorText
+                                                    id="owner-contact-phone-error"
+                                                    error={errors.phone}
+                                                />
+                                                <label
+                                                    htmlFor="owner-contact-message"
+                                                    className="sr-only"
+                                                >
+                                                    {t('your_message')}
+                                                </label>
                                                 <textarea
+                                                    id="owner-contact-message"
+                                                    required
+                                                    minLength={10}
+                                                    aria-invalid={Boolean(
+                                                        errors.message,
+                                                    )}
+                                                    aria-describedby={
+                                                        errors.message
+                                                            ? 'owner-contact-message-error'
+                                                            : undefined
+                                                    }
                                                     className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-400 focus:border-[#C9A84C] focus:ring-1 focus:ring-[#C9A84C] focus:outline-none"
                                                     rows={3}
                                                     placeholder={t(
@@ -917,12 +1064,17 @@ export default function PropertyDetails({
                                                         )
                                                     }
                                                 />
+                                                <ErrorText
+                                                    id="owner-contact-message-error"
+                                                    error={errors.message}
+                                                />
                                                 <button
                                                     type="submit"
-                                                    className="w-full rounded-xl bg-[#C9A84C] px-6 py-3 font-bold text-white transition-all duration-300 hover:bg-[#A8882E] disabled:opacity-50"
+                                                    className="w-full rounded-xl bg-[#CF8E19] px-6 py-3 font-bold text-[#292625] transition-all duration-300 hover:bg-[#E0A43A] disabled:opacity-50"
                                                     disabled={
                                                         processing || !user
                                                     }
+                                                    aria-busy={processing}
                                                 >
                                                     {processing
                                                         ? t('sending')
@@ -980,7 +1132,7 @@ export default function PropertyDetails({
                                             onClick={() => setActiveTab(tab.id)}
                                             className={`flex-1 rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-300 ${
                                                 activeTab === tab.id
-                                                    ? 'bg-[#0d2340] text-white shadow-md'
+                                                    ? 'bg-[#413D3C] text-white shadow-md dark:bg-[#CF8E19] dark:text-[#292625]'
                                                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                                             }`}
                                         >
@@ -1194,7 +1346,7 @@ export default function PropertyDetails({
                                                     )
                                                     .map(
                                                         (
-                                                            amenity: any,
+                                                            amenity: Amenity,
                                                             index: number,
                                                         ) => (
                                                             <div
@@ -1409,12 +1561,12 @@ export default function PropertyDetails({
                                 <div className="space-y-4">
                                     {arroundProperties
                                         ?.slice(0, 3)
-                                        .map((p: any) => (
+                                        .map((p: NearbyProperty) => (
                                             <Link
                                                 key={p.id}
                                                 href={route(
                                                     'property.show',
-                                                    p.id,
+                                                    p.slug,
                                                 )}
                                                 className="group block"
                                             >
@@ -1470,217 +1622,41 @@ export default function PropertyDetails({
                 </div>
             </section>
 
-            {/* Full Screen Image Modal with Advanced Features */}
             {isModalOpen && (
-                <div
-                    ref={modalRef}
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4"
+                <PropertyGalleryDialog
+                    property={property}
+                    dialogRef={modalRef}
+                    imageRef={imageRef}
+                    currentIndex={currentIndex}
+                    zoomLevel={zoomLevel}
+                    rotation={rotation}
+                    dragOffset={dragOffset}
+                    isDragging={isDragging}
+                    isMobile={isMobile}
+                    autoPlay={autoPlay}
+                    showThumbnails={showThumbnails}
+                    setAutoPlay={setAutoPlay}
+                    setShowThumbnails={setShowThumbnails}
+                    setCurrentIndex={setCurrentIndex}
+                    setZoomLevel={setZoomLevel}
+                    setRotation={setRotation}
+                    setDragOffset={setDragOffset}
+                    closeModal={closeModal}
+                    handleZoomOut={handleZoomOut}
+                    handleZoomIn={handleZoomIn}
+                    handleRotate={handleRotate}
+                    handleReset={handleReset}
+                    handleDownload={handleDownload}
+                    prevImage={prevImage}
+                    nextImage={nextImage}
                     onMouseDown={handleMouseDown}
                     onMouseMove={handleMouseMove}
                     onMouseUp={handleMouseUp}
-                    onMouseLeave={handleMouseUp}
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
-                >
-                    {/* Top Controls */}
-                    <div className="absolute top-0 right-0 left-0 z-10 bg-gradient-to-b from-black/70 to-transparent p-4 md:p-6">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 md:gap-4">
-                                <button
-                                    onClick={closeModal}
-                                    className="rounded-full bg-white/10 p-2 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white/20 md:p-3"
-                                >
-                                    <LucideX
-                                        size={20}
-                                        className="md:h-7 md:w-7"
-                                    />
-                                </button>
-                                <div className="rounded-full bg-black/60 px-3 py-1 backdrop-blur-md md:px-4 md:py-2">
-                                    <span className="text-xs font-medium text-white md:text-sm">
-                                        {currentIndex + 1} /{' '}
-                                        {property.images.length}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-1 md:gap-3">
-                                <button
-                                    onClick={handleZoomOut}
-                                    className="rounded-full bg-white/10 p-2 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white/20 md:p-3"
-                                    title="Zoom out"
-                                >
-                                    <LucideZoomOut
-                                        size={16}
-                                        className="md:h-6 md:w-6"
-                                    />
-                                </button>
-                                <div className="rounded-full bg-black/60 px-2 py-1 backdrop-blur-md md:px-3 md:py-1">
-                                    <span className="text-xs font-medium text-white md:text-sm">
-                                        {Math.round(zoomLevel * 100)}%
-                                    </span>
-                                </div>
-                                <button
-                                    onClick={handleZoomIn}
-                                    className="rounded-full bg-white/10 p-2 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white/20 md:p-3"
-                                    title="Zoom in"
-                                >
-                                    <LucideZoomIn
-                                        size={16}
-                                        className="md:h-6 md:w-6"
-                                    />
-                                </button>
-                                <button
-                                    onClick={handleRotate}
-                                    className="rounded-full bg-white/10 p-2 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white/20 md:p-3"
-                                    title="Rotate"
-                                >
-                                    <LucideRotateCw
-                                        size={16}
-                                        className="md:h-6 md:w-6"
-                                    />
-                                </button>
-                                <button
-                                    onClick={handleReset}
-                                    className="rounded-full bg-white/10 p-2 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white/20 md:p-3"
-                                    title="Reset"
-                                >
-                                    <LucideMaximize2
-                                        size={16}
-                                        className="md:h-6 md:w-6"
-                                    />
-                                </button>
-                                <button
-                                    onClick={handleDownload}
-                                    className="rounded-full bg-white/10 p-2 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white/20 md:p-3"
-                                    title="Download"
-                                >
-                                    <LucideDownload
-                                        size={16}
-                                        className="md:h-6 md:w-6"
-                                    />
-                                </button>
-                                <button
-                                    onClick={() => setAutoPlay(!autoPlay)}
-                                    className="rounded-full bg-white/10 p-2 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white/20 md:p-3"
-                                    title={autoPlay ? 'Pause' : 'Play'}
-                                >
-                                    {autoPlay ? (
-                                        <LucidePause
-                                            size={16}
-                                            className="md:h-6 md:w-6"
-                                        />
-                                    ) : (
-                                        <LucidePlay
-                                            size={16}
-                                            className="md:h-6 md:w-6"
-                                        />
-                                    )}
-                                </button>
-                                <button
-                                    onClick={() =>
-                                        setShowThumbnails(!showThumbnails)
-                                    }
-                                    className="rounded-full bg-white/10 p-2 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white/20 md:p-3"
-                                    title="Toggle thumbnails"
-                                >
-                                    <LucideGrid3x3
-                                        size={16}
-                                        className="md:h-6 md:w-6"
-                                    />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Image Container */}
-                    <div className="relative flex h-full w-full items-center justify-center">
-                        <img
-                            ref={imageRef}
-                            src={`/storage/${property.images[currentIndex]?.url}`}
-                            alt={`${property.title} ${currentIndex + 1}`}
-                            className="max-h-full max-w-full rounded-lg object-contain transition-transform duration-300 select-none"
-                            style={{
-                                transform: `scale(${zoomLevel}) rotate(${rotation}deg) translate(${dragOffset.x}px, ${dragOffset.y}px)`,
-                                cursor:
-                                    zoomLevel > 1
-                                        ? isDragging
-                                            ? 'grabbing'
-                                            : 'grab'
-                                        : 'default',
-                                maxWidth: isMobile ? '100%' : '90vw',
-                                maxHeight: isMobile ? '70vh' : '80vh',
-                            }}
-                            draggable={false}
-                        />
-                    </div>
-
-                    {/* Navigation Arrows */}
-                    <button
-                        onClick={prevImage}
-                        className="absolute top-1/2 left-2 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white/20 md:left-6 md:p-3"
-                    >
-                        <LucideChevronLeft
-                            size={20}
-                            className="md:h-8 md:w-8"
-                        />
-                    </button>
-                    <button
-                        onClick={nextImage}
-                        className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white/20 md:right-6 md:p-3"
-                    >
-                        <LucideChevronRight
-                            size={20}
-                            className="md:h-8 md:w-8"
-                        />
-                    </button>
-
-                    {/* Bottom Thumbnails */}
-                    {showThumbnails && (
-                        <div className="absolute right-0 bottom-0 left-0 z-10 bg-gradient-to-t from-black/70 to-transparent p-4 md:p-6">
-                            <div className="flex gap-2 overflow-x-auto pb-2">
-                                {property.images.map((img, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => {
-                                            setCurrentIndex(index);
-                                            setZoomLevel(1);
-                                            setRotation(0);
-                                            setDragOffset({ x: 0, y: 0 });
-                                        }}
-                                        className={`h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg transition-all duration-300 md:h-20 md:w-20 ${
-                                            index === currentIndex
-                                                ? 'scale-110 ring-2 ring-white'
-                                                : 'opacity-70 hover:opacity-100'
-                                        }`}
-                                    >
-                                        <img
-                                            src={`/storage/${img.url}`}
-                                            alt={`${property.title} ${index + 1}`}
-                                            className="h-full w-full object-cover"
-                                        />
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Keyboard Shortcuts Help - Hidden on mobile */}
-                    {!isMobile && (
-                        <div className="absolute right-6 bottom-6 rounded-lg bg-black/60 px-4 py-2 text-xs text-white backdrop-blur-md">
-                            <p className="mb-1 font-semibold">
-                                {t('keyboard_shortcuts')}
-                            </p>
-                            <p>← → : {t('navigate')}</p>
-                            <p>+ - : {t('zoom')}</p>
-                            <p>R : {t('rotate')}</p>
-                            <p>Space : {t('play_pause')}</p>
-                            <p>ESC : {t('close')}</p>
-                        </div>
-                    )}
-                </div>
+                />
             )}
-
             {/* Share Modal */}
             {shareModal && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">

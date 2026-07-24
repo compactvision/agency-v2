@@ -2,13 +2,13 @@
 
 namespace App\Domains\Auth\Controllers;
 
+use App\Domains\Auth\Requests\BecomeSellerRequest;
+use App\Domains\Auth\Requests\ChangePasswordRequest;
+use App\Domains\Auth\Requests\ForgotPasswordRequest;
 use App\Domains\Auth\Requests\LoginRequest;
 use App\Domains\Auth\Requests\RegisterRequest;
-use App\Domains\Auth\Requests\BecomeSellerRequest;
-use App\Domains\Auth\Requests\ForgotPasswordRequest;
 use App\Domains\Auth\Requests\ResetPasswordRequest;
 use App\Domains\Auth\Requests\UpdateProfileRequest;
-use App\Domains\Auth\Requests\ChangePasswordRequest;
 use App\Domains\Auth\Services\AuthService;
 use App\Models\User;
 use App\Support\ApiResponse;
@@ -21,14 +21,13 @@ class AuthController
 {
     public function __construct(
         protected AuthService $service
-    ) {
-    }
+    ) {}
 
     public function register(RegisterRequest $request)
     {
         try {
-            $result = $this->service->register($request->validated());
-            
+            $result = $this->service->register($request->validated(), issueToken: true);
+
             event(new \Illuminate\Auth\Events\Registered($result['user']));
 
             return ApiResponse::success(
@@ -37,8 +36,10 @@ class AuthController
                 201
             );
         } catch (\Throwable $e) {
-            if (app()->isLocal())
+            if (app()->isLocal()) {
                 throw $e;
+            }
+
             return ApiResponse::error('Internal server error', 500, 'REGISTER_ERROR');
         }
     }
@@ -53,8 +54,10 @@ class AuthController
         } catch (ValidationException $e) {
             return ApiResponse::error('Invalid credentials', 422, 'INVALID_CREDENTIALS', $e->errors());
         } catch (\Throwable $e) {
-            if (app()->isLocal())
+            if (app()->isLocal()) {
                 throw $e;
+            }
+
             return ApiResponse::error('Internal server error', 500, 'LOGIN_ERROR');
         }
     }
@@ -70,6 +73,7 @@ class AuthController
     public function logout(Request $request)
     {
         $this->service->logout($request->user());
+
         return ApiResponse::success(null, 'Logged out successfully');
     }
 
@@ -77,37 +81,35 @@ class AuthController
     {
         $result = $this->service->updateProfile($request->user(), $request->validated());
 
-        if ($result === "NO_CHANGES") {
+        if ($result === 'NO_CHANGES') {
             return ApiResponse::success(
                 $request->user()->load(['country', 'city', 'municipality', 'roles']),
-                "No changes detected"
+                'No changes detected'
             );
         }
 
-        return ApiResponse::success($result, "Profile updated");
+        return ApiResponse::success($result, 'Profile updated');
     }
-
 
     public function becomeSeller(BecomeSellerRequest $request)
     {
         $result = $this->service->becomeSeller($request->user(), $request->validated());
 
-        if ($result === "NO_CHANGES") {
+        if ($result === 'NO_CHANGES') {
             return ApiResponse::success(
                 $request->user()->load(['country', 'city', 'municipality', 'roles']),
-                "No changes detected"
+                'No changes detected'
             );
         }
 
-        return ApiResponse::success($result, "User upgraded to seller");
+        return ApiResponse::success($result, 'User upgraded to seller');
     }
-
-
 
     public function changePassword(ChangePasswordRequest $request)
     {
         try {
             $this->service->changePassword($request->user(), $request->validated());
+
             return ApiResponse::success(null, 'Password updated');
         } catch (ValidationException $e) {
             return ApiResponse::error('Current password incorrect', 422, 'INVALID_PASSWORD', $e->errors());
@@ -116,11 +118,12 @@ class AuthController
 
     public function forgotPassword(ForgotPasswordRequest $request)
     {
-        $status = Password::sendResetLink($request->only('email'));
+        Password::sendResetLink($request->only('email'));
 
-        return $status === Password::RESET_LINK_SENT
-            ? ApiResponse::success(null, 'Reset link sent')
-            : ApiResponse::error('Unable to send reset link', 400);
+        return ApiResponse::success(
+            null,
+            'If an account exists for this email, a reset link has been sent.'
+        );
     }
 
     public function resetPassword(ResetPasswordRequest $request)
@@ -145,6 +148,7 @@ class AuthController
         }
 
         $request->user()->sendEmailVerificationNotification();
+
         return ApiResponse::success(null, 'Verification email sent');
     }
 
@@ -152,11 +156,11 @@ class AuthController
     {
         $user = User::findOrFail($request->id);
 
-        if (!hash_equals((string) $request->hash, sha1($user->email))) {
+        if (! hash_equals((string) $request->hash, sha1($user->email))) {
             return ApiResponse::error('Invalid verification link', 400);
         }
 
-        if (!$user->hasVerifiedEmail()) {
+        if (! $user->hasVerifiedEmail()) {
             $user->markEmailAsVerified();
         }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Dashboard;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateRoleRequest extends FormRequest
@@ -11,19 +12,20 @@ class UpdateRoleRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->user()->hasRole(['admin', 'super-admin']);
+        return auth()->user()?->can('role.update') ?? false;
     }
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'name' => 'required|string|unique:roles,name,' . $this->route('id'),
-            'permissions' => 'nullable|array',
+            'name' => ['required', 'string', 'max:255', 'unique:roles,name,'.$this->route('id')],
+            'permissions' => ['nullable', 'array'],
+            'permissions.*' => ['string', 'distinct', 'exists:permissions,name'],
         ];
     }
 }

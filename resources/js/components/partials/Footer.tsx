@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import BrandLogo from '../brand-logo';
 
 export default function Footer() {
     const { t } = useTranslation();
@@ -32,7 +33,7 @@ export default function Footer() {
     const twitter = settings?.twitter ?? '#';
     const linkedin = settings?.linkedin ?? '#';
     const instagram = settings?.instagram ?? '#';
-    const siteName = settings?.site_name ?? 'Agency.';
+    const siteName = 'The Agency';
     const emailToDisplay = settings?.app_email ?? 'contact@agency.com';
     const phoneToDisplay = settings?.numero ?? '+1 234 567 890';
     const addressToDisplay =
@@ -92,7 +93,7 @@ export default function Footer() {
     return (
         <footer
             ref={footerRef}
-            className="relative bg-[#0d2340] pt-20 pb-10 text-white"
+            className="relative bg-[#292625] pt-20 pb-10 text-white"
         >
             <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 {/* Top Section - Feature Cards */}
@@ -105,7 +106,7 @@ export default function Footer() {
                 >
                     {/* Acheter */}
                     <div className="group rounded-2xl border border-white/10 bg-white/5 p-8 transition-all duration-300 hover:bg-white/10">
-                        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#C9A84C]/20 text-[#C9A84C] transition-colors duration-300 group-hover:bg-[#C9A84C] group-hover:text-white">
+                        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#CF8E19]/20 text-[#CF8E19] transition-colors duration-300 group-hover:bg-[#CF8E19] group-hover:text-[#292625]">
                             <Home className="h-7 w-7" />
                         </div>
                         <h3 className="mb-4 text-2xl font-bold text-white">
@@ -118,7 +119,7 @@ export default function Footer() {
                         </p>
                         <button
                             onClick={() => handleSearch('sale')}
-                            className="inline-flex items-center gap-2 text-sm font-semibold text-[#C9A84C] transition-colors hover:text-white"
+                            className="inline-flex items-center gap-2 text-sm font-semibold text-[#CF8E19] transition-colors hover:text-white"
                         >
                             {t('explore_properties', 'Explorer')}
                             <ChevronRight className="h-4 w-4" />
@@ -127,7 +128,7 @@ export default function Footer() {
 
                     {/* Vendre */}
                     <div className="group rounded-2xl border border-white/10 bg-white/5 p-8 transition-all duration-300 hover:bg-white/10">
-                        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#C9A84C]/20 text-[#C9A84C] transition-colors duration-300 group-hover:bg-[#C9A84C] group-hover:text-white">
+                        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#CF8E19]/20 text-[#CF8E19] transition-colors duration-300 group-hover:bg-[#CF8E19] group-hover:text-[#292625]">
                             <Building className="h-7 w-7" />
                         </div>
                         <h3 className="mb-4 text-2xl font-bold text-white">
@@ -142,7 +143,7 @@ export default function Footer() {
                             onClick={() =>
                                 router.get(route('dashboard.properties.create'))
                             }
-                            className="inline-flex items-center gap-2 text-sm font-semibold text-[#C9A84C] transition-colors hover:text-white"
+                            className="inline-flex items-center gap-2 text-sm font-semibold text-[#CF8E19] transition-colors hover:text-white"
                         >
                             {t('list_property', 'Publier une annonce')}
                             <ChevronRight className="h-4 w-4" />
@@ -151,7 +152,7 @@ export default function Footer() {
 
                     {/* Louer */}
                     <div className="group rounded-2xl border border-white/10 bg-white/5 p-8 transition-all duration-300 hover:bg-white/10">
-                        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#C9A84C]/20 text-[#C9A84C] transition-colors duration-300 group-hover:bg-[#C9A84C] group-hover:text-white">
+                        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#CF8E19]/20 text-[#CF8E19] transition-colors duration-300 group-hover:bg-[#CF8E19] group-hover:text-[#292625]">
                             <Key className="h-7 w-7" />
                         </div>
                         <h3 className="mb-4 text-2xl font-bold text-white">
@@ -164,7 +165,7 @@ export default function Footer() {
                         </p>
                         <button
                             onClick={() => handleSearch('rent')}
-                            className="inline-flex items-center gap-2 text-sm font-semibold text-[#C9A84C] transition-colors hover:text-white"
+                            className="inline-flex items-center gap-2 text-sm font-semibold text-[#CF8E19] transition-colors hover:text-white"
                         >
                             {t('explore_rentals', 'Explorer les locations')}
                             <ChevronRight className="h-4 w-4" />
@@ -182,14 +183,11 @@ export default function Footer() {
                 >
                     {/* Brand & Contact */}
                     <div>
-                        <div className="mb-6 flex items-center gap-2">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#C9A84C] text-white">
-                                <span className="text-xl font-black">A</span>
-                            </div>
-                            <span className="text-2xl font-bold tracking-tight">
-                                Agency<span className="text-[#C9A84C]">.</span>
-                            </span>
-                        </div>
+                        <BrandLogo
+                            className="mb-6"
+                            variant="on-dark"
+                            imageClassName="h-14 max-w-[13rem]"
+                        />
                         <p className="mb-6 text-sm leading-relaxed text-gray-400">
                             {i18n.language === 'fr'
                                 ? "L'excellence immobilière à portée de main. Découvrez des propriétés d'exception avec un service premium."
@@ -197,15 +195,15 @@ export default function Footer() {
                         </p>
                         <ul className="space-y-4 text-sm text-gray-400">
                             <li className="flex items-start gap-3">
-                                <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-[#C9A84C]" />
+                                <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-[#CF8E19]" />
                                 <span>{addressToDisplay}</span>
                             </li>
                             <li className="flex items-center gap-3">
-                                <Phone className="h-5 w-5 shrink-0 text-[#C9A84C]" />
+                                <Phone className="h-5 w-5 shrink-0 text-[#CF8E19]" />
                                 <span>{phoneToDisplay}</span>
                             </li>
                             <li className="flex items-center gap-3">
-                                <Mail className="h-5 w-5 shrink-0 text-[#C9A84C]" />
+                                <Mail className="h-5 w-5 shrink-0 text-[#CF8E19]" />
                                 <span>{emailToDisplay}</span>
                             </li>
                         </ul>
@@ -327,7 +325,7 @@ export default function Footer() {
                                             ? 'Votre email'
                                             : 'Your email'
                                     }
-                                    className={`w-full rounded-xl border bg-[#152C47] px-4 py-3 text-sm text-white placeholder-gray-500 focus:ring-1 focus:ring-[#C9A84C] focus:outline-none ${
+                                    className={`w-full rounded-xl border bg-[#353130] px-4 py-3 text-sm text-white placeholder-gray-500 focus:ring-1 focus:ring-[#CF8E19] focus:outline-none ${
                                         error
                                             ? 'border-red-500'
                                             : 'border-white/10'
@@ -346,7 +344,7 @@ export default function Footer() {
                                         ? 'bg-green-600'
                                         : loading
                                           ? 'cursor-not-allowed bg-gray-600'
-                                          : 'bg-[#C9A84C] hover:bg-[#A8882E]'
+                                          : 'bg-[#CF8E19] text-[#292625] hover:bg-[#E0A43A]'
                                 }`}
                             >
                                 {subscribed

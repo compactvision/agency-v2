@@ -23,6 +23,7 @@ import {
     XCircle,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { route } from 'ziggy-js';
 
 type PropertyImage = { url: string };
@@ -47,6 +48,7 @@ type Property = {
 type PaginationLink = { url: string | null; label: string; active: boolean };
 
 export default function Properties() {
+    const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
     const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
     const [sortBy, setSortBy] = useState('created_at');
@@ -135,7 +137,7 @@ export default function Properties() {
     };
 
     const deleteProperty = (id: number) => {
-        if (confirm('Voulez-vous vraiment supprimer cette propriété ?')) {
+        if (confirm(t('dashboard_ui.properties.delete_confirmation'))) {
             router.delete(route('dashboard.properties.destroy', { id }), {
                 preserveScroll: true,
             });
@@ -191,7 +193,7 @@ export default function Properties() {
                 return (
                     <span className="inline-flex items-center rounded-full border border-slate-200 bg-[#1E3A5F]/10 px-2 py-1 text-xs font-medium text-[#0d2340]">
                         <Clock size={10} className="mr-1" />
-                        En attente
+                        {t('dashboard_ui.common.pending')}
                     </span>
                 );
 
@@ -199,7 +201,7 @@ export default function Properties() {
                 return (
                     <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800">
                         <Edit3 size={10} className="mr-1" />
-                        Brouillon
+                        {t('dashboard_ui.common.draft')}
                     </span>
                 );
 
@@ -207,7 +209,7 @@ export default function Properties() {
                 return (
                     <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800">
                         <CheckCircle size={10} className="mr-1" />
-                        Publié
+                        {t('dashboard_ui.common.published')}
                     </span>
                 );
 
@@ -215,7 +217,7 @@ export default function Properties() {
                 return (
                     <span className="inline-flex items-center rounded-full border border-red-200 bg-red-100 px-2 py-1 text-xs font-medium text-red-800">
                         <AlertCircle size={10} className="mr-1" />
-                        Rejeté
+                        {t('rejected')}
                     </span>
                 );
 
@@ -223,7 +225,7 @@ export default function Properties() {
                 return (
                     <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2 py-1 text-xs font-medium text-slate-800">
                         <ImageOff size={10} className="mr-1" />
-                        Archivé
+                        {t('dashboard_ui.properties.archived')}
                     </span>
                 );
 
@@ -246,18 +248,17 @@ export default function Properties() {
         <Dashboard>
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 {/* Header Section */}
-                <div className="sticky top-0 z-1 border-b border-slate-200 bg-white/80 shadow-lg shadow-sm backdrop-blur-xl">
+                <div className="dashboard-section-header sticky top-0 z-10 border-b border-slate-200 bg-white/80 shadow-sm backdrop-blur-xl">
                     <div className="px-4 py-4 sm:px-6 lg:px-8">
                         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                             <BackButton />
 
                             <div className="flex-1 text-center sm:text-left">
-                                <h1 className="bg-gradient-to-r from-slate-100 to-slate-100 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
-                                    Propriétés
+                                <h1 className="dashboard-page-title text-2xl font-bold sm:text-3xl">
+                                    {t('dashboard_ui.properties.title')}
                                 </h1>
                                 <p className="mt-1 text-sm text-slate-600 sm:text-base">
-                                    Gérez vos propriétés et suivez leurs
-                                    performances
+                                    {t('dashboard_ui.properties.description')}
                                 </p>
                             </div>
 
@@ -271,7 +272,9 @@ export default function Properties() {
                                                 ? 'bg-slate-500 text-white'
                                                 : 'text-[#1E3A5F] hover:bg-slate-200'
                                         }`}
-                                        title="Vue grille"
+                                        title={t(
+                                            'dashboard_ui.properties.grid_view',
+                                        )}
                                     >
                                         <Filter size={16} />
                                     </button>
@@ -282,7 +285,9 @@ export default function Properties() {
                                                 ? 'bg-slate-500 text-white'
                                                 : 'text-[#1E3A5F] hover:bg-slate-200'
                                         }`}
-                                        title="Vue liste"
+                                        title={t(
+                                            'dashboard_ui.properties.list_view',
+                                        )}
                                     >
                                         <BarChart3 size={16} />
                                     </button>
@@ -291,13 +296,15 @@ export default function Properties() {
                                 {/* Create Button */}
                                 <Link
                                     href={route('dashboard.properties.create')}
-                                    className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-4 py-2.5 font-medium text-white shadow-lg shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22]"
+                                    className="dashboard-primary-action inline-flex transform items-center rounded-xl px-4 py-2.5 font-medium shadow-lg transition-all duration-300 hover:scale-[1.02]"
                                 >
                                     <Plus size={18} className="mr-2" />
                                     <span className="hidden sm:inline">
-                                        Nouvelle propriété
+                                        {t('dashboard_ui.properties.new')}
                                     </span>
-                                    <span className="sm:hidden">Ajouter</span>
+                                    <span className="sm:hidden">
+                                        {t('dashboard_ui.properties.add')}
+                                    </span>
                                 </Link>
                             </div>
                         </div>
@@ -311,7 +318,9 @@ export default function Properties() {
                                 />
                                 <input
                                     type="text"
-                                    placeholder="Rechercher par titre, type, localisation..."
+                                    placeholder={t(
+                                        'dashboard_ui.properties.search_placeholder',
+                                    )}
                                     className="w-full rounded-xl border border-slate-200 bg-white/80 py-3 pr-4 pl-10 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none"
                                     value={searchQuery}
                                     onChange={(e) =>
@@ -342,20 +351,26 @@ export default function Properties() {
                                     className="cursor-pointer appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none"
                                 >
                                     <option value="created_at-desc">
-                                        Plus récentes
+                                        {t('dashboard_ui.properties.recent')}
                                     </option>
                                     <option value="created_at-asc">
-                                        Plus anciennes
+                                        {t('dashboard_ui.properties.oldest')}
                                     </option>
                                     <option value="price-asc">
-                                        Prix croissant
+                                        {t('dashboard_ui.properties.price_asc')}
                                     </option>
                                     <option value="price-desc">
-                                        Prix décroissant
+                                        {t(
+                                            'dashboard_ui.properties.price_desc',
+                                        )}
                                     </option>
-                                    <option value="title-asc">Titre A-Z</option>
+                                    <option value="title-asc">
+                                        {t('dashboard_ui.properties.title_asc')}
+                                    </option>
                                     <option value="title-desc">
-                                        Titre Z-A
+                                        {t(
+                                            'dashboard_ui.properties.title_desc',
+                                        )}
                                     </option>
                                 </select>
                                 <TrendingUp
@@ -387,7 +402,7 @@ export default function Properties() {
                                 {total}
                             </div>
                             <div className="text-sm text-slate-600">
-                                Total propriétés
+                                {t('dashboard_ui.properties.total')}
                             </div>
                         </div>
 
@@ -401,7 +416,7 @@ export default function Properties() {
                                 </div>
                                 <div className="flex items-center text-sm font-medium text-[#1E3A5F]">
                                     <Clock size={16} className="mr-1" />
-                                    En attente
+                                    {t('dashboard_ui.common.pending')}
                                 </div>
                             </div>
                             <div className="text-2xl font-bold text-slate-900">
@@ -412,7 +427,9 @@ export default function Properties() {
                                 }
                             </div>
                             <div className="text-sm text-slate-600">
-                                En validation
+                                {t(
+                                    'dashboard_ui.properties.pending_validation',
+                                )}
                             </div>
                         </div>
 
@@ -436,7 +453,7 @@ export default function Properties() {
                                     .toLocaleString()}
                             </div>
                             <div className="text-sm text-slate-600">
-                                Vues totales
+                                {t('dashboard_ui.properties.views')}
                             </div>
                         </div>
 
@@ -454,7 +471,7 @@ export default function Properties() {
                                 {favorites}
                             </div>
                             <div className="text-sm text-slate-600">
-                                Favoris
+                                {t('dashboard_ui.properties.favorites')}
                             </div>
                         </div>
                     </div>
@@ -474,11 +491,12 @@ export default function Properties() {
                                         />
                                     </div>
                                     <h3 className="mb-2 text-xl font-semibold text-slate-900">
-                                        Aucune propriété
+                                        {t('dashboard_ui.properties.empty')}
                                     </h3>
                                     <p className="mb-6 text-slate-600">
-                                        Commencez par ajouter votre première
-                                        propriété
+                                        {t(
+                                            'dashboard_ui.properties.empty_description',
+                                        )}
                                     </p>
                                     <Link
                                         href={route(
@@ -487,7 +505,7 @@ export default function Properties() {
                                         className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-6 py-3 font-medium text-white shadow-lg shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22]"
                                     >
                                         <Plus size={20} className="mr-2" />
-                                        Créer une propriété
+                                        {t('dashboard_ui.properties.create')}
                                     </Link>
                                 </div>
                             ) : (
@@ -588,7 +606,9 @@ export default function Properties() {
                                                                 )
                                                             }
                                                             className="rounded-lg p-2 text-[#1E3A5F] transition-colors hover:bg-slate-100"
-                                                            title="Voir détails"
+                                                            title={t(
+                                                                'dashboard_ui.properties.view_details',
+                                                            )}
                                                         >
                                                             <Eye size={16} />
                                                         </button>
@@ -611,7 +631,9 @@ export default function Properties() {
                                                                     )
                                                                 }
                                                                 className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100"
-                                                                title="Plus d'options"
+                                                                title={t(
+                                                                    'dashboard_ui.properties.more_actions',
+                                                                )}
                                                             >
                                                                 <MoreVertical
                                                                     size={16}
@@ -635,7 +657,9 @@ export default function Properties() {
                                                                             }
                                                                         />
                                                                         <span>
-                                                                            Modifier
+                                                                            {t(
+                                                                                'dashboard_ui.common.edit',
+                                                                            )}
                                                                         </span>
                                                                     </button>
                                                                     <button
@@ -652,7 +676,9 @@ export default function Properties() {
                                                                             }
                                                                         />
                                                                         <span>
-                                                                            Statistiques
+                                                                            {t(
+                                                                                'dashboard_ui.properties.statistics',
+                                                                            )}
                                                                         </span>
                                                                     </button>
                                                                     <button
@@ -669,7 +695,9 @@ export default function Properties() {
                                                                             }
                                                                         />
                                                                         <span>
-                                                                            Supprimer
+                                                                            {t(
+                                                                                'dashboard_ui.common.delete',
+                                                                            )}
                                                                         </span>
                                                                     </button>
                                                                 </div>
@@ -695,11 +723,12 @@ export default function Properties() {
                                         />
                                     </div>
                                     <h3 className="mb-2 text-xl font-semibold text-slate-900">
-                                        Aucune propriété
+                                        {t('dashboard_ui.properties.empty')}
                                     </h3>
                                     <p className="mb-6 text-slate-600">
-                                        Commencez par ajouter votre première
-                                        propriété
+                                        {t(
+                                            'dashboard_ui.properties.empty_description',
+                                        )}
                                     </p>
                                     <Link
                                         href={route(
@@ -708,7 +737,7 @@ export default function Properties() {
                                         className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-6 py-3 font-medium text-white shadow-lg shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22]"
                                     >
                                         <Plus size={20} className="mr-2" />
-                                        Créer une propriété
+                                        {t('dashboard_ui.properties.create')}
                                     </Link>
                                 </div>
                             ) : (
@@ -717,22 +746,34 @@ export default function Properties() {
                                         <thead className="bg-slate-50">
                                             <tr>
                                                 <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                                    Image
+                                                    {t(
+                                                        'dashboard_ui.properties.image',
+                                                    )}
                                                 </th>
                                                 <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                                    Propriété
+                                                    {t(
+                                                        'dashboard_ui.properties.property',
+                                                    )}
                                                 </th>
                                                 <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                                    Statut
+                                                    {t(
+                                                        'dashboard_ui.common.status',
+                                                    )}
                                                 </th>
                                                 <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                                    Prix
+                                                    {t(
+                                                        'dashboard_ui.properties.price',
+                                                    )}
                                                 </th>
                                                 <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                                    Vues
+                                                    {t(
+                                                        'dashboard_ui.properties.view_count',
+                                                    )}
                                                 </th>
                                                 <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                                    Actions
+                                                    {t(
+                                                        'dashboard_ui.common.actions',
+                                                    )}
                                                 </th>
                                             </tr>
                                         </thead>
@@ -744,7 +785,7 @@ export default function Properties() {
                                                 ) => (
                                                     <tr
                                                         key={property.id}
-                                                        className="transition-colors hover:bg-slate-50"
+                                                        className="dashboard-data-row group transition-colors"
                                                         style={{
                                                             animationDelay: `${index * 0.05}s`,
                                                         }}
@@ -823,7 +864,7 @@ export default function Properties() {
                                                                 0}
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <div className="flex items-center gap-2">
+                                                            <div className="dashboard-row-actions flex items-center gap-2 rounded-xl p-1 md:pointer-events-none md:translate-x-2 md:opacity-0 md:group-focus-within:pointer-events-auto md:group-focus-within:translate-x-0 md:group-focus-within:opacity-100 md:group-hover:pointer-events-auto md:group-hover:translate-x-0 md:group-hover:opacity-100">
                                                                 <button
                                                                     onClick={() =>
                                                                         handleViewProperty(
@@ -831,7 +872,10 @@ export default function Properties() {
                                                                         )
                                                                     }
                                                                     className="rounded-lg p-2 text-[#1E3A5F] transition-colors hover:bg-slate-100"
-                                                                    title="Voir détails"
+                                                                    title={t(
+                                                                        'dashboard_ui.properties.view_details',
+                                                                    )}
+                                                                    aria-label={`Voir la propriété ${property.title}`}
                                                                 >
                                                                     <Eye
                                                                         size={
@@ -860,7 +904,10 @@ export default function Properties() {
                                                                             )
                                                                         }
                                                                         className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100"
-                                                                        title="Plus d'options"
+                                                                        title={t(
+                                                                            'dashboard_ui.properties.more_actions',
+                                                                        )}
+                                                                        aria-label={`Actions pour ${property.title}`}
                                                                     >
                                                                         <MoreVertical
                                                                             size={
@@ -886,7 +933,9 @@ export default function Properties() {
                                                                                     }
                                                                                 />
                                                                                 <span>
-                                                                                    Modifier
+                                                                                    {t(
+                                                                                        'dashboard_ui.common.edit',
+                                                                                    )}
                                                                                 </span>
                                                                             </button>
                                                                             <button
@@ -903,7 +952,9 @@ export default function Properties() {
                                                                                     }
                                                                                 />
                                                                                 <span>
-                                                                                    Statistiques
+                                                                                    {t(
+                                                                                        'dashboard_ui.properties.statistics',
+                                                                                    )}
                                                                                 </span>
                                                                             </button>
                                                                             <button
@@ -920,7 +971,9 @@ export default function Properties() {
                                                                                     }
                                                                                 />
                                                                                 <span>
-                                                                                    Supprimer
+                                                                                    {t(
+                                                                                        'dashboard_ui.common.delete',
+                                                                                    )}
                                                                                 </span>
                                                                             </button>
                                                                         </div>

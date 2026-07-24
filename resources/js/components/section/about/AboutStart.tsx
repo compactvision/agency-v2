@@ -66,7 +66,7 @@ export default function AboutStart() {
     return (
         <section
             ref={sectionRef}
-            className="relative overflow-hidden bg-white py-20 lg:py-32"
+            className="relative overflow-hidden bg-white py-20 lg:py-32 dark:bg-[#353130]"
         >
             {/* Formes décoratives de fond */}
             <div className="absolute inset-0 overflow-hidden">
@@ -161,13 +161,13 @@ export default function AboutStart() {
                                     {t('about_us', 'About Us')}
                                 </span>
                             </div>
-                            <h2 className="mt-4 text-4xl leading-tight font-bold text-gray-900 md:text-5xl lg:text-6xl">
+                            <h2 className="mt-4 text-4xl leading-tight font-bold text-gray-900 md:text-5xl lg:text-6xl dark:text-[#EEEFE6]">
                                 {t(
                                     'unlocking_new_home',
                                     'Unlocking Door to Your New Home',
                                 )}
                             </h2>
-                            <p className="mt-6 text-lg leading-relaxed text-gray-600">
+                            <p className="mt-6 text-lg leading-relaxed text-gray-600 dark:text-[#EEEFE6]/70">
                                 {t(
                                     'real_estate_intro',
                                     'Real estate is a lucrative industry involving buying, selling, and renting properties. It encompasses residential, commercial, and industrial sectors. Real estate agents play a crucial role in facilitating transactions and guiding clients.',
@@ -182,9 +182,9 @@ export default function AboutStart() {
                                 return (
                                     <div
                                         key={index}
-                                        className={`flex transform cursor-pointer items-start gap-4 rounded-xl border border-gray-100 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-amber-200 hover:bg-amber-50/30 ${
+                                        className={`flex transform cursor-pointer items-start gap-4 rounded-xl border border-gray-100 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[#CF8E19]/40 hover:bg-[#CF8E19]/5 dark:border-white/10 ${
                                             activeFeature === index
-                                                ? 'border-amber-200 bg-amber-50/30'
+                                                ? 'border-[#CF8E19]/40 bg-[#CF8E19]/5'
                                                 : ''
                                         }`}
                                         onMouseEnter={() =>
@@ -204,7 +204,7 @@ export default function AboutStart() {
                                             <Icon className="h-6 w-6" />
                                         </div>
                                         <div className="flex-1">
-                                            <h3 className="mb-1 text-lg font-semibold text-gray-900">
+                                            <h3 className="mb-1 text-lg font-semibold text-gray-900 dark:text-[#EEEFE6]">
                                                 {feature.title}
                                             </h3>
                                             {/* Barre de progression animée */}
@@ -242,10 +242,10 @@ export default function AboutStart() {
                         {stats.map((stat, index) => (
                             <div
                                 key={index}
-                                className="rounded-xl bg-gray-50 p-4 text-center"
+                                className="rounded-xl bg-gray-50 p-4 text-center dark:border dark:border-white/10 dark:bg-[#292625]"
                             >
                                 <div
-                                    className={`mb-1 text-2xl font-bold text-gray-900 transition-all duration-1000 ${
+                                    className={`mb-1 text-2xl font-bold text-gray-900 transition-all duration-1000 dark:text-[#EEEFE6] ${
                                         statsAnimated
                                             ? 'translate-y-0 opacity-100'
                                             : 'translate-y-4 opacity-0'
@@ -256,7 +256,7 @@ export default function AboutStart() {
                                 >
                                     {stat.number}
                                 </div>
-                                <div className="text-sm text-gray-600">
+                                <div className="text-sm text-gray-600 dark:text-[#EEEFE6]/65">
                                     {stat.label}
                                 </div>
                             </div>
@@ -266,7 +266,7 @@ export default function AboutStart() {
             </div>
 
             {/* Forme décorative du bas */}
-            <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-32 bg-gradient-to-t from-gray-50 to-transparent"></div>
+            <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-32 bg-gradient-to-t from-gray-50 to-transparent dark:from-[#292625]"></div>
         </section>
     );
 }

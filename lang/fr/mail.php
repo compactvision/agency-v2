@@ -1,0 +1,147 @@
+<?php
+
+return [
+    'subjects' => [
+        'verify_email' => 'Confirmez votre adresse e-mail — The Agency',
+        'reset_password' => 'Réinitialisation de votre mot de passe — The Agency',
+        'welcome_seller' => 'Votre espace professionnel The Agency est prêt',
+        'property_pending' => 'Annonce :reference reçue et en cours de validation',
+        'admin_property_pending' => 'Action requise : annonce :reference à valider',
+        'property_approved' => 'Annonce :reference approuvée et publiée',
+        'property_rejected' => 'Corrections requises pour l’annonce :reference',
+        'property_enquiry' => 'Nouvelle demande pour l’annonce :reference',
+        'contact' => 'Nouveau message du site — :subject',
+        'manual_subscription' => 'Action requise : demande d’abonnement :plan',
+        'subscription_activated' => 'Votre abonnement :plan est actif',
+        'subscription_expired' => 'Votre abonnement :plan est arrivé à expiration',
+        'subscription_expiring' => '{0} Votre abonnement expire aujourd’hui|{1} Votre abonnement expire demain|[2,*] Votre abonnement expire dans :count jours',
+    ],
+
+    'common' => [
+        'hello' => 'Bonjour :name,',
+        'hello_team' => 'Bonjour,',
+        'team' => 'L’équipe The Agency',
+        'thank_you' => 'Merci de votre confiance.',
+        'reference' => 'Référence',
+        'property' => 'Annonce',
+        'not_provided' => 'Non renseigné',
+        'not_available' => 'Non disponible',
+        'unlimited' => 'Sans échéance',
+        'date_format' => 'd/m/Y',
+        'view_dashboard' => 'Accéder au tableau de bord',
+        'automated_notice' => 'Ce message transactionnel a été envoyé automatiquement. Pour toute question, utilisez la page de contact de notre site.',
+    ],
+
+    'auth' => [
+        'verify_greeting' => 'Bienvenue chez The Agency, :name.',
+        'verify_intro' => 'Confirmez votre adresse e-mail afin de sécuriser votre compte et d’accéder à l’ensemble de nos services.',
+        'verify_action' => 'Confirmer mon adresse e-mail',
+        'verify_expiry' => 'Ce lien sécurisé expirera dans :count minutes.',
+        'verify_ignore' => 'Si vous n’avez pas créé ce compte, vous pouvez ignorer ce message.',
+        'reset_greeting' => 'Bonjour :name,',
+        'reset_intro' => 'Nous avons reçu une demande de réinitialisation du mot de passe associé à votre compte.',
+        'reset_action' => 'Réinitialiser mon mot de passe',
+        'reset_expiry' => 'Ce lien sécurisé expirera dans :count minutes.',
+        'reset_ignore' => 'Si vous n’êtes pas à l’origine de cette demande, aucune action n’est nécessaire. Votre mot de passe reste inchangé.',
+    ],
+
+    'roles' => [
+        'agency' => 'Agence immobilière',
+        'seller' => 'Vendeur particulier',
+    ],
+
+    'welcome' => [
+        'title' => 'Votre espace professionnel est prêt',
+        'intro' => 'Votre profil a été mis à jour avec succès. Vous disposez maintenant du statut **:role**.',
+        'next' => 'Vous pouvez désormais :',
+        'publish' => 'créer et soumettre vos annonces immobilières ;',
+        'manage' => 'gérer vos biens et suivre leur validation ;',
+        'analytics' => 'consulter vos performances depuis votre tableau de bord.',
+        'action' => 'Accéder à mon espace',
+    ],
+
+    'property_pending' => [
+        'title' => 'Votre annonce est en cours de validation',
+        'intro' => 'Nous avons bien reçu l’annonce **:title**.',
+        'review' => 'Notre équipe vérifie actuellement sa qualité, son exactitude et sa conformité avant publication.',
+        'timing' => 'Vous recevrez un nouvel e-mail dès que l’examen sera terminé ou si une correction est nécessaire.',
+        'action' => 'Suivre mon annonce',
+    ],
+
+    'admin_property' => [
+        'title' => 'Une annonce attend votre validation',
+        'intro' => 'Une nouvelle annonce a été soumise. Une vérification administrative est requise avant sa publication.',
+        'title_label' => 'Titre',
+        'owner' => 'Déposée par',
+        'email' => 'E-mail',
+        'instruction' => 'Vérifiez les informations, les médias et la conformité de l’annonce, puis approuvez-la ou demandez des corrections.',
+        'action' => 'Examiner l’annonce',
+    ],
+
+    'property_approved' => [
+        'title' => 'Votre annonce est publiée',
+        'intro' => 'Bonne nouvelle : l’annonce **:title** a été approuvée après vérification.',
+        'visibility' => 'Elle est maintenant visible sur The Agency et peut être consultée par les visiteurs.',
+        'action' => 'Voir l’annonce publiée',
+    ],
+
+    'property_rejected' => [
+        'title' => 'Des corrections sont nécessaires',
+        'intro' => 'L’annonce **:title** ne peut pas être publiée dans son état actuel.',
+        'reason' => 'Motif communiqué par notre équipe',
+        'next' => 'Corrigez les éléments indiqués, puis soumettez à nouveau l’annonce pour validation.',
+        'action' => 'Corriger mon annonce',
+    ],
+
+    'contact' => [
+        'title' => 'Nouveau message depuis le site',
+        'intro' => 'Un visiteur a envoyé une demande via le formulaire de contact.',
+        'name' => 'Nom',
+        'email' => 'E-mail',
+        'phone' => 'Téléphone',
+        'subject' => 'Sujet',
+        'message' => 'Message',
+        'reply' => 'Vous pouvez répondre directement à cet e-mail pour contacter le demandeur.',
+    ],
+
+    'enquiry' => [
+        'title' => 'Nouvelle demande concernant votre annonce',
+        'intro' => '**:name** souhaite obtenir davantage d’informations sur **:title**.',
+        'sender' => 'Demandeur',
+        'email' => 'E-mail',
+        'phone' => 'Téléphone',
+        'message' => 'Message',
+        'safety' => 'Pour votre sécurité, ne communiquez jamais de mot de passe, de code de validation ou d’information bancaire.',
+        'reply' => 'Répondez directement à cet e-mail pour contacter le demandeur.',
+        'action' => 'Consulter l’annonce',
+    ],
+
+    'billing' => [
+        'plan' => 'Formule',
+        'amount' => 'Montant',
+        'start' => 'Début',
+        'expiry' => 'Expiration',
+        'user_id' => 'Identifiant utilisateur',
+        'subscription_id' => 'Identifiant abonnement',
+        'activated_title' => 'Votre abonnement est actif',
+        'activated_intro' => 'Votre formule **:plan** a été activée avec succès. Les fonctionnalités correspondantes sont maintenant disponibles.',
+        'activated_action' => 'Voir mon abonnement',
+        'expired_title' => 'Votre abonnement est arrivé à expiration',
+        'expired_intro' => 'Votre formule **:plan** a expiré le **:date**.',
+        'expired_effect' => 'Les fonctionnalités liées à cette formule sont suspendues jusqu’à son renouvellement. Vos données et votre historique restent conservés.',
+        'renew_action' => 'Renouveler mon abonnement',
+        'expiring_title' => 'Votre abonnement expire bientôt',
+        'expires_today' => 'Votre formule **:plan** expire aujourd’hui.',
+        'expires_later' => '{1} Votre formule **:plan** expire dans **1 jour**.|[2,*] Votre formule **:plan** expire dans **:count jours**.',
+        'expiring_advice' => 'Renouvelez-la avant l’échéance afin de conserver un accès continu à vos fonctionnalités.',
+        'manual_title' => 'Nouvelle demande d’abonnement manuel',
+        'manual_intro' => 'Une demande pour la formule **:plan** attend une décision administrative.',
+        'manual_instruction' => 'Vérifiez le paiement et l’identité de la demande avant de l’approuver ou de la rejeter.',
+        'manual_action' => 'Examiner la demande',
+    ],
+
+    'footer' => [
+        'rights' => '© :year The Agency. Tous droits réservés.',
+        'confidentiality' => 'Cette communication est destinée uniquement à son destinataire.',
+    ],
+];

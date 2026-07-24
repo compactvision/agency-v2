@@ -2,6 +2,7 @@ import { Link, router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { Heart, MapPin, Bath, Bed, Maximize2, ArrowRight, Camera } from 'lucide-react';
 import { useState } from 'react';
+import type { SharedData } from '@/types';
 
 function formatPrice(price: number): string {
     return price.toLocaleString('fr-FR', {
@@ -27,7 +28,7 @@ export default function PropertyCardHome({
     viewMode?: 'grid' | 'list';
 }) {
     const { t } = useTranslation();
-    const user = usePage().props.auth?.user;
+    const user = usePage<SharedData>().props.auth?.user;
     const [isFavorite, setIsFavorite] = useState(favorites.includes(property.id));
     const [hovered, setHovered] = useState(false);
     const [imageLoaded, setImageLoaded] = useState(false);
@@ -66,7 +67,7 @@ export default function PropertyCardHome({
             >
                 {/* Image */}
                 <div className="relative h-48 w-full shrink-0 overflow-hidden sm:h-auto sm:w-64">
-                    <Link href={route('property.show', property.id)} className="block h-full w-full">
+                    <Link href={route('property.show', property.slug)} className="block h-full w-full">
                         {imageUrl ? (
                             <img
                                 src={imageUrl}
@@ -91,7 +92,7 @@ export default function PropertyCardHome({
                     )}
                     <div className="absolute bottom-3 left-3 flex items-center gap-1 rounded-full bg-black/50 px-2 py-1 text-xs text-white backdrop-blur-sm">
                         <Camera className="h-3 w-3" />
-                        <span>{property.images?.length || 1}</span>
+                        <span>{property.images_count || property.images?.length || 1}</span>
                     </div>
                     {user && (
                         <button
@@ -110,7 +111,7 @@ export default function PropertyCardHome({
                     <div>
                         <div className="mb-1 flex items-start justify-between gap-2">
                             <h3 className="text-lg font-bold text-gray-900 line-clamp-1 group-hover:text-[#1E3A5F]">
-                                <Link href={route('property.show', property.id)} className="hover:text-[#1E3A5F] transition-colors">
+                                <Link href={route('property.show', property.slug)} className="hover:text-[#1E3A5F] transition-colors">
                                     {property.title}
                                 </Link>
                             </h3>
@@ -149,7 +150,7 @@ export default function PropertyCardHome({
                             </div>
                         </div>
                         <Link
-                            href={route('property.show', property.id)}
+                            href={route('property.show', property.slug)}
                             className="inline-flex items-center gap-2 rounded-xl bg-[#1E3A5F] px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-[#152C47] hover:shadow-lg hover:-translate-y-0.5"
                         >
                             {t('view_details')}
@@ -170,7 +171,7 @@ export default function PropertyCardHome({
         >
             {/* Image */}
             <div className="relative h-52 overflow-hidden">
-                <Link href={route('property.show', property.id)} className="block h-full w-full">
+                <Link href={route('property.show', property.slug)} className="block h-full w-full">
                     {imageUrl ? (
                         <>
                             {!imageLoaded && <div className="absolute inset-0 skeleton" />}
@@ -239,7 +240,7 @@ export default function PropertyCardHome({
 
                 {/* Titre */}
                 <h3 className="mb-2 text-sm font-bold text-gray-900 line-clamp-2 transition-colors duration-200 group-hover:text-[#1E3A5F]">
-                    <Link href={route('property.show', property.id)}>
+                    <Link href={route('property.show', property.slug)}>
                         {property.title}
                     </Link>
                 </h3>
@@ -276,7 +277,7 @@ export default function PropertyCardHome({
 
                 {/* CTA */}
                 <Link
-                    href={route('property.show', property.id)}
+                    href={route('property.show', property.slug)}
                     className={`mt-auto flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all duration-200 ${
                         hovered
                             ? 'bg-[#1E3A5F] text-white shadow-md'

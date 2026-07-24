@@ -41,20 +41,29 @@ export default function RoleAndPermission({
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const { data, setData, post, put, processing, errors, reset, clearErrors } =
-        useForm<{
-            name: string;
-            email: string;
-            password: string;
-            password_confirmation: string;
-            roles: string[];
-        }>({
-            name: user?.name ?? '',
-            email: user?.email ?? '',
-            password: '',
-            password_confirmation: '',
-            roles: user?.roles?.map((r) => r.name) ?? [],
-        });
+    const {
+        data,
+        setData,
+        transform,
+        post,
+        put,
+        processing,
+        errors,
+        reset,
+        clearErrors,
+    } = useForm<{
+        name: string;
+        email: string;
+        password: string;
+        password_confirmation: string;
+        roles: string[];
+    }>({
+        name: user?.name ?? '',
+        email: user?.email ?? '',
+        password: '',
+        password_confirmation: '',
+        roles: user?.roles?.map((r) => r.name) ?? [],
+    });
 
     // Sync quand on ouvre / change d'utilisateur
     useEffect(() => {
@@ -84,15 +93,17 @@ export default function RoleAndPermission({
         );
     };
 
-    const handleSave = () => {
+    const handleSave = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
         if (isEdit && user?.id != null) {
             // ÉDITION : on n'envoie PAS de mot de passe ici
+            transform((current) => ({
+                name: current.name,
+                email: current.email,
+                roles: current.roles,
+            }));
             put(route('dashboard.users.update', user.id), {
-                data: {
-                    name: data.name,
-                    email: data.email,
-                    roles: data.roles,
-                },
                 preserveScroll: true,
                 onSuccess: () => {
                     close();
@@ -100,14 +111,9 @@ export default function RoleAndPermission({
                 },
             });
         } else {
-            // CRÉATION : uniquement nom, email, password (+ confirmation)
+            // CRÉATION : les rôles sélectionnés sont également transmis.
+            transform((current) => current);
             post(route('dashboard.users.store'), {
-                data: {
-                    name: data.name,
-                    email: data.email,
-                    password: data.password,
-                    password_confirmation: data.password_confirmation,
-                },
                 preserveScroll: true,
                 onSuccess: () => {
                     close();
@@ -120,18 +126,23 @@ export default function RoleAndPermission({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div
+            className="agency-modal-layer fixed inset-0 z-50 overflow-y-auto"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="user-modal-title"
+        >
             <div className="flex min-h-screen items-center justify-center p-4">
                 {/* Overlay avec effet de flou */}
                 <div
-                    className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+                    className="agency-modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
                     onClick={() => !processing && close()}
                 ></div>
 
                 {/* Modal content */}
-                <div className="relative max-h-[90vh] w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all">
+                <div className="agency-modal relative max-h-[90vh] w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all">
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-amber-400 to-amber-600 p-6 text-white">
+                    <div className="agency-modal-header bg-gradient-to-r from-amber-400 to-amber-600 p-6 text-white">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
@@ -147,7 +158,10 @@ export default function RoleAndPermission({
                                         />
                                     )}
                                 </div>
-                                <h2 className="text-2xl font-bold">
+                                <h2
+                                    id="user-modal-title"
+                                    className="text-2xl font-bold"
+                                >
                                     {isEdit
                                         ? "Modifier l'utilisateur"
                                         : 'Créer un utilisateur'}
@@ -155,6 +169,7 @@ export default function RoleAndPermission({
                             </div>
                             <button
                                 type="button"
+                                aria-label="Fermer"
                                 className="rounded-full p-2 transition-colors hover:bg-white/20"
                                 onClick={() => !processing && close()}
                             >
@@ -166,7 +181,7 @@ export default function RoleAndPermission({
                     {/* Form content */}
                     <form
                         onSubmit={handleSave}
-                        className="max-h-[60vh] space-y-6 overflow-y-auto p-6"
+                        className="agency-modal-body max-h-[60vh] space-y-6 overflow-y-auto p-6"
                     >
                         {/* Nom */}
                         <div>
@@ -436,7 +451,7 @@ export default function RoleAndPermission({
                         <div className="flex justify-end gap-4 border-t border-gray-200 pt-6">
                             <button
                                 type="button"
-                                className="rounded-xl bg-gray-100 px-6 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-none"
+                                className="agency-btn-secondary rounded-xl px-6 py-3 font-medium transition-colors focus:ring-2 focus:ring-[#CF8E19] focus:ring-offset-2 focus:outline-none"
                                 onClick={close}
                                 disabled={processing}
                             >
@@ -444,7 +459,7 @@ export default function RoleAndPermission({
                             </button>
                             <button
                                 type="submit"
-                                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-6 py-3 font-medium text-white transition-all hover:from-amber-500 hover:to-amber-700 focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-75"
+                                className="agency-btn-primary flex items-center gap-2 rounded-xl px-6 py-3 font-medium transition-all focus:ring-2 focus:ring-[#CF8E19] focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-75"
                                 disabled={processing}
                             >
                                 {processing ? (

@@ -1,15 +1,15 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Domains\Ads\Controllers\AdController;
-use App\Domains\Ads\Controllers\AdminAdController;
 use App\Domains\Ads\Controllers\AdImageController;
+use App\Domains\Ads\Controllers\AdminAdController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('ads')->group(function () {
 
     // 🌍 PUBLIC
-    Route::get('/public', [AdController::class, 'public']);
-    Route::get('/public/{id}', [AdController::class, 'show']);
+    Route::get('/public', [AdController::class, 'public'])->middleware('throttle:120,1');
+    Route::get('/public/{id}', [AdController::class, 'show'])->middleware('throttle:120,1');
 
     // 🟢 SELLER + SUBSCRIPTION ACTIVE
     Route::middleware(['auth:sanctum', 'maintenance', 'seller.active'])->group(function () {

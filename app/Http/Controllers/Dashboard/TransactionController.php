@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Domains\Billing\Domain\ValueObjects\BillingInterval;
+use App\Domains\Billing\Models\Plan;
+use App\Domains\Billing\Models\Subscription;
+use App\Domains\Billing\Resources\SubscriptionResource;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Domains\Billing\Resources\SubscriptionResource;
-use App\Domains\Billing\Models\Subscription;
-use App\Domains\Billing\Models\Plan;
 
 class TransactionController extends Controller
 {
@@ -17,9 +18,19 @@ class TransactionController extends Controller
             ->orderBy('created_at', 'desc');
 
         if ($request->search) {
-            $query->whereHas('user', function($q) use ($request) {
-                $q->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('email', 'like', "%{$request->search}%");
+            $search = trim((string) $request->search);
+            $query->where(function ($query) use ($search) {
+                $query
+                    ->when(
+                        ctype_digit($search),
+                        fn ($query) => $query->orWhereKey((int) $search),
+                    )
+                    ->orWhere('transaction_id', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery
+                            ->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -57,18 +68,26 @@ class TransactionController extends Controller
             return back()->with('info', 'Redirection vers la plateforme de paiement sécurisée...');
         }
 
-        if (!$request->phone_number) {
+        if (! $request->phone_number) {
             return back()->withErrors(['phone_number' => 'Le numéro de téléphone est requis pour le paiement manuel.']);
         }
 
         Subscription::create([
             'user_id' => auth()->id(),
             'plan_id' => $plan->id,
-            'transaction_id' => 'REQ_' . uniqid(),
+            'plan_name' => $plan->name,
+            'plan_interval' => $plan->interval,
+            'plan_features' => $plan->features()
+                ->get(['name', 'value'])
+                ->map(fn ($feature) => $feature->only(['name', 'value']))
+                ->values()
+                ->all(),
+            'transaction_id' => 'REQ_'.uniqid(),
             'status' => 'pending',
             'amount' => $plan->price,
             'currency' => 'USD',
-            'payment_method' => 'Orange Money / M-Pesa (' . $request->phone_number . ')',
+            'interval' => $plan->interval,
+            'payment_method' => 'Orange Money / M-Pesa ('.$request->phone_number.')',
         ]);
 
         return back()->with('success', 'Votre demande a été envoyée avec succès.');
@@ -78,10 +97,14 @@ class TransactionController extends Controller
     {
 
         $sub = Subscription::findOrFail($id);
+        $interval = BillingInterval::from(
+            $sub->plan_interval ?: $sub->interval ?: $sub->plan->interval
+        );
         $sub->update([
             'status' => 'active',
             'started_at' => now(),
-            'expires_at' => now()->addMonth(), // Default 1 month, check plan for duration
+            'expires_at' => $interval->addTo(now()),
+            'approved_by' => auth()->id(),
         ]);
 
         return back()->with('success', 'Demande approuvée.');
@@ -94,6 +117,8 @@ class TransactionController extends Controller
         $sub->update([
             'status' => 'cancelled',
             'failure_reason' => $request->admin_note,
+            'cancelled_at' => now(),
+            'approved_by' => auth()->id(),
         ]);
 
         return back()->with('success', 'Demande rejetée.');

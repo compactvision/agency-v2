@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Domains\System\Models\SystemSetting;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -46,10 +46,14 @@ class HandleInertiaRequests extends Middleware
         if ($user) {
             $userData = array_merge($user->toArray(), [
                 'profile_photo_url' => $user->profile_photo
-                    ? asset('storage/' . $user->profile_photo)
+                    ? asset('storage/'.$user->profile_photo)
                     : null,
             ]);
         }
+
+        $permissions = $request->user()?->hasRole('super-admin')
+            ? collect(config('role_permissions.permissions', []))
+            : ($request->user()?->getAllPermissions()->pluck('name') ?? collect());
 
         return [
             ...parent::share($request),
@@ -58,10 +62,14 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $userData,
                 'roles' => $request->user()?->getRoleNames() ?? [],
-                'permissions' => $request->user()?->getAllPermissions()->pluck('name') ?? [],
+                'permissions' => $permissions,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'settings' => \App\Domains\System\Models\SystemSetting::where('key', 'site_settings')->first()?->value ?? [],
+            'settings' => SystemSetting::where('key', 'site_settings')->first()?->value ?? [],
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+            ],
         ];
     }
 }

@@ -44,8 +44,8 @@ export default function Service() {
             title: t('single_family_home'),
             description:
                 i18n.language === 'fr'
-                    ? 'Avec un très large choix de maisons à vendre disponibles sur le site web, DRC Agency peut vous aider à trouver celle que vous appellerez votre chez-vous.'
-                    : "With a wide selection of homes for sale available on our website, DRC Agency can help you find one you'll call home.",
+                    ? 'Avec un très large choix de maisons à vendre disponibles sur le site web, The Agency peut vous aider à trouver celle que vous appellerez votre chez-vous.'
+                    : "With a wide selection of homes for sale available on our website, The Agency can help you find one you'll call home.",
         },
         {
             id: 2,
@@ -55,8 +55,8 @@ export default function Service() {
             title: t('duplex_houses'),
             description:
                 i18n.language === 'fr'
-                    ? 'Un grand nombre de maisons en duplex sont disponibles à la vente sur le site web. DRC Agency peut vous aider à trouver celle que vous voudrez appeler votre chez-vous.'
-                    : "A large number of duplex homes are available for sale on our website. DRC Agency can help you find one you'll want to call home.",
+                    ? 'Un grand nombre de maisons en duplex sont disponibles à la vente sur le site web. The Agency peut vous aider à trouver celle que vous voudrez appeler votre chez-vous.'
+                    : "A large number of duplex homes are available for sale on our website. The Agency can help you find one you'll want to call home.",
         },
         {
             id: 3,
@@ -66,8 +66,8 @@ export default function Service() {
             title: t('modern_home'),
             description:
                 i18n.language === 'fr'
-                    ? 'Un large éventail de maisons modernes est disponible sur notre plateforme. DRC Agency vous aide à trouver celle qui correspond à votre style de vie.'
-                    : 'A wide range of modern homes is available on our platform. DRC Agency helps you find one that matches your lifestyle.',
+                    ? 'Un large éventail de maisons modernes est disponible sur notre plateforme. The Agency vous aide à trouver celle qui correspond à votre style de vie.'
+                    : 'A wide range of modern homes is available on our platform. The Agency helps you find one that matches your lifestyle.',
         },
     ];
 

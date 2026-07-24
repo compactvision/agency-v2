@@ -49,9 +49,6 @@ export default function SubscriptionPopup({
 
         // On ne rajoute plus `243` ici
         post(route('dashboard.payment-requests.store'), {
-            data: {
-                ...data, // on envoie juste les 9 chiffres locaux
-            },
             onSuccess: () => {
                 onClose();
                 reset();
@@ -67,16 +64,20 @@ export default function SubscriptionPopup({
     const isManual = !selectedPlan || selectedPlan.payment_method === 'manual';
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div
+            className="agency-modal-layer fixed inset-0 z-50 overflow-y-auto"
+            role="dialog"
+            aria-modal="true"
+        >
             <div className="flex min-h-screen items-center justify-center p-4">
                 {/* Overlay avec effet de flou */}
                 <div
-                    className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+                    className="agency-modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
                     onClick={onClose}
                 ></div>
 
                 {/* Modal content */}
-                <div className="relative w-full max-w-md transform rounded-2xl bg-white p-6 shadow-2xl transition-all">
+                <div className="agency-modal agency-modal-body relative w-full max-w-md transform rounded-2xl bg-white p-6 shadow-2xl transition-all">
                     {/* Header */}
                     <div className="mb-6 flex items-center justify-between">
                         <h2 className="text-2xl font-bold text-gray-900">
@@ -228,7 +229,7 @@ export default function SubscriptionPopup({
                         <div className="flex gap-3 pt-2">
                             <button
                                 type="button"
-                                className="flex-1 rounded-lg bg-gray-100 px-4 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-none"
+                                className="agency-btn-secondary flex-1 rounded-lg px-4 py-3 font-medium transition-colors focus:ring-2 focus:ring-[#CF8E19] focus:ring-offset-2 focus:outline-none"
                                 onClick={onClose}
                                 disabled={processing}
                             >
@@ -236,7 +237,7 @@ export default function SubscriptionPopup({
                             </button>
                             <button
                                 type="submit"
-                                className={`flex flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-amber-400 to-amber-600 px-4 py-3 font-medium text-white transition-all hover:from-amber-500 hover:to-amber-700 focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-75 ${
+                                className={`agency-btn-primary flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium transition-all focus:ring-2 focus:ring-[#CF8E19] focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-75 ${
                                     !data.plan_id
                                         ? 'cursor-not-allowed opacity-50'
                                         : ''

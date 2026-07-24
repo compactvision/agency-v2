@@ -4,6 +4,7 @@
 <title>{{ config('app.name') }}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="format-detection" content="telephone=no,date=no,address=no,email=no,url=no">
 <meta name="color-scheme" content="light">
 <meta name="supported-color-schemes" content="light">
 <style>
@@ -20,6 +21,14 @@ width: 100% !important;
 @media only screen and (max-width: 500px) {
 .button {
 width: 100% !important;
+}
+
+.content-cell {
+padding: 24px 20px !important;
+}
+
+.logo {
+width: 210px !important;
 }
 }
 </style>

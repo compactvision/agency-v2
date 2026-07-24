@@ -1,34 +1,36 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const FAQ_ITEMS = [
     {
         id: 'collapseOne',
-        question: 'Votre satisfaction est notre priorité absolue ?',
-        answer: 'Nous nous engageons à fournir un service exceptionnel, personnalisé et adapté à vos besoins spécifiques. Votre satisfaction est au cœur de notre démarche.',
+        questionKey: 'faq_satisfaction_question',
+        answerKey: 'faq_satisfaction_answer',
     },
     {
         id: 'collapseTwo',
-        question: 'Comment savoir si mon entreprise éligible ?',
-        answer: "Notre équipe d'experts analyse votre situation et vous guide à travers les critères d'éligibilité pour vous offrir les meilleures solutions.",
+        questionKey: 'faq_eligibility_question',
+        answerKey: 'faq_eligibility_answer',
     },
     {
         id: 'collapseThree',
-        question: 'Quels types de services immobiliers proposez-vous ?',
-        answer: 'Nous offrons une gamme complète de services : achat, vente, location, gestion de biens, conseil en investissement et accompagnement juridique.',
+        questionKey: 'faq_services_question',
+        answerKey: 'faq_services_answer',
     },
     {
         id: 'collapseFour',
-        question: 'Combien de temps dure un projet immobilier typique ?',
-        answer: 'La durée varie selon le type de projet, mais nous nous engageons à vous fournir un calendrier précis et à respecter les délais convenus.',
+        questionKey: 'faq_duration_question',
+        answerKey: 'faq_duration_answer',
     },
     {
         id: 'collapseFive',
-        question: 'Quels sont les coûts associés à vos services ?',
-        answer: 'Nos tarifs sont transparents et compétitifs. Nous vous proposons un devis détaillé adapté à votre budget et à vos objectifs.',
+        questionKey: 'faq_cost_question',
+        answerKey: 'faq_cost_answer',
     },
 ];
 
 export function FaqAccordion() {
+    const { t } = useTranslation();
     const [activeAccordion, setActiveAccordion] = useState('collapseThree');
 
     const toggleAccordion = (id: string) => {
@@ -55,7 +57,7 @@ export function FaqAccordion() {
                             <span
                                 className={`text-lg font-semibold ${activeAccordion === item.id ? 'text-amber-600 dark:text-amber-400' : 'text-gray-800 dark:text-zinc-200'} transition-colors duration-300 group-hover:text-amber-600 dark:group-hover:text-amber-400`}
                             >
-                                {item.question}
+                                {t(item.questionKey)}
                             </span>
                             <div
                                 className={`relative h-10 w-10 shrink-0 rounded-full ${activeAccordion === item.id ? 'bg-gradient-to-r from-amber-600 to-orange-600' : 'bg-gray-100 dark:bg-zinc-800'} flex items-center justify-center transition-all duration-300 group-hover:scale-110`}
@@ -80,7 +82,7 @@ export function FaqAccordion() {
                         >
                             <div className="px-8 pb-6">
                                 <p className="leading-relaxed text-gray-600 dark:text-zinc-400">
-                                    {item.answer}
+                                    {t(item.answerKey)}
                                 </p>
                             </div>
                         </div>

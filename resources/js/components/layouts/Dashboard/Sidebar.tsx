@@ -1,4 +1,5 @@
 import ProfileProgress from '@/components/ui/ProfileProgress';
+import { computeProfileCompletion } from '@/utils/profileCompletion';
 import { router, usePage } from '@inertiajs/react';
 import {
     Archive,
@@ -23,6 +24,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { route } from 'ziggy-js';
 import usePermission from '../../../hooks/usePermission';
+import BrandLogo from '../../brand-logo';
 
 export default function Sidebar({
     isOpen,
@@ -40,6 +42,8 @@ export default function Sidebar({
     const { can, hasRole } = usePermission();
     const { auth } = usePage().props as any;
     const user = auth?.user;
+    const profileIsComplete =
+        computeProfileCompletion(user ?? {}).percent >= 100;
     const { t } = useTranslation();
 
     // Déterminer l'élément actif basé sur la route actuelle
@@ -59,8 +63,8 @@ export default function Sidebar({
             'Dashboard/Municipalities/Index': 'municipalities',
             'Dashboard/Plans/Index': 'plans',
             'Dashboard/Pages/Index': 'pages',
-            'Dashboard/Payment-Requests/Index': 'payment-requests',
-            'Dashboard/Chatbot-Logs/Index': 'chatbot-logs',
+            'Dashboard/Payment-Requests/Index': 'transactions',
+            'Dashboard/Chatbot-Logs/Index': 'chatbot',
             'Dashboard/Audit-Logs/Index': 'audit-logs',
             'Dashboard/Settings': 'settings',
             'Dashboard/Categories/Index': 'categories',
@@ -88,6 +92,8 @@ export default function Sidebar({
             currentPath.includes('new-property')
         ) {
             activeId = 'dashboard/new-property';
+        } else if (currentPath.includes('properties/validation')) {
+            activeId = 'dashboard/properties/validation';
         } else if (
             currentPath.includes('properties/favorites') ||
             currentPath.includes('favorites')
@@ -102,9 +108,9 @@ export default function Sidebar({
         } else if (currentPath.includes('pages')) {
             activeId = 'pages';
         } else if (currentPath.includes('payment-requests')) {
-            activeId = 'payment-requests';
+            activeId = 'transactions';
         } else if (currentPath.includes('chatbot-logs')) {
-            activeId = 'chatbot-logs';
+            activeId = 'chatbot';
         } else if (currentPath.includes('audit-logs')) {
             activeId = 'audit-logs';
         } else if (currentPath.includes('settings')) {
@@ -131,7 +137,7 @@ export default function Sidebar({
             id: 'dashboard',
             label: t('overview'),
             icon: LayoutDashboard,
-            description: 'Tableau de bord',
+            description: t('dashboard'),
             route: 'dashboard',
             section: 'main',
         },
@@ -139,7 +145,7 @@ export default function Sidebar({
             id: 'properties',
             label: t('properties'),
             icon: Building,
-            description: 'Gérer les propriétés',
+            description: t('manage_properties'),
             route: 'dashboard.properties.index',
             section: 'main',
             roles: ['admin', 'seller', 'agency', 'super-admin'],
@@ -147,9 +153,9 @@ export default function Sidebar({
         },
         {
             id: 'search-properties',
-            label: 'Rechercher',
+            label: t('search'),
             icon: MapPin,
-            description: 'Trouver des biens',
+            description: t('find_properties_description'),
             route: 'properties',
             section: 'main',
             roles: ['buyer'],
@@ -158,7 +164,7 @@ export default function Sidebar({
             id: 'dashboard/users',
             label: t('users'),
             icon: Users,
-            description: 'Gérer les utilisateurs',
+            description: t('manage_users'),
             route: 'dashboard.users.index',
             section: 'main',
             roles: ['admin', 'super-admin'],
@@ -168,7 +174,7 @@ export default function Sidebar({
             id: 'dashboard/roles',
             label: t('roles'),
             icon: Shield,
-            description: 'Gérer les rôles',
+            description: t('manage_roles'),
             route: 'dashboard.roles.index',
             section: 'main',
             roles: ['admin', 'super-admin'],
@@ -180,19 +186,19 @@ export default function Sidebar({
             id: 'dashboard/new-property',
             label: t('create_listing'),
             icon: Plus,
-            description: 'Ajouter une propriété',
+            description: t('add_property'),
             route: 'dashboard.properties.create',
-            section: 'Propriétés',
+            section: t('section_properties'),
             roles: ['admin', 'seller', 'agency', 'super-admin'],
             permission: 'property.create',
         },
         {
             id: 'dashboard/properties/validation',
-            label: 'Validation',
+            label: t('validation'),
             icon: FileText,
-            description: 'Valider les propriétés',
+            description: t('validate_properties'),
             route: 'dashboard.properties.validation',
-            section: 'Propriétés',
+            section: t('section_properties'),
             roles: ['admin', 'super-admin'],
             permission: 'property.validate',
         },
@@ -200,9 +206,9 @@ export default function Sidebar({
             id: 'favorites',
             label: t('my_favorites'),
             icon: Heart,
-            description: 'Mes favoris',
+            description: t('my_favorites'),
             route: 'dashboard.properties.favorites',
-            section: 'Propriétés',
+            section: t('section_properties'),
             roles: ['admin', 'seller', 'agency', 'buyer', 'super-admin'],
             permission: 'property.favorites.view',
         },
@@ -212,9 +218,9 @@ export default function Sidebar({
             id: 'municipalities',
             label: t('municipalities'),
             icon: MapPin,
-            description: 'Gérer les municipalités',
+            description: t('manage_municipalities'),
             route: 'dashboard.municipalities.index',
-            section: 'Admin',
+            section: t('section_admin'),
             roles: ['admin', 'super-admin'],
             permission: 'municipality.view',
         },
@@ -222,9 +228,9 @@ export default function Sidebar({
             id: 'categories',
             label: t('categories'),
             icon: Building,
-            description: 'Gérer les catégories',
+            description: t('manage_categories'),
             route: 'dashboard.categories.index',
-            section: 'Admin',
+            section: t('section_admin'),
             roles: ['admin', 'super-admin'],
             permission: 'category.view',
         },
@@ -232,9 +238,9 @@ export default function Sidebar({
             id: 'amenities',
             label: t('amenities.amenities'),
             icon: Package,
-            description: 'Gérer les équipements',
+            description: t('manage_amenities'),
             route: 'dashboard.amenities.index',
-            section: 'Admin',
+            section: t('section_admin'),
             roles: ['admin', 'super-admin'],
             permission: 'amenity.view',
         },
@@ -242,9 +248,9 @@ export default function Sidebar({
             id: 'plans',
             label: t('plans'),
             icon: Package,
-            description: 'Gérer les plans',
+            description: t('manage_plans'),
             route: 'dashboard.plans.index',
-            section: 'Admin',
+            section: t('section_admin'),
             roles: ['admin', 'super-admin'],
             permission: 'plan.view',
         },
@@ -252,9 +258,9 @@ export default function Sidebar({
             id: 'pages',
             label: t('pages'),
             icon: FileText,
-            description: 'Gérer les pages',
+            description: t('manage_pages'),
             route: 'dashboard.pages.index',
-            section: 'Admin',
+            section: t('section_admin'),
             roles: ['admin', 'super-admin'],
             permission: 'pages.view',
         },
@@ -262,9 +268,9 @@ export default function Sidebar({
             id: 'transactions',
             label: t('transactions'),
             icon: Receipt,
-            description: 'Gérer les transactions',
+            description: t('manage_transactions'),
             route: 'dashboard.payment-requests.index',
-            section: 'Admin',
+            section: t('section_admin'),
             roles: ['admin', 'super-admin'],
             permission: 'payment.view',
         },
@@ -272,9 +278,9 @@ export default function Sidebar({
             id: 'audit-logs',
             label: t('audit_logs'),
             icon: Archive,
-            description: "Journaux d'audit",
+            description: t('audit_log_description'),
             route: 'dashboard.audit-logs.index',
-            section: 'Admin',
+            section: t('section_admin'),
             roles: ['admin', 'super-admin'],
             permission: 'audit-log.view',
         },
@@ -282,9 +288,9 @@ export default function Sidebar({
             id: 'chatbot',
             label: t('chatbot'),
             icon: MessageSquare,
-            description: 'Journaux du chatbot',
+            description: t('chatbot_logs'),
             route: 'dashboard.chatbot-logs.index',
-            section: 'Admin',
+            section: t('section_admin'),
             roles: ['admin', 'super-admin'],
             permission: 'chatbot-log.view',
         },
@@ -294,25 +300,25 @@ export default function Sidebar({
             id: 'profile',
             label: t('my_profile'),
             icon: User,
-            description: 'Mon profil',
+            description: t('my_profile'),
             route: 'dashboard.users.profile',
-            section: 'Profil',
+            section: t('section_profile'),
         },
         {
             id: 'settings',
             label: t('settings'),
             icon: Settings,
-            description: 'Paramètres',
+            description: t('settings'),
             route: 'dashboard.settings',
-            section: 'Profil',
+            section: t('section_profile'),
         },
         {
             id: 'subscription',
             label: t('my_package'),
             icon: Crown,
-            description: 'Mon abonnement',
+            description: t('my_subscription'),
             route: 'dashboard.subscriptions.index',
-            section: 'Profil',
+            section: t('section_profile'),
             roles: ['admin', 'seller', 'agency', 'super-admin'],
             permission: 'subscription.view',
         },
@@ -320,11 +326,11 @@ export default function Sidebar({
         // ANALYTICS
         {
             id: 'stats',
-            label: 'Statistiques',
+            label: t('statistics'),
             icon: BarChart3,
-            description: 'Statistiques détaillées',
+            description: t('detailed_statistics'),
             route: 'dashboard.analytics.index',
-            section: 'Analytics',
+            section: t('section_analytics'),
             roles: ['admin', 'seller', 'agency', 'super-admin'],
             permission: 'analytics.statistics.view',
         },
@@ -334,8 +340,8 @@ export default function Sidebar({
             id: 'logout',
             label: t('log_out'),
             icon: LogOut,
-            description: 'Se déconnecter',
-            section: 'Profil',
+            description: t('logout'),
+            section: t('section_profile'),
         },
     ];
 
@@ -347,14 +353,12 @@ export default function Sidebar({
         // Si l'item n'a ni rôles ni permissions définis, il est visible par tous (ex: dashboard, profil)
         if (!item.roles && !item.permission) return true;
 
-        // Vérification par rôle (priorité à la simplicité de configuration)
-        const roleMatch = item.roles ? hasRole(item.roles) : false;
+        // Lorsqu'un rôle et une permission sont définis, les deux sont requis.
+        // Cela évite qu'un simple nom de rôle contourne une permission retirée.
+        if (item.roles && !hasRole(item.roles)) return false;
+        if (item.permission && !can(item.permission)) return false;
 
-        // Vérification par permission
-        const permissionMatch = item.permission ? can(item.permission) : false;
-
-        // L'item est visible si l'un des deux matches (Logique OR pour plus de flexibilité)
-        return roleMatch || permissionMatch;
+        return true;
     });
 
     const handleLogout = () => {
@@ -397,38 +401,48 @@ export default function Sidebar({
 
             {/* Sidebar */}
             <aside
-                className={`fixed top-0 left-0 z-50 h-screen border-r border-slate-200 bg-white transition-all duration-500 ease-in-out ${isCollapsed ? 'w-20' : 'w-72'} ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} flex flex-col shadow-2xl backdrop-blur-xl lg:shadow-none`}
+                className={`dashboard-sidebar fixed top-0 left-0 z-50 h-screen border-r border-slate-200 bg-white transition-all duration-500 ease-in-out ${isCollapsed ? 'w-20' : 'w-72'} ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} flex flex-col shadow-2xl backdrop-blur-xl lg:shadow-none`}
             >
                 {/* Header */}
-                <div className="relative flex h-20 items-center justify-between border-b border-slate-100 bg-white px-6">
-                    <div className="flex items-center space-x-4 overflow-hidden">
-                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0d2340] text-xl font-bold text-white shadow-sm ring-2 ring-slate-100">
-                            <LayoutDashboard size={24} />
-                        </div>
+                <div
+                    className={`relative flex h-20 items-center border-b border-slate-100 bg-white ${isCollapsed ? 'justify-center px-2' : 'justify-between px-6'}`}
+                >
+                    <div
+                        className={`flex items-center overflow-hidden ${isCollapsed ? 'justify-center' : 'space-x-4'}`}
+                    >
+                        <BrandLogo
+                            markOnly
+                            imageClassName={isCollapsed ? 'h-10' : 'h-12'}
+                        />
                         <div
-                            className={`transition-all duration-500 ease-in-out ${isCollapsed ? 'translate-x-4 opacity-0' : 'translate-x-0 opacity-100'} `}
+                            className={`transition-all duration-500 ease-in-out ${isCollapsed ? 'hidden' : 'translate-x-0 opacity-100'}`}
                         >
-                            <h1 className="text-2xl font-bold text-[#0d2340]">
-                                AgencyDRC
+                            <h1 className="text-2xl font-bold text-[#413D3C] dark:text-[#EEEFE6]">
+                                The{' '}
+                                <span className="text-[#CF8E19]">Agency</span>
                             </h1>
                             <p className="text-xs font-medium text-[#C9A84C]">
-                                Premium Dashboard
+                                {t('premium_dashboard')}
                             </p>
                         </div>
                     </div>
 
                     {/* Toggle Button - Desktop Only */}
                     <button
-                        className="hidden h-10 w-10 transform items-center justify-center rounded-xl text-slate-400 transition-all duration-300 hover:scale-105 hover:bg-slate-100 hover:text-[#0d2340] focus:ring-2 focus:ring-[#C9A84C] focus:ring-offset-2 focus:outline-none lg:flex"
+                        className={`hidden transform items-center justify-center text-slate-400 transition-all duration-300 hover:scale-105 hover:bg-slate-100 hover:text-[#0d2340] focus:ring-2 focus:ring-[#C9A84C] focus:outline-none lg:flex ${
+                            isCollapsed
+                                ? 'absolute top-1/2 -right-3 z-10 h-7 w-7 -translate-y-1/2 rounded-full border border-slate-200 bg-white shadow-md'
+                                : 'h-10 w-10 rounded-xl focus:ring-offset-2'
+                        }`}
                         onClick={onToggleCollapse}
                         aria-label={
                             isCollapsed
-                                ? 'Développer la barre latérale'
-                                : 'Réduire la barre latérale'
+                                ? t('expand_sidebar')
+                                : t('collapse_sidebar')
                         }
                     >
                         <svg
-                            className="h-6 w-6 transition-transform duration-300"
+                            className={`h-6 w-6 transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`}
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -445,14 +459,23 @@ export default function Sidebar({
 
                 {/* Scrollable Content */}
                 <div className="scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent flex-1 overflow-y-auto py-6">
-                    <div className="space-y-6 px-6">
+                    <div
+                        className={
+                            isCollapsed ? 'space-y-3 px-3' : 'space-y-6 px-6'
+                        }
+                    >
                         {Object.entries(groupedMenuItems).map(
                             ([section, items]) => (
-                                <div key={section} className="space-y-1">
+                                <div
+                                    key={section}
+                                    className={
+                                        isCollapsed ? 'space-y-2' : 'space-y-1'
+                                    }
+                                >
                                     {/* Section Title */}
                                     {section !== 'main' && (
                                         <h3
-                                            className={`text-xs font-bold tracking-widest text-slate-400 uppercase transition-all duration-500 ease-in-out ${isCollapsed ? 'h-0 opacity-0' : 'h-auto opacity-100'} mb-2 flex items-center`}
+                                            className={`mb-2 items-center text-xs font-bold tracking-widest text-slate-400 uppercase transition-all duration-500 ease-in-out ${isCollapsed ? 'hidden' : 'flex'}`}
                                         >
                                             <span className="mr-2 h-4 w-1 rounded-full bg-[#C9A84C]"></span>
                                             {section}
@@ -466,12 +489,23 @@ export default function Sidebar({
                                             return (
                                                 <button
                                                     key={item.id}
-                                                    className={`group/menu-item relative flex w-full items-center rounded-xl px-3 py-2.5 transition-all duration-300 ease-in-out ${
+                                                    type="button"
+                                                    className={`dashboard-nav-item group/menu-item relative flex items-center rounded-xl transition-all duration-200 ease-out ${
+                                                        isCollapsed
+                                                            ? 'mx-auto h-11 w-11 justify-center p-0'
+                                                            : 'w-full px-3 py-2.5'
+                                                    }`}
+                                                    data-collapsed={
+                                                        isCollapsed
+                                                            ? 'true'
+                                                            : 'false'
+                                                    }
+                                                    data-active={
                                                         activeMenuItem ===
                                                         item.id
-                                                            ? 'bg-slate-50 text-[#0d2340]'
-                                                            : 'text-slate-600 hover:bg-slate-50 hover:text-[#0d2340]'
-                                                    } ${isCollapsed ? 'justify-center px-3 py-2.5' : ''} `}
+                                                            ? 'true'
+                                                            : 'false'
+                                                    }
                                                     onClick={() =>
                                                         handleMenuClick(
                                                             item.id,
@@ -486,25 +520,27 @@ export default function Sidebar({
                                                 >
                                                     {/* Icon Container - Amélioré */}
                                                     <div
-                                                        className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg transition-all duration-300 ${
-                                                            activeMenuItem ===
-                                                            item.id
-                                                                ? 'bg-[#1E3A5F] text-white shadow-sm'
-                                                                : 'bg-slate-100/50 text-slate-500 group-hover/menu-item:bg-slate-100 group-hover/menu-item:text-[#1E3A5F]'
-                                                        } ${isCollapsed ? 'h-8 w-8' : 'mr-3 h-8 w-8'} `}
+                                                        className={`dashboard-nav-icon flex flex-shrink-0 items-center justify-center rounded-lg transition-all duration-200 ${isCollapsed ? 'h-9 w-9' : 'mr-3 h-8 w-8'}`}
                                                     >
-                                                        <Icon size={16} />
+                                                        <Icon
+                                                            size={
+                                                                isCollapsed
+                                                                    ? 18
+                                                                    : 16
+                                                            }
+                                                            strokeWidth={2}
+                                                        />
                                                     </div>
 
                                                     {/* Text Container */}
                                                     <div
-                                                        className={`flex flex-col items-start transition-all duration-500 ease-in-out ${isCollapsed ? 'w-0 opacity-0' : 'opacity-100'} `}
+                                                        className={`flex flex-col items-start transition-all duration-500 ease-in-out ${isCollapsed ? 'hidden' : 'opacity-100'}`}
                                                     >
                                                         <span className="text-left text-sm font-semibold">
                                                             {item.label}
                                                         </span>
                                                         {item.description && (
-                                                            <span className="mt-0.5 text-left text-xs text-slate-500">
+                                                            <span className="dashboard-nav-description mt-0.5 text-left text-xs">
                                                                 {
                                                                     item.description
                                                                 }
@@ -529,7 +565,7 @@ export default function Sidebar({
                 </div>
 
                 {/* Profile Progress Footer */}
-                {!isCollapsed && (
+                {!isCollapsed && !profileIsComplete && (
                     <div className="border-t border-slate-100 bg-white p-6">
                         <ProfileProgress user={user} />
                     </div>

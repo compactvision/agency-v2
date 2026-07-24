@@ -15,6 +15,7 @@ import {
     Star,
     Zap,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 type Counts = { approved: number; pending: number; total: number };
 type UserCounts = {
@@ -38,6 +39,7 @@ type UserCounts = {
 };
 
 const Profile = () => {
+    const { t, i18n } = useTranslation();
     const props = usePage().props as any;
     const user = props.user as UserCounts & { name?: string };
     const counts = props.counts as Counts;
@@ -52,17 +54,20 @@ const Profile = () => {
     };
 
     const formatDate = (dateString?: string) => {
-        if (!dateString) return 'Non spécifié';
-        return new Date(dateString).toLocaleDateString('fr-FR', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-        });
+        if (!dateString) return t('not_specified');
+        return new Date(dateString).toLocaleDateString(
+            i18n.resolvedLanguage === 'en' ? 'en-US' : 'fr-FR',
+            {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+            },
+        );
     };
 
     const stats = [
         {
-            label: 'Propriétés',
+            label: t('properties'),
             value: total.toString(),
             icon: <Building2 size={20} />,
             color: 'from-slate-100 to-slate-100',
@@ -70,7 +75,7 @@ const Profile = () => {
             textColor: 'text-[#1E3A5F]',
         },
         {
-            label: 'Approuvées',
+            label: t('approved'),
             value: approved.toString(),
             icon: <Award size={20} />,
             color: 'from-emerald-400 to-emerald-600',
@@ -78,7 +83,7 @@ const Profile = () => {
             textColor: 'text-emerald-600',
         },
         {
-            label: 'En attente',
+            label: t('pending'),
             value: pending.toString(),
             icon: <Calendar size={20} />,
             color: 'from-blue-400 to-blue-600',
@@ -112,15 +117,19 @@ const Profile = () => {
     const achievements = [
         {
             icon: <Star size={16} />,
-            label: 'Membre premium',
+            label: t('premium_member'),
             color: 'text-[#C9A84C]',
         },
         {
             icon: <Shield size={16} />,
-            label: 'Vérifié',
+            label: t('verified'),
             color: 'text-emerald-500',
         },
-        { icon: <Zap size={16} />, label: 'Actif', color: 'text-blue-500' },
+        {
+            icon: <Zap size={16} />,
+            label: t('active'),
+            color: 'text-blue-500',
+        },
     ];
 
     return (
@@ -131,11 +140,11 @@ const Profile = () => {
                     <div className="mb-8">
                         <BackButton />
                         <div className="mt-6 text-center">
-                            <h1 className="mb-2 bg-gradient-to-r from-slate-100 to-slate-100 bg-clip-text text-4xl font-bold text-transparent">
-                                Mon Profil
+                            <h1 className="dashboard-page-title mb-2 text-4xl font-bold">
+                                {t('my_profile')}
                             </h1>
                             <p className="text-lg text-slate-600">
-                                Bienvenue dans votre espace personnel
+                                {t('profile_welcome')}
                             </p>
                         </div>
                     </div>
@@ -163,7 +172,7 @@ const Profile = () => {
                                             {user?.profile_photo_url ? (
                                                 <img
                                                     src={user.profile_photo_url}
-                                                    alt="Profile"
+                                                    alt={t('profile_photo')}
                                                     className="relative h-32 w-32 rounded-full border-4 border-white object-cover shadow-xl lg:h-40 lg:w-40"
                                                 />
                                             ) : (
@@ -194,26 +203,26 @@ const Profile = () => {
                                     {/* User Info */}
                                     <div className="flex-1 text-center lg:text-left">
                                         <h2 className="mb-2 text-3xl font-bold text-slate-900 lg:text-4xl">
-                                            {user?.name || 'Utilisateur'}
+                                            {user?.name || t('user')}
                                         </h2>
                                         <div className="mb-4 flex items-center justify-center gap-2 lg:justify-start">
                                             <div className="rounded-full bg-gradient-to-r from-slate-100 to-slate-100 px-3 py-1 text-sm font-medium text-[#0d2340]">
                                                 {user?.roles?.[0]?.name ||
-                                                    'Membre'}
+                                                    t('member')}
                                             </div>
                                             <div className="flex items-center text-sm text-slate-500">
                                                 <Calendar
                                                     size={14}
                                                     className="mr-1"
                                                 />
-                                                Membre depuis{' '}
+                                                {t('member_since')}{' '}
                                                 {formatDate(user?.created_at)}
                                             </div>
                                         </div>
 
                                         <p className="mb-6 max-w-2xl leading-relaxed text-slate-600">
                                             {user?.bio ||
-                                                "Passionné par l'immobilier et dédié à offrir les meilleures opportunités à mes clients."}
+                                                t('default_profile_bio')}
                                         </p>
 
                                         {/* Quick Info */}
@@ -225,7 +234,7 @@ const Profile = () => {
                                                 />
                                                 <span>
                                                     {user?.address ||
-                                                        'Non spécifié'}
+                                                        t('not_specified')}
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-2 text-slate-600">
@@ -235,7 +244,7 @@ const Profile = () => {
                                                 />
                                                 <span>
                                                     {user?.company ||
-                                                        'Non spécifié'}
+                                                        t('not_specified')}
                                                 </span>
                                             </div>
                                             {user?.website && (
@@ -250,7 +259,7 @@ const Profile = () => {
                                                         rel="noopener noreferrer"
                                                         className="transition-colors hover:text-[#1E3A5F]"
                                                     >
-                                                        Site web
+                                                        {t('website')}
                                                     </a>
                                                 </div>
                                             )}
@@ -303,7 +312,7 @@ const Profile = () => {
                                         <Mail size={20} />
                                     </div>
                                     <h3 className="text-xl font-bold text-slate-900">
-                                        Informations de contact
+                                        {t('contact_information')}
                                     </h3>
                                 </div>
 
@@ -314,13 +323,14 @@ const Profile = () => {
                                         </div>
                                         <div>
                                             <div className="mb-1 text-sm text-slate-500">
-                                                Email
+                                                {t('email')}
                                             </div>
                                             <a
                                                 href={`mailto:${user?.email}`}
                                                 className="font-medium text-slate-900 transition-colors hover:text-[#1E3A5F]"
                                             >
-                                                {user?.email || 'Non spécifié'}
+                                                {user?.email ||
+                                                    t('not_specified')}
                                             </a>
                                         </div>
                                     </div>
@@ -331,13 +341,14 @@ const Profile = () => {
                                         </div>
                                         <div>
                                             <div className="mb-1 text-sm text-slate-500">
-                                                Téléphone
+                                                {t('phone')}
                                             </div>
                                             <a
                                                 href={`tel:${user?.phone}`}
                                                 className="font-medium text-slate-900 transition-colors hover:text-[#1E3A5F]"
                                             >
-                                                {user?.phone || 'Non spécifié'}
+                                                {user?.phone ||
+                                                    t('not_specified')}
                                             </a>
                                         </div>
                                     </div>
@@ -348,11 +359,11 @@ const Profile = () => {
                                         </div>
                                         <div>
                                             <div className="mb-1 text-sm text-slate-500">
-                                                Adresse
+                                                {t('address')}
                                             </div>
                                             <div className="font-medium text-slate-900">
                                                 {user?.address ||
-                                                    'Non spécifié'}
+                                                    t('not_specified')}
                                             </div>
                                         </div>
                                     </div>
@@ -363,11 +374,11 @@ const Profile = () => {
                                         </div>
                                         <div>
                                             <div className="mb-1 text-sm text-slate-500">
-                                                Entreprise
+                                                {t('company')}
                                             </div>
                                             <div className="font-medium text-slate-900">
                                                 {user?.company ||
-                                                    'Non spécifié'}
+                                                    t('not_specified')}
                                             </div>
                                         </div>
                                     </div>
@@ -383,7 +394,7 @@ const Profile = () => {
                                         <Globe size={20} />
                                     </div>
                                     <h3 className="text-xl font-bold text-slate-900">
-                                        Réseaux sociaux
+                                        {t('social_networks')}
                                     </h3>
                                 </div>
 
@@ -411,8 +422,8 @@ const Profile = () => {
                                                 </div>
                                                 <div className="mt-1 text-xs text-slate-500">
                                                     {social.url
-                                                        ? 'Disponible'
-                                                        : 'Non configuré'}
+                                                        ? t('available')
+                                                        : t('not_configured')}
                                                 </div>
                                             </div>
                                             {social.url && (
@@ -433,7 +444,7 @@ const Profile = () => {
                                                 size={20}
                                             />
                                             <span className="text-sm font-medium text-slate-700">
-                                                Niveau d'activité
+                                                {t('activity_level')}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-1">

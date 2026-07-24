@@ -4,6 +4,7 @@ namespace App\Domains\Locations\Services;
 
 use App\Domains\Locations\Models\Municipality;
 use App\Domains\Locations\Resources\MunicipalityResource;
+use App\Support\ReferenceCache;
 
 class MunicipalityService
 {
@@ -16,10 +17,10 @@ class MunicipalityService
             ->with(['city'])
             ->withCount(['properties' => function ($query) {
                 $query->where('is_published', true)
-                      ->where('is_approved', true);
+                    ->where('is_approved', true);
             }]);
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $query->where('name', 'like', "%{$filters['search']}%");
         }
 
@@ -31,14 +32,17 @@ class MunicipalityService
      */
     public function all()
     {
-        return MunicipalityResource::collection(
-            Municipality::with(['city'])
+        $municipalities = ReferenceCache::remember(
+            ReferenceCache::MUNICIPALITIES,
+            fn () => Municipality::with(['city'])
                 ->withCount(['properties' => function ($query) {
                     $query->where('is_published', true)
-                          ->where('is_approved', true);
+                        ->where('is_approved', true);
                 }])
-                ->get()
+                ->get(),
         );
+
+        return MunicipalityResource::collection($municipalities);
     }
 
     /**
@@ -58,6 +62,7 @@ class MunicipalityService
     {
         $municipality = Municipality::create($data);
         $municipality->load('city');
+
         return new MunicipalityResource($municipality);
     }
 
@@ -67,10 +72,10 @@ class MunicipalityService
     public function update($id, array $data)
     {
         $municipality = Municipality::findOrFail($id);
-        
+
         $changes = [];
         foreach ($data as $field => $value) {
-            if ($municipality->$field !== $value) {
+            if ($value !== $municipality->$field) {
                 $changes[$field] = $value;
             }
         }
@@ -85,7 +90,7 @@ class MunicipalityService
 
         $municipality->update($changes);
         $municipality->load('city');
-        
+
         return [
             'no_changes' => false,
             'changed_fields' => $changes,
@@ -99,6 +104,7 @@ class MunicipalityService
     public function delete($id)
     {
         $municipality = Municipality::findOrFail($id);
+
         return $municipality->delete();
     }
 }

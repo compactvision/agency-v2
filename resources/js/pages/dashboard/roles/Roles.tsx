@@ -1,9 +1,11 @@
 import PermissionsPopup from '@/components/forms/PermissionsPopup';
 import Dashboard from '@/components/layouts/Dashboard/Dashboard';
 import BackButton from '@/components/ui/BackButton';
+import usePermission from '@/hooks/usePermission';
 import { router, usePage } from '@inertiajs/react';
 import {
     Check,
+    ChevronDown,
     Edit3,
     Key,
     Lock,
@@ -14,6 +16,7 @@ import {
     Users,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { route } from 'ziggy-js';
 
@@ -28,6 +31,7 @@ interface Permission {
 }
 
 interface PageProps {
+    [key: string]: unknown;
     roles: {
         data: Role[];
         links: { url: string | null; label: string; active: boolean }[];
@@ -45,9 +49,12 @@ interface PageProps {
 }
 
 export default function Roles({ roles, permissions }: PageProps) {
+    const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
     const [currentRole, setCurrentRole] = useState<Role | null>(null);
+    const [expandedRoleId, setExpandedRoleId] = useState<number | null>(null);
+    const { can, hasRole } = usePermission();
     const { filters } = usePage<{
         filters?: { search?: string; per_page?: number };
     }>().props;
@@ -55,8 +62,13 @@ export default function Roles({ roles, permissions }: PageProps) {
     const [searchQuery, setSearchQuery] = useState(filters?.search ?? '');
     const [perPage, setPerPage] = useState<number>(filters?.per_page ?? 20);
 
-    const { auth } = usePage<PageProps>().props;
-    const userPermissions: string[] = auth?.permissions || [];
+    const canCreateRole = can('role.create');
+    const canEditRole = (role: Role) =>
+        can('role.update') &&
+        (!['admin', 'super-admin'].includes(role.name) ||
+            hasRole('super-admin'));
+    const canDeleteRole = (role: Role) =>
+        can('role.delete') && !['admin', 'super-admin'].includes(role.name);
 
     useEffect(() => {
         const t = setTimeout(() => {
@@ -79,6 +91,8 @@ export default function Roles({ roles, permissions }: PageProps) {
     }, [searchQuery, perPage]);
 
     const handleCreateOpen = () => {
+        if (!canCreateRole) return;
+
         setCurrentRole(null);
         setIsOpen(true);
     };
@@ -89,14 +103,20 @@ export default function Roles({ roles, permissions }: PageProps) {
     };
 
     const handleEditOpen = (role: Role) => {
+        if (!canEditRole(role)) return;
+
         setCurrentRole(role);
         setEditOpen(true);
     };
 
     const deleteRole = (id: number) => {
-        if (confirm('Êtes-vous sûr de vouloir supprimer ce rôle ?')) {
+        const role = roles.data.find((candidate) => candidate.id === id);
+        if (!role || !canDeleteRole(role)) return;
+
+        if (confirm(t('dashboard_ui.roles.delete_confirmation'))) {
             router.delete(route('dashboard.roles.destroy', id), {
-                onError: () => toast.error('Erreur lors de la suppression.'),
+                onError: () =>
+                    toast.error(t('dashboard_ui.roles.delete_error')),
             });
         }
     };
@@ -118,29 +138,21 @@ export default function Roles({ roles, permissions }: PageProps) {
         });
     };
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('fr-FR', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-        });
-    };
-
     return (
         <Dashboard>
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 {/* Header Section */}
-                <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 shadow-lg shadow-sm backdrop-blur-xl">
+                <div className="dashboard-section-header sticky top-0 z-10 border-b border-slate-200 bg-white/80 shadow-lg shadow-sm backdrop-blur-xl">
                     <div className="px-4 py-4 sm:px-6 lg:px-8">
                         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                             <BackButton />
 
                             <div className="flex-1 text-center sm:text-left">
-                                <h1 className="bg-gradient-to-r from-slate-100 to-slate-100 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
-                                    Gestion des Rôles
+                                <h1 className="dashboard-page-title text-2xl font-bold sm:text-3xl">
+                                    {t('dashboard_ui.roles.title')}
                                 </h1>
                                 <p className="mt-1 text-sm text-slate-600 sm:text-base">
-                                    Gérez vos rôles et leurs permissions
+                                    {t('dashboard_ui.roles.description')}
                                 </p>
                             </div>
                         </div>
@@ -154,7 +166,9 @@ export default function Roles({ roles, permissions }: PageProps) {
                                 />
                                 <input
                                     type="text"
-                                    placeholder="Rechercher un rôle..."
+                                    placeholder={t(
+                                        'dashboard_ui.roles.search_placeholder',
+                                    )}
                                     className="w-full rounded-xl border border-slate-200 bg-white/80 py-3 pr-4 pl-10 text-sm shadow-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none"
                                     value={searchQuery}
                                     onChange={(e) =>
@@ -165,7 +179,9 @@ export default function Roles({ roles, permissions }: PageProps) {
                                     <button
                                         onClick={() => setSearchQuery('')}
                                         className="absolute top-1/2 right-3 -translate-y-1/2 text-[#1E3A5F] transition-colors hover:text-[#1E3A5F]"
-                                        aria-label="Effacer"
+                                        aria-label={t(
+                                            'dashboard_ui.common.clear_search',
+                                        )}
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -186,16 +202,17 @@ export default function Roles({ roles, permissions }: PageProps) {
                                     <option value={100}>100</option>
                                 </select>
 
-                                <button
-                                    className="flex transform items-center gap-2 rounded-xl bg-gradient-to-r from-slate-100 to-slate-100 px-6 py-3 font-medium text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:from-slate-100 hover:to-slate-100 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
-                                    onClick={handleCreateOpen}
-                                    disabled={
-                                        !userPermissions.includes('role.create')
-                                    }
-                                >
-                                    <Plus size={18} />
-                                    <span>Nouveau rôle</span>
-                                </button>
+                                {canCreateRole && (
+                                    <button
+                                        className="dashboard-primary-action flex transform items-center gap-2 rounded-xl px-6 py-3 font-medium shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
+                                        onClick={handleCreateOpen}
+                                    >
+                                        <Plus size={18} />
+                                        <span>
+                                            {t('dashboard_ui.roles.new')}
+                                        </span>
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -211,13 +228,15 @@ export default function Roles({ roles, permissions }: PageProps) {
                                 </div>
                                 <div className="flex items-center rounded-lg bg-emerald-50 px-2 py-1 text-sm font-medium text-emerald-600">
                                     <Users size={16} className="mr-1" />
-                                    Total
+                                    {t('dashboard_ui.roles.total')}
                                 </div>
                             </div>
                             <div className="text-2xl font-bold text-slate-900">
                                 {roles.data.length}
                             </div>
-                            <div className="text-sm text-slate-600">Rôles</div>
+                            <div className="text-sm text-slate-600">
+                                {t('roles')}
+                            </div>
                         </div>
 
                         <div className="transform rounded-2xl border border-slate-200 bg-white p-5 shadow-lg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-sm hover:shadow-xl">
@@ -227,7 +246,7 @@ export default function Roles({ roles, permissions }: PageProps) {
                                 </div>
                                 <div className="flex items-center rounded-lg bg-slate-50 px-2 py-1 text-sm font-medium text-[#1E3A5F]">
                                     <Lock size={16} className="mr-1" />
-                                    Actif
+                                    {t('dashboard_ui.roles.active')}
                                 </div>
                             </div>
                             <div className="text-2xl font-bold text-slate-900">
@@ -238,7 +257,7 @@ export default function Roles({ roles, permissions }: PageProps) {
                                 }
                             </div>
                             <div className="text-sm text-slate-600">
-                                Avec permissions
+                                {t('dashboard_ui.roles.with_permissions')}
                             </div>
                         </div>
 
@@ -249,7 +268,7 @@ export default function Roles({ roles, permissions }: PageProps) {
                                 </div>
                                 <div className="flex items-center rounded-lg bg-slate-50 px-2 py-1 text-sm font-medium text-[#1E3A5F]">
                                     <Shield size={16} className="mr-1" />
-                                    Total
+                                    {t('dashboard_ui.roles.total')}
                                 </div>
                             </div>
                             <div className="text-2xl font-bold text-slate-900">
@@ -260,7 +279,7 @@ export default function Roles({ roles, permissions }: PageProps) {
                                 )}
                             </div>
                             <div className="text-sm text-slate-600">
-                                Permissions
+                                {t('dashboard_ui.roles.permissions')}
                             </div>
                         </div>
                     </div>
@@ -275,13 +294,15 @@ export default function Roles({ roles, permissions }: PageProps) {
                                 <thead className="bg-slate-50">
                                     <tr>
                                         <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                            Nom
+                                            {t('dashboard_ui.roles.name')}
                                         </th>
                                         <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                            Permissions
+                                            {t(
+                                                'dashboard_ui.roles.permissions',
+                                            )}
                                         </th>
                                         <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                            Actions
+                                            {t('dashboard_ui.common.actions')}
                                         </th>
                                     </tr>
                                 </thead>
@@ -289,7 +310,7 @@ export default function Roles({ roles, permissions }: PageProps) {
                                     {roles.data.map((role, index) => (
                                         <tr
                                             key={role.id}
-                                            className="transition-colors hover:bg-slate-50"
+                                            className="dashboard-data-row group transition-colors"
                                             style={{
                                                 animationDelay: `${index * 0.05}s`,
                                             }}
@@ -312,59 +333,113 @@ export default function Roles({ roles, permissions }: PageProps) {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="flex flex-wrap gap-1">
-                                                    {role.permissions
-                                                        .slice(0, 3)
-                                                        .map((perm) => (
-                                                            <span
-                                                                key={perm.name}
-                                                                className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800"
-                                                            >
-                                                                {perm.name}
+                                                <div className="flex max-w-xl flex-col items-start gap-2">
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {role.permissions
+                                                            .slice(
+                                                                0,
+                                                                expandedRoleId ===
+                                                                    role.id
+                                                                    ? undefined
+                                                                    : 3,
+                                                            )
+                                                            .map((perm) => (
+                                                                <span
+                                                                    key={
+                                                                        perm.name
+                                                                    }
+                                                                    className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800"
+                                                                >
+                                                                    {perm.name}
+                                                                </span>
+                                                            ))}
+                                                        {role.permissions
+                                                            .length === 0 && (
+                                                            <span className="text-sm text-slate-500">
+                                                                {t(
+                                                                    'dashboard_ui.roles.no_permissions',
+                                                                )}
                                                             </span>
-                                                        ))}
+                                                        )}
+                                                    </div>
                                                     {role.permissions.length >
                                                         3 && (
-                                                        <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
-                                                            +
-                                                            {role.permissions
-                                                                .length -
-                                                                3}{' '}
-                                                            plus
-                                                        </span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                setExpandedRoleId(
+                                                                    expandedRoleId ===
+                                                                        role.id
+                                                                        ? null
+                                                                        : role.id,
+                                                                )
+                                                            }
+                                                            className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-[#8A5B08] transition-colors hover:bg-[#CF8E19]/10 dark:text-[#E0A43A]"
+                                                            aria-expanded={
+                                                                expandedRoleId ===
+                                                                role.id
+                                                            }
+                                                        >
+                                                            {expandedRoleId ===
+                                                            role.id
+                                                                ? t(
+                                                                      'dashboard_ui.roles.show_less',
+                                                                  )
+                                                                : t(
+                                                                      'dashboard_ui.roles.show_all',
+                                                                      {
+                                                                          count: role
+                                                                              .permissions
+                                                                              .length,
+                                                                      },
+                                                                  )}
+                                                            <ChevronDown
+                                                                size={14}
+                                                                className={`transition-transform ${
+                                                                    expandedRoleId ===
+                                                                    role.id
+                                                                        ? 'rotate-180'
+                                                                        : ''
+                                                                }`}
+                                                            />
+                                                        </button>
                                                     )}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                                                <div className="flex space-x-2">
-                                                    <button
-                                                        className="rounded p-1 text-[#1E3A5F] transition-colors hover:bg-slate-100 hover:text-[#1E3A5F] disabled:cursor-not-allowed disabled:opacity-50"
-                                                        onClick={() =>
-                                                            handleEditOpen(role)
-                                                        }
-                                                        title="Modifier"
-                                                        disabled={
-                                                            !userPermissions.includes(
-                                                                'role.update',
-                                                            )
-                                                        }
-                                                    >
-                                                        <Edit3 size={18} />
-                                                    </button>
-                                                    <button
-                                                        className="rounded p-1 text-red-600 transition-colors hover:bg-red-50 hover:text-red-900 disabled:cursor-not-allowed disabled:opacity-50"
-                                                        onClick={() =>
-                                                            deleteRole(role.id)
-                                                        }
-                                                        title="Supprimer"
-                                                        disabled={
-                                                            !userPermissions.includes(
-                                                                'role.delete',
-                                                            )
-                                                        }
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
+                                                <div className="dashboard-row-actions flex space-x-2 rounded-xl p-1 md:pointer-events-none md:translate-x-2 md:opacity-0 md:group-focus-within:pointer-events-auto md:group-focus-within:translate-x-0 md:group-focus-within:opacity-100 md:group-hover:pointer-events-auto md:group-hover:translate-x-0 md:group-hover:opacity-100">
+                                                    {canEditRole(role) && (
+                                                        <button
+                                                            className="rounded p-1 text-[#1E3A5F] transition-colors hover:bg-slate-100 hover:text-[#1E3A5F]"
+                                                            onClick={() =>
+                                                                handleEditOpen(
+                                                                    role,
+                                                                )
+                                                            }
+                                                            title={t(
+                                                                'dashboard_ui.common.edit',
+                                                            )}
+                                                            aria-label={`Modifier le rôle ${role.name}`}
+                                                        >
+                                                            <Edit3 size={18} />
+                                                        </button>
+                                                    )}
+                                                    {canDeleteRole(role) && (
+                                                        <button
+                                                            className="rounded p-1 text-red-600 transition-colors hover:bg-red-50 hover:text-red-900"
+                                                            onClick={() =>
+                                                                deleteRole(
+                                                                    role.id,
+                                                                )
+                                                            }
+                                                            title={t(
+                                                                'dashboard_ui.common.delete',
+                                                            )}
+                                                            aria-label={`Supprimer le rôle ${role.name}`}
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
@@ -399,12 +474,20 @@ export default function Roles({ roles, permissions }: PageProps) {
 
                                         <div className="mb-3">
                                             <h4 className="mb-2 text-sm font-medium text-slate-700">
-                                                Permissions (
-                                                {role.permissions.length})
+                                                {t(
+                                                    'dashboard_ui.roles.permissions',
+                                                )}{' '}
+                                                ({role.permissions.length})
                                             </h4>
                                             <div className="flex flex-wrap gap-1">
                                                 {role.permissions
-                                                    .slice(0, 3)
+                                                    .slice(
+                                                        0,
+                                                        expandedRoleId ===
+                                                            role.id
+                                                            ? undefined
+                                                            : 3,
+                                                    )
                                                     .map((perm) => (
                                                         <span
                                                             key={perm.name}
@@ -413,47 +496,84 @@ export default function Roles({ roles, permissions }: PageProps) {
                                                             {perm.name}
                                                         </span>
                                                     ))}
-                                                {role.permissions.length >
-                                                    3 && (
-                                                    <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
-                                                        +
-                                                        {role.permissions
-                                                            .length - 3}{' '}
-                                                        plus
+                                                {role.permissions.length ===
+                                                    0 && (
+                                                    <span className="text-sm text-slate-500">
+                                                        {t(
+                                                            'dashboard_ui.roles.no_permissions',
+                                                        )}
                                                     </span>
                                                 )}
                                             </div>
+                                            {role.permissions.length > 3 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setExpandedRoleId(
+                                                            expandedRoleId ===
+                                                                role.id
+                                                                ? null
+                                                                : role.id,
+                                                        )
+                                                    }
+                                                    className="mt-2 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-[#8A5B08] hover:bg-[#CF8E19]/10 dark:text-[#E0A43A]"
+                                                    aria-expanded={
+                                                        expandedRoleId ===
+                                                        role.id
+                                                    }
+                                                >
+                                                    {expandedRoleId === role.id
+                                                        ? t(
+                                                              'dashboard_ui.roles.show_less',
+                                                          )
+                                                        : t(
+                                                              'dashboard_ui.roles.show_all',
+                                                              {
+                                                                  count: role
+                                                                      .permissions
+                                                                      .length,
+                                                              },
+                                                          )}
+                                                    <ChevronDown
+                                                        size={14}
+                                                        className={`transition-transform ${
+                                                            expandedRoleId ===
+                                                            role.id
+                                                                ? 'rotate-180'
+                                                                : ''
+                                                        }`}
+                                                    />
+                                                </button>
+                                            )}
                                         </div>
 
                                         <div className="flex justify-end space-x-2">
-                                            <button
-                                                className="rounded-lg bg-slate-50 p-2 text-[#1E3A5F] transition-colors hover:bg-slate-100 hover:text-[#1E3A5F] disabled:cursor-not-allowed disabled:opacity-50"
-                                                onClick={() =>
-                                                    handleEditOpen(role)
-                                                }
-                                                title="Modifier"
-                                                disabled={
-                                                    !userPermissions.includes(
-                                                        'role.update',
-                                                    )
-                                                }
-                                            >
-                                                <Edit3 size={18} />
-                                            </button>
-                                            <button
-                                                className="rounded-lg bg-red-50 p-2 text-red-600 transition-colors hover:bg-red-100 hover:text-red-900 disabled:cursor-not-allowed disabled:opacity-50"
-                                                onClick={() =>
-                                                    deleteRole(role.id)
-                                                }
-                                                title="Supprimer"
-                                                disabled={
-                                                    !userPermissions.includes(
-                                                        'role.delete',
-                                                    )
-                                                }
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
+                                            {canEditRole(role) && (
+                                                <button
+                                                    className="rounded-lg bg-slate-50 p-2 text-[#1E3A5F] transition-colors hover:bg-slate-100 hover:text-[#1E3A5F]"
+                                                    onClick={() =>
+                                                        handleEditOpen(role)
+                                                    }
+                                                    title={t(
+                                                        'dashboard_ui.common.edit',
+                                                    )}
+                                                >
+                                                    <Edit3 size={18} />
+                                                </button>
+                                            )}
+                                            {canDeleteRole(role) && (
+                                                <button
+                                                    className="rounded-lg bg-red-50 p-2 text-red-600 transition-colors hover:bg-red-100 hover:text-red-900"
+                                                    onClick={() =>
+                                                        deleteRole(role.id)
+                                                    }
+                                                    title={t(
+                                                        'dashboard_ui.common.delete',
+                                                    )}
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
@@ -467,25 +587,26 @@ export default function Roles({ roles, permissions }: PageProps) {
                                             />
                                         </div>
                                         <h3 className="mb-2 text-xl font-semibold text-slate-900">
-                                            Aucun rôle trouvé
+                                            {t('dashboard_ui.roles.empty')}
                                         </h3>
                                         <p className="mb-6 text-slate-600">
                                             {searchQuery
-                                                ? 'Aucun rôle ne correspond à votre recherche'
-                                                : 'Commencez par créer votre premier rôle'}
+                                                ? t(
+                                                      'dashboard_ui.roles.empty_search',
+                                                  )
+                                                : t(
+                                                      'dashboard_ui.roles.empty_description',
+                                                  )}
                                         </p>
-                                        <button
-                                            className="mx-auto flex transform items-center gap-2 rounded-lg bg-gradient-to-r from-slate-100 to-slate-100 px-4 py-2 font-medium text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:from-slate-100 hover:to-slate-100 hover:shadow-xl"
-                                            onClick={handleCreateOpen}
-                                            disabled={
-                                                !userPermissions.includes(
-                                                    'role.create',
-                                                )
-                                            }
-                                        >
-                                            <Plus size={18} />
-                                            Créer un rôle
-                                        </button>
+                                        {canCreateRole && (
+                                            <button
+                                                className="dashboard-primary-action mx-auto flex transform items-center gap-2 rounded-lg px-4 py-2 font-medium shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
+                                                onClick={handleCreateOpen}
+                                            >
+                                                <Plus size={18} />
+                                                {t('dashboard_ui.roles.create')}
+                                            </button>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -529,7 +650,7 @@ export default function Roles({ roles, permissions }: PageProps) {
                 </div>
             </div>
 
-            {isOpen && (
+            {isOpen && canCreateRole && (
                 <PermissionsPopup
                     isOpen={isOpen}
                     setIsOpen={setIsOpen}
@@ -541,7 +662,7 @@ export default function Roles({ roles, permissions }: PageProps) {
                 />
             )}
 
-            {editOpen && currentRole && (
+            {editOpen && currentRole && canEditRole(currentRole) && (
                 <PermissionsPopup
                     isOpen={editOpen}
                     setIsOpen={setEditOpen}

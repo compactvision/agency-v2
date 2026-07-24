@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 
 interface Section {
     id: number;
@@ -14,6 +15,7 @@ interface PageProps {
 }
 
 export default function Page({ page }: PageProps) {
+    const { t } = useTranslation();
     return (
         <div className="min-h-screen bg-white">
             <Head title={page.title} />
@@ -50,7 +52,7 @@ export default function Page({ page }: PageProps) {
                     {page.sections.length === 0 && (
                         <div className="py-20 text-center">
                             <p className="text-slate-500 italic">
-                                Contenu en cours de rédaction...
+                                {t('content_coming_soon')}
                             </p>
                         </div>
                     )}
@@ -60,8 +62,8 @@ export default function Page({ page }: PageProps) {
             {/* Simple Footer/CTA if needed */}
             <div className="mt-20 border-t border-slate-200 bg-slate-50 px-4 py-12 text-center">
                 <p className="text-slate-600">
-                    &copy; {new Date().getFullYear()} Agence Immobilière. Tous
-                    droits réservés.
+                    &copy; {new Date().getFullYear()} The Agency.{' '}
+                    {t('all_rights_reserved')}
                 </p>
             </div>
         </div>

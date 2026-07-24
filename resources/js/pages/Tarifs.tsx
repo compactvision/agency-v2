@@ -84,12 +84,12 @@ export default function Tarifs({
 
             {/* Modal de confirmation */}
             {showConfirmModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-                        <h3 className="mb-4 text-xl font-bold text-gray-900">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-2xl border border-[#D8D7CE] bg-white p-6 shadow-2xl dark:border-[#4C4643] dark:bg-[#2B2827]">
+                        <h3 className="mb-4 text-xl font-bold text-[#413D3C] dark:text-[#F3F1E8]">
                             Confirmation
                         </h3>
-                        <p className="mb-6 text-gray-600">
+                        <p className="mb-6 text-[#625E5B] dark:text-[#C8C2BA]">
                             Vous avez déjà un abonnement actif. Voulez-vous
                             passer à ce nouveau plan ?
                         </p>
@@ -99,13 +99,13 @@ export default function Tarifs({
                                     setShowConfirmModal(false);
                                     setPendingPlanId(null);
                                 }}
-                                className="rounded-lg px-4 py-2 font-semibold text-gray-600 hover:bg-gray-100"
+                                className="rounded-lg px-4 py-2 font-semibold text-[#625E5B] transition-colors hover:bg-[#EEEFE6] hover:text-[#292625] dark:text-[#C8C2BA] dark:hover:bg-[#403B39] dark:hover:text-[#F3F1E8]"
                             >
                                 Annuler
                             </button>
                             <button
                                 onClick={confirmSwitch}
-                                className="rounded-lg bg-orange-600 px-4 py-2 font-semibold text-white hover:bg-orange-700"
+                                className="rounded-lg bg-[#CF8E19] px-4 py-2 font-semibold text-[#292625] transition-colors hover:bg-[#E0A43A]"
                             >
                                 Confirmer le changement
                             </button>
@@ -116,19 +116,19 @@ export default function Tarifs({
 
             {/* Message de succès */}
             {successMessage && (
-                <div className="fixed top-24 right-4 z-[100] max-w-sm rounded-xl border border-green-200 bg-green-50 p-4 shadow-xl">
+                <div className="fixed top-24 right-4 z-[100] max-w-sm rounded-xl border border-emerald-200 bg-emerald-50 p-4 shadow-xl dark:border-emerald-800 dark:bg-[#173D34]">
                     <div className="flex items-start gap-3">
                         <Check className="mt-1 h-5 w-5 text-green-600" />
                         <div>
-                            <p className="font-semibold text-green-800">
+                            <p className="font-semibold text-emerald-800 dark:text-emerald-200">
                                 Demande envoyée
                             </p>
-                            <p className="text-sm text-green-700">
+                            <p className="text-sm text-emerald-700 dark:text-emerald-300">
                                 {successMessage}
                             </p>
                             <button
                                 onClick={() => setSuccessMessage(null)}
-                                className="mt-2 text-xs font-bold text-green-800 uppercase underline"
+                                className="mt-2 text-xs font-bold text-emerald-800 uppercase underline dark:text-emerald-200"
                             >
                                 Fermer
                             </button>
@@ -137,21 +137,21 @@ export default function Tarifs({
                 </div>
             )}
 
-            <section className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 py-20">
-                <div className="absolute top-0 left-0 h-full w-full opacity-5">
-                    <div className="absolute top-10 left-10 h-64 w-64 rounded-full bg-orange-500 blur-3xl filter"></div>
-                    <div className="absolute right-10 bottom-10 h-96 w-96 rounded-full bg-blue-500 blur-3xl filter"></div>
+            <section className="relative overflow-hidden bg-gradient-to-br from-[#F7F7F2] via-[#EEEFE6] to-[#E4E5DC] py-20 dark:from-[#211F1E] dark:via-[#292625] dark:to-[#211F1E]">
+                <div className="pointer-events-none absolute top-0 left-0 h-full w-full opacity-10 dark:opacity-20">
+                    <div className="absolute top-10 left-10 h-64 w-64 rounded-full bg-[#CF8E19] blur-3xl filter"></div>
+                    <div className="absolute right-10 bottom-10 h-96 w-96 rounded-full bg-[#57514F] blur-3xl filter"></div>
                 </div>
 
                 <div className="relative z-10 container mx-auto px-4">
                     <div className="mx-auto mb-16 max-w-3xl text-center">
-                        <span className="mb-4 inline-block rounded-full bg-white px-4 py-2 text-sm font-semibold text-orange-600 shadow-md">
+                        <span className="mb-4 inline-block rounded-full border border-[#D8D7CE] bg-white/90 px-4 py-2 text-sm font-semibold text-[#A66E0A] shadow-md backdrop-blur-sm dark:border-[#57514F] dark:bg-[#353130] dark:text-[#E0A43A]">
                             {t('pricing_plan')}
                         </span>
-                        <h2 className="mb-4 text-4xl font-bold text-gray-900 md:text-5xl">
+                        <h2 className="mb-4 text-4xl font-bold text-[#413D3C] md:text-5xl dark:text-[#F3F1E8]">
                             {t('pricing_plan_better')}
                         </h2>
-                        <p className="text-lg text-gray-600">
+                        <p className="text-lg text-[#625E5B] dark:text-[#C8C2BA]">
                             Choisissez le plan qui correspond le mieux à vos
                             besoins et développez votre activité immobilière
                         </p>
@@ -166,14 +166,14 @@ export default function Tarifs({
                             return (
                                 <div
                                     key={plan.id}
-                                    className={`relative overflow-hidden rounded-2xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl ${
+                                    className={`relative overflow-hidden rounded-2xl border border-[#D8D7CE] bg-white shadow-lg transition-all duration-300 hover:-translate-y-2 hover:border-[#CF8E19]/70 hover:shadow-2xl dark:border-[#4C4643] dark:bg-[#2B2827] dark:shadow-black/30 dark:hover:border-[#CF8E19] ${
                                         isPopular
-                                            ? 'scale-105 transform ring-2 ring-orange-500'
+                                            ? 'transform ring-2 ring-[#CF8E19] lg:scale-105'
                                             : ''
                                     }`}
                                 >
                                     {isPopular && (
-                                        <div className="absolute top-0 right-0 flex items-center gap-1 rounded-bl-lg bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-1 text-sm font-semibold text-white">
+                                        <div className="absolute top-0 right-0 flex items-center gap-1 rounded-bl-lg bg-[#CF8E19] px-4 py-1 text-sm font-semibold text-[#292625]">
                                             <Star size={16} />
                                             Populaire
                                         </div>
@@ -184,28 +184,28 @@ export default function Tarifs({
                                             <div
                                                 className={`rounded-full p-3 ${
                                                     isPopular
-                                                        ? 'bg-gradient-to-br from-orange-100 to-orange-200 text-orange-600'
-                                                        : 'bg-gray-100 text-gray-600'
+                                                        ? 'bg-[#CF8E19]/15 text-[#A66E0A] dark:bg-[#CF8E19]/20 dark:text-[#E0A43A]'
+                                                        : 'bg-[#EEEFE6] text-[#625E5B] dark:bg-[#403B39] dark:text-[#C8C2BA]'
                                                 }`}
                                             >
                                                 {getPlanIcon(plan.name)}
                                             </div>
                                         </div>
 
-                                        <h3 className="mb-2 text-2xl font-bold text-gray-900">
+                                        <h3 className="mb-2 text-2xl font-bold text-[#413D3C] dark:text-[#F3F1E8]">
                                             {plan.name}
                                         </h3>
 
                                         <div className="mb-4 flex items-baseline">
-                                            <span className="text-4xl font-bold text-gray-900">
+                                            <span className="text-4xl font-bold text-[#292625] dark:text-[#F3F1E8]">
                                                 {plan.price}$
                                             </span>
-                                            <span className="ml-2 text-gray-500">
+                                            <span className="ml-2 text-[#736E69] dark:text-[#BBB5AD]">
                                                 /mois
                                             </span>
                                         </div>
 
-                                        <p className="mb-6 text-gray-600">
+                                        <p className="mb-6 text-[#625E5B] dark:text-[#C8C2BA]">
                                             {t(
                                                 'essential_services_to_start_your_journey',
                                             )}
@@ -224,10 +224,10 @@ export default function Tarifs({
                                             aria-busy={isSubmitting}
                                             className={`w-full rounded-lg px-6 py-3 font-semibold transition-all duration-300 ${
                                                 isCurrentPlan
-                                                    ? 'cursor-not-allowed bg-gray-200 text-gray-500'
+                                                    ? 'cursor-not-allowed bg-[#E4E5DC] text-[#85807B] dark:bg-[#403B39] dark:text-[#9F9992]'
                                                     : isPopular
-                                                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg hover:from-orange-600 hover:to-orange-700 hover:shadow-xl'
-                                                      : 'border-2 border-orange-500 bg-white text-orange-500 hover:bg-orange-50'
+                                                      ? 'bg-[#CF8E19] text-[#292625] shadow-lg shadow-[#CF8E19]/20 hover:bg-[#E0A43A] hover:shadow-xl'
+                                                      : 'border-2 border-[#CF8E19] bg-white text-[#8A5B08] hover:bg-[#CF8E19]/10 dark:bg-transparent dark:text-[#E0A43A] dark:hover:bg-[#CF8E19]/15'
                                             } flex items-center justify-center gap-3`}
                                         >
                                             {isSubmitting ? (
@@ -275,13 +275,13 @@ export default function Tarifs({
                                                         key={feature.id}
                                                         className="flex items-start gap-3"
                                                     >
-                                                        <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
+                                                        <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-[#173D34]">
                                                             <Check
                                                                 size={16}
-                                                                className="text-green-600"
+                                                                className="text-emerald-600 dark:text-emerald-300"
                                                             />
                                                         </div>
-                                                        <span className="text-gray-700">
+                                                        <span className="text-[#514D4A] dark:text-[#D1CCC4]">
                                                             {feature.name}
                                                         </span>
                                                     </li>
@@ -297,7 +297,7 @@ export default function Tarifs({
                     {/* global error / server validation summary */}
                     {(globalError || Object.keys(serverErrors).length > 0) && (
                         <div className="mx-auto mt-6 max-w-3xl">
-                            <div className="rounded border border-red-100 bg-red-50 p-4 text-red-700">
+                            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-900 dark:bg-[#482626] dark:text-red-200">
                                 {globalError && (
                                     <p className="font-medium">{globalError}</p>
                                 )}
@@ -320,17 +320,17 @@ export default function Tarifs({
                     )}
 
                     <div className="mt-20 text-center">
-                        <div className="mx-auto max-w-4xl rounded-2xl bg-white p-8 shadow-lg">
-                            <h3 className="mb-4 text-2xl font-bold text-gray-900">
+                        <div className="mx-auto max-w-4xl rounded-2xl border border-[#D8D7CE] bg-white/90 p-8 shadow-lg backdrop-blur-sm dark:border-[#4C4643] dark:bg-[#2B2827] dark:shadow-black/30">
+                            <h3 className="mb-4 text-2xl font-bold text-[#413D3C] dark:text-[#F3F1E8]">
                                 Vous avez des questions ?
                             </h3>
-                            <p className="mb-6 text-gray-600">
+                            <p className="mb-6 text-[#625E5B] dark:text-[#C8C2BA]">
                                 Notre équipe d'experts est là pour vous aider à
                                 choisir le plan qui vous convient le mieux.
                             </p>
                             <Link
                                 href={route('contact')}
-                                className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-3 font-semibold text-white shadow-md transition-all duration-300 hover:from-orange-600 hover:to-orange-700 hover:shadow-lg"
+                                className="inline-flex items-center gap-2 rounded-lg bg-[#CF8E19] px-6 py-3 font-semibold text-[#292625] shadow-md transition-all duration-300 hover:bg-[#E0A43A] hover:shadow-lg"
                             >
                                 Contacter le support
                             </Link>

@@ -14,13 +14,69 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+type PropertyType =
+    | 'house'
+    | 'apartment'
+    | 'studio'
+    | 'villa'
+    | 'land'
+    | 'office'
+    | 'shop'
+    | 'garage'
+    | 'warehouse'
+    | 'other';
+type SaleType = 'rent' | 'sale';
+
+interface PropertyImage {
+    id?: number;
+    url: string;
+}
+
+interface PropertyPopupData {
+    id: number;
+    title: string;
+    description?: string;
+    type: PropertyType;
+    sale_type: SaleType;
+    price: number;
+    surface?: number;
+    bedrooms?: number;
+    bathrooms?: number;
+    kitchens?: number;
+    rooms?: number;
+    property_age?: number;
+    address?: string;
+    floor?: number;
+    total_floors?: number;
+    is_approved: boolean;
+    is_published: boolean;
+    is_featured?: boolean;
+    images: PropertyImage[];
+}
+
+interface PropertyDetailsPopupProps {
+    isOpen: boolean;
+    onClose: () => void;
+    property: PropertyPopupData | null;
+    toggleApproval: (id: number) => void;
+}
+
+interface PopupPageProps {
+    auth: {
+        user?: {
+            roles?: string[];
+        };
+    };
+    [key: string]: unknown;
+}
+
 // Composant PropertyPopup
 export default function PropertyDetailsPopup({
     isOpen,
     onClose,
     property,
     toggleApproval,
-}) {
+}: PropertyDetailsPopupProps) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     const typeLabels = {
@@ -36,7 +92,7 @@ export default function PropertyDetailsPopup({
         other: 'Autre',
     };
 
-    const user = usePage().props.auth.user;
+    const user = usePage<PopupPageProps>().props.auth.user;
     const isAdmin = !!user?.roles?.includes?.('Admin');
 
     const saleTypeLabels = {
@@ -44,27 +100,27 @@ export default function PropertyDetailsPopup({
         sale: 'À vendre',
     };
 
+    const imageCount = property?.images.length ?? 0;
+
     const nextImage = () => {
-        if (property?.images?.length > 0) {
-            setCurrentImageIndex((prev) => (prev + 1) % property.images.length);
+        if (imageCount > 0) {
+            setCurrentImageIndex((prev) => (prev + 1) % imageCount);
         }
     };
 
     const prevImage = () => {
-        if (property?.images?.length > 0) {
+        if (imageCount > 0) {
             setCurrentImageIndex(
-                (prev) =>
-                    (prev - 1 + property.images.length) %
-                    property.images.length,
+                (prev) => (prev - 1 + imageCount) % imageCount,
             );
         }
     };
 
-    const setImage = (index) => {
+    const setImage = (index: number) => {
         setCurrentImageIndex(index);
     };
 
-    const formatPrice = (price) => {
+    const formatPrice = (price: number) => {
         return new Intl.NumberFormat('fr-FR', {
             style: 'currency',
             currency: 'USD',
@@ -73,14 +129,14 @@ export default function PropertyDetailsPopup({
     };
 
     useEffect(() => {
-        if (isOpen && property?.images?.length > 0) {
+        if (isOpen && imageCount > 0) {
             const interval = setInterval(nextImage, 5000);
             return () => clearInterval(interval);
         }
-    }, [isOpen, property?.images?.length]);
+    }, [isOpen, imageCount]);
 
     useEffect(() => {
-        const handleKeyDown = (e) => {
+        const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose();
         };
 
@@ -151,7 +207,10 @@ export default function PropertyDetailsPopup({
                                                 {/* Points de navigation */}
                                                 <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 transform space-x-2">
                                                     {property.images.map(
-                                                        (_, index) => (
+                                                        (
+                                                            _: PropertyImage,
+                                                            index: number,
+                                                        ) => (
                                                             <button
                                                                 key={index}
                                                                 className={`h-2 w-2 rounded-full transition-all duration-200 ${
@@ -252,7 +311,7 @@ export default function PropertyDetailsPopup({
                                     </div>
                                 )}
 
-                                {property.bedrooms > 0 && (
+                                {(property.bedrooms ?? 0) > 0 && (
                                     <div className="flex flex-col items-center rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
                                         <Bed className="mb-2 h-6 w-6 text-amber-500" />
                                         <div className="text-lg font-bold text-gray-900">
@@ -264,7 +323,7 @@ export default function PropertyDetailsPopup({
                                     </div>
                                 )}
 
-                                {property.bathrooms > 0 && (
+                                {(property.bathrooms ?? 0) > 0 && (
                                     <div className="flex flex-col items-center rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
                                         <Bath className="mb-2 h-6 w-6 text-amber-500" />
                                         <div className="text-lg font-bold text-gray-900">
@@ -276,7 +335,7 @@ export default function PropertyDetailsPopup({
                                     </div>
                                 )}
 
-                                {property.kitchens > 0 && (
+                                {(property.kitchens ?? 0) > 0 && (
                                     <div className="flex flex-col items-center rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
                                         <ForkKnife className="mb-2 h-6 w-6 text-amber-500" />
                                         <div className="text-lg font-bold text-gray-900">
@@ -288,7 +347,7 @@ export default function PropertyDetailsPopup({
                                     </div>
                                 )}
 
-                                {property.rooms > 0 && (
+                                {(property.rooms ?? 0) > 0 && (
                                     <div className="flex flex-col items-center rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
                                         <Home className="mb-2 h-6 w-6 text-amber-500" />
                                         <div className="text-lg font-bold text-gray-900">

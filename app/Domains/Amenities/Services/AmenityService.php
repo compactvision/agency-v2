@@ -4,24 +4,28 @@ namespace App\Domains\Amenities\Services;
 
 use App\Domains\Amenities\Models\Amenity;
 use App\Domains\Amenities\Resources\AmenityResource;
-use Illuminate\Support\Str;
+use App\Support\ReferenceCache;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Str;
 
 class AmenityService
 {
     public function all()
     {
-        return AmenityResource::collection(
-            Amenity::orderBy('position')->orderBy('name')->get()
+        $amenities = ReferenceCache::remember(
+            ReferenceCache::AMENITIES,
+            fn () => Amenity::orderBy('position')->orderBy('name')->get(),
         );
+
+        return AmenityResource::collection($amenities);
     }
 
     public function find(int $id)
     {
         $amenity = Amenity::find($id);
 
-        if (!$amenity) {
-            throw new ModelNotFoundException();
+        if (! $amenity) {
+            throw new ModelNotFoundException;
         }
 
         return new AmenityResource($amenity);
@@ -42,7 +46,7 @@ class AmenityService
 
         // Normaliser les champs (évite NULL vs 0 ou "" vs null)
         foreach ($data as $key => $value) {
-            if ($value === "") {
+            if ($value === '') {
                 $data[$key] = null;
             }
         }
@@ -55,7 +59,7 @@ class AmenityService
         // Détection manuelle des changements
         $changes = [];
         foreach ($data as $field => $value) {
-            if ($amenity->$field != $value) {   // comparaison non-stricte pour éviter NULL vs "0"
+            if ($value != $amenity->$field) {   // comparaison non-stricte pour éviter NULL vs "0"
                 $changes[$field] = $value;
             }
         }
@@ -64,7 +68,7 @@ class AmenityService
         if (empty($changes)) {
             return [
                 'no_changes' => true,
-                'amenity' => new AmenityResource($amenity->fresh())
+                'amenity' => new AmenityResource($amenity->fresh()),
             ];
         }
 
@@ -74,17 +78,16 @@ class AmenityService
         return [
             'no_changes' => false,
             'changed_fields' => $changes,
-            'amenity' => new AmenityResource($amenity->fresh())
+            'amenity' => new AmenityResource($amenity->fresh()),
         ];
     }
-
 
     public function delete(int $id)
     {
         $amenity = Amenity::find($id);
 
-        if (!$amenity) {
-            throw new ModelNotFoundException();
+        if (! $amenity) {
+            throw new ModelNotFoundException;
         }
 
         return $amenity->delete();

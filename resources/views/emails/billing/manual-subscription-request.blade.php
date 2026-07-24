@@ -1,21 +1,23 @@
 <x-mail::message>
-# 🔔 Nouvelle demande d'abonnement manuel
+# {{ __('mail.billing.manual_title') }}
 
-Bonjour Admin,
+{{ __('mail.common.hello_team') }}
 
-Un utilisateur vient de faire une demande d'abonnement au plan **{{ $planName }}** et attend votre validation.
+{!! __('mail.billing.manual_intro', ['plan' => e($planName)]) !!}
 
-| Détails | |
-|---|---|
-| Utilisateur ID | {{ $userId }} |
-| Plan | {{ $planName }} |
-| Subscription ID | {{ $subscriptionId }} |
+<x-mail::table>
+| | |
+|:--|:--|
+| **{{ __('mail.billing.user_id') }}** | #{{ $userId }} |
+| **{{ __('mail.billing.plan') }}** | {{ $planName }} |
+| **{{ __('mail.billing.subscription_id') }}** | #{{ $subscriptionId }} |
+</x-mail::table>
 
-Rendez-vous dans le panneau d'administration pour approuver ou rejeter cette demande.
+{{ __('mail.billing.manual_instruction') }}
 
-<x-mail::button :url="config('app.url') . '/dashboard/admin/subscriptions/' . $subscriptionId">
-Voir la demande
+<x-mail::button :url="$paymentRequestsUrl">
+{{ __('mail.billing.manual_action') }}
 </x-mail::button>
 
-{{ config('app.name') }}
+{{ __('mail.common.automated_notice') }}
 </x-mail::message>

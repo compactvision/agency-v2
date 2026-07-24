@@ -14,9 +14,9 @@ class PageService
     {
         $query = Page::query()->orderBy('created_at', 'desc');
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $query->where('title', 'like', "%{$filters['search']}%")
-                  ->orWhere('slug', 'like', "%{$filters['search']}%");
+                ->orWhere('slug', 'like', "%{$filters['search']}%");
         }
 
         return $query->paginate($perPage)->withQueryString();
@@ -31,6 +31,10 @@ class PageService
             $page = Page::create([
                 'title' => $data['title'],
                 'status' => $data['status'] ?? 'published',
+                'meta_title' => $data['meta_title'] ?? null,
+                'meta_description' => $data['meta_description'] ?? null,
+                'og_image' => $data['og_image'] ?? null,
+                'noindex' => $data['noindex'] ?? false,
             ]);
 
             $this->syncSections($page, $data['sections'] ?? []);
@@ -48,6 +52,10 @@ class PageService
             $page->update([
                 'title' => $data['title'],
                 'status' => $data['status'] ?? $page->status,
+                'meta_title' => $data['meta_title'] ?? null,
+                'meta_description' => $data['meta_description'] ?? null,
+                'og_image' => $data['og_image'] ?? null,
+                'noindex' => $data['noindex'] ?? false,
             ]);
 
             if (isset($data['sections'])) {

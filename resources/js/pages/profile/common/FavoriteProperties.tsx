@@ -74,6 +74,7 @@ export default function FavoriteProperties({
             setIsDeleting(true);
             router.post(
                 route('dashboard.properties.favorite', selectedProperty),
+                {},
                 {
                     onFinish: () => {
                         setIsDeleting(false);

@@ -1,16 +1,18 @@
 <x-mail::message>
-# ❌ Votre abonnement a expiré
+# {{ __('mail.billing.expired_title') }}
 
-Bonjour **{{ $subscription->user->name ?? 'Utilisateur' }}**,
+{{ __('mail.common.hello', ['name' => $subscription->user->name ?? __('mail.common.not_available')]) }}
 
-Votre abonnement au plan **{{ $subscription->plan->name }}** a expiré le **{{ $subscription->expires_at?->format('d/m/Y') }}**.
+{!! __('mail.billing.expired_intro', [
+    'plan' => e($planName),
+    'date' => $subscription->expires_at?->format(__('mail.common.date_format')) ?? __('mail.common.not_available'),
+]) !!}
 
-Vos annonces ne sont plus visibles publiquement. Renouvelez votre abonnement pour les réactiver.
+{{ __('mail.billing.expired_effect') }}
 
-<x-mail::button :url="config('app.url') . '/dashboard/billing'" color="error">
-Renouveler maintenant
+<x-mail::button :url="$subscriptionsUrl">
+{{ __('mail.billing.renew_action') }}
 </x-mail::button>
 
-Cordialement,<br>
-{{ config('app.name') }}
+{{ __('mail.common.team') }}
 </x-mail::message>

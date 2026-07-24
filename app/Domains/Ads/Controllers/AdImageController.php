@@ -2,13 +2,13 @@
 
 namespace App\Domains\Ads\Controllers;
 
-use App\Support\ApiResponse;
 use App\Domains\Ads\Models\Ad;
 use App\Domains\Ads\Models\AdImage;
-use App\Domains\Ads\Services\AdImageService;
-use App\Domains\Ads\Requests\StoreAdImageRequest;
 use App\Domains\Ads\Requests\ReorderAdImagesRequest;
-use Illuminate\Support\Facades\Auth;
+use App\Domains\Ads\Requests\StoreAdImageRequest;
+use App\Domains\Ads\Services\AdImageService;
+use App\Support\ApiResponse;
+use Illuminate\Support\Facades\Gate;
 
 class AdImageController
 {
@@ -21,17 +21,13 @@ class AdImageController
      */
     public function store(StoreAdImageRequest $request, Ad $ad)
     {
-        if ($ad->user_id !== Auth::id()) {
-            return ApiResponse::error("Forbidden", 403);
-        }
-
         if ($ad->status !== 'draft') {
-            return ApiResponse::error("Images can only be modified on draft ads", 403);
+            return ApiResponse::error('Images can only be modified on draft ads', 403);
         }
 
         $images = $this->service->addImages($ad, $request->file('images'));
 
-        return ApiResponse::success($images, "Images added");
+        return ApiResponse::success($images, 'Images added');
     }
 
     /**
@@ -39,17 +35,15 @@ class AdImageController
      */
     public function destroy(AdImage $image)
     {
-        if ($image->ad->user_id !== Auth::id()) {
-            return ApiResponse::error("Forbidden", 403);
-        }
+        Gate::authorize('manageImages', $image->ad);
 
         if ($image->ad->status !== 'draft') {
-            return ApiResponse::error("Images can only be modified on draft ads", 403);
+            return ApiResponse::error('Images can only be modified on draft ads', 403);
         }
 
         $this->service->deleteImage($image);
 
-        return ApiResponse::success(null, "Image deleted");
+        return ApiResponse::success(null, 'Image deleted');
     }
 
     /**
@@ -57,16 +51,12 @@ class AdImageController
      */
     public function reorder(ReorderAdImagesRequest $request, Ad $ad)
     {
-        if ($ad->user_id !== Auth::id()) {
-            return ApiResponse::error("Forbidden", 403);
-        }
-
         if ($ad->status !== 'draft') {
-            return ApiResponse::error("Images can only be modified on draft ads", 403);
+            return ApiResponse::error('Images can only be modified on draft ads', 403);
         }
 
         $this->service->reorderImages($ad, $request->image_ids);
 
-        return ApiResponse::success(null, "Images reordered");
+        return ApiResponse::success(null, 'Images reordered');
     }
 }

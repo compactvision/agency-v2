@@ -1,11 +1,13 @@
 import ErrorText from '@/components/ui/ErrorText';
-import { useForm } from '@inertiajs/react';
+import { type SharedData } from '@/types';
+import { useForm, usePage } from '@inertiajs/react';
 import { AtSign, MessageSquare, Phone, Send, User } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 export function ContactForm() {
     const { t } = useTranslation();
+    const { flash } = usePage<SharedData>().props;
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -19,6 +21,13 @@ export function ContactForm() {
         post(route('contact.send'), {
             preserveScroll: true,
             onSuccess: () => reset(),
+            onError: () => {
+                requestAnimationFrame(() => {
+                    document
+                        .querySelector<HTMLElement>('[aria-invalid="true"]')
+                        ?.focus();
+                });
+            },
         });
     };
 
@@ -38,6 +47,23 @@ export function ContactForm() {
             </div>
 
             {/* Formulaire */}
+            {flash?.success && (
+                <div
+                    role="status"
+                    aria-live="polite"
+                    className="mb-6 rounded-lg border border-emerald-300 bg-emerald-50 p-4 font-medium text-emerald-900"
+                >
+                    {flash.success}
+                </div>
+            )}
+            {flash?.error && (
+                <div
+                    role="alert"
+                    className="mb-6 rounded-lg border border-red-300 bg-red-50 p-4 font-medium text-red-900"
+                >
+                    {flash.error}
+                </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     {/* Champ Nom */}
@@ -58,6 +84,12 @@ export function ContactForm() {
                             <input
                                 id="name"
                                 type="text"
+                                autoComplete="name"
+                                required
+                                aria-invalid={Boolean(errors.name)}
+                                aria-describedby={
+                                    errors.name ? 'name-error' : undefined
+                                }
                                 className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 transition-colors focus:border-transparent focus:ring-2 focus:ring-orange-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200"
                                 placeholder={t('your_name')}
                                 value={data.name}
@@ -66,7 +98,7 @@ export function ContactForm() {
                                 }
                             />
                         </div>
-                        <ErrorText error={errors.name} />
+                        <ErrorText id="name-error" error={errors.name} />
                     </div>
 
                     {/* Champ Email */}
@@ -87,6 +119,12 @@ export function ContactForm() {
                             <input
                                 id="email"
                                 type="email"
+                                autoComplete="email"
+                                required
+                                aria-invalid={Boolean(errors.email)}
+                                aria-describedby={
+                                    errors.email ? 'email-error' : undefined
+                                }
                                 className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 transition-colors focus:border-transparent focus:ring-2 focus:ring-orange-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200"
                                 placeholder={t('your_email')}
                                 value={data.email}
@@ -95,7 +133,7 @@ export function ContactForm() {
                                 }
                             />
                         </div>
-                        <ErrorText error={errors.email} />
+                        <ErrorText id="email-error" error={errors.email} />
                     </div>
 
                     {/* Champ Téléphone */}
@@ -116,6 +154,11 @@ export function ContactForm() {
                             <input
                                 id="phone"
                                 type="tel"
+                                autoComplete="tel"
+                                aria-invalid={Boolean(errors.phone)}
+                                aria-describedby={
+                                    errors.phone ? 'phone-error' : undefined
+                                }
                                 className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 transition-colors focus:border-transparent focus:ring-2 focus:ring-orange-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200"
                                 placeholder={t('phone_number')}
                                 value={data.phone}
@@ -124,7 +167,7 @@ export function ContactForm() {
                                 }
                             />
                         </div>
-                        <ErrorText error={errors.phone} />
+                        <ErrorText id="phone-error" error={errors.phone} />
                     </div>
 
                     {/* Champ Sujet */}
@@ -139,6 +182,11 @@ export function ContactForm() {
                             <input
                                 id="subject"
                                 type="text"
+                                required
+                                aria-invalid={Boolean(errors.subject)}
+                                aria-describedby={
+                                    errors.subject ? 'subject-error' : undefined
+                                }
                                 className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-4 transition-colors focus:border-transparent focus:ring-2 focus:ring-orange-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200"
                                 placeholder={t('subject')}
                                 value={data.subject}
@@ -147,7 +195,7 @@ export function ContactForm() {
                                 }
                             />
                         </div>
-                        <ErrorText error={errors.subject} />
+                        <ErrorText id="subject-error" error={errors.subject} />
                     </div>
                 </div>
 
@@ -169,13 +217,19 @@ export function ContactForm() {
                         <textarea
                             id="message"
                             rows={5}
+                            required
+                            minLength={10}
+                            aria-invalid={Boolean(errors.message)}
+                            aria-describedby={
+                                errors.message ? 'message-error' : undefined
+                            }
                             className="w-full resize-none rounded-lg border border-gray-300 py-3 pr-4 pl-10 transition-colors focus:border-transparent focus:ring-2 focus:ring-orange-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200"
                             placeholder={t('your_message')}
                             value={data.message}
                             onChange={(e) => setData('message', e.target.value)}
                         ></textarea>
                     </div>
-                    <ErrorText error={errors.message} />
+                    <ErrorText id="message-error" error={errors.message} />
                 </div>
 
                 {/* Bouton d'envoi */}
@@ -184,6 +238,7 @@ export function ContactForm() {
                         type="submit"
                         className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-3 font-semibold text-white shadow-md transition-all duration-300 hover:from-orange-600 hover:to-orange-700 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
                         disabled={processing}
+                        aria-busy={processing}
                     >
                         {processing ? (
                             <>

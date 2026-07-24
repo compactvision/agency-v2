@@ -1,3 +1,4 @@
+import AppearanceTabs from '@/components/appearance-tabs';
 import Dashboard from '@/components/layouts/Dashboard/Dashboard';
 import BackButton from '@/components/ui/BackButton';
 import DeleteUser from '@/components/ui/DeleteUser';
@@ -17,12 +18,9 @@ import {
     Lock,
     Mail,
     MapPin,
-    Monitor,
-    Moon,
     Phone,
     Save,
     Settings as SettingsIcon,
-    Sun,
     Trash2,
     Twitter,
     Upload,
@@ -30,10 +28,11 @@ import {
     X,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 // Mock des hooks et composants pour la démo
-const usePermission = () => ({ can: (permission) => true });
+const usePermission = () => ({ can: (_permission: string) => true });
 
 // Version corrigée de useForm avec router Inertia
 const useForm = (initialData: any) => {
@@ -157,99 +156,6 @@ const Toggle = ({
     );
 };
 
-const useTranslation = () => ({
-    t: (key) => {
-        const translations = {
-            my_profile: 'Mon Profil',
-            edit_your_photo: 'Modifier votre photo',
-            bio: 'Biographie',
-            type_bio_here: 'Tapez votre bio ici...',
-            email_address: 'Adresse Email',
-            name: 'Nom',
-            phone: 'Téléphone',
-            company: 'Entreprise',
-            address: 'Adresse',
-            rc_number: 'Numéro RC',
-            tax_number: 'Numéro Fiscal',
-            appearance: 'Apparence',
-            site_language: 'Langue du site',
-            current_password: 'Mot de passe actuel',
-            new_password: 'Nouveau mot de passe',
-            confirm_password: 'Confirmer le mot de passe',
-            updating: 'Mise à jour...',
-            update_password: 'Mettre à jour le mot de passe',
-            site_name: 'Nom du site',
-            numero: 'Numéro',
-        };
-        return translations[key] || key;
-    },
-    i18n: {
-        language: 'fr',
-        changeLanguage: (lng) => console.log('Language changed to:', lng),
-    },
-});
-
-const ThemeSelector = () => {
-    const [selectedTheme, setSelectedTheme] = useState('light');
-
-    const themes = [
-        {
-            id: 'light',
-            name: 'Clair',
-            icon: <Sun size={18} />,
-            bg: 'bg-white',
-            border: 'border-gray-200',
-        },
-        {
-            id: 'dark',
-            name: 'Sombre',
-            icon: <Moon size={18} />,
-            bg: 'bg-gray-800',
-            border: 'border-gray-700',
-        },
-        {
-            id: 'auto',
-            name: 'Auto',
-            icon: <Monitor size={18} />,
-            bg: 'bg-gradient-to-r from-white to-gray-800',
-            border: 'border-gray-300',
-        },
-    ];
-
-    return (
-        <div className="p-6">
-            <h4 className="mb-4 text-lg font-semibold text-gray-900">Thème</h4>
-            <div className="grid grid-cols-3 gap-4">
-                {themes.map((theme) => (
-                    <div
-                        key={theme.id}
-                        onClick={() => setSelectedTheme(theme.id)}
-                        className={`relative cursor-pointer rounded-xl border-2 p-4 transition-all ${
-                            selectedTheme === theme.id
-                                ? 'border-slate-200 shadow-md'
-                                : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                    >
-                        <div
-                            className={`mb-2 h-16 w-full rounded-lg ${theme.bg} ${theme.border} flex items-center justify-center`}
-                        >
-                            {theme.icon}
-                        </div>
-                        <div className="text-center text-sm font-medium text-gray-900">
-                            {theme.name}
-                        </div>
-                        {selectedTheme === theme.id && (
-                            <div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-slate-500">
-                                <Check size={12} className="text-white" />
-                            </div>
-                        )}
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-};
-
 export default function Settings() {
     const { can } = usePermission();
 
@@ -305,20 +211,20 @@ export default function Settings() {
     });
 
     // Handlers corrigés
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const loadingToast = toast.loading('Mise à jour des paramètres...');
+        const loadingToast = toast.loading(t('updating_settings'));
 
         appForm.post('dashboard.settings.update', {
             preserveScroll: true,
             preserveState: true,
             onSuccess: () => {
                 toast.dismiss(loadingToast);
-                toast.success('Paramètres mis à jour avec succès');
+                toast.success(t('settings_updated_success'));
             },
-            onError: (errors) => {
+            onError: (errors: Record<string, string>) => {
                 toast.dismiss(loadingToast);
-                toast.error('Erreur lors de la mise à jour');
+                toast.error(t('settings_update_error'));
                 console.error('Erreurs:', errors);
             },
         });
@@ -326,18 +232,18 @@ export default function Settings() {
 
     const handlePasswordSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const loadingToast = toast.loading('Mise à jour du mot de passe...');
+        const loadingToast = toast.loading(t('updating_password'));
 
         passwordForm.put('user-password.update', {
             preserveScroll: true,
             onSuccess: () => {
                 passwordForm.reset();
                 toast.dismiss(loadingToast);
-                toast.success('Mot de passe mis à jour avec succès');
+                toast.success(t('password_updated_success'));
             },
-            onError: (errors) => {
+            onError: (errors: Record<string, string>) => {
                 toast.dismiss(loadingToast);
-                toast.error('Erreur lors de la mise à jour du mot de passe');
+                toast.error(t('password_update_error'));
                 console.error('Erreurs:', errors);
             },
         });
@@ -355,7 +261,7 @@ export default function Settings() {
         });
 
         profileForm.setProcessing(true);
-        const loadingToast = toast.loading('Mise à jour du profil...');
+        const loadingToast = toast.loading(t('updating_profile'));
 
         // Utiliser router directement pour les FormData
         router.post(route('profile.update'), formData, {
@@ -365,12 +271,12 @@ export default function Settings() {
             onSuccess: () => {
                 profileForm.setProcessing(false);
                 toast.dismiss(loadingToast);
-                toast.success('Profil mis à jour avec succès');
+                toast.success(t('profile_updated_success'));
             },
-            onError: (errors) => {
+            onError: (errors: Record<string, string>) => {
                 profileForm.setProcessing(false);
                 toast.dismiss(loadingToast);
-                toast.error('Erreur lors de la mise à jour du profil');
+                toast.error(t('profile_update_error'));
                 console.error('Erreurs:', errors);
             },
             onFinish: () => {
@@ -379,7 +285,7 @@ export default function Settings() {
         });
     };
 
-    const getInitial = (name) => {
+    const getInitial = (name: string) => {
         return name ? name.charAt(0).toUpperCase() : 'U';
     };
 
@@ -387,11 +293,7 @@ export default function Settings() {
         user.profile_photo && user.profile_photo.trim() !== '';
 
     const handleDelete = () => {
-        if (
-            !window.confirm(
-                'Êtes-vous sûr de vouloir supprimer votre photo de profil ?',
-            )
-        ) {
+        if (!window.confirm(t('confirm_delete_profile_photo'))) {
             return;
         }
 
@@ -401,25 +303,23 @@ export default function Settings() {
                 setPreview(null);
                 router.reload({ only: ['user'] });
             },
-            onError: (errors) => {
+            onError: (errors: Record<string, string>) => {
                 console.error('Erreurs:', errors);
             },
         });
     };
 
-    const handleFileChange = (event) => {
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
         if (file.size > 2048 * 1024) {
-            toast.error(
-                'Le fichier est trop volumineux. Taille maximale : 2MB',
-            );
+            toast.error(t('profile_photo_too_large'));
             return;
         }
 
         if (!file.type.startsWith('image/')) {
-            toast.error('Veuillez sélectionner un fichier image valide');
+            toast.error(t('invalid_image_file'));
             return;
         }
 
@@ -430,7 +330,7 @@ export default function Settings() {
 
     const handleUpdate = () => {
         if (!profileForm.data.profile_photo) {
-            toast.error('Veuillez sélectionner une photo');
+            toast.error(t('select_profile_photo'));
             return;
         }
 
@@ -451,13 +351,13 @@ export default function Settings() {
                         : null,
                 );
                 profileForm.setData('profile_photo', null);
-                toast.success('Photo mise à jour avec succès');
+                toast.success(t('profile_photo_updated_success'));
 
                 router.reload({ only: ['user'] });
             },
-            onError: (errors) => {
+            onError: (errors: Record<string, string>) => {
                 profileForm.processing = false;
-                toast.error('Erreur lors de la mise à jour de la photo');
+                toast.error(t('profile_photo_update_error'));
                 console.error('Erreurs:', errors);
             },
             onFinish: () => {
@@ -471,7 +371,7 @@ export default function Settings() {
             appForm.data.adresse ?? ''
         )
             .split(',')
-            .map((s) => s.trim());
+            .map((segment: string) => segment.trim());
         return {
             avenue: avenue.replace(/^Av\/\s*/, ''),
             numero: numero.replace(/^N°\s*/, ''),
@@ -480,23 +380,27 @@ export default function Settings() {
         };
     })();
 
-    const changeLanguage = async (lng) => {
+    const changeLanguage = async (lng: string) => {
         try {
             await i18n.changeLanguage(lng);
         } catch (error) {
-            console.error('Erreur lors du changement de langue:', error);
+            console.error(t('language_update_error'), error);
         }
     };
 
     const tabs = [
-        { id: 'profile', label: 'Profil', icon: <User size={18} /> },
-        { id: 'password', label: 'Mot de passe', icon: <Lock size={18} /> },
-        { id: 'preferences', label: 'Préférences', icon: <Bell size={18} /> },
+        { id: 'profile', label: t('profile'), icon: <User size={18} /> },
+        { id: 'password', label: t('password'), icon: <Lock size={18} /> },
+        {
+            id: 'preferences',
+            label: t('preferences'),
+            icon: <Bell size={18} />,
+        },
         ...(isAdmin
             ? [
                   {
                       id: 'app-details',
-                      label: "Détails de l'app",
+                      label: t('app_details'),
                       icon: <SettingsIcon size={18} />,
                   },
               ]
@@ -521,7 +425,7 @@ export default function Settings() {
                                         {preview ? (
                                             <img
                                                 src={preview}
-                                                alt="Profile"
+                                                alt={t('profile_photo')}
                                                 className="relative h-32 w-32 rounded-full border-4 border-white object-cover shadow-lg"
                                             />
                                         ) : (
@@ -549,8 +453,8 @@ export default function Settings() {
                                                         className="mr-2"
                                                     />
                                                     {profileForm.processing
-                                                        ? 'Suppression...'
-                                                        : 'Supprimer'}
+                                                        ? t('deleting')
+                                                        : t('delete')}
                                                 </button>
                                             )}
 
@@ -560,8 +464,8 @@ export default function Settings() {
                                                     className="mr-2"
                                                 />
                                                 {hasProfilePhoto
-                                                    ? 'Changer'
-                                                    : 'Télécharger'}
+                                                    ? t('change')
+                                                    : t('upload')}
                                                 <input
                                                     type="file"
                                                     accept="image/*"
@@ -583,20 +487,20 @@ export default function Settings() {
                                                         className="mr-2"
                                                     />
                                                     {profileForm.processing
-                                                        ? 'Sauvegarde...'
-                                                        : 'Sauvegarder'}
+                                                        ? t('saving')
+                                                        : t('save')}
                                                 </button>
                                             )}
                                         </div>
 
                                         <div className="mt-3 text-sm text-gray-500">
                                             {profileForm.processing &&
-                                                'Traitement en cours...'}
+                                                t('processing')}
                                             {!hasProfilePhoto &&
                                                 !preview &&
-                                                'Aucune photo de profil'}
+                                                t('no_profile_photo')}
                                             {profileForm.data.profile_photo &&
-                                                'Nouvelle photo sélectionnée - cliquez sur Sauvegarder'}
+                                                t('new_profile_photo_selected')}
                                         </div>
 
                                         {profileForm.errors.profile_photo && (
@@ -1078,7 +982,7 @@ export default function Settings() {
                                                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                                         ></path>
                                                     </svg>
-                                                    Sauvegarde...
+                                                    {t('saving')}
                                                 </>
                                             ) : (
                                                 <>
@@ -1086,7 +990,7 @@ export default function Settings() {
                                                         size={18}
                                                         className="mr-2"
                                                     />
-                                                    Sauvegarder
+                                                    {t('save')}
                                                 </>
                                             )}
                                         </button>
@@ -1104,7 +1008,7 @@ export default function Settings() {
                     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
                         <div className="p-6">
                             <h3 className="mb-6 text-lg font-semibold text-gray-900">
-                                Changer le mot de passe
+                                {t('change_password')}
                             </h3>
 
                             <form
@@ -1346,7 +1250,9 @@ export default function Settings() {
                 return (
                     <div className="space-y-6">
                         <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-                            <ThemeSelector />
+                            <div className="p-6">
+                                <AppearanceTabs />
+                            </div>
                         </div>
 
                         <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
@@ -1366,7 +1272,10 @@ export default function Settings() {
                                         onChange={(e) =>
                                             changeLanguage(e.target.value)
                                         }
-                                        value={i18n.language}
+                                        value={
+                                            i18n.resolvedLanguage ??
+                                            i18n.language
+                                        }
                                     >
                                         <option value="en">English</option>
                                         <option value="fr">Français</option>
@@ -1384,7 +1293,7 @@ export default function Settings() {
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div>
                                     <h3 className="mb-6 text-lg font-semibold text-gray-900">
-                                        Détails de l'application
+                                        {t('app_details')}
                                     </h3>
                                 </div>
 
@@ -1417,7 +1326,7 @@ export default function Settings() {
 
                                     <div>
                                         <label className="mb-2 block text-sm font-medium text-gray-700">
-                                            Email
+                                            {t('email')}
                                         </label>
                                         <div className="relative">
                                             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -1486,14 +1395,14 @@ export default function Settings() {
 
                                 <div>
                                     <h3 className="mb-6 text-lg font-semibold text-gray-900">
-                                        Informations personnelles
+                                        {t('personal_information')}
                                     </h3>
                                 </div>
 
                                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                     <div>
                                         <label className="mb-2 block text-sm font-medium text-gray-700">
-                                            Avenue
+                                            {t('avenue')}
                                         </label>
                                         <div className="relative">
                                             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -1545,7 +1454,7 @@ export default function Settings() {
                                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                     <div>
                                         <label className="mb-2 block text-sm font-medium text-gray-700">
-                                            Quartier
+                                            {t('district')}
                                         </label>
                                         <div className="relative">
                                             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -1570,7 +1479,7 @@ export default function Settings() {
 
                                     <div>
                                         <label className="mb-2 block text-sm font-medium text-gray-700">
-                                            Commune
+                                            {t('municipality')}
                                         </label>
                                         <div className="relative">
                                             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -1704,7 +1613,7 @@ export default function Settings() {
                                         className="inline-flex items-center rounded-lg bg-gray-100 px-6 py-3 font-medium text-gray-700 transition-all hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-none"
                                     >
                                         <X size={18} className="mr-2" />
-                                        Restaurer par défaut
+                                        {t('restore_defaults')}
                                     </button>
                                     <button
                                         type="submit"
@@ -1737,7 +1646,7 @@ export default function Settings() {
                                                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                                     ></path>
                                                 </svg>
-                                                Enregistrement...
+                                                {t('saving')}
                                             </>
                                         ) : (
                                             <>
@@ -1745,7 +1654,7 @@ export default function Settings() {
                                                     size={18}
                                                     className="mr-2"
                                                 />
-                                                Enregistrer
+                                                {t('save')}
                                             </>
                                         )}
                                     </button>
@@ -1758,6 +1667,20 @@ export default function Settings() {
             case 'preferences':
                 return (
                     <div className="space-y-6">
+                        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                            <div className="border-b border-gray-100 bg-gradient-to-r from-slate-100 to-slate-50 px-6 py-5 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900">
+                                <h3 className="font-bold text-gray-900 dark:text-white">
+                                    {t('appearance_settings')}
+                                </h3>
+                                <p className="mt-1 text-sm text-gray-500 dark:text-slate-300">
+                                    {t('appearance_settings_description')}
+                                </p>
+                            </div>
+                            <div className="p-6">
+                                <AppearanceTabs className="grid w-full grid-cols-1 sm:grid-cols-3" />
+                            </div>
+                        </div>
+
                         <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
                             <div className="border-b border-gray-100 bg-gradient-to-r from-slate-100 to-slate-50 px-6 py-5">
                                 <div className="flex items-center gap-3">
@@ -1848,12 +1771,13 @@ export default function Settings() {
                                     <button
                                         key={lang.code}
                                         type="button"
-                                        onClick={() =>
+                                        onClick={() => {
                                             profileForm.setData(
                                                 'language',
                                                 lang.code,
-                                            )
-                                        }
+                                            );
+                                            void changeLanguage(lang.code);
+                                        }}
                                         className={`relative flex flex-col items-center gap-3 rounded-xl border-2 p-6 transition-all duration-200 ${
                                             profileForm.data.language ===
                                             lang.code
@@ -1920,11 +1844,10 @@ export default function Settings() {
                         <BackButton />
                         <div className="mt-6 text-center">
                             <h1 className="mb-2 text-3xl font-bold text-gray-900">
-                                Paramètres
+                                {t('settings')}
                             </h1>
                             <p className="text-gray-600">
-                                Gérez vos préférences et informations
-                                personnelles
+                                {t('settings_description')}
                             </p>
                         </div>
                     </div>

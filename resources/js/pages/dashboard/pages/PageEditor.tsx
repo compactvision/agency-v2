@@ -10,6 +10,7 @@ import {
     Type,
 } from 'lucide-react';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Section {
     id: number | null;
@@ -20,12 +21,21 @@ interface Section {
 interface Page {
     id?: number;
     title: string;
+    meta_title?: string | null;
+    meta_description?: string | null;
+    og_image?: string | null;
+    noindex?: boolean;
     sections: Section[];
 }
 
 export default function PageEditor({ page }: { page?: Page }) {
+    const { t } = useTranslation();
     const { data, setData, post, put, errors, processing } = useForm({
         title: page?.title ?? '',
+        meta_title: page?.meta_title ?? '',
+        meta_description: page?.meta_description ?? '',
+        og_image: page?.og_image ?? '',
+        noindex: page?.noindex ?? false,
         sections: page?.sections ?? [],
     });
 
@@ -65,21 +75,29 @@ export default function PageEditor({ page }: { page?: Page }) {
         <Dashboard>
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 {/* Header Section */}
-                <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 shadow-lg shadow-sm backdrop-blur-xl">
+                <div className="dashboard-section-header sticky top-0 z-10 border-b border-slate-200 bg-white/80 shadow-sm backdrop-blur-xl">
                     <div className="px-4 py-4 sm:px-6 lg:px-8">
                         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                             <BackButton />
 
                             <div className="flex-1 text-center sm:text-left">
-                                <h1 className="bg-gradient-to-r from-slate-100 to-slate-100 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
+                                <h1 className="dashboard-page-title text-2xl font-bold sm:text-3xl">
                                     {page?.id
-                                        ? 'Modifier une page'
-                                        : 'Créer une page'}
+                                        ? t(
+                                              'dashboard_ui.pages.editor_edit_title',
+                                          )
+                                        : t(
+                                              'dashboard_ui.pages.editor_create_title',
+                                          )}
                                 </h1>
                                 <p className="mt-1 text-sm text-slate-600 sm:text-base">
                                     {page?.id
-                                        ? 'Modifiez le contenu et la structure de votre page'
-                                        : 'Créez une nouvelle page avec du contenu personnalisé'}
+                                        ? t(
+                                              'dashboard_ui.pages.editor_edit_description',
+                                          )
+                                        : t(
+                                              'dashboard_ui.pages.editor_create_description',
+                                          )}
                                 </p>
                             </div>
 
@@ -89,7 +107,7 @@ export default function PageEditor({ page }: { page?: Page }) {
                                         {data.sections.length}
                                     </div>
                                     <div className="text-xs text-slate-500">
-                                        Sections
+                                        {t('dashboard_ui.pages.sections')}
                                     </div>
                                 </div>
                                 <div className="min-w-[80px] rounded-xl border border-slate-200 bg-white p-3 text-center shadow-md">
@@ -97,7 +115,7 @@ export default function PageEditor({ page }: { page?: Page }) {
                                         {data.title.length}
                                     </div>
                                     <div className="text-xs text-slate-500">
-                                        Caractères
+                                        {t('dashboard_ui.pages.characters')}
                                     </div>
                                 </div>
                             </div>
@@ -121,7 +139,7 @@ export default function PageEditor({ page }: { page?: Page }) {
                                     />
                                 </div>
                                 <h3 className="text-lg font-semibold text-slate-800">
-                                    Titre de la page
+                                    {t('dashboard_ui.pages.page_title')}
                                 </h3>
                             </div>
                         </div>
@@ -130,7 +148,9 @@ export default function PageEditor({ page }: { page?: Page }) {
                                 <input
                                     type="text"
                                     className={`w-full rounded-xl border px-4 py-3 ${errors.title ? 'border-red-300 focus:ring-red-500' : 'border-slate-200 focus:ring-slate-200'} bg-white/80 text-sm shadow-sm backdrop-blur-sm transition-all duration-300 focus:ring-2 focus:outline-none`}
-                                    placeholder="Entrez le titre de votre page..."
+                                    placeholder={t(
+                                        'dashboard_ui.pages.page_title_placeholder',
+                                    )}
                                     value={data.title}
                                     onChange={(e) =>
                                         setData('title', e.target.value)
@@ -149,6 +169,92 @@ export default function PageEditor({ page }: { page?: Page }) {
                         </div>
                     </div>
 
+                    {/* SEO Section */}
+                    <div className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-sm">
+                        <div className="border-b border-slate-200 bg-gradient-to-r from-slate-100 to-slate-50 px-6 py-4">
+                            <h3 className="text-lg font-semibold text-slate-800">
+                                {t('dashboard_ui.pages.seo')}
+                            </h3>
+                        </div>
+                        <div className="grid gap-5 p-6">
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-700">
+                                    Titre SEO ({data.meta_title.length}/65)
+                                </label>
+                                <input
+                                    type="text"
+                                    maxLength={65}
+                                    className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm"
+                                    value={data.meta_title}
+                                    onChange={(event) =>
+                                        setData(
+                                            'meta_title',
+                                            event.target.value,
+                                        )
+                                    }
+                                    placeholder={data.title}
+                                />
+                                {errors.meta_title && (
+                                    <p className="mt-1 text-sm text-red-600">
+                                        {errors.meta_title}
+                                    </p>
+                                )}
+                            </div>
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-700">
+                                    Meta description (
+                                    {data.meta_description.length}/160)
+                                </label>
+                                <textarea
+                                    rows={3}
+                                    maxLength={160}
+                                    className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm"
+                                    value={data.meta_description}
+                                    onChange={(event) =>
+                                        setData(
+                                            'meta_description',
+                                            event.target.value,
+                                        )
+                                    }
+                                />
+                                {errors.meta_description && (
+                                    <p className="mt-1 text-sm text-red-600">
+                                        {errors.meta_description}
+                                    </p>
+                                )}
+                            </div>
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-700">
+                                    Image sociale (URL HTTPS)
+                                </label>
+                                <input
+                                    type="url"
+                                    className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm"
+                                    value={data.og_image}
+                                    onChange={(event) =>
+                                        setData('og_image', event.target.value)
+                                    }
+                                    placeholder="https://example.com/image.jpg"
+                                />
+                                {errors.og_image && (
+                                    <p className="mt-1 text-sm text-red-600">
+                                        {errors.og_image}
+                                    </p>
+                                )}
+                            </div>
+                            <label className="flex items-center gap-3 text-sm text-slate-700">
+                                <input
+                                    type="checkbox"
+                                    checked={data.noindex}
+                                    onChange={(event) =>
+                                        setData('noindex', event.target.checked)
+                                    }
+                                />
+                                {t('dashboard_ui.pages.noindex')}
+                            </label>
+                        </div>
+                    </div>
+
                     {/* Content Sections */}
                     <div className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-sm">
                         <div className="border-b border-slate-200 bg-gradient-to-r from-slate-100 to-slate-50 px-6 py-4">
@@ -161,7 +267,7 @@ export default function PageEditor({ page }: { page?: Page }) {
                                         />
                                     </div>
                                     <h3 className="text-lg font-semibold text-slate-800">
-                                        Contenu de la page
+                                        {t('dashboard_ui.pages.content')}
                                     </h3>
                                 </div>
                                 <button
@@ -184,10 +290,12 @@ export default function PageEditor({ page }: { page?: Page }) {
                                     />
                                 </div>
                                 <h4 className="mb-2 text-xl font-semibold text-slate-800">
-                                    Aucune section
+                                    {t('dashboard_ui.pages.no_section')}
                                 </h4>
                                 <p className="mx-auto mb-6 max-w-md text-slate-600">
-                                    Commencez par ajouter votre première section
+                                    {t(
+                                        'dashboard_ui.pages.no_section_description',
+                                    )}
                                     de contenu
                                 </p>
                                 <button
@@ -196,7 +304,7 @@ export default function PageEditor({ page }: { page?: Page }) {
                                     onClick={handleAddSection}
                                 >
                                     <Plus size={18} />
-                                    Ajouter une section
+                                    {t('dashboard_ui.pages.add_section')}
                                 </button>
                             </div>
                         ) : (
@@ -229,7 +337,9 @@ export default function PageEditor({ page }: { page?: Page }) {
                                                             index,
                                                         )
                                                     }
-                                                    title="Supprimer cette section"
+                                                    title={t(
+                                                        'dashboard_ui.pages.delete_section',
+                                                    )}
                                                 >
                                                     <Trash2 size={16} />
                                                 </button>
@@ -243,12 +353,16 @@ export default function PageEditor({ page }: { page?: Page }) {
                                                         size={16}
                                                         className="text-[#C9A84C]"
                                                     />
-                                                    Titre de la section
+                                                    {t(
+                                                        'dashboard_ui.pages.section_title',
+                                                    )}
                                                 </label>
                                                 <input
                                                     type="text"
-                                                    className={`w-full rounded-lg border px-4 py-3 ${errors.sections?.[index]?.heading ? 'border-red-300 focus:ring-red-500' : 'border-slate-200 focus:ring-slate-200'} bg-white/80 text-sm shadow-sm backdrop-blur-sm transition-all duration-300 focus:ring-2 focus:outline-none`}
-                                                    placeholder="Titre de cette section..."
+                                                    className={`w-full rounded-lg border px-4 py-3 ${errors[`sections.${index}.heading`] ? 'border-red-300 focus:ring-red-500' : 'border-slate-200 focus:ring-slate-200'} bg-white/80 text-sm shadow-sm backdrop-blur-sm transition-all duration-300 focus:ring-2 focus:outline-none`}
+                                                    placeholder={t(
+                                                        'dashboard_ui.pages.section_title_placeholder',
+                                                    )}
                                                     value={section.heading}
                                                     onChange={(e) =>
                                                         handleChangeSection(
@@ -258,8 +372,9 @@ export default function PageEditor({ page }: { page?: Page }) {
                                                         )
                                                     }
                                                 />
-                                                {errors.sections?.[index]
-                                                    ?.heading && (
+                                                {errors[
+                                                    `sections.${index}.heading`
+                                                ] && (
                                                     <div className="mt-2 flex items-center text-sm text-red-600">
                                                         <AlertCircle
                                                             size={14}
@@ -267,9 +382,9 @@ export default function PageEditor({ page }: { page?: Page }) {
                                                         />
                                                         <span>
                                                             {
-                                                                errors.sections[
-                                                                    index
-                                                                ].heading
+                                                                errors[
+                                                                    `sections.${index}.heading`
+                                                                ]
                                                             }
                                                         </span>
                                                     </div>
@@ -282,12 +397,16 @@ export default function PageEditor({ page }: { page?: Page }) {
                                                         size={16}
                                                         className="text-[#C9A84C]"
                                                     />
-                                                    Contenu du paragraphe
+                                                    {t(
+                                                        'dashboard_ui.pages.paragraph',
+                                                    )}
                                                 </label>
                                                 <textarea
-                                                    className={`w-full rounded-lg border px-4 py-3 ${errors.sections?.[index]?.paragraph ? 'border-red-300 focus:ring-red-500' : 'border-slate-200 focus:ring-slate-200'} resize-vertical bg-white/80 text-sm shadow-sm backdrop-blur-sm transition-all duration-300 focus:ring-2 focus:outline-none`}
+                                                    className={`w-full rounded-lg border px-4 py-3 ${errors[`sections.${index}.paragraph`] ? 'border-red-300 focus:ring-red-500' : 'border-slate-200 focus:ring-slate-200'} resize-vertical bg-white/80 text-sm shadow-sm backdrop-blur-sm transition-all duration-300 focus:ring-2 focus:outline-none`}
                                                     rows={4}
-                                                    placeholder="Rédigez le contenu de cette section..."
+                                                    placeholder={t(
+                                                        'dashboard_ui.pages.paragraph_placeholder',
+                                                    )}
                                                     value={section.paragraph}
                                                     onChange={(e) =>
                                                         handleChangeSection(
@@ -297,8 +416,9 @@ export default function PageEditor({ page }: { page?: Page }) {
                                                         )
                                                     }
                                                 />
-                                                {errors.sections?.[index]
-                                                    ?.paragraph && (
+                                                {errors[
+                                                    `sections.${index}.paragraph`
+                                                ] && (
                                                     <div className="mt-2 flex items-center text-sm text-red-600">
                                                         <AlertCircle
                                                             size={14}
@@ -306,9 +426,9 @@ export default function PageEditor({ page }: { page?: Page }) {
                                                         />
                                                         <span>
                                                             {
-                                                                errors.sections[
-                                                                    index
-                                                                ].paragraph
+                                                                errors[
+                                                                    `sections.${index}.paragraph`
+                                                                ]
                                                             }
                                                         </span>
                                                     </div>
@@ -325,7 +445,7 @@ export default function PageEditor({ page }: { page?: Page }) {
                     <div className="flex justify-center">
                         <button
                             type="submit"
-                            className="inline-flex min-w-[220px] transform items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-slate-100 to-slate-100 px-8 py-4 font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:from-slate-100 hover:to-slate-100 hover:shadow-xl disabled:transform-none disabled:cursor-not-allowed disabled:opacity-70"
+                            className="dashboard-primary-action inline-flex min-w-[220px] transform items-center justify-center gap-3 rounded-xl px-8 py-4 font-semibold shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl disabled:transform-none disabled:cursor-not-allowed disabled:opacity-70"
                             disabled={processing}
                         >
                             {processing ? (
@@ -335,10 +455,10 @@ export default function PageEditor({ page }: { page?: Page }) {
                             )}
                             <span>
                                 {processing
-                                    ? 'En cours...'
+                                    ? t('processing')
                                     : page?.id
-                                      ? 'Mettre à jour la page'
-                                      : 'Créer la page'}
+                                      ? t('dashboard_ui.pages.update')
+                                      : t('dashboard_ui.pages.create')}
                             </span>
                         </button>
                     </div>

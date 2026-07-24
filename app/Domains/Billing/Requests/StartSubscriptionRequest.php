@@ -3,6 +3,7 @@
 namespace App\Domains\Billing\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StartSubscriptionRequest extends FormRequest
 {
@@ -15,7 +16,11 @@ class StartSubscriptionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'plan_id' => ['required', 'integer', 'exists:plans,id'],
+            'plan_id' => [
+                'required',
+                'integer',
+                Rule::exists('plans', 'id')->where('is_active', true),
+            ],
         ];
     }
 }

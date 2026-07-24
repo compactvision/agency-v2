@@ -136,6 +136,29 @@ type Property = {
     land_type?: string;
 };
 
+type PropertyFormData = Omit<
+    Property,
+    | 'id'
+    | 'reference'
+    | 'existing_images'
+    | 'slug'
+    | 'land_surface'
+    | 'land_type'
+> & {
+    existing_images: Array<{
+        id: number;
+        url: string;
+        position?: number;
+        name?: string;
+        isExisting?: boolean;
+    }>;
+    slug: string;
+    land_surface: string;
+    land_type: string;
+    images_to_delete: number[];
+    image_positions: number[];
+};
+
 interface Props {
     countries: { [key: number]: string };
     municipalities: Municipality[];
@@ -195,8 +218,8 @@ const PropertyForm: React.FC<Props> = ({
     }, []);
 
     // Initialisation des données du formulaire
-    const initializeFormData = useCallback(() => {
-        const baseData = {
+    const initializeFormData = useCallback((): PropertyFormData => {
+        const baseData: PropertyFormData = {
             title: '',
             description: '',
             type: '',
@@ -358,14 +381,14 @@ const PropertyForm: React.FC<Props> = ({
     }, [property, isEditMode]);
 
     const { data, setData, post, put, errors, processing, reset, transform } =
-        useForm(initializeFormData());
+        useForm<PropertyFormData>(initializeFormData());
 
     // Reset form when property changes (Edit mode hydration fix)
     useEffect(() => {
         if (property && isEditMode) {
-            reset(initializeFormData());
+            setData(initializeFormData());
         }
-    }, [property, isEditMode, reset, initializeFormData]);
+    }, [property, isEditMode, setData, initializeFormData]);
 
     // Fonctions utilitaires
     const generateReferenceNumber = useCallback(() => {
@@ -1118,7 +1141,7 @@ const PropertyForm: React.FC<Props> = ({
         <Dashboard>
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 {/* Header responsive */}
-                <div className="sticky top-0 z-1 border-b border-slate-200 bg-white/80 shadow-lg shadow-sm backdrop-blur-xl">
+                <div className="dashboard-section-header sticky top-0 z-10 border-b border-slate-200 bg-white/80 shadow-sm backdrop-blur-xl">
                     <div className="px-3 py-3 sm:px-4 sm:py-4 lg:px-8">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <button
@@ -1136,7 +1159,7 @@ const PropertyForm: React.FC<Props> = ({
                             </button>
 
                             <div className="flex-1 text-center sm:text-left">
-                                <h1 className="bg-gradient-to-r from-slate-100 to-slate-100 bg-clip-text text-xl font-bold text-transparent sm:text-2xl lg:text-3xl">
+                                <h1 className="dashboard-page-title text-xl font-bold sm:text-2xl lg:text-3xl">
                                     {isEditMode ? 'Modifier' : 'Publier'} une
                                     propriété
                                 </h1>
@@ -1303,7 +1326,7 @@ const PropertyForm: React.FC<Props> = ({
                                                 sections.find(
                                                     (s) =>
                                                         s.id === activeSection,
-                                                ).icon,
+                                                )!.icon,
                                                 {
                                                     size: 20,
                                                     className: 'text-[#C9A84C]',

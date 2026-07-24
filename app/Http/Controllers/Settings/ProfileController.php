@@ -4,26 +4,17 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Support\UserAnonymizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class ProfileController extends Controller
 {
-    /**
-     * Show the user's profile settings page.
-     */
-    public function edit(Request $request): Response
-    {
-        return Inertia::render('settings/profile', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
-            'status' => $request->session()->get('status'),
-        ]);
-    }
+    public function __construct(
+        private readonly UserAnonymizer $userAnonymizer,
+    ) {}
 
     /**
      * Update the user's profile settings.
@@ -38,10 +29,10 @@ class ProfileController extends Controller
         unset($data['newsletter']);
 
         if ($request->hasFile('profile_photo')) {
-            if ($user->profile_photo) {
-                Storage::disk('public')->delete($user->profile_photo);
-            }
+            $oldProfilePhoto = $user->profile_photo;
             $data['profile_photo'] = $request->file('profile_photo')->store('profile-photos', 'public');
+        } else {
+            $oldProfilePhoto = null;
         }
 
         // Cast boolean explicitly to avoid PHP falsy issues
@@ -57,6 +48,10 @@ class ProfileController extends Controller
 
         $user->save();
 
+        if ($oldProfilePhoto) {
+            Storage::disk('public')->delete($oldProfilePhoto);
+        }
+
         if ($newsletter !== null) {
             $user->newsletter_subscription()->updateOrCreate(
                 ['email' => $user->email],
@@ -64,7 +59,7 @@ class ProfileController extends Controller
             );
         }
 
-        return back()->with('success', __('profile_updated_success'));
+        return to_route('dashboard.users.profile')->with('success', __('profile_updated_success'));
     }
 
     /**
@@ -73,18 +68,19 @@ class ProfileController extends Controller
     public function updateProfilePhoto(Request $request): RedirectResponse
     {
         $request->validate([
-            'profile_photo' => ['required', 'image', 'max:2048'],
+            'profile_photo' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048', 'dimensions:max_width=5000,max_height=5000'],
         ]);
 
         $user = $request->user();
 
-        if ($user->profile_photo) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo);
-        }
-
+        $oldProfilePhoto = $user->profile_photo;
         $path = $request->file('profile_photo')->store('profile-photos', 'public');
         $user->profile_photo = $path;
         $user->save();
+
+        if ($oldProfilePhoto) {
+            Storage::disk('public')->delete($oldProfilePhoto);
+        }
 
         return back()->with('status', 'profile-photo-updated');
     }
@@ -97,7 +93,7 @@ class ProfileController extends Controller
         $user = $request->user();
 
         if ($user->profile_photo) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo);
+            Storage::disk('public')->delete($user->profile_photo);
             $user->profile_photo = null;
             $user->save();
         }
@@ -118,7 +114,7 @@ class ProfileController extends Controller
 
         Auth::logout();
 
-        $user->delete();
+        $this->userAnonymizer->anonymize($user);
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

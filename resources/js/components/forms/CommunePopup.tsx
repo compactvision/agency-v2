@@ -76,9 +76,13 @@ export default function CommunePopup({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm transition-all duration-300">
-            <div className="w-full max-w-lg animate-in overflow-hidden rounded-2xl bg-white shadow-2xl duration-200 fade-in zoom-in">
-                <div className="relative border-b border-gray-100 bg-gradient-to-r from-amber-500 to-amber-600 p-6 text-white">
+        <div
+            className="agency-modal-layer fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm transition-all duration-300"
+            role="dialog"
+            aria-modal="true"
+        >
+            <div className="agency-modal w-full max-w-lg animate-in overflow-hidden rounded-2xl bg-white shadow-2xl duration-200 fade-in zoom-in">
+                <div className="agency-modal-header relative border-b border-gray-100 bg-gradient-to-r from-amber-500 to-amber-600 p-6 text-white">
                     <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20">
                             <MapPin size={20} />
@@ -106,7 +110,7 @@ export default function CommunePopup({
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-5 p-6 text-gray-900"
+                    className="agency-modal-body space-y-5 p-6 text-gray-900"
                 >
                     <div className="space-y-2">
                         <label className="text-sm font-semibold text-gray-700">
@@ -184,14 +188,14 @@ export default function CommunePopup({
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 rounded-xl bg-gray-100 px-4 py-3 text-sm font-bold text-gray-700 transition-all hover:bg-gray-200 active:scale-95"
+                            className="agency-btn-secondary flex-1 rounded-xl px-4 py-3 text-sm font-bold transition-all active:scale-95"
                         >
                             Annuler
                         </button>
                         <button
                             type="submit"
                             disabled={processing}
-                            className="flex-[2] rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-amber-500/20 transition-all hover:from-amber-600 hover:to-amber-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="agency-btn-primary flex-[2] rounded-xl px-4 py-3 text-sm font-bold shadow-lg transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {processing ? (
                                 <div className="flex items-center justify-center gap-2">

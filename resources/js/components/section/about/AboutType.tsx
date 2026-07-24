@@ -29,7 +29,7 @@ export default function AboutType() {
                 'Gestion de biens prestigieux pour maximiser leur valeur et leur visibilité.',
             ),
             icon: Building,
-            color: 'from-blue-400 to-blue-600',
+            color: 'from-[#413D3C] to-[#5D5755]',
             features: ['Service Premium', 'Marketing Avancé', 'Support 24/7'],
         },
         {
@@ -39,7 +39,7 @@ export default function AboutType() {
                 "Opportunités d'investissement immobilier haut de gamme et sécurisées.",
             ),
             icon: TrendingUp,
-            color: 'from-purple-400 to-purple-600',
+            color: 'from-[#CF8E19] to-[#A96F0B]',
             features: [
                 'Rendement Élevé',
                 'Analyse de Marché',
@@ -53,7 +53,7 @@ export default function AboutType() {
                 "Accompagnement intelligent pour l'achat et la vente de propriétés.",
             ),
             icon: Home,
-            color: 'from-green-400 to-green-600',
+            color: 'from-[#5D5755] to-[#292625]',
             features: [
                 'Technologie IA',
                 'Visites Virtuelles',
@@ -67,7 +67,7 @@ export default function AboutType() {
                 'Locations fiables et gestion locative pour propriétaires et locataires.',
             ),
             icon: Shield,
-            color: 'from-amber-400 to-amber-600',
+            color: 'from-[#CF8E19] to-[#E0A43A]',
             features: [
                 'Vérification Locataires',
                 'Maintenance Rapide',
@@ -81,7 +81,7 @@ export default function AboutType() {
                 'Accès à des propriétés exclusives avec un service sur-mesure.',
             ),
             icon: Key,
-            color: 'from-red-400 to-red-600',
+            color: 'from-[#413D3C] to-[#CF8E19]',
             features: [
                 'Biens Exclusifs',
                 'Service Conciergerie',
@@ -95,7 +95,7 @@ export default function AboutType() {
                 'Vente rapide et efficace de vos biens grâce à notre réseau et expertise.',
             ),
             icon: Zap,
-            color: 'from-indigo-400 to-indigo-600',
+            color: 'from-[#A96F0B] to-[#CF8E19]',
             features: [
                 'Vente Rapide',
                 'Évaluation Précise',
@@ -129,7 +129,7 @@ export default function AboutType() {
     return (
         <section
             ref={sectionRef}
-            className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-50 py-20 lg:py-32"
+            className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-50 py-20 lg:py-32 dark:bg-[#292625] dark:bg-none"
         >
             {/* Formes décoratives de fond */}
             <div className="absolute inset-0 overflow-hidden">
@@ -152,13 +152,13 @@ export default function AboutType() {
                             {t('property_type_subtitle', 'Types de Propriétés')}
                         </span>
                     </div>
-                    <h2 className="mt-4 text-4xl leading-tight font-bold text-gray-900 md:text-5xl lg:text-6xl">
+                    <h2 className="mt-4 text-4xl leading-tight font-bold text-[#413D3C] md:text-5xl lg:text-6xl dark:text-[#EEEFE6]">
                         {t(
                             'property_type_title',
                             "Investir dans l'immobilier n'a jamais été aussi simple",
                         )}
                     </h2>
-                    <p className="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-gray-600">
+                    <p className="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-gray-600 dark:text-[#EEEFE6]/70">
                         {t(
                             'property_type_description',
                             "Découvrez nos différentes solutions immobilières adaptées à tous vos besoins, de l'investissement à la résidence principale.",
@@ -173,7 +173,7 @@ export default function AboutType() {
                         return (
                             <div
                                 key={index}
-                                className={`group relative transform overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg transition-all duration-500 hover:-translate-y-2 hover:border-transparent hover:shadow-2xl ${
+                                className={`group relative transform overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg transition-all duration-500 hover:-translate-y-2 hover:border-[#CF8E19]/40 hover:shadow-2xl dark:border-white/10 dark:bg-[#353130] ${
                                     visible
                                         ? 'translate-y-0 opacity-100'
                                         : 'translate-y-10 opacity-0'
@@ -213,7 +213,7 @@ export default function AboutType() {
                                 {/* Contenu */}
                                 <div className="px-6 pb-6">
                                     <h3
-                                        className={`mb-3 text-xl font-bold text-gray-900 transition-colors duration-300 ${
+                                        className={`mb-3 text-xl font-bold text-gray-900 transition-colors duration-300 dark:text-[#EEEFE6] ${
                                             activeType === index
                                                 ? 'bg-gradient-to-r bg-clip-text text-transparent ' +
                                                   type.color
@@ -223,7 +223,7 @@ export default function AboutType() {
                                         {type.title}
                                     </h3>
 
-                                    <p className="mb-6 leading-relaxed text-gray-600">
+                                    <p className="mb-6 leading-relaxed text-gray-600 dark:text-[#EEEFE6]/70">
                                         {type.desc}
                                     </p>
 
@@ -240,7 +240,7 @@ export default function AboutType() {
                                                     >
                                                         <CheckCircle className="h-3 w-3 text-white" />
                                                     </div>
-                                                    <span className="text-sm font-medium text-gray-700">
+                                                    <span className="text-sm font-medium text-gray-700 dark:text-[#EEEFE6]/75">
                                                         {feature}
                                                     </span>
                                                 </li>
@@ -261,9 +261,9 @@ export default function AboutType() {
                             : 'translate-y-10 opacity-0'
                     }`}
                 >
-                    <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-amber-50 px-6 py-3">
-                        <Target className="h-5 w-5 text-amber-600" />
-                        <span className="font-medium text-amber-800">
+                    <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#CF8E19]/10 px-6 py-3 dark:border dark:border-[#CF8E19]/20">
+                        <Target className="h-5 w-5 text-[#CF8E19]" />
+                        <span className="font-medium text-[#A96F0B] dark:text-[#E0A43A]">
                             {t(
                                 'find_perfect_match',
                                 'Trouvez la solution parfaite pour vous',
@@ -273,7 +273,7 @@ export default function AboutType() {
 
                     <Link
                         href={route('properties')}
-                        className="group inline-flex transform items-center gap-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-8 py-4 font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-amber-500 hover:to-amber-700 hover:shadow-xl hover:shadow-amber-500/25"
+                        className="group inline-flex transform items-center gap-3 rounded-xl bg-gradient-to-r from-[#CF8E19] to-[#A96F0B] px-8 py-4 font-semibold text-[#292625] transition-all duration-300 hover:scale-105 hover:from-[#E0A43A] hover:to-[#CF8E19] hover:shadow-xl hover:shadow-[#CF8E19]/25"
                     >
                         <span>
                             {t('view_all_types', 'Voir tous les types')}
@@ -285,7 +285,7 @@ export default function AboutType() {
             </div>
 
             {/* Forme décorative du bas */}
-            <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-32 bg-gradient-to-t from-gray-50 to-transparent"></div>
+            <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-32 bg-gradient-to-t from-gray-50 to-transparent dark:from-[#353130]"></div>
 
             {/* Particules flottantes */}
             <div className="pointer-events-none absolute inset-0 overflow-hidden">

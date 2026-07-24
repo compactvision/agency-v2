@@ -1,21 +1,23 @@
 <x-mail::message>
-    # Bonjour {{ $userName }},
+# {{ __('mail.property_pending.title') }}
 
-    Nous vous confirmons la bonne réception de votre annonce **"{{ $propertyTitle }}"** (Référence: {{ $reference }}).
+{{ __('mail.common.hello', ['name' => $userName]) }}
 
-    Votre annonce est actuellement en cours de validation par notre équipe d'experts. Cette étape nous permet de
-    garantir la qualité et le sérieux des offres publiées sur notre plateforme. Ce processus prend généralement moins de
-    **24 heures**.
+{!! __('mail.property_pending.intro', ['title' => e($propertyTitle)]) !!}
 
-    Vous recevrez une notification dès que votre annonce sera en ligne, ou si des informations complémentaires sont
-    nécessaires.
+<x-mail::panel>
+**{{ __('mail.common.reference') }} :** {{ $reference }}
+</x-mail::panel>
 
-    <x-mail::button :url="config('app.url') . '/dashboard/properties'">
-        Suivre l'état de mon annonce
-    </x-mail::button>
+{{ __('mail.property_pending.review') }}
 
-    Merci de votre confiance.
+{{ __('mail.property_pending.timing') }}
 
-    Cordialement,<br>
-    L'équipe {{ config('app.name') }}
+<x-mail::button :url="$propertiesUrl">
+{{ __('mail.property_pending.action') }}
+</x-mail::button>
+
+{{ __('mail.common.thank_you') }}
+
+{{ __('mail.common.team') }}
 </x-mail::message>

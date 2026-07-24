@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Domains\Locations\Resources\MunicipalityResource;
+use App\Domains\Locations\Services\MunicipalityService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Domains\Locations\Models\Municipality;
-use App\Domains\Locations\Services\MunicipalityService;
-use App\Domains\Locations\Resources\MunicipalityResource;
 
 class MunicipalityController extends Controller
 {
@@ -27,38 +26,38 @@ class MunicipalityController extends Controller
                 'data' => MunicipalityResource::collection($municipalities->items())->resolve(),
                 'meta' => [
                     'current_page' => $municipalities->currentPage(),
-                    'last_page'    => $municipalities->lastPage(),
-                    'total'        => $municipalities->total(),
-                    'from'         => $municipalities->firstItem(),
-                    'to'           => $municipalities->lastItem(),
+                    'last_page' => $municipalities->lastPage(),
+                    'total' => $municipalities->total(),
+                    'from' => $municipalities->firstItem(),
+                    'to' => $municipalities->lastItem(),
                 ],
                 'links' => $municipalities->linkCollection()->toArray(),
             ],
-            'cities' => \App\Domains\Locations\Models\City::all()->map(fn($c) => ['id' => $c->id, 'name' => $c->name]),
+            'cities' => \App\Domains\Locations\Models\City::all()->map(fn ($c) => ['id' => $c->id, 'name' => $c->name]),
             'filters' => (object) $request->only(['search']),
         ]);
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'city_id' => 'required|exists:cities,id',
         ]);
 
-        $this->municipalityService->create($request->all());
+        $this->municipalityService->create($validated);
 
         return back()->with('success', 'Commune créée avec succès.');
     }
 
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'city_id' => 'required|exists:cities,id',
         ]);
 
-        $this->municipalityService->update($id, $request->all());
+        $this->municipalityService->update($id, $validated);
 
         return back()->with('success', 'Commune mise à jour avec succès.');
     }

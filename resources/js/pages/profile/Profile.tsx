@@ -8,6 +8,7 @@ import {
     Calendar,
     Camera,
     CheckCircle,
+    CircleFadingArrowUp,
     Edit3,
     Eye,
     FileText,
@@ -26,7 +27,6 @@ import {
     XCircle,
     Zap,
 } from 'lucide-react';
-import { CircleFadingArrowUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -69,6 +69,7 @@ interface DashboardStats {
 }
 
 interface PageProps {
+    [key: string]: unknown;
     auth: {
         user: User;
     };
@@ -116,8 +117,7 @@ export default function Profile() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const scrollToTop = () =>
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+    const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
     // Récupération du tab actif depuis l'URL avec validation
     useEffect(() => {
@@ -768,7 +768,10 @@ export default function Profile() {
             </section>
 
             {/* Mobile Menu Toggle — se soulève quand scroll-to-top apparaît */}
-            <div className="fixed right-6 z-50 lg:hidden" style={{ bottom: '2rem' }}>
+            <div
+                className="fixed right-6 z-50 lg:hidden"
+                style={{ bottom: '2rem' }}
+            >
                 {/* Bouton profil */}
                 <button
                     onClick={() => setShowMobileMenu(!showMobileMenu)}
@@ -777,7 +780,8 @@ export default function Profile() {
                         transform: showScrollTop
                             ? 'translateY(-64px)'
                             : 'translateY(0)',
-                        transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                        transition:
+                            'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
                     }}
                 >
                     {showMobileMenu ? (

@@ -3,22 +3,24 @@
 namespace App\Mail;
 
 use App\Domains\Ads\Models\Ad;
+use App\Support\UsesMailLocale;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class PropertyApprovedMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, UsesMailLocale;
 
     /**
      * Create a new message instance.
      */
     public function __construct(public Ad $ad)
     {
+        $this->useMailLocale($ad->user?->language);
     }
 
     /**
@@ -27,7 +29,9 @@ class PropertyApprovedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Félicitations ! Votre propriété a été approuvée',
+            subject: __('mail.subjects.property_approved', [
+                'reference' => $this->ad->reference,
+            ]),
         );
     }
 
@@ -37,14 +41,17 @@ class PropertyApprovedMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.properties.approved',
+            markdown: 'emails.properties.approved',
+            with: [
+                'propertyUrl' => route('property.show', $this->ad),
+            ],
         );
     }
 
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return array<int, Attachment>
      */
     public function attachments(): array
     {

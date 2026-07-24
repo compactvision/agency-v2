@@ -1,4 +1,5 @@
 import { Link, router, usePage } from '@inertiajs/react';
+import axios from 'axios';
 import {
     Bell,
     BellRing,
@@ -41,6 +42,7 @@ interface Notification {
 }
 
 interface PageProps {
+    [key: string]: unknown;
     auth: {
         user: User;
     };
@@ -52,18 +54,46 @@ interface PageProps {
     };
 }
 
+const SIDEBAR_COLLAPSED_STORAGE_KEY = 'dashboard.sidebar.collapsed';
+
+const getSavedSidebarState = () => {
+    if (typeof window === 'undefined') return false;
+
+    try {
+        return (
+            window.localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY) ===
+            'true'
+        );
+    } catch {
+        return false;
+    }
+};
+
 const Dashboard = ({ children }: { children: ReactNode }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { auth, recentNotifications, flash } = usePage<PageProps>().props;
     const { user } = auth;
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] =
+        useState(getSavedSidebarState);
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [isScrolled, setIsScrolled] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
+    const [isMobile, setIsMobile] = useState(
+        () => typeof window !== 'undefined' && window.innerWidth < 1024,
+    );
+
+    const changeLanguage = async (language: string) => {
+        await i18n.changeLanguage(language);
+
+        try {
+            await axios.post('/language', { language });
+        } catch {
+            toast.error(t('language_update_error'));
+        }
+    };
 
     // Public Header Links
     const publicLinks = [
@@ -77,7 +107,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
     // Detect mobile
     useEffect(() => {
         const checkMobile = () => {
-            setIsMobile(window.innerWidth < 768);
+            setIsMobile(window.innerWidth < 1024);
         };
         checkMobile();
         window.addEventListener('resize', checkMobile);
@@ -90,6 +120,24 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
 
     const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
     const closeSidebar = () => setIsSidebarOpen(false);
+    const toggleSidebarCollapse = () => {
+        if (isMobile) return;
+
+        setIsSidebarCollapsed((currentState) => {
+            const nextState = !currentState;
+
+            try {
+                window.localStorage.setItem(
+                    SIDEBAR_COLLAPSED_STORAGE_KEY,
+                    String(nextState),
+                );
+            } catch {
+                // La sidebar reste fonctionnelle si le stockage est indisponible.
+            }
+
+            return nextState;
+        });
+    };
     const toggleProfileMenu = (e: React.MouseEvent) => {
         e.stopPropagation();
         setIsProfileMenuOpen((prev) => !prev);
@@ -145,14 +193,12 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
     }, [flash]);
 
     return (
-        <div className="relative flex min-h-screen bg-slate-50 font-sans text-slate-900">
+        <div className="dashboard-shell relative flex min-h-screen bg-slate-50 font-sans text-slate-900">
             <Sidebar
                 isOpen={isSidebarOpen}
                 onClose={closeSidebar}
-                isCollapsed={isSidebarCollapsed}
-                onToggleCollapse={() =>
-                    !isMobile && setIsSidebarCollapsed(!isSidebarCollapsed)
-                }
+                isCollapsed={!isMobile && isSidebarCollapsed}
+                onToggleCollapse={toggleSidebarCollapse}
             />
 
             <div
@@ -166,7 +212,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
             >
                 {/* Header */}
                 <header
-                    className={`sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur-xl transition-all duration-300 ${isScrolled ? 'py-2 shadow-sm' : 'py-4'} `}
+                    className={`dashboard-header sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur-xl transition-all duration-300 ${isScrolled ? 'py-2 shadow-sm' : 'py-4'} `}
                 >
                     <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
                         <div className="flex items-center justify-between gap-4">
@@ -199,10 +245,29 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
 
                             {/* Right Actions */}
                             <div className="flex flex-1 items-center justify-end space-x-2 sm:space-x-4">
+                                <label
+                                    className="sr-only"
+                                    htmlFor="dashboard-language"
+                                >
+                                    {t('language')}
+                                </label>
+                                <select
+                                    id="dashboard-language"
+                                    value={i18n.resolvedLanguage ?? 'fr'}
+                                    onChange={(event) =>
+                                        void changeLanguage(event.target.value)
+                                    }
+                                    className="rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs font-bold text-slate-600 outline-none focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/20"
+                                >
+                                    <option value="fr">FR</option>
+                                    <option value="en">EN</option>
+                                </select>
+
                                 {/* Notifications */}
                                 <div className="notifications-menu relative">
                                     <button
                                         onClick={toggleNotifications}
+                                        aria-label={t('notifications')}
                                         className="group relative rounded-2xl border border-slate-200 bg-white p-2.5 text-slate-600 transition-all hover:border-[#1E3A5F] hover:text-[#1E3A5F]"
                                     >
                                         <Bell
@@ -349,7 +414,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                                                 {user.name}
                                             </p>
                                             <p className="text-[10px] font-medium text-slate-400">
-                                                Tableau de bord
+                                                {t('dashboard')}
                                             </p>
                                         </div>
                                         <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-[#1E3A5F] font-bold text-white shadow-sm ring-2 ring-white">
@@ -422,7 +487,7 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                 </header>
 
                 {/* Content Area */}
-                <main className="flex-1 p-4 sm:p-6 lg:p-8">
+                <main className="dashboard-content flex-1 p-4 sm:p-6 lg:p-8">
                     <div className="mx-auto max-w-[1600px]">{children}</div>
                 </main>
             </div>

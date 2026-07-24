@@ -2,45 +2,49 @@
 
 namespace App\Domains\Auth\Services;
 
+use App\Mail\WelcomeSeller;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\WelcomeSeller;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Role;
 
 class AuthService
 {
     /**
      * REGISTER
      */
-    public function register(array $data): array
+    public function register(array $data, bool $issueToken = true): array
     {
-        $data['password'] = Hash::make($data['password']);
+        return DB::transaction(function () use ($data, $issueToken) {
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+                'phone' => $data['phone'] ?? null,
+                'country_id' => $data['country_id'] ?? null,
+                'city_id' => $data['city_id'] ?? null,
+                'municipality_id' => $data['municipality_id'] ?? null,
+                'address' => $data['address'] ?? null,
+            ]);
 
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => $data['password'],
-            'phone' => $data['phone'] ?? null,
-            'country_id' => $data['country_id'] ?? null,
-            'city_id' => $data['city_id'] ?? null,
-            'municipality_id' => $data['municipality_id'] ?? null,
-            'address' => $data['address'] ?? null,
-        ]);
+            $user->assignRole(Role::findOrCreate('buyer', 'web'));
 
-        // Default role
-        $user->assignRole('buyer');
+            $result = [
+                'user' => $user->load(['country', 'city', 'municipality', 'roles']),
+            ];
 
-        // Token for API
-        $token = $user->createToken('auth_token')->plainTextToken;
+            if ($issueToken) {
+                $result['token'] = $user->createToken('auth_token')->plainTextToken;
+            }
 
-        return [
-            'user' => $user->load(['country', 'city', 'municipality', 'roles']),
-            'token' => $token,
-        ];
+            return $result;
+        });
     }
-
 
     /**
      * LOGIN
@@ -48,7 +52,7 @@ class AuthService
     public function login(array $credentials): array
     {
         if (
-            !Auth::attempt([
+            ! Auth::attempt([
                 'email' => $credentials['email'],
                 'password' => $credentials['password'],
             ])
@@ -59,6 +63,7 @@ class AuthService
         }
 
         $user = Auth::user();
+        $user->tokens()->where('name', 'auth_token')->delete();
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return [
@@ -66,7 +71,6 @@ class AuthService
             'token' => $token,
         ];
     }
-
 
     /**
      * LOGOUT
@@ -76,7 +80,6 @@ class AuthService
         $user->currentAccessToken()?->delete();
     }
 
-
     /**
      * ME
      */
@@ -85,13 +88,15 @@ class AuthService
         return $user->load(['country', 'city', 'municipality', 'roles']);
     }
 
-
     /**
      * BECOME SELLER (avec dirty-check optimisé)
      */
     public function becomeSeller(User $user, array $data): User|string
     {
-        $cleaned = array_map(fn($v) => $v === '' ? null : $v, $data);
+        $cleaned = array_map(fn ($v) => $v === '' ? null : $v, $data);
+        $profilePhoto = $cleaned['profile_photo'] ?? null;
+        unset($cleaned['profile_photo']);
+        $oldProfilePhoto = null;
 
         $user->fill([
             'name' => $cleaned['name'] ?? $user->name,
@@ -107,19 +112,19 @@ class AuthService
             'municipality_id' => $cleaned['municipality_id'] ?? $user->municipality_id,
         ]);
 
-        if (request()->hasFile('profile_photo')) {
-            $path = request()->file('profile_photo')->store('profile-photos', 'public');
-            $user->profile_photo = $path;
+        if ($profilePhoto instanceof UploadedFile) {
+            $oldProfilePhoto = $user->profile_photo;
+            $user->profile_photo = $profilePhoto->store('profile-photos', 'public');
         }
 
         // Determine correct role based on user_type
         $roleToAdd = ($cleaned['user_type'] === 'agency') ? 'agency' : 'seller';
-        
-        $roleChanged = !$user->hasRole($roleToAdd);
+
+        $roleChanged = ! $user->hasRole($roleToAdd);
 
         // Aucun changement sur les champs + role déjà présent
-        if (!$user->isDirty() && !$roleChanged) {
-            return "NO_CHANGES";
+        if (! $user->isDirty() && ! $roleChanged) {
+            return 'NO_CHANGES';
         }
 
         // Sauver uniquement si dirty
@@ -129,31 +134,35 @@ class AuthService
 
         // Gérer les rôles si nécessaire
         if ($roleChanged) {
+            Role::findOrCreate($roleToAdd, 'web');
+
             // Supprimer explicitement le rôle 'buyer' s'il existe
             $user->removeRole('buyer');
-            
+
             // Supprimer l'autre rôle de vendeur/agence pour éviter les doublons
             if ($roleToAdd === 'agency') {
                 $user->removeRole('seller');
             } else {
                 $user->removeRole('agency');
             }
-            
+
             $user->assignRole($roleToAdd);
-            
+
             // Envoyer le mail de bienvenue uniquement lors du premier passage ou changement de rôle majeur
             Mail::to($user->email)->send(new WelcomeSeller($user, $roleToAdd));
         }
 
-        if (!$user->is_seller) {
+        if (! $user->is_seller) {
             $user->is_seller = true;
             $user->save();
         }
 
+        if ($oldProfilePhoto) {
+            Storage::disk('public')->delete($oldProfilePhoto);
+        }
+
         return $user->fresh()->load(['country', 'city', 'municipality', 'roles']);
     }
-
-
 
     /**
      * Update profile
@@ -161,35 +170,46 @@ class AuthService
     public function updateProfile(User $user, array $data): User|string
     {
         // Nettoyage des champs vides → null
-        $cleaned = array_map(fn($v) => $v === '' ? null : $v, $data);
+        $cleaned = array_map(fn ($v) => $v === '' ? null : $v, $data);
+        $profilePhoto = $cleaned['profile_photo'] ?? null;
+        unset($cleaned['profile_photo']);
+        $oldProfilePhoto = null;
 
         $user->fill($cleaned);
 
+        if ($profilePhoto instanceof UploadedFile) {
+            $oldProfilePhoto = $user->profile_photo;
+            $user->profile_photo = $profilePhoto->store('profile-photos', 'public');
+        }
+
         // Rien n’a changé
-        if (!$user->isDirty()) {
-            return "NO_CHANGES";
+        if (! $user->isDirty()) {
+            return 'NO_CHANGES';
         }
 
         // Sauvegarde uniquement si nécessaire
         $user->save();
 
+        if ($oldProfilePhoto) {
+            Storage::disk('public')->delete($oldProfilePhoto);
+        }
+
         return $user->fresh()->load(['country', 'city', 'municipality', 'roles']);
     }
-
-
 
     /**
      * Change password
      */
     public function changePassword(User $user, array $data): void
     {
-        if (!Hash::check($data['current_password'], $user->password)) {
+        if (! Hash::check($data['current_password'], $user->password)) {
             throw ValidationException::withMessages([
-                'current_password' => ['Current password is incorrect']
+                'current_password' => ['Current password is incorrect'],
             ]);
         }
 
         $user->password = Hash::make($data['new_password']);
         $user->save();
+        $user->tokens()->delete();
     }
 }

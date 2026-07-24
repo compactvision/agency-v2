@@ -11,6 +11,7 @@ import {
     XCircle,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Log = {
     id: number;
@@ -38,6 +39,7 @@ type Props = {
 export default function AuditLog({
     logs = { data: [], links: [], current_page: 1, last_page: 1, total: 0 },
 }: Readonly<Props>) {
+    const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
 
@@ -165,19 +167,18 @@ export default function AuditLog({
         <Dashboard>
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 {/* Header Section */}
-                <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 shadow-lg shadow-sm backdrop-blur-xl">
+                <div className="dashboard-section-header sticky top-0 z-10 border-b border-slate-200 bg-white/80 shadow-sm backdrop-blur-xl">
                     <div className="px-3 py-3 sm:px-4 sm:py-4 lg:px-8">
                         <div className="flex flex-col gap-3 sm:gap-4">
                             <div className="flex items-start justify-between sm:items-center">
                                 <BackButton />
 
                                 <div className="ml-0 flex-1 text-center sm:ml-4 sm:text-left">
-                                    <h1 className="bg-gradient-to-r from-slate-100 to-slate-100 bg-clip-text text-xl font-bold text-transparent sm:text-2xl lg:text-3xl">
-                                        Audit Logs
+                                    <h1 className="dashboard-page-title text-xl font-bold sm:text-2xl lg:text-3xl">
+                                        {t('dashboard_ui.audit.title')}
                                     </h1>
                                     <p className="mt-1 text-xs text-slate-600 sm:text-sm lg:text-base">
-                                        Consultez et gérez l'ensemble des
-                                        activités système
+                                        {t('dashboard_ui.audit.description')}
                                     </p>
                                 </div>
                             </div>
@@ -191,7 +192,9 @@ export default function AuditLog({
                                     />
                                     <input
                                         type="text"
-                                        placeholder="Rechercher dans les logs..."
+                                        placeholder={t(
+                                            'dashboard_ui.audit.search_placeholder',
+                                        )}
                                         className={`w-full rounded-lg border border-slate-200 bg-white/80 py-2.5 pr-8 pl-9 text-xs shadow-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:rounded-xl sm:py-3 sm:pr-10 sm:pl-10 sm:text-sm ${isSearching ? 'opacity-70' : ''}`}
                                         value={searchQuery}
                                         onChange={(e) =>
@@ -202,7 +205,9 @@ export default function AuditLog({
                                         <button
                                             onClick={() => setSearchQuery('')}
                                             className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-[#1E3A5F] transition-colors hover:text-[#1E3A5F] sm:right-3"
-                                            aria-label="Effacer"
+                                            aria-label={t(
+                                                'dashboard_ui.common.clear_search',
+                                            )}
                                         >
                                             <XCircle size={14} />
                                         </button>
@@ -268,7 +273,7 @@ export default function AuditLog({
                                 {infoLogs}
                             </div>
                             <div className="text-xs text-slate-600 sm:text-sm">
-                                Logs d'information
+                                {t('dashboard_ui.audit.info_logs')}
                             </div>
                         </div>
 
@@ -292,7 +297,7 @@ export default function AuditLog({
                                 {warningLogs}
                             </div>
                             <div className="text-xs text-slate-600 sm:text-sm">
-                                Avertissements
+                                {t('dashboard_ui.audit.warnings')}
                             </div>
                         </div>
 
@@ -316,7 +321,7 @@ export default function AuditLog({
                                 {errorLogs}
                             </div>
                             <div className="text-xs text-slate-600 sm:text-sm">
-                                Erreurs système
+                                {t('dashboard_ui.audit.system_errors')}
                             </div>
                         </div>
 
@@ -340,7 +345,7 @@ export default function AuditLog({
                                 {criticalLogs}
                             </div>
                             <div className="text-xs text-slate-600 sm:text-sm">
-                                Erreurs critiques
+                                {t('dashboard_ui.audit.critical_errors')}
                             </div>
                         </div>
                     </div>
@@ -358,28 +363,30 @@ export default function AuditLog({
                                             #
                                         </th>
                                         <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-slate-700 uppercase lg:px-6 lg:py-4">
-                                            Agent
+                                            {t('dashboard_ui.audit.agent')}
                                         </th>
                                         <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-slate-700 uppercase lg:px-6 lg:py-4">
-                                            Utilisateur
+                                            {t('dashboard_ui.common.user')}
                                         </th>
                                         <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-slate-700 uppercase lg:px-6 lg:py-4">
-                                            Action
+                                            {t('dashboard_ui.audit.action')}
                                         </th>
                                         <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-slate-700 uppercase lg:px-6 lg:py-4">
-                                            Cible
+                                            {t('dashboard_ui.audit.target')}
                                         </th>
                                         <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-slate-700 uppercase lg:px-6 lg:py-4">
-                                            Niveau
+                                            {t('dashboard_ui.audit.level')}
                                         </th>
                                         <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-slate-700 uppercase lg:px-6 lg:py-4">
                                             IP
                                         </th>
                                         <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-slate-700 uppercase lg:px-6 lg:py-4">
-                                            Description
+                                            {t(
+                                                'dashboard_ui.common.description',
+                                            )}
                                         </th>
                                         <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-slate-700 uppercase lg:px-6 lg:py-4">
-                                            Date
+                                            {t('dashboard_ui.common.date')}
                                         </th>
                                     </tr>
                                 </thead>
@@ -387,7 +394,7 @@ export default function AuditLog({
                                     {logs?.data?.map((log, index) => (
                                         <tr
                                             key={log.id}
-                                            className="transition-colors hover:bg-slate-50"
+                                            className="dashboard-data-row transition-colors"
                                             style={{
                                                 animationDelay: `${index * 0.05}s`,
                                             }}
@@ -476,7 +483,9 @@ export default function AuditLog({
                                         <div className="mb-3 space-y-2">
                                             <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:gap-2">
                                                 <span className="text-xs text-slate-500">
-                                                    Action
+                                                    {t(
+                                                        'dashboard_ui.audit.action',
+                                                    )}
                                                 </span>
                                                 <span className="truncate text-right text-xs text-slate-900 sm:text-left sm:text-sm">
                                                     {log.action}
@@ -484,7 +493,9 @@ export default function AuditLog({
                                             </div>
                                             <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:gap-2">
                                                 <span className="text-xs text-slate-500">
-                                                    Cible
+                                                    {t(
+                                                        'dashboard_ui.audit.target',
+                                                    )}
                                                 </span>
                                                 <span className="truncate text-right text-xs text-slate-900 sm:text-left sm:text-sm">
                                                     {log.entity_type}{' '}
@@ -503,7 +514,9 @@ export default function AuditLog({
                                             </div>
                                             <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:gap-2">
                                                 <span className="text-xs text-slate-500">
-                                                    Date
+                                                    {t(
+                                                        'dashboard_ui.common.date',
+                                                    )}
                                                 </span>
                                                 <span className="text-right text-xs text-slate-900 sm:text-left sm:text-sm">
                                                     {formatDate(log.created_at)}
@@ -513,7 +526,9 @@ export default function AuditLog({
 
                                         <div className="mb-3">
                                             <span className="text-xs text-slate-500">
-                                                Description
+                                                {t(
+                                                    'dashboard_ui.common.description',
+                                                )}
                                             </span>
                                             <p className="mt-1 text-xs break-words text-slate-900 sm:text-sm">
                                                 {log.description || '-'}
@@ -522,7 +537,7 @@ export default function AuditLog({
 
                                         <div>
                                             <span className="text-xs text-slate-500">
-                                                Agent
+                                                {t('dashboard_ui.audit.agent')}
                                             </span>
                                             <p className="mt-1 text-xs break-all text-slate-900 sm:text-sm">
                                                 {log.user_agent || '-'}
@@ -540,12 +555,16 @@ export default function AuditLog({
                                             />
                                         </div>
                                         <h3 className="mb-2 text-lg font-semibold text-slate-900 sm:text-xl">
-                                            Aucun log trouvé
+                                            {t('dashboard_ui.audit.empty')}
                                         </h3>
                                         <p className="px-4 text-sm text-slate-600">
                                             {searchQuery
-                                                ? 'Aucun log ne correspond à votre recherche'
-                                                : "Il n'y a pas encore d'activité enregistrée"}
+                                                ? t(
+                                                      'dashboard_ui.audit.empty_search',
+                                                  )
+                                                : t(
+                                                      'dashboard_ui.audit.empty_description',
+                                                  )}
                                         </p>
                                     </div>
                                 )}
@@ -560,11 +579,13 @@ export default function AuditLog({
                         <div className="text-center text-xs text-slate-600 sm:text-left sm:text-sm">
                             {logs?.data?.length > 0 ? (
                                 <>
-                                    Affichage de {logs.data.length} sur{' '}
-                                    {logs.total || logs.data.length} logs
+                                    {t('dashboard_ui.audit.displaying', {
+                                        count: logs.data.length,
+                                        total: logs.total || logs.data.length,
+                                    })}
                                 </>
                             ) : (
-                                'Aucun log'
+                                t('dashboard_ui.audit.none')
                             )}
                         </div>
 

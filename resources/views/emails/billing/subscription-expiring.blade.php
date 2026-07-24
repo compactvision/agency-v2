@@ -1,22 +1,23 @@
 <x-mail::message>
-# ⚠️ Votre abonnement expire bientôt
+# {{ __('mail.billing.expiring_title') }}
 
-Bonjour **{{ $subscription->user->name ?? 'Utilisateur' }}**,
+{{ __('mail.common.hello', ['name' => $subscription->user->name ?? __('mail.common.not_available')]) }}
 
-@if($daysRemaining === 0)
-Votre abonnement au plan **{{ $subscription->plan->name }}** **expire aujourd'hui**.
+@if ($daysRemaining === 0)
+{!! __('mail.billing.expires_today', ['plan' => e($planName)]) !!}
 @else
-Votre abonnement au plan **{{ $subscription->plan->name }}** expire dans **{{ $daysRemaining }} jour(s)**.
+{!! trans_choice('mail.billing.expires_later', $daysRemaining, ['plan' => e($planName), 'count' => $daysRemaining]) !!}
 @endif
 
-**Date d'expiration :** {{ $subscription->expires_at?->format('d/m/Y') }}
+<x-mail::panel>
+**{{ __('mail.billing.expiry') }} :** {{ $subscription->expires_at?->format(__('mail.common.date_format')) ?? __('mail.common.not_available') }}
+</x-mail::panel>
 
-Renouvelez dès maintenant pour ne pas perdre l'accès à vos annonces et fonctionnalités.
+{{ __('mail.billing.expiring_advice') }}
 
-<x-mail::button :url="config('app.url') . '/dashboard/billing'" color="success">
-Renouveler mon abonnement
+<x-mail::button :url="$subscriptionsUrl">
+{{ __('mail.billing.renew_action') }}
 </x-mail::button>
 
-Cordialement,<br>
-{{ config('app.name') }}
+{{ __('mail.common.team') }}
 </x-mail::message>

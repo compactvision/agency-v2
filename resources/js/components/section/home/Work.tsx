@@ -21,7 +21,7 @@ const steps = [
         descKey: 'step_1_desc',
         defaultDesc:
             'Inscrivez-vous gratuitement et activez votre profil vendeur en quelques minutes.',
-        color: '#1E3A5F',
+        color: '#413D3C',
     },
     {
         number: '02',
@@ -41,7 +41,7 @@ const steps = [
         descKey: 'step_3_desc',
         defaultDesc:
             'Ajoutez photos, description et prix. Votre annonce est en ligne instantanément.',
-        color: '#C9A84C',
+        color: '#CF8E19',
     },
     {
         number: '04',
@@ -51,7 +51,7 @@ const steps = [
         descKey: 'step_4_desc',
         defaultDesc:
             'Recevez les demandes des acheteurs et gérez vos contacts depuis votre tableau de bord.',
-        color: '#A8882E',
+        color: '#A96F0B',
     },
 ];
 
@@ -90,8 +90,8 @@ export default function HowItWorks() {
         >
             {/* Blobs décoratifs */}
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                <div className="absolute -top-20 right-10 h-72 w-72 rounded-full bg-[#1E3A5F]/5 blur-3xl" />
-                <div className="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-[#C9A84C]/6 blur-3xl" />
+                <div className="absolute -top-20 right-10 h-72 w-72 rounded-full bg-[#413D3C]/5 blur-3xl" />
+                <div className="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-[#CF8E19]/6 blur-3xl" />
             </div>
 
             <div className="relative z-10 mx-auto max-w-7xl px-4">
@@ -100,7 +100,7 @@ export default function HowItWorks() {
                     className={`mb-16 text-center transition-all duration-700 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
                 >
                     <span className="section-label">
-                        <span className="h-px w-8 bg-[#C9A84C]" />
+                        <span className="h-px w-8 bg-[#CF8E19]" />
                         {t('how_it_works_subtitle', 'Processus Simple')}
                     </span>
                     <h2 className="section-title mt-2">
@@ -123,7 +123,7 @@ export default function HowItWorks() {
                             {/* Ligne de progression */}
                             <div className="absolute top-8 bottom-8 left-[22px] w-0.5 rounded-full bg-gray-200" />
                             <div
-                                className="absolute top-8 left-[22px] w-0.5 rounded-full bg-gradient-to-b from-[#1E3A5F] to-[#C9A84C] transition-all duration-1000"
+                                className="absolute top-8 left-[22px] w-0.5 rounded-full bg-gradient-to-b from-[#413D3C] to-[#CF8E19] transition-all duration-1000"
                                 style={{
                                     height: `${(activeStep / (steps.length - 1)) * 100}%`,
                                 }}
@@ -176,7 +176,7 @@ export default function HowItWorks() {
                                         <div
                                             className={`flex-1 rounded-xl border p-5 transition-all duration-300 ${
                                                 isCurrent
-                                                    ? 'border-[#1E3A5F]/20 bg-white shadow-md'
+                                                    ? 'border-[#413D3C]/20 bg-white shadow-md dark:bg-[#353130]'
                                                     : 'border-transparent bg-white/60 hover:bg-white hover:shadow-sm'
                                             }`}
                                         >
@@ -190,7 +190,7 @@ export default function HowItWorks() {
                                                     <Icon className="h-4 w-4" />
                                                 </div>
                                                 <h3
-                                                    className={`text-sm font-bold transition-colors duration-300 ${isCurrent ? 'text-[#1E3A5F]' : 'text-gray-800'}`}
+                                                    className={`text-sm font-bold transition-colors duration-300 ${isCurrent ? 'text-[#413D3C] dark:text-[#CF8E19]' : 'text-gray-800 dark:text-[#EEEFE6]'}`}
                                                 >
                                                     {t(
                                                         step.titleKey,
@@ -222,7 +222,7 @@ export default function HowItWorks() {
                                     alt="Processus de vente"
                                     className="h-80 w-full object-cover lg:h-96"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#0d2340]/50 via-transparent to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#292625]/55 via-transparent to-transparent" />
                             </div>
 
                             {/* Badge sécurité */}
@@ -234,7 +234,7 @@ export default function HowItWorks() {
                             </div>
 
                             {/* Badge rapidité */}
-                            <div className="absolute right-5 bottom-5 flex items-center gap-2 rounded-xl bg-[#C9A84C] px-4 py-2.5 shadow-lg">
+                            <div className="absolute right-5 bottom-5 flex items-center gap-2 rounded-xl bg-[#CF8E19] px-4 py-2.5 text-[#292625] shadow-lg">
                                 <Zap className="h-4 w-4 text-white" />
                                 <span className="text-sm font-semibold text-white">
                                     {t('fast_process', 'Mise en ligne rapide')}

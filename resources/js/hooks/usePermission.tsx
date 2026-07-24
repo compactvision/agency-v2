@@ -5,8 +5,11 @@ export default function usePermission() {
     const auth = (props as any).auth || {};
     const permissions: string[] = auth.permissions || [];
     const roles: string[] = auth.roles || [];
+    const isSuperAdmin = roles.includes('super-admin');
 
     const can = (perm: string | string[]) => {
+        if (isSuperAdmin) return true;
+
         if (Array.isArray(perm)) {
             return perm.some((p) => permissions.includes(p));
         }
@@ -20,7 +23,7 @@ export default function usePermission() {
         return roles.includes(role);
     };
 
-    return { can, hasRole };
+    return { can, hasRole, isSuperAdmin };
 }
 // This hook checks if the user has the required permissions.
 // It returns a function `can` that can be used to check for single or multiple permissions.

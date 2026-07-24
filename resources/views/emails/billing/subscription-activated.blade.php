@@ -1,21 +1,24 @@
 <x-mail::message>
-# 🎉 Votre abonnement est activé !
+# {{ __('mail.billing.activated_title') }}
 
-Bonjour **{{ $subscription->user->name ?? 'Utilisateur' }}**,
+{{ __('mail.common.hello', ['name' => $subscription->user->name ?? __('mail.common.not_available')]) }}
 
-Votre abonnement au plan **{{ $subscription->plan->name }}** est maintenant **actif**.
+{!! __('mail.billing.activated_intro', ['plan' => e($planName)]) !!}
 
-| Détails | |
-|---|---|
-| Plan | {{ $subscription->plan->name }} |
-| Montant | {{ $subscription->amount }} {{ $subscription->currency }} |
-| Début | {{ $subscription->started_at?->format('d/m/Y') }} |
-| Expiration | {{ $subscription->expires_at?->format('d/m/Y') ?? 'Illimité' }} |
+<x-mail::table>
+| | |
+|:--|:--|
+| **{{ __('mail.billing.plan') }}** | {{ $planName }} |
+| **{{ __('mail.billing.amount') }}** | {{ number_format((float) $subscription->amount, 2, '.', ' ') }} {{ $subscription->currency }} |
+| **{{ __('mail.billing.start') }}** | {{ $subscription->started_at?->format(__('mail.common.date_format')) ?? __('mail.common.not_available') }} |
+| **{{ __('mail.billing.expiry') }}** | {{ $subscription->expires_at?->format(__('mail.common.date_format')) ?? __('mail.common.unlimited') }} |
+</x-mail::table>
 
-<x-mail::button :url="config('app.url') . '/dashboard/billing'">
-Voir mon abonnement
+<x-mail::button :url="$subscriptionsUrl">
+{{ __('mail.billing.activated_action') }}
 </x-mail::button>
 
-Merci de votre confiance,<br>
-{{ config('app.name') }}
+{{ __('mail.common.thank_you') }}
+
+{{ __('mail.common.team') }}
 </x-mail::message>

@@ -5,6 +5,8 @@ import { router, usePage } from '@inertiajs/react';
 import {
     AlertCircle,
     CheckCircle,
+    ChevronLeft,
+    ChevronRight,
     Clock,
     CreditCard,
     Loader2,
@@ -13,6 +15,7 @@ import {
     XCircle,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { route } from 'ziggy-js';
 
 // ===== Types =====
@@ -49,6 +52,7 @@ type PageProps = {
 
 // ===== Component =====
 export default function Transactions() {
+    const { t } = useTranslation();
     const { hasRole } = usePermission();
     const {
         paymentRequests = {
@@ -125,7 +129,7 @@ export default function Transactions() {
                 return (
                     <span className="inline-flex items-center rounded-full border border-slate-200 bg-[#1E3A5F]/10 px-2.5 py-1 text-xs font-medium whitespace-nowrap text-[#0d2340] shadow-sm">
                         <Clock size={12} className="mr-1" />
-                        En attente
+                        {t('dashboard_ui.common.pending')}
                     </span>
                 );
             case 'active':
@@ -133,21 +137,21 @@ export default function Transactions() {
                 return (
                     <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-100 px-2.5 py-1 text-xs font-medium whitespace-nowrap text-emerald-800 shadow-sm">
                         <CheckCircle size={12} className="mr-1" />
-                        Validé
+                        {t('dashboard_ui.common.approved')}
                     </span>
                 );
             case 'cancelled':
                 return (
                     <span className="inline-flex items-center rounded-full border border-red-200 bg-red-100 px-2.5 py-1 text-xs font-medium whitespace-nowrap text-red-800 shadow-sm">
                         <XCircle size={12} className="mr-1" />
-                        Annulé
+                        {t('dashboard_ui.common.cancelled')}
                     </span>
                 );
             case 'failed':
                 return (
                     <span className="inline-flex items-center rounded-full border border-rose-200 bg-rose-100 px-2.5 py-1 text-xs font-medium whitespace-nowrap text-rose-800 shadow-sm">
                         <AlertCircle size={12} className="mr-1" />
-                        Échoué
+                        {t('dashboard_ui.common.failed')}
                     </span>
                 );
             default:
@@ -172,17 +176,17 @@ export default function Transactions() {
         <Dashboard>
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 pb-12">
                 {/* Header Section */}
-                <div className="sticky top-0 z-1 border-b border-slate-200 bg-white/80 shadow-lg shadow-sm backdrop-blur-xl">
+                <div className="dashboard-section-header sticky top-0 z-10 border-b border-slate-200 bg-white/80 shadow-sm backdrop-blur-xl">
                     <div className="px-4 py-4 sm:px-6 lg:px-8">
                         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                             <BackButton />
 
                             <div className="w-full flex-1 text-center sm:w-auto sm:text-left">
-                                <h1 className="bg-gradient-to-r from-slate-100 to-slate-100 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
-                                    Transactions
+                                <h1 className="dashboard-page-title text-2xl font-bold sm:text-3xl">
+                                    {t('dashboard_ui.transactions.title')}
                                 </h1>
                                 <p className="mt-1 text-sm text-slate-600 sm:text-base">
-                                    Gérez vos transactions et leurs informations
+                                    {t('dashboard_ui.transactions.description')}
                                 </p>
                             </div>
                         </div>
@@ -196,7 +200,9 @@ export default function Transactions() {
                                 />
                                 <input
                                     type="text"
-                                    placeholder="Rechercher une transaction..."
+                                    placeholder={t(
+                                        'dashboard_ui.transactions.search_placeholder',
+                                    )}
                                     className={`w-full rounded-xl border border-slate-200 bg-white/80 py-3 pr-10 pl-10 text-sm shadow-sm backdrop-blur-sm transition-all focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none ${isSearching ? 'opacity-70' : ''}`}
                                     value={searchQuery}
                                     onChange={(e) =>
@@ -236,14 +242,14 @@ export default function Transactions() {
                                 </div>
                                 <div className="flex items-center rounded-lg bg-emerald-50 px-2 py-1 text-sm font-medium text-emerald-600">
                                     <TrendingUp size={16} className="mr-1" />
-                                    Total
+                                    {t('dashboard_ui.common.total')}
                                 </div>
                             </div>
                             <div className="text-2xl font-bold text-slate-900">
                                 {paymentRequests?.meta?.total || 0}
                             </div>
                             <div className="text-sm text-slate-600">
-                                Transactions totales
+                                {t('dashboard_ui.transactions.total')}
                             </div>
                         </div>
 
@@ -254,7 +260,7 @@ export default function Transactions() {
                                 </div>
                                 <div className="flex items-center rounded-lg bg-slate-50 px-2 py-1 text-sm font-medium text-[#1E3A5F]">
                                     <Clock size={16} className="mr-1" />
-                                    En attente
+                                    {t('dashboard_ui.common.pending')}
                                 </div>
                             </div>
                             <div className="text-2xl font-bold text-slate-900">
@@ -263,7 +269,9 @@ export default function Transactions() {
                                 ).length || 0}
                             </div>
                             <div className="text-sm text-slate-600">
-                                En validation
+                                {t(
+                                    'dashboard_ui.properties.pending_validation',
+                                )}
                             </div>
                         </div>
 
@@ -277,7 +285,7 @@ export default function Transactions() {
                                 </div>
                                 <div className="flex items-center rounded-lg bg-emerald-50 px-2 py-1 text-sm font-medium text-emerald-600">
                                     <CheckCircle size={16} className="mr-1" />
-                                    Validées
+                                    {t('dashboard_ui.transactions.approved')}
                                 </div>
                             </div>
                             <div className="text-2xl font-bold text-slate-900">
@@ -286,7 +294,7 @@ export default function Transactions() {
                                 ).length || 0}
                             </div>
                             <div className="text-sm text-slate-600">
-                                Transactions réussies
+                                {t('dashboard_ui.transactions.successful')}
                             </div>
                         </div>
                     </div>
@@ -308,12 +316,16 @@ export default function Transactions() {
                                     />
                                 </div>
                                 <h3 className="text-lg font-semibold text-slate-900">
-                                    Aucune transaction trouvée
+                                    {t('dashboard_ui.transactions.empty')}
                                 </h3>
                                 <p className="mt-1 max-w-sm text-slate-500">
                                     {searchQuery
-                                        ? 'Aucun résultat ne correspond à votre recherche.'
-                                        : "Il n'y a aucune transaction pour le moment."}
+                                        ? t(
+                                              'dashboard_ui.transactions.empty_search',
+                                          )
+                                        : t(
+                                              'dashboard_ui.transactions.empty_description',
+                                          )}
                                 </p>
                             </div>
                         ) : (
@@ -323,25 +335,39 @@ export default function Transactions() {
                                     <thead className="border-b border-slate-200 bg-slate-50">
                                         <tr>
                                             <th className="px-6 py-4 text-left text-xs font-semibold tracking-wider text-slate-700 uppercase">
-                                                #ID
+                                                {t(
+                                                    'dashboard_ui.transactions.id',
+                                                )}
                                             </th>
                                             <th className="px-6 py-4 text-left text-xs font-semibold tracking-wider text-slate-700 uppercase">
-                                                Plan
+                                                {t(
+                                                    'dashboard_ui.transactions.plan',
+                                                )}
                                             </th>
                                             <th className="px-6 py-4 text-left text-xs font-semibold tracking-wider text-slate-700 uppercase">
-                                                Montant
+                                                {t(
+                                                    'dashboard_ui.transactions.amount',
+                                                )}
                                             </th>
                                             <th className="px-6 py-4 text-left text-xs font-semibold tracking-wider text-slate-700 uppercase">
-                                                Méthode
+                                                {t(
+                                                    'dashboard_ui.transactions.method',
+                                                )}
                                             </th>
                                             <th className="px-6 py-4 text-left text-xs font-semibold tracking-wider text-slate-700 uppercase">
-                                                Statut
+                                                {t(
+                                                    'dashboard_ui.common.status',
+                                                )}
                                             </th>
                                             <th className="px-6 py-4 text-left text-xs font-semibold tracking-wider text-slate-700 uppercase">
-                                                Date
+                                                {t(
+                                                    'dashboard_ui.transactions.date',
+                                                )}
                                             </th>
                                             <th className="px-6 py-4 text-right text-xs font-semibold tracking-wider text-slate-700 uppercase">
-                                                Actions
+                                                {t(
+                                                    'dashboard_ui.common.actions',
+                                                )}
                                             </th>
                                         </tr>
                                     </thead>
@@ -350,7 +376,7 @@ export default function Transactions() {
                                             (pay: any, index: number) => (
                                                 <tr
                                                     key={pay.id}
-                                                    className="group transition-colors hover:bg-slate-50"
+                                                    className="dashboard-data-row group transition-colors"
                                                 >
                                                     <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-slate-700">
                                                         #{pay.id}
@@ -360,13 +386,19 @@ export default function Transactions() {
                                                             <span className="text-sm font-semibold text-slate-900">
                                                                 {pay.plan
                                                                     ?.name ||
-                                                                    'Sans plan'}
+                                                                    t(
+                                                                        'dashboard_ui.transactions.without_plan',
+                                                                    )}
                                                             </span>
                                                             <span className="text-xs text-slate-500">
                                                                 {pay.type ===
                                                                 'switch'
-                                                                    ? 'Changement'
-                                                                    : 'Nouveau'}
+                                                                    ? t(
+                                                                          'dashboard_ui.transactions.change',
+                                                                      )
+                                                                    : t(
+                                                                          'dashboard_ui.transactions.new',
+                                                                      )}
                                                             </span>
                                                         </div>
                                                     </td>
@@ -377,7 +409,9 @@ export default function Transactions() {
                                                     </td>
                                                     <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-600">
                                                         {pay.payment_method ??
-                                                            'Manuel'}
+                                                            t(
+                                                                'dashboard_ui.transactions.manual',
+                                                            )}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         {getStatusBadge(
@@ -391,7 +425,7 @@ export default function Transactions() {
                                                     </td>
                                                     <td className="px-6 py-4 text-right whitespace-nowrap">
                                                         {isAdmin ? (
-                                                            <div className="flex items-center justify-end gap-2 opacity-100 transition-opacity group-hover:opacity-100 sm:opacity-0">
+                                                            <div className="dashboard-row-actions flex items-center justify-end gap-2 rounded-xl p-1 md:pointer-events-none md:translate-x-2 md:opacity-0 md:group-focus-within:pointer-events-auto md:group-focus-within:translate-x-0 md:group-focus-within:opacity-100 md:group-hover:pointer-events-auto md:group-hover:translate-x-0 md:group-hover:opacity-100">
                                                                 {pay.status ===
                                                                 'pending' ? (
                                                                     <>
@@ -402,14 +436,19 @@ export default function Transactions() {
                                                                                     pay.id,
                                                                                 )
                                                                             }
-                                                                            title="Valider la demande"
+                                                                            title={t(
+                                                                                'dashboard_ui.transactions.approve',
+                                                                            )}
+                                                                            aria-label={`Valider la transaction ${pay.id}`}
                                                                         >
                                                                             <CheckCircle
                                                                                 size={
                                                                                     16
                                                                                 }
                                                                             />
-                                                                            Valider
+                                                                            {t(
+                                                                                'dashboard_ui.transactions.approve',
+                                                                            )}
                                                                         </button>
                                                                         <button
                                                                             className="rounded-lg bg-red-50 p-2 text-red-600 transition-colors hover:bg-red-100 hover:text-red-800"
@@ -418,7 +457,10 @@ export default function Transactions() {
                                                                                     pay.id,
                                                                                 )
                                                                             }
-                                                                            title="Rejeter"
+                                                                            title={t(
+                                                                                'dashboard_ui.transactions.reject',
+                                                                            )}
+                                                                            aria-label={`Rejeter la transaction ${pay.id}`}
                                                                         >
                                                                             <XCircle
                                                                                 size={
@@ -435,8 +477,12 @@ export default function Transactions() {
                                                                         ].includes(
                                                                             pay.status,
                                                                         )
-                                                                            ? 'Validé'
-                                                                            : 'Terminé'}
+                                                                            ? t(
+                                                                                  'dashboard_ui.common.approved',
+                                                                              )
+                                                                            : t(
+                                                                                  'dashboard_ui.common.completed',
+                                                                              )}
                                                                     </span>
                                                                 )}
                                                             </div>
@@ -466,7 +512,9 @@ export default function Transactions() {
                                                     </span>
                                                     <h3 className="text-base font-bold text-slate-900">
                                                         {pay.plan?.name ||
-                                                            'Sans plan'}
+                                                            t(
+                                                                'dashboard_ui.transactions.without_plan',
+                                                            )}
                                                     </h3>
                                                 </div>
                                                 {getStatusBadge(pay.status)}
@@ -475,7 +523,9 @@ export default function Transactions() {
                                             <div className="mb-4 grid grid-cols-2 gap-3 text-sm">
                                                 <div>
                                                     <span className="block text-xs text-slate-400">
-                                                        Montant
+                                                        {t(
+                                                            'dashboard_ui.transactions.amount',
+                                                        )}
                                                     </span>
                                                     <span className="font-medium text-slate-800">
                                                         {pay.plan?.price
@@ -485,7 +535,9 @@ export default function Transactions() {
                                                 </div>
                                                 <div>
                                                     <span className="block text-xs text-slate-400">
-                                                        Date
+                                                        {t(
+                                                            'dashboard_ui.transactions.date',
+                                                        )}
                                                     </span>
                                                     <span className="font-medium text-slate-800">
                                                         {formatDate(
@@ -495,11 +547,15 @@ export default function Transactions() {
                                                 </div>
                                                 <div className="col-span-2">
                                                     <span className="block text-xs text-slate-400">
-                                                        Méthode & Réf.
+                                                        {t(
+                                                            'dashboard_ui.transactions.method_reference',
+                                                        )}
                                                     </span>
                                                     <span className="font-medium text-slate-800">
                                                         {pay.payment_method ??
-                                                            'Manuel'}{' '}
+                                                            t(
+                                                                'dashboard_ui.transactions.manual',
+                                                            )}{' '}
                                                         {pay.payment_reference
                                                             ? `(${pay.payment_reference})`
                                                             : ''}
@@ -521,7 +577,9 @@ export default function Transactions() {
                                                             <CheckCircle
                                                                 size={16}
                                                             />{' '}
-                                                            Valider
+                                                            {t(
+                                                                'dashboard_ui.transactions.approve',
+                                                            )}
                                                         </button>
                                                         <button
                                                             className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-50 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100"
@@ -534,7 +592,9 @@ export default function Transactions() {
                                                             <XCircle
                                                                 size={16}
                                                             />{' '}
-                                                            Rejeter
+                                                            {t(
+                                                                'dashboard_ui.transactions.reject',
+                                                            )}
                                                         </button>
                                                     </div>
                                                 )}
@@ -549,51 +609,97 @@ export default function Transactions() {
                 {/* Pagination */}
                 {paymentRequests?.data && paymentRequests.data.length > 0 && (
                     <div className="px-4 py-6 sm:px-6 lg:px-8">
-                        <div className="flex flex-col-reverse items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white/50 p-4 backdrop-blur-sm sm:flex-row">
-                            <div className="order-2 text-sm font-medium text-slate-600 sm:order-1">
-                                Affichage de{' '}
-                                <span className="text-[#0d2340]">
-                                    {(paymentRequests?.meta as any)?.from ??
+                        <nav
+                            className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row"
+                            aria-label="Pagination des transactions"
+                        >
+                            <div className="text-center text-sm font-medium text-slate-600 sm:text-left">
+                                {t('dashboard_ui.transactions.displaying', {
+                                    from:
+                                        (paymentRequests?.meta as any)?.from ??
                                         (paymentRequests as any)?.from ??
-                                        0}
-                                </span>{' '}
-                                à{' '}
-                                <span className="text-[#0d2340]">
-                                    {(paymentRequests?.meta as any)?.to ??
+                                        0,
+                                    to:
+                                        (paymentRequests?.meta as any)?.to ??
                                         (paymentRequests as any)?.to ??
-                                        0}
-                                </span>{' '}
-                                sur{' '}
-                                <span className="text-[#0d2340]">
-                                    {paymentRequests?.meta?.total ??
+                                        0,
+                                    total:
+                                        paymentRequests?.meta?.total ??
                                         (paymentRequests as any)?.total ??
-                                        0}
-                                </span>
+                                        0,
+                                })}
                             </div>
 
-                            {/* Scrollable Container for Mobile */}
-                            <div className="order-1 w-full sm:order-2 sm:w-auto">
-                                <div className="hide-scrollbar flex items-center justify-start gap-2 overflow-x-auto px-1 pb-2 sm:justify-center sm:pb-0">
-                                    {paymentRequests?.links?.map(
-                                        (link: any, index: number) => (
+                            <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
+                                {paymentRequests?.links?.map(
+                                    (link: any, index: number) => {
+                                        const isPrevious = index === 0;
+                                        const isNext =
+                                            index ===
+                                            paymentRequests.links.length - 1;
+                                        const isEdge = isPrevious || isNext;
+
+                                        return (
                                             <button
                                                 key={index}
-                                                className={`flex-shrink-0 rounded-lg border px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                                                type="button"
+                                                className={`inline-flex h-10 min-w-10 items-center justify-center rounded-xl border px-3 text-sm font-semibold transition-all duration-200 ${
                                                     link.active
-                                                        ? 'scale-105 transform border-slate-200 bg-slate-500 text-white shadow-md shadow-sm'
-                                                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-200 hover:bg-slate-100 hover:text-[#0d2340]'
-                                                } ${!link.url ? 'cursor-not-allowed opacity-50 grayscale' : ''}`}
+                                                        ? 'border-[#CF8E19] bg-[#CF8E19] text-[#292625] shadow-md'
+                                                        : 'border-slate-200 bg-white text-slate-700 hover:border-[#CF8E19] hover:bg-[#CF8E19]/10 hover:text-[#292625]'
+                                                } ${!link.url ? 'cursor-not-allowed opacity-40' : ''} ${!isEdge && !link.active ? 'hidden sm:inline-flex' : ''}`}
                                                 disabled={!link.url}
                                                 onClick={() => goTo(link.url)}
-                                                dangerouslySetInnerHTML={{
-                                                    __html: link.label,
-                                                }}
-                                            />
-                                        ),
-                                    )}
-                                </div>
+                                                aria-current={
+                                                    link.active
+                                                        ? 'page'
+                                                        : undefined
+                                                }
+                                                aria-label={
+                                                    isPrevious
+                                                        ? t(
+                                                              'dashboard_ui.common.previous_page',
+                                                          )
+                                                        : isNext
+                                                          ? t(
+                                                                'dashboard_ui.common.next_page',
+                                                            )
+                                                          : `Page ${link.label}`
+                                                }
+                                            >
+                                                {isPrevious ? (
+                                                    <>
+                                                        <ChevronLeft
+                                                            size={17}
+                                                            aria-hidden="true"
+                                                        />
+                                                        <span className="ml-1 hidden lg:inline">
+                                                            {t(
+                                                                'dashboard_ui.common.previous',
+                                                            )}
+                                                        </span>
+                                                    </>
+                                                ) : isNext ? (
+                                                    <>
+                                                        <span className="mr-1 hidden lg:inline">
+                                                            {t(
+                                                                'dashboard_ui.common.next',
+                                                            )}
+                                                        </span>
+                                                        <ChevronRight
+                                                            size={17}
+                                                            aria-hidden="true"
+                                                        />
+                                                    </>
+                                                ) : (
+                                                    link.label
+                                                )}
+                                            </button>
+                                        );
+                                    },
+                                )}
                             </div>
-                        </div>
+                        </nav>
                     </div>
                 )}
             </div>

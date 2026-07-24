@@ -8,6 +8,7 @@ import {
     LineElement,
     PointElement,
     Tooltip,
+    type ChartOptions,
 } from 'chart.js';
 import {
     Activity,
@@ -33,7 +34,45 @@ ChartJS.register(
     Legend,
 );
 
-export default function Show({ propertyTitle, views, contacts }) {
+type StatType = 'views' | 'first' | 'last' | 'contacts';
+
+interface AnalyticsShowProps {
+    propertyTitle: string;
+    views: {
+        total: number;
+        first?: string;
+        last?: string;
+        chart?: Array<{ date: string; total: number }>;
+        topViewers?: Array<{
+            user: { id: number; name: string };
+            total: number;
+        }>;
+        data?: Array<{
+            user?: { name?: string };
+            viewed_at: string;
+        }>;
+    };
+    contacts: {
+        total: number;
+        chart?: Array<{
+            date: string;
+            total_email: number;
+            total_whatsapp: number;
+        }>;
+        byMethod?: Array<{ method: string; total: number }>;
+        data?: Array<{
+            user?: { name?: string };
+            method: string;
+            clicked_at: string;
+        }>;
+    };
+}
+
+export default function Show({
+    propertyTitle,
+    views,
+    contacts,
+}: AnalyticsShowProps) {
     const viewsChartData = {
         labels: views?.chart?.map((item) => item.date) || [],
         datasets: [
@@ -141,7 +180,7 @@ export default function Show({ propertyTitle, views, contacts }) {
         },
     };
 
-    const getStatIcon = (type) => {
+    const getStatIcon = (type: StatType) => {
         const iconMap = {
             views: Eye,
             first: Calendar,
@@ -151,7 +190,7 @@ export default function Show({ propertyTitle, views, contacts }) {
         return iconMap[type] || Eye;
     };
 
-    const getStatColor = (type) => {
+    const getStatColor = (type: StatType) => {
         const colorMap = {
             views: 'from-blue-400 to-blue-600',
             first: 'from-emerald-400 to-emerald-600',
@@ -161,7 +200,17 @@ export default function Show({ propertyTitle, views, contacts }) {
         return colorMap[type] || 'from-gray-400 to-gray-600';
     };
 
-    const StatCard = ({ title, value, type, delay = 0 }) => {
+    const StatCard = ({
+        title,
+        value,
+        type,
+        delay = 0,
+    }: {
+        title: string;
+        value: string | number | undefined;
+        type: StatType;
+        delay?: number;
+    }) => {
         const Icon = getStatIcon(type);
         const colorClass = getStatColor(type);
 
@@ -194,7 +243,7 @@ export default function Show({ propertyTitle, views, contacts }) {
         );
     };
 
-    const getContactIcon = (method) => {
+    const getContactIcon = (method: string) => {
         return method === 'email' ? Mail : Phone;
     };
 
@@ -264,7 +313,9 @@ export default function Show({ propertyTitle, views, contacts }) {
                                     <div className="h-64">
                                         <Line
                                             data={viewsChartData}
-                                            options={chartOptions}
+                                            options={
+                                                chartOptions as ChartOptions<'line'>
+                                            }
                                         />
                                     </div>
                                 </div>
@@ -286,7 +337,9 @@ export default function Show({ propertyTitle, views, contacts }) {
                                     <div className="h-64">
                                         <Line
                                             data={contactsChartData}
-                                            options={chartOptions}
+                                            options={
+                                                chartOptions as ChartOptions<'line'>
+                                            }
                                         />
                                     </div>
                                 </div>

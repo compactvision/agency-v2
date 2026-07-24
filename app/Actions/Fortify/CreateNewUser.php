@@ -2,8 +2,8 @@
 
 namespace App\Actions\Fortify;
 
-use App\Models\User;
 use App\Domains\Auth\Services\AuthService;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -35,7 +35,7 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
-        $result = $this->authService->register($input);
+        $result = $this->authService->register($input, issueToken: false);
 
         return $result['user'];
     }

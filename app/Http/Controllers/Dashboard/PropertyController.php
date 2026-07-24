@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
 use App\Domains\Ads\Models\Ad;
-use App\Domains\Ads\Services\AdService;
 use App\Domains\Ads\Requests\StoreAdRequest;
 use App\Domains\Ads\Requests\UpdateAdRequest;
 use App\Domains\Ads\Resources\AdResource;
+use App\Domains\Ads\Services\AdService;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
 
 class PropertyController extends Controller
 {
@@ -25,7 +25,7 @@ class PropertyController extends Controller
 
         // Role-based filtering: Sellers/Agencies only see their own properties
         // Admins and Super-admins see everything
-        if (!$user->hasRole(['admin', 'super-admin'])) {
+        if (! $user->hasRole(['admin', 'super-admin'])) {
             $query->where('user_id', auth()->id());
         }
 
@@ -34,14 +34,14 @@ class PropertyController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('reference', 'like', "%{$search}%");
+                    ->orWhere('reference', 'like', "%{$search}%");
             });
         }
 
         // Sorting
         $sortBy = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
-        
+
         // Safety check for sort fields
         $allowedSorts = ['created_at', 'price', 'title'];
         if (in_array($sortBy, $allowedSorts)) {
@@ -71,9 +71,7 @@ class PropertyController extends Controller
 
     public function validation(Request $request)
     {
-        if (!$request->user()->hasRole(['admin', 'super-admin'])) {
-            abort(403);
-        }
+        $this->authorize('moderate', new Ad);
 
         $query = Ad::query()
             ->with(['category', 'images', 'details', 'municipality', 'user'])
@@ -83,7 +81,7 @@ class PropertyController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('reference', 'like', "%{$search}%");
+                    ->orWhere('reference', 'like', "%{$search}%");
             });
         }
 
@@ -136,9 +134,7 @@ class PropertyController extends Controller
         $property = Ad::with(['details', 'amenities', 'images', 'category'])
             ->findOrFail($id);
 
-        if ($property->user_id !== auth()->id() && !auth()->user()->hasRole(['admin', 'super-admin'])) {
-            abort(403);
-        }
+        $this->authorize('update', $property);
 
         return Inertia::render('dashboard/properties/EditProperties', array_merge(
             $this->getLookupData(),
@@ -149,10 +145,6 @@ class PropertyController extends Controller
     public function update($id, UpdateAdRequest $request, AdService $service)
     {
         $ad = Ad::findOrFail($id);
-
-        if ($ad->user_id !== auth()->id() && !auth()->user()->hasRole(['admin', 'super-admin'])) {
-            abort(403);
-        }
 
         try {
             $service->update($ad, $request->validated());
@@ -177,49 +169,44 @@ class PropertyController extends Controller
         $property = Ad::with(['details', 'amenities', 'images', 'category', 'user', 'municipality'])
             ->findOrFail($id);
 
-        if ($property->user_id !== auth()->id() && !auth()->user()->hasRole(['admin', 'super-admin'])) {
-            abort(403);
-        }
+        $this->authorize('view', $property);
 
         return Inertia::render('dashboard/properties/ShowProperty', [
-            'property' => (new AdResource($property))->resolve()
+            'property' => (new AdResource($property))->resolve(),
         ]);
     }
 
     public function validationShow($id)
     {
-        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
-            abort(403);
-        }
+        $this->authorize('moderate', new Ad);
 
         $property = Ad::with(['details', 'amenities', 'images', 'category', 'user', 'municipality'])
             ->findOrFail($id);
 
         return Inertia::render('dashboard/properties/ValidationShow', [
-            'property' => (new AdResource($property))->resolve()
+            'property' => (new AdResource($property))->resolve(),
         ]);
     }
 
     public function approve($id, AdService $service)
     {
-        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
-            abort(403);
-        }
-
         $property = Ad::findOrFail($id);
-        
+        $this->authorize('moderate', $property);
+
         try {
             if ($property->status === 'published') {
-                // If already published, we toggle it back to pending or draft? 
+                // If already published, we toggle it back to pending or draft?
                 // Let's assume for now admin wants to "un-approve" it.
                 $property->update([
                     'status' => 'pending_validation',
-                    'is_published' => false
+                    'is_published' => false,
                 ]);
+
                 return redirect()->back()->with('success', 'Approbation retirée.');
             }
 
             $service->approve($property);
+
             return redirect()->back()->with('success', 'Propriété approuvée.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
@@ -228,15 +215,15 @@ class PropertyController extends Controller
 
     public function reject($id, Request $request, AdService $service)
     {
-        if (!auth()->user()->hasRole(['admin', 'super-admin'])) {
-            abort(403);
-        }
-
         $property = Ad::findOrFail($id);
-        $reason = $request->input('reason', 'Non spécifiée');
+        $this->authorize('moderate', $property);
+        $reason = $request->validate([
+            'reason' => ['required', 'string', 'max:1000'],
+        ])['reason'];
 
         try {
             $service->reject($property, $reason);
+
             return redirect()->back()->with('success', 'Propriété rejetée.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
@@ -250,16 +237,17 @@ class PropertyController extends Controller
         if ($request->search) {
             $query->where(function ($q) use ($request) {
                 $q->where('title', 'like', "%{$request->search}%")
-                  ->orWhere('ad_type', 'like', "%{$request->search}%")
-                  ->orWhereHas('municipality', function($mq) use ($request) {
-                      $mq->where('name', 'like', "%{$request->search}%");
-                  });
+                    ->orWhere('ad_type', 'like', "%{$request->search}%")
+                    ->orWhereHas('municipality', function ($mq) use ($request) {
+                        $mq->where('name', 'like', "%{$request->search}%");
+                    });
             });
         }
 
         $sortField = $request->input('sort_by', 'created_at');
         $sortOrder = $request->input('sort_order', 'desc');
-        
+        $sortOrder = in_array($sortOrder, ['asc', 'desc'], true) ? $sortOrder : 'desc';
+
         // Validation basique des champs de tri
         if (in_array($sortField, ['created_at', 'price', 'title'])) {
             $query->orderBy($sortField, $sortOrder);
@@ -287,7 +275,11 @@ class PropertyController extends Controller
     public function toggleFavorite($id)
     {
         $user = auth()->user();
-        $user->favorites()->toggle($id);
+        $property = Ad::query()
+            ->where('is_published', true)
+            ->where('is_approved', true)
+            ->findOrFail($id);
+        $user->favorites()->toggle($property->id);
 
         return redirect()->back(); // Ou JsonResponse
     }
@@ -296,7 +288,7 @@ class PropertyController extends Controller
     {
         return [
             'countries' => \App\Domains\Locations\Models\Country::all()->pluck('name', 'id'),
-            'municipalities' => \App\Domains\Locations\Models\Municipality::with('city')->get()->map(function($m) {
+            'municipalities' => \App\Domains\Locations\Models\Municipality::with('city')->get()->map(function ($m) {
                 return [
                     'id' => $m->id,
                     'name' => $m->name,
@@ -304,13 +296,13 @@ class PropertyController extends Controller
                     'country' => $m->city?->country?->name,
                 ];
             }),
-            'amenities' => \App\Domains\Amenities\Models\Amenity::all()->map(function($a) {
+            'amenities' => \App\Domains\Amenities\Models\Amenity::all()->map(function ($a) {
                 return [
                     'id' => $a->id,
                     'name' => $a->name,
                 ];
             }),
-            'categories' => \App\Domains\Categories\Models\Category::all()->map(function($c) {
+            'categories' => \App\Domains\Categories\Models\Category::all()->map(function ($c) {
                 return [
                     'id' => $c->id,
                     'name' => $c->name,

@@ -1,6 +1,7 @@
 import RoleAndPermission from '@/components/forms/RoleAndPermission';
 import Dashboard from '@/components/layouts/Dashboard/Dashboard';
 import BackButton from '@/components/ui/BackButton';
+import usePermission from '@/hooks/usePermission';
 import { router, usePage } from '@inertiajs/react';
 import {
     Edit3,
@@ -15,6 +16,7 @@ import {
     X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Role = { name: string };
 type UserType = {
@@ -39,6 +41,8 @@ interface PageProps {
 }
 
 export default function User() {
+    const { t } = useTranslation();
+    const { can, hasRole } = usePermission();
     const {
         users,
         roles = [],
@@ -52,6 +56,15 @@ export default function User() {
     const [isSearching, setIsSearching] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
+    const canCreateUser = can('user.create');
+    const canEditUser = (user: UserType) =>
+        can('user.update') &&
+        (!user.roles.some((role) => role.name === 'super-admin') ||
+            hasRole('super-admin'));
+    const canDeleteUser = (user: UserType) =>
+        can('user.delete') &&
+        (!user.roles.some((role) => role.name === 'super-admin') ||
+            hasRole('super-admin'));
 
     // Safeguard users data
     const usersData = users?.data || [];
@@ -94,12 +107,17 @@ export default function User() {
     };
 
     const handleEdit = (user: UserType) => {
+        if (!canEditUser(user)) return;
+
         setSelectedUser(user);
         setIsOpen(true);
     };
 
     const deleteUser = (id: number) => {
-        if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+        const user = usersData.find((candidate) => candidate.id === id);
+        if (!user || !canDeleteUser(user)) return;
+
+        if (confirm(t('dashboard_ui.users.delete_confirmation'))) {
             router.delete(route('dashboard.users.destroy', id), {
                 preserveScroll: true,
                 onSuccess: () => {
@@ -132,7 +150,9 @@ export default function User() {
                         : 'border border-gray-200 bg-gray-100 text-gray-800'
                 }`}
             >
-                {hasRoles ? 'Actif' : 'Inactif'}
+                {hasRoles
+                    ? t('dashboard_ui.users.active')
+                    : t('dashboard_ui.users.inactive')}
             </span>
         );
     };
@@ -148,12 +168,13 @@ export default function User() {
                             <div className="p-6">
                                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                                     <div className="mb-6 lg:mb-0">
-                                        <h1 className="text-2xl font-bold text-gray-900">
-                                            Utilisateurs
+                                        <h1 className="dashboard-page-title text-2xl font-bold">
+                                            {t('dashboard_ui.users.title')}
                                         </h1>
                                         <p className="mt-1 text-gray-600">
-                                            Gérez vos utilisateurs et leurs
-                                            informations
+                                            {t(
+                                                'dashboard_ui.users.description',
+                                            )}
                                         </p>
                                     </div>
                                     <div className="flex gap-4">
@@ -162,7 +183,7 @@ export default function User() {
                                                 {usersData.length}
                                             </span>
                                             <span className="text-sm text-gray-600">
-                                                Utilisateurs
+                                                {t('dashboard_ui.users.title')}
                                             </span>
                                         </div>
                                         <div className="min-w-[120px] rounded-lg bg-emerald-50 p-4 text-center">
@@ -176,7 +197,7 @@ export default function User() {
                                                 }
                                             </span>
                                             <span className="text-sm text-gray-600">
-                                                Actifs
+                                                {t('dashboard_ui.users.active')}
                                             </span>
                                         </div>
                                     </div>
@@ -196,7 +217,9 @@ export default function User() {
                                     />
                                     <input
                                         type="text"
-                                        placeholder="Rechercher un utilisateur..."
+                                        placeholder={t(
+                                            'dashboard_ui.users.search_placeholder',
+                                        )}
                                         className={`w-full rounded-lg border border-gray-300 bg-white py-3 pr-4 pl-10 text-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none ${
                                             isSearching ? 'opacity-70' : ''
                                         }`}
@@ -228,7 +251,9 @@ export default function User() {
                                             className="cursor-pointer appearance-none rounded-lg border border-gray-300 bg-white px-4 py-3 pr-10 text-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none"
                                         >
                                             <option value="">
-                                                Tous les rôles
+                                                {t(
+                                                    'dashboard_ui.users.all_roles',
+                                                )}
                                             </option>
                                             {roles.map((role) => (
                                                 <option
@@ -245,21 +270,23 @@ export default function User() {
                                         />
                                     </div>
 
-                                    <button
-                                        onClick={() => {
-                                            setSelectedUser(null);
-                                            setIsOpen(true);
-                                        }}
-                                        className="inline-flex transform items-center rounded-lg bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-4 py-3 font-medium text-white shadow-lg shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22]"
-                                    >
-                                        <Plus size={18} className="mr-2" />
-                                        <span className="hidden sm:inline">
-                                            Nouvel utilisateur
-                                        </span>
-                                        <span className="sm:hidden">
-                                            Ajouter
-                                        </span>
-                                    </button>
+                                    {canCreateUser && (
+                                        <button
+                                            onClick={() => {
+                                                setSelectedUser(null);
+                                                setIsOpen(true);
+                                            }}
+                                            className="inline-flex transform items-center rounded-lg bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-4 py-3 font-medium text-white shadow-lg shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22]"
+                                        >
+                                            <Plus size={18} className="mr-2" />
+                                            <span className="hidden sm:inline">
+                                                {t('dashboard_ui.users.new')}
+                                            </span>
+                                            <span className="sm:hidden">
+                                                {t('dashboard_ui.users.add')}
+                                            </span>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -273,22 +300,22 @@ export default function User() {
                                 <thead className="bg-slate-50">
                                     <tr>
                                         <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
-                                            Image
+                                            {t('dashboard_ui.users.image')}
                                         </th>
                                         <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
-                                            Nom
+                                            {t('dashboard_ui.users.name')}
                                         </th>
                                         <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
-                                            Email
+                                            {t('dashboard_ui.users.email')}
                                         </th>
                                         <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
-                                            Rôle
+                                            {t('dashboard_ui.users.role')}
                                         </th>
                                         <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
-                                            Statut
+                                            {t('dashboard_ui.common.status')}
                                         </th>
                                         <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">
-                                            Actions
+                                            {t('dashboard_ui.common.actions')}
                                         </th>
                                     </tr>
                                 </thead>
@@ -296,7 +323,7 @@ export default function User() {
                                     {usersData.map((user, index) => (
                                         <tr
                                             key={user.id}
-                                            className="transition-colors hover:bg-slate-50"
+                                            className="dashboard-data-row group transition-colors"
                                             style={{
                                                 animationDelay: `${index * 0.05}s`,
                                             }}
@@ -357,7 +384,9 @@ export default function User() {
                                                                           role.name,
                                                                   )
                                                                   .join(', ')
-                                                            : 'Aucun rôle'}
+                                                            : t(
+                                                                  'dashboard_ui.users.no_role',
+                                                              )}
                                                     </span>
                                                 </div>
                                             </td>
@@ -365,25 +394,47 @@ export default function User() {
                                                 {getStatusBadge(user)}
                                             </td>
                                             <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                                                <div className="flex space-x-2">
-                                                    <button
-                                                        className="rounded-lg p-1 text-[#1E3A5F] transition-colors hover:bg-slate-100 hover:text-[#1E3A5F]"
-                                                        onClick={() =>
-                                                            handleEdit(user)
-                                                        }
-                                                        title="Modifier"
-                                                    >
-                                                        <Edit3 size={18} />
-                                                    </button>
-                                                    <button
-                                                        className="rounded-lg p-1 text-red-600 transition-colors hover:bg-red-50 hover:text-red-900"
-                                                        onClick={() =>
-                                                            deleteUser(user.id)
-                                                        }
-                                                        title="Supprimer"
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
+                                                <div className="dashboard-row-actions flex space-x-2 rounded-xl p-1 md:pointer-events-none md:translate-x-2 md:opacity-0 md:group-focus-within:pointer-events-auto md:group-focus-within:translate-x-0 md:group-focus-within:opacity-100 md:group-hover:pointer-events-auto md:group-hover:translate-x-0 md:group-hover:opacity-100">
+                                                    {canEditUser(user) && (
+                                                        <button
+                                                            className="rounded-lg p-1 text-[#1E3A5F] transition-colors hover:bg-slate-100 hover:text-[#1E3A5F]"
+                                                            onClick={() =>
+                                                                handleEdit(user)
+                                                            }
+                                                            title={t(
+                                                                'dashboard_ui.common.edit',
+                                                            )}
+                                                            aria-label={t(
+                                                                'dashboard_ui.users.edit_label',
+                                                                {
+                                                                    name: user.name,
+                                                                },
+                                                            )}
+                                                        >
+                                                            <Edit3 size={18} />
+                                                        </button>
+                                                    )}
+                                                    {canDeleteUser(user) && (
+                                                        <button
+                                                            className="rounded-lg p-1 text-red-600 transition-colors hover:bg-red-50 hover:text-red-900"
+                                                            onClick={() =>
+                                                                deleteUser(
+                                                                    user.id,
+                                                                )
+                                                            }
+                                                            title={t(
+                                                                'dashboard_ui.common.delete',
+                                                            )}
+                                                            aria-label={t(
+                                                                'dashboard_ui.users.delete_label',
+                                                                {
+                                                                    name: user.name,
+                                                                },
+                                                            )}
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
@@ -455,28 +506,40 @@ export default function User() {
                                                                       role.name,
                                                               )
                                                               .join(', ')
-                                                        : 'Aucun rôle'}
+                                                        : t(
+                                                              'dashboard_ui.users.no_role',
+                                                          )}
                                                 </span>
                                             </div>
                                         </div>
 
                                         <div className="flex justify-end space-x-2">
-                                            <button
-                                                className="rounded-lg p-2 text-[#1E3A5F] transition-colors hover:bg-slate-100 hover:text-[#1E3A5F]"
-                                                onClick={() => handleEdit(user)}
-                                                title="Modifier"
-                                            >
-                                                <Edit3 size={18} />
-                                            </button>
-                                            <button
-                                                className="rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 hover:text-red-900"
-                                                onClick={() =>
-                                                    deleteUser(user.id)
-                                                }
-                                                title="Supprimer"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
+                                            {canEditUser(user) && (
+                                                <button
+                                                    className="rounded-lg p-2 text-[#1E3A5F] transition-colors hover:bg-slate-100 hover:text-[#1E3A5F]"
+                                                    onClick={() =>
+                                                        handleEdit(user)
+                                                    }
+                                                    title={t(
+                                                        'dashboard_ui.common.edit',
+                                                    )}
+                                                >
+                                                    <Edit3 size={18} />
+                                                </button>
+                                            )}
+                                            {canDeleteUser(user) && (
+                                                <button
+                                                    className="rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 hover:text-red-900"
+                                                    onClick={() =>
+                                                        deleteUser(user.id)
+                                                    }
+                                                    title={t(
+                                                        'dashboard_ui.common.delete',
+                                                    )}
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
@@ -491,22 +554,25 @@ export default function User() {
                                         />
                                     </div>
                                     <h3 className="mb-2 text-xl font-semibold text-gray-900">
-                                        Aucun utilisateur trouvé
+                                        {t('dashboard_ui.users.empty')}
                                     </h3>
                                     <p className="mb-6 text-gray-600">
-                                        Commencez par créer votre premier
-                                        utilisateur
+                                        {t(
+                                            'dashboard_ui.users.empty_description',
+                                        )}
                                     </p>
-                                    <button
-                                        onClick={() => {
-                                            setSelectedUser(null);
-                                            setIsOpen(true);
-                                        }}
-                                        className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-6 py-3 font-medium text-white shadow-lg shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22]"
-                                    >
-                                        <Plus size={20} className="mr-2" />
-                                        Créer un utilisateur
-                                    </button>
+                                    {canCreateUser && (
+                                        <button
+                                            onClick={() => {
+                                                setSelectedUser(null);
+                                                setIsOpen(true);
+                                            }}
+                                            className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-6 py-3 font-medium text-white shadow-lg shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22]"
+                                        >
+                                            <Plus size={20} className="mr-2" />
+                                            {t('dashboard_ui.users.create')}
+                                        </button>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -517,12 +583,14 @@ export default function User() {
                         <div className="mb-4 text-sm text-gray-700 sm:mb-0">
                             {usersData.length > 0 ? (
                                 <>
-                                    Affichage de {usersMeta.from} à{' '}
-                                    {usersMeta.to} sur {usersMeta.total}{' '}
-                                    utilisateurs
+                                    {t('dashboard_ui.users.displaying', {
+                                        from: usersMeta.from,
+                                        to: usersMeta.to,
+                                        total: usersMeta.total,
+                                    })}
                                 </>
                             ) : (
-                                'Aucun utilisateur'
+                                t('dashboard_ui.users.none')
                             )}
                         </div>
 
@@ -545,16 +613,20 @@ export default function User() {
                         </div>
                     </div>
 
-                    <RoleAndPermission
-                        key={selectedUser?.id ?? 'create'}
-                        isOpen={isOpen}
-                        setIsOpen={(v) => {
-                            if (!v) setSelectedUser(null);
-                            setIsOpen(v);
-                        }}
-                        user={selectedUser ?? undefined}
-                        roles={roles}
-                    />
+                    {isOpen &&
+                        ((selectedUser && canEditUser(selectedUser)) ||
+                            (!selectedUser && canCreateUser)) && (
+                            <RoleAndPermission
+                                key={selectedUser?.id ?? 'create'}
+                                isOpen={isOpen}
+                                setIsOpen={(v) => {
+                                    if (!v) setSelectedUser(null);
+                                    setIsOpen(v);
+                                }}
+                                user={selectedUser ?? undefined}
+                                roles={roles}
+                            />
+                        )}
                 </div>
             </div>
         </Dashboard>

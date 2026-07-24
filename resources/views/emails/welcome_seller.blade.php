@@ -1,22 +1,21 @@
 <x-mail::message>
-    # Bienvenue chez Agency DRC !
+# {{ __('mail.welcome.title') }}
 
-    Bonjour **{{ $name }}**,
+{{ __('mail.common.hello', ['name' => $name]) }}
 
-    Félicitations ! Votre profil a été mis à jour avec succès. Vous êtes désormais enregistré en tant que
-    **{{ $role }}** sur notre plateforme.
+{!! __('mail.welcome.intro', ['role' => e($role)]) !!}
 
-    Vous pouvez dès maintenant commencer à :
-    * Publier vos annonces immobilières
-    * Gérer vos propriétés en toute simplicité
-    * Suivre vos performances depuis votre espace dédié
+{{ __('mail.welcome.next') }}
 
-    <x-mail::button :url="config('app.url') . '/dashboard'">
-        Accéder à mon tableau de bord
-    </x-mail::button>
+- {{ __('mail.welcome.publish') }}
+- {{ __('mail.welcome.manage') }}
+- {{ __('mail.welcome.analytics') }}
 
-    Nous sommes ravis de vous accompagner dans le développement de vos activités immobilières.
+<x-mail::button :url="$dashboardUrl">
+{{ __('mail.welcome.action') }}
+</x-mail::button>
 
-    À très bientôt,<br>
-    L'équipe {{ config('app.name') }}
+{{ __('mail.common.thank_you') }}
+
+{{ __('mail.common.team') }}
 </x-mail::message>

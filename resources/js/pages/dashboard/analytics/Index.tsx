@@ -9,6 +9,7 @@ import {
     LineElement,
     PointElement,
     Tooltip,
+    type ChartOptions,
 } from 'chart.js';
 import 'chart.js/auto';
 import {
@@ -24,6 +25,7 @@ import {
     TrendingUp,
     Users,
     XCircle,
+    type LucideIcon,
 } from 'lucide-react';
 import { Doughnut, Line } from 'react-chartjs-2';
 
@@ -37,6 +39,60 @@ ChartJS.register(
     Legend,
 );
 
+type StatType =
+    | 'sellers'
+    | 'agencies'
+    | 'buyers'
+    | 'total'
+    | 'properties'
+    | 'published'
+    | 'approved'
+    | 'featured'
+    | 'active'
+    | 'expired'
+    | 'pending'
+    | 'rejected'
+    | 'credit';
+type ColorModifier =
+    | 'blue'
+    | 'green'
+    | 'purple'
+    | 'orange'
+    | 'cyan'
+    | 'emerald'
+    | 'teal'
+    | 'yellow'
+    | 'success'
+    | 'danger'
+    | 'warning'
+    | 'indigo'
+    | 'default';
+
+interface AnalyticsIndexProps {
+    viewsPerDay?: Array<{ date: string; total: number }>;
+    contactsPerMethod?: Array<{ method: string; total: number }>;
+    mostViewedProperties?: Array<{
+        id: number;
+        title: string;
+        views_count: number;
+        municipality?: { name?: string };
+    }>;
+    userStats?: { sellers: number; agencies: number; buyers: number };
+    propertyStats?: {
+        total: number;
+        published: number;
+        approved: number;
+        featured: number;
+    };
+    subscriptionStats?: { active: number; expired: number; total: number };
+    paymentRequestStats?: {
+        pending: number;
+        approved: number;
+        rejected: number;
+    };
+    isAdmin?: boolean;
+}
+
 export default function Index({
     viewsPerDay = [],
     contactsPerMethod = [],
@@ -46,13 +102,13 @@ export default function Index({
     subscriptionStats = { active: 0, expired: 0, total: 0 },
     paymentRequestStats = { pending: 0, approved: 0, rejected: 0 },
     isAdmin = false,
-}: any) {
+}: AnalyticsIndexProps) {
     const lineData = {
-        labels: viewsPerDay.map((v: any) => v.date).reverse(),
+        labels: viewsPerDay.map((v) => v.date).reverse(),
         datasets: [
             {
                 label: 'Vues par jour',
-                data: viewsPerDay.map((v: any) => v.total).reverse(),
+                data: viewsPerDay.map((v) => v.total).reverse(),
                 borderColor: '#3b82f6',
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
                 tension: 0.4,
@@ -67,10 +123,10 @@ export default function Index({
     };
 
     const doughnutData = {
-        labels: contactsPerMethod.map((c: any) => c.method),
+        labels: contactsPerMethod.map((c) => c.method),
         datasets: [
             {
-                data: contactsPerMethod.map((c: any) => c.total),
+                data: contactsPerMethod.map((c) => c.total),
                 backgroundColor: [
                     'rgba(34, 197, 94, 0.8)',
                     'rgba(250, 204, 21, 0.8)',
@@ -143,8 +199,8 @@ export default function Index({
         },
     };
 
-    const getStatIcon = (type: string) => {
-        const iconMap = {
+    const getStatIcon = (type: StatType): LucideIcon => {
+        const iconMap: Record<StatType, LucideIcon> = {
             sellers: Users,
             agencies: Building,
             buyers: Users,
@@ -159,11 +215,11 @@ export default function Index({
             rejected: XCircle,
             credit: CreditCard,
         };
-        return iconMap[type] || TrendingUp;
+        return iconMap[type];
     };
 
-    const getStatModifier = (type: string): string => {
-        const modifierMap = {
+    const getStatModifier = (type: StatType): ColorModifier => {
+        const modifierMap: Record<StatType, ColorModifier> = {
             sellers: 'blue',
             agencies: 'green',
             buyers: 'purple',
@@ -178,14 +234,24 @@ export default function Index({
             rejected: 'danger',
             credit: 'indigo',
         };
-        return modifierMap[type] || 'default';
+        return modifierMap[type];
     };
 
-    const StatCard = ({ title, value, type, delay = 0 }) => {
+    const StatCard = ({
+        title,
+        value,
+        type,
+        delay = 0,
+    }: {
+        title: string;
+        value: number;
+        type: StatType;
+        delay?: number;
+    }) => {
         const Icon = getStatIcon(type);
         const modifier = getStatModifier(type);
 
-        const colorClasses = {
+        const colorClasses: Record<ColorModifier, string> = {
             blue: 'from-blue-400 to-blue-600',
             green: 'from-emerald-400 to-emerald-600',
             purple: 'from-purple-400 to-purple-600',
@@ -230,7 +296,13 @@ export default function Index({
         );
     };
 
-    const ChartIcon = ({ type, size = 20 }) => {
+    const ChartIcon = ({
+        type,
+        size = 20,
+    }: {
+        type: 'line' | 'doughnut';
+        size?: number;
+    }) => {
         const iconMap = {
             line: TrendingUp,
             doughnut: Phone,
@@ -393,7 +465,9 @@ export default function Index({
                                     <div className="h-64">
                                         <Line
                                             data={lineData}
-                                            options={chartOptions}
+                                            options={
+                                                chartOptions as ChartOptions<'line'>
+                                            }
                                         />
                                     </div>
                                 </div>
@@ -415,10 +489,12 @@ export default function Index({
                                     <div className="h-64">
                                         <Doughnut
                                             data={doughnutData}
-                                            options={{
-                                                ...chartOptions,
-                                                cutout: '60%',
-                                            }}
+                                            options={
+                                                {
+                                                    ...chartOptions,
+                                                    cutout: '60%',
+                                                } as ChartOptions<'doughnut'>
+                                            }
                                         />
                                     </div>
                                 </div>
@@ -458,10 +534,7 @@ export default function Index({
                                         </thead>
                                         <tbody className="divide-y divide-slate-200">
                                             {mostViewedProperties.map(
-                                                (
-                                                    property: any,
-                                                    index: number,
-                                                ) => (
+                                                (property, index: number) => (
                                                     <tr
                                                         key={property.id}
                                                         className="transition-colors hover:bg-slate-50"

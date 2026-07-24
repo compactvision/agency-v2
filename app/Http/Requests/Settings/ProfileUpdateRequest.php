@@ -53,13 +53,13 @@ class ProfileUpdateRequest extends FormRequest
             'language' => ['nullable', 'string', 'in:en,fr'],
             'notifications_enabled' => ['nullable', 'boolean'],
             'newsletter' => ['nullable', 'boolean'],
-            'profile_photo' => ['nullable', 'image', 'max:2048'],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048', 'dimensions:max_width=5000,max_height=5000'],
             'rc_number' => ['nullable', 'string', 'max:255'],
             'tax_number' => ['nullable', 'string', 'max:255'],
-            'facebook' => ['nullable', 'string', 'max:255'],
-            'twitter' => ['nullable', 'string', 'max:255'],
-            'instagram' => ['nullable', 'string', 'max:255'],
-            'linkedin' => ['nullable', 'string', 'max:255'],
+            'facebook' => ['nullable', 'url:http,https', 'max:255'],
+            'twitter' => ['nullable', 'url:http,https', 'max:255'],
+            'instagram' => ['nullable', 'url:http,https', 'max:255'],
+            'linkedin' => ['nullable', 'url:http,https', 'max:255'],
         ];
     }
 }

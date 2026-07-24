@@ -3,22 +3,24 @@
 namespace App\Mail;
 
 use App\Domains\Ads\Models\Ad;
+use App\Support\UsesMailLocale;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class PropertyRejectedMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, UsesMailLocale;
 
     /**
      * Create a new message instance.
      */
     public function __construct(public Ad $ad, public string $reason)
     {
+        $this->useMailLocale($ad->user?->language);
     }
 
     /**
@@ -27,7 +29,9 @@ class PropertyRejectedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Mise à jour importante concernant votre annonce : ' . $this->ad->title,
+            subject: __('mail.subjects.property_rejected', [
+                'reference' => $this->ad->reference,
+            ]),
         );
     }
 
@@ -37,14 +41,17 @@ class PropertyRejectedMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.properties.rejected',
+            markdown: 'emails.properties.rejected',
+            with: [
+                'editUrl' => route('dashboard.properties.edit', $this->ad->id),
+            ],
         );
     }
 
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return array<int, Attachment>
      */
     public function attachments(): array
     {

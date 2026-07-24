@@ -16,6 +16,7 @@ import {
     XCircle,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type DashboardMetrics = {
     properties: { total: number; unapproved: number };
@@ -39,6 +40,7 @@ type StatusInput =
 
 type Property = {
     id: number;
+    slug: string;
     title: string;
     price: number;
     location: string;
@@ -57,6 +59,7 @@ type DashboardPageProps = {
 };
 
 export default function DashboardIndex() {
+    const { t, i18n } = useTranslation();
     const {
         properties = [],
         logs = [],
@@ -169,20 +172,26 @@ export default function DashboardIndex() {
     };
 
     const formatPrice = (price: number) => {
-        return new Intl.NumberFormat('fr-FR', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-        }).format(price);
+        return new Intl.NumberFormat(
+            i18n.resolvedLanguage === 'en' ? 'en-US' : 'fr-FR',
+            {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            },
+        ).format(price);
     };
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return new Intl.DateTimeFormat('fr-FR', {
-            day: '2-digit',
-            month: 'short',
-        })
+        return new Intl.DateTimeFormat(
+            i18n.resolvedLanguage === 'en' ? 'en-US' : 'fr-FR',
+            {
+                day: '2-digit',
+                month: 'short',
+            },
+        )
             .format(date)
             .toUpperCase();
     };
@@ -204,21 +213,21 @@ export default function DashboardIndex() {
 
         const map = {
             approved: {
-                label: 'Approuvé',
+                label: t('approved'),
                 className:
                     'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200',
                 icon: CheckCircle,
                 color: 'text-emerald-600',
             },
             pending: {
-                label: 'En attente',
+                label: t('pending'),
                 className:
                     'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[#C9A84C]/20 text-[#C9A84C] border border-[#C9A84C]/30',
                 icon: AlertCircle,
                 color: 'text-[#C9A84C]',
             },
             rejected: {
-                label: 'Rejeté',
+                label: t('rejected'),
                 className:
                     'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200',
                 icon: XCircle,
@@ -267,7 +276,7 @@ export default function DashboardIndex() {
                                 )}
                             </div>
                             <div className="text-xs font-medium text-slate-600 sm:text-sm">
-                                Propriétés
+                                {t('properties')}
                             </div>
                         </div>
 
@@ -279,7 +288,7 @@ export default function DashboardIndex() {
                                 </div>
                                 <div className="hidden items-center text-xs font-medium text-[#C9A84C] sm:flex sm:text-sm">
                                     <AlertCircle className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
-                                    Review
+                                    {t('review')}
                                 </div>
                             </div>
                             <div className="mb-1 text-2xl font-bold text-slate-900 sm:text-3xl">
@@ -289,7 +298,7 @@ export default function DashboardIndex() {
                                 )}
                             </div>
                             <div className="text-xs font-medium text-slate-600 sm:text-sm">
-                                En Attente
+                                {t('pending')}
                             </div>
                         </div>
 
@@ -308,7 +317,7 @@ export default function DashboardIndex() {
                                 {formatStatValue(animatedStats.views, 'views')}
                             </div>
                             <div className="text-xs font-medium text-slate-600 sm:text-sm">
-                                Vues Totales
+                                {t('total_views')}
                             </div>
                         </div>
 
@@ -330,7 +339,7 @@ export default function DashboardIndex() {
                                 )}
                             </div>
                             <div className="text-xs font-medium text-slate-600 sm:text-sm">
-                                Favoris
+                                {t('favorites')}
                             </div>
                         </div>
                     </div>
@@ -348,7 +357,7 @@ export default function DashboardIndex() {
                                             <Home className="h-4 w-4 text-[#1E3A5F] sm:h-5 sm:w-5" />
                                         </div>
                                         <h3 className="text-lg font-bold text-slate-900 sm:text-xl">
-                                            Propriétés Récentes
+                                            {t('recent_properties')}
                                         </h3>
                                     </div>
                                     <button
@@ -362,9 +371,11 @@ export default function DashboardIndex() {
                                         className="flex transform items-center justify-center rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-3 py-2 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22] sm:px-4"
                                     >
                                         <span className="hidden sm:inline">
-                                            Voir toutes
+                                            {t('view_all')}
                                         </span>
-                                        <span className="sm:hidden">Tout</span>
+                                        <span className="sm:hidden">
+                                            {t('all')}
+                                        </span>
                                         <Filter className="ml-2 h-4 w-4" />
                                     </button>
                                 </div>
@@ -376,15 +387,16 @@ export default function DashboardIndex() {
                                                 <FileText className="h-8 w-8 text-slate-400 sm:h-10 sm:w-10" />
                                             </div>
                                             <h4 className="mb-2 text-base font-semibold text-slate-900 sm:text-lg">
-                                                Aucune propriété
+                                                {t('no_properties')}
                                             </h4>
                                             <p className="mb-4 text-sm text-slate-600 sm:mb-6 sm:text-base">
-                                                Ajoutez votre première propriété
-                                                pour commencer
+                                                {t(
+                                                    'add_first_property_description',
+                                                )}
                                             </p>
                                             <button className="inline-flex transform items-center justify-center rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-4 py-2 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22] sm:px-6 sm:py-3">
                                                 <Plus className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                                                Ajouter une propriété
+                                                {t('add_property')}
                                             </button>
                                         </div>
                                     ) : (
@@ -395,7 +407,7 @@ export default function DashboardIndex() {
                                                     route
                                                         ? route(
                                                               'property.show',
-                                                              property.id,
+                                                              property.slug,
                                                           )
                                                         : `/properties/${property.id}`
                                                 }
@@ -467,7 +479,7 @@ export default function DashboardIndex() {
                                         <FileText className="h-4 w-4 text-[#1E3A5F] sm:h-5 sm:w-5" />
                                     </div>
                                     <h3 className="text-lg font-bold text-slate-900 sm:text-xl">
-                                        Activité Récente
+                                        {t('recent_activity')}
                                     </h3>
                                 </div>
 
@@ -478,7 +490,7 @@ export default function DashboardIndex() {
                                                 <FileText className="h-6 w-6 text-slate-400 sm:h-8 sm:w-8" />
                                             </div>
                                             <p className="text-sm text-slate-600">
-                                                Aucune activité récente
+                                                {t('no_recent_activity')}
                                             </p>
                                         </div>
                                     ) : (

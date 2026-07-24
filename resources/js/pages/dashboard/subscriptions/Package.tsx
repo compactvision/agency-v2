@@ -30,6 +30,7 @@ type Plan = {
     name: string;
     price: string;
     duration: string;
+    payment_method: 'manual' | 'automatic';
 };
 
 type PageProps = {

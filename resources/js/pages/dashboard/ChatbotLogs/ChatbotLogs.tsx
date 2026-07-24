@@ -14,6 +14,7 @@ import {
     XCircle,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Log = {
     id: number;
@@ -40,6 +41,7 @@ type Props = {
 export default function ChatbotLogs({
     logs = { data: [], links: [], current_page: 1, last_page: 1, total: 0 },
 }: Readonly<Props>) {
+    const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
 
@@ -92,7 +94,9 @@ export default function ChatbotLogs({
             return (
                 <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-800">
                     {getIntentIcon(intent)}
-                    <span className="ml-1">Non défini</span>
+                    <span className="ml-1">
+                        {t('dashboard_ui.common.undefined')}
+                    </span>
                 </span>
             );
         }
@@ -177,19 +181,18 @@ export default function ChatbotLogs({
         <Dashboard>
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 {/* Header Section - Mobile First */}
-                <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 shadow-lg shadow-sm backdrop-blur-xl">
+                <div className="dashboard-section-header sticky top-0 z-10 border-b border-slate-200 bg-white/80 shadow-sm backdrop-blur-xl">
                     <div className="w-full px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-4 lg:px-8 lg:py-4">
                         <div className="flex flex-col gap-3 sm:gap-4">
                             <div className="flex items-center justify-between">
                                 <BackButton />
 
                                 <div className="ml-0 flex-1 text-center sm:ml-4 sm:text-left">
-                                    <h1 className="bg-gradient-to-r from-slate-100 to-slate-100 bg-clip-text text-lg font-bold text-transparent sm:text-xl md:text-2xl lg:text-3xl">
-                                        Historique des conversations
+                                    <h1 className="dashboard-page-title text-lg font-bold sm:text-xl md:text-2xl lg:text-3xl">
+                                        {t('dashboard_ui.chatbot.title')}
                                     </h1>
                                     <p className="mt-1 text-xs text-slate-600 sm:text-sm md:text-base lg:text-base">
-                                        Consultez et analysez les interactions
-                                        avec le chatbot
+                                        {t('dashboard_ui.chatbot.description')}
                                     </p>
                                 </div>
                             </div>
@@ -203,7 +206,9 @@ export default function ChatbotLogs({
                                     />
                                     <input
                                         type="text"
-                                        placeholder="Rechercher une conversation..."
+                                        placeholder={t(
+                                            'dashboard_ui.chatbot.search_placeholder',
+                                        )}
                                         className={`w-full rounded-lg border border-slate-200 bg-white/80 py-2.5 pr-8 pl-9 text-xs shadow-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:py-3 sm:pr-10 sm:pl-10 sm:text-sm ${isSearching ? 'opacity-70' : ''}`}
                                         value={searchQuery}
                                         onChange={(e) =>
@@ -214,7 +219,9 @@ export default function ChatbotLogs({
                                         <button
                                             onClick={() => setSearchQuery('')}
                                             className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-[#1E3A5F] transition-colors hover:text-[#1E3A5F]"
-                                            aria-label="Effacer"
+                                            aria-label={t(
+                                                'dashboard_ui.common.clear_search',
+                                            )}
                                         >
                                             <XCircle size={12} />
                                         </button>
@@ -246,11 +253,13 @@ export default function ChatbotLogs({
                                 </div>
 
                                 <button
-                                    className="flex w-full transform items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-slate-100 to-slate-100 px-4 py-2.5 text-sm font-medium whitespace-nowrap text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:from-slate-100 hover:to-slate-100 hover:shadow-xl sm:w-auto sm:px-6 sm:py-3"
+                                    className="dashboard-primary-action flex w-full transform items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium whitespace-nowrap shadow-lg transition-all duration-300 hover:-translate-y-0.5 sm:w-auto sm:px-6 sm:py-3"
                                     onClick={exportLogs}
                                 >
                                     <Download size={14} />
-                                    <span>Exporter</span>
+                                    <span>
+                                        {t('dashboard_ui.common.export')}
+                                    </span>
                                 </button>
                             </div>
                         </div>
@@ -273,14 +282,14 @@ export default function ChatbotLogs({
                                         size={10}
                                         className="mr-1 sm:size-12"
                                     />
-                                    Total
+                                    {t('dashboard_ui.common.total')}
                                 </div>
                             </div>
                             <div className="text-base font-bold text-slate-900 sm:text-lg md:text-xl lg:text-2xl">
                                 {totalConversations}
                             </div>
                             <div className="text-xs text-slate-600 sm:text-sm">
-                                Conversations
+                                {t('dashboard_ui.chatbot.conversations')}
                             </div>
                         </div>
 
@@ -297,14 +306,14 @@ export default function ChatbotLogs({
                                         size={10}
                                         className="mr-1 sm:size-12"
                                     />
-                                    Messages
+                                    {t('dashboard_ui.chatbot.messages')}
                                 </div>
                             </div>
                             <div className="text-base font-bold text-slate-900 sm:text-lg md:text-xl lg:text-2xl">
                                 {totalMessages}
                             </div>
                             <div className="text-xs text-slate-600 sm:text-sm">
-                                Messages échangés
+                                {t('dashboard_ui.chatbot.messages')}
                             </div>
                         </div>
 
@@ -321,14 +330,14 @@ export default function ChatbotLogs({
                                         size={10}
                                         className="mr-1 sm:size-12"
                                     />
-                                    Utilisateurs
+                                    {t('dashboard_ui.chatbot.users')}
                                 </div>
                             </div>
                             <div className="text-base font-bold text-slate-900 sm:text-lg md:text-xl lg:text-2xl">
                                 {uniqueUsers}
                             </div>
                             <div className="text-xs text-slate-600 sm:text-sm">
-                                Utilisateurs uniques
+                                {t('dashboard_ui.chatbot.unique_users')}
                             </div>
                         </div>
 
@@ -345,14 +354,16 @@ export default function ChatbotLogs({
                                         size={10}
                                         className="mr-1 sm:size-12"
                                     />
-                                    Intents
+                                    {t(
+                                        'dashboard_ui.chatbot.identified_intents',
+                                    )}
                                 </div>
                             </div>
                             <div className="text-base font-bold text-slate-900 sm:text-lg md:text-xl lg:text-2xl">
                                 {definedIntents}
                             </div>
                             <div className="text-xs text-slate-600 sm:text-sm">
-                                Intents identifiés
+                                {t('dashboard_ui.chatbot.identified_intents')}
                             </div>
                         </div>
                     </div>
@@ -370,22 +381,22 @@ export default function ChatbotLogs({
                                             #
                                         </th>
                                         <th className="px-3 py-2 text-left text-xs font-medium tracking-wider text-slate-700 uppercase sm:px-4 sm:py-3 md:px-6">
-                                            Session
+                                            {t('dashboard_ui.chatbot.session')}
                                         </th>
                                         <th className="px-3 py-2 text-left text-xs font-medium tracking-wider text-slate-700 uppercase sm:px-4 sm:py-3 md:px-6">
-                                            Utilisateur
+                                            {t('dashboard_ui.common.user')}
                                         </th>
                                         <th className="px-3 py-2 text-left text-xs font-medium tracking-wider text-slate-700 uppercase sm:px-4 sm:py-3 md:px-6">
-                                            Message
+                                            {t('dashboard_ui.chatbot.message')}
                                         </th>
                                         <th className="px-3 py-2 text-left text-xs font-medium tracking-wider text-slate-700 uppercase sm:px-4 sm:py-3 md:px-6">
-                                            Réponse
+                                            {t('dashboard_ui.chatbot.response')}
                                         </th>
                                         <th className="px-3 py-2 text-left text-xs font-medium tracking-wider text-slate-700 uppercase sm:px-4 sm:py-3 md:px-6">
-                                            Intent
+                                            {t('dashboard_ui.chatbot.intent')}
                                         </th>
                                         <th className="px-3 py-2 text-left text-xs font-medium tracking-wider text-slate-700 uppercase sm:px-4 sm:py-3 md:px-6">
-                                            Date
+                                            {t('dashboard_ui.common.date')}
                                         </th>
                                     </tr>
                                 </thead>
@@ -393,7 +404,7 @@ export default function ChatbotLogs({
                                     {logs.data.map((log, index) => (
                                         <tr
                                             key={log.id}
-                                            className="transition-colors hover:bg-slate-50"
+                                            className="dashboard-data-row transition-colors"
                                             style={{
                                                 animationDelay: `${index * 0.05}s`,
                                             }}
@@ -420,7 +431,9 @@ export default function ChatbotLogs({
                                                     <div className="ml-2 sm:ml-3">
                                                         <div className="text-xs font-medium text-slate-900 sm:text-sm">
                                                             {log.user?.name ||
-                                                                'Utilisateur inconnu'}
+                                                                t(
+                                                                    'dashboard_ui.chatbot.unknown_user',
+                                                                )}
                                                         </div>
                                                         <div className="hidden text-xs text-slate-500 sm:block">
                                                             ID: #{log.id}
@@ -469,7 +482,9 @@ export default function ChatbotLogs({
                                                 <div className="ml-2 min-w-0 flex-1 sm:ml-3">
                                                     <h3 className="truncate text-sm font-medium text-slate-900 sm:text-base">
                                                         {log.user?.name ||
-                                                            'Utilisateur inconnu'}
+                                                            t(
+                                                                'dashboard_ui.chatbot.unknown_user',
+                                                            )}
                                                     </h3>
                                                     <p className="text-xs text-slate-500">
                                                         Session:{' '}
@@ -487,7 +502,9 @@ export default function ChatbotLogs({
                                         <div className="mb-3 space-y-2">
                                             <div className="flex flex-col gap-1">
                                                 <span className="text-xs font-medium text-slate-500">
-                                                    Message
+                                                    {t(
+                                                        'dashboard_ui.chatbot.message',
+                                                    )}
                                                 </span>
                                                 <span className="text-sm break-words text-slate-900">
                                                     {log.message}
@@ -495,7 +512,9 @@ export default function ChatbotLogs({
                                             </div>
                                             <div className="flex flex-col gap-1">
                                                 <span className="text-xs font-medium text-slate-500">
-                                                    Réponse
+                                                    {t(
+                                                        'dashboard_ui.chatbot.response',
+                                                    )}
                                                 </span>
                                                 <span className="text-sm break-words text-slate-900">
                                                     {log.response}
@@ -503,7 +522,9 @@ export default function ChatbotLogs({
                                             </div>
                                             <div className="flex flex-col gap-1">
                                                 <span className="text-xs font-medium text-slate-500">
-                                                    Date
+                                                    {t(
+                                                        'dashboard_ui.common.date',
+                                                    )}
                                                 </span>
                                                 <span className="text-sm text-slate-900">
                                                     {log.formatted_date ||
@@ -525,12 +546,16 @@ export default function ChatbotLogs({
                                             />
                                         </div>
                                         <h3 className="mb-2 text-base font-semibold text-slate-900 sm:text-lg md:text-xl">
-                                            Aucune conversation trouvée
+                                            {t('dashboard_ui.chatbot.empty')}
                                         </h3>
                                         <p className="px-4 text-sm text-slate-600">
                                             {searchQuery
-                                                ? 'Aucune conversation ne correspond à votre recherche'
-                                                : "Le chatbot n'a encore reçu aucune interaction"}
+                                                ? t(
+                                                      'dashboard_ui.chatbot.empty_search',
+                                                  )
+                                                : t(
+                                                      'dashboard_ui.chatbot.empty_description',
+                                                  )}
                                         </p>
                                     </div>
                                 )}
@@ -545,12 +570,13 @@ export default function ChatbotLogs({
                         <div className="w-full text-center text-xs text-slate-600 sm:w-auto sm:text-left sm:text-sm">
                             {logs.data.length > 0 ? (
                                 <>
-                                    Affichage de {logs.data.length} sur{' '}
-                                    {logs.total || logs.data.length}{' '}
-                                    conversations
+                                    {t('dashboard_ui.chatbot.displaying', {
+                                        count: logs.data.length,
+                                        total: logs.total || logs.data.length,
+                                    })}
                                 </>
                             ) : (
-                                'Aucune conversation'
+                                t('dashboard_ui.chatbot.none')
                             )}
                         </div>
 

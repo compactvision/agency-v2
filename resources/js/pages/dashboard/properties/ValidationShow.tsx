@@ -151,14 +151,10 @@ export default function ValidationShow({
                                         <h3 className="mb-4 border-b pb-2 text-lg font-bold text-slate-800">
                                             Description
                                         </h3>
-                                        <div
-                                            className="prose prose-sm max-w-none text-slate-600"
-                                            dangerouslySetInnerHTML={{
-                                                __html:
-                                                    property.description ||
-                                                    'Aucune description fournie.',
-                                            }}
-                                        />
+                                        <div className="prose prose-sm max-w-none whitespace-pre-line text-slate-600">
+                                            {property.description ||
+                                                'Aucune description fournie.'}
+                                        </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">

@@ -14,9 +14,7 @@ class NewsletterController extends Controller
     public function subscribe(Request $request)
     {
         $request->validate([
-            'email' => ['required', 'email', 'max:255', 'unique:newsletter_subscriptions,email'],
-        ], [
-            'email.unique' => __('newsletter_already_subscribed') ?: 'Cet email est déjà inscrit à notre newsletter.',
+            'email' => ['required', 'email', 'max:255'],
         ]);
 
         NewsletterSubscription::updateOrCreate(
@@ -27,6 +25,6 @@ class NewsletterController extends Controller
             ]
         );
 
-        return back()->with('success', __('newsletter_subscribed_success') ?: 'Vous êtes désormais inscrit à la newsletter !');
+        return back()->with('success', __('newsletter_subscribed_success') ?: 'Si cette adresse est valide, son inscription est prise en compte.');
     }
 }

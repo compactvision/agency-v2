@@ -13,6 +13,7 @@ import {
     Trash2,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Page = {
     id: number;
@@ -34,7 +35,8 @@ function useDebounce<T>(value: T, delay = 300) {
 }
 
 export default function Pages() {
-    const { pages, filters } = usePage().props as {
+    const { t } = useTranslation();
+    const { pages, filters } = usePage().props as unknown as {
         pages: { data: Page[]; links: PaginationLink[] };
         filters?: { search?: string };
     };
@@ -58,7 +60,7 @@ export default function Pages() {
     }, [debounced]);
 
     const deletePage = (id: number) => {
-        if (confirm('Supprimer cette page ?')) {
+        if (confirm(t('dashboard_ui.pages.delete_confirmation'))) {
             router.delete(route('dashboard.pages.destroy', id), {
                 preserveScroll: true,
             });
@@ -71,14 +73,14 @@ export default function Pages() {
                 return (
                     <span className="inline-flex items-center rounded-full border border-slate-200 bg-[#1E3A5F]/10 px-2.5 py-1 text-xs font-medium text-[#0d2340] shadow-sm">
                         <Clock size={12} className="mr-1" />
-                        Brouillon
+                        {t('dashboard_ui.common.draft')}
                     </span>
                 );
             case 'published':
                 return (
                     <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-800 shadow-sm">
                         <CheckCircle size={12} className="mr-1" />
-                        Publié
+                        {t('dashboard_ui.common.published')}
                     </span>
                 );
             default:
@@ -125,17 +127,17 @@ export default function Pages() {
         <Dashboard>
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 {/* Header Section */}
-                <div className="sticky top-0 z-1 border-b border-slate-200 bg-white/80 shadow-lg shadow-sm backdrop-blur-xl">
+                <div className="dashboard-section-header sticky top-0 z-10 border-b border-slate-200 bg-white/80 shadow-sm backdrop-blur-xl">
                     <div className="px-4 py-4 sm:px-6 lg:px-8">
                         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                             <BackButton />
 
                             <div className="flex-1 text-center sm:text-left">
-                                <h1 className="bg-gradient-to-r from-slate-100 to-slate-100 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
-                                    Gestion des Pages
+                                <h1 className="dashboard-page-title text-2xl font-bold sm:text-3xl">
+                                    {t('dashboard_ui.pages.title')}
                                 </h1>
                                 <p className="mt-1 text-sm text-slate-600 sm:text-base">
-                                    Créez et gérez les pages de votre site
+                                    {t('dashboard_ui.pages.description')}
                                 </p>
                             </div>
                         </div>
@@ -149,7 +151,9 @@ export default function Pages() {
                                 />
                                 <input
                                     type="text"
-                                    placeholder="Rechercher une page..."
+                                    placeholder={t(
+                                        'dashboard_ui.pages.search_placeholder',
+                                    )}
                                     className={`w-full rounded-xl border border-slate-200 bg-white/80 py-3 pr-4 pl-10 text-sm shadow-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none ${loading ? 'opacity-70' : ''}`}
                                     value={query}
                                     onChange={(e) => setQuery(e.target.value)}
@@ -166,7 +170,7 @@ export default function Pages() {
                             </div>
 
                             <button
-                                className="flex transform items-center gap-2 rounded-xl bg-gradient-to-r from-slate-100 to-slate-100 px-6 py-3 font-medium text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:from-slate-100 hover:to-slate-100 hover:shadow-xl"
+                                className="dashboard-primary-action flex transform items-center gap-2 rounded-xl px-6 py-3 font-medium shadow-lg transition-all duration-300 hover:-translate-y-0.5"
                                 onClick={() =>
                                     router.visit(
                                         route('dashboard.pages.create'),
@@ -174,7 +178,7 @@ export default function Pages() {
                                 }
                             >
                                 <Plus size={18} />
-                                <span>Nouvelle page</span>
+                                <span>{t('dashboard_ui.pages.new')}</span>
                             </button>
                         </div>
                     </div>
@@ -193,14 +197,14 @@ export default function Pages() {
                                 </div>
                                 <div className="flex items-center rounded-lg bg-emerald-50 px-2 py-1 text-sm font-medium text-emerald-600">
                                     <Plus size={16} className="mr-1" />
-                                    Total
+                                    {t('dashboard_ui.common.total')}
                                 </div>
                             </div>
                             <div className="text-2xl font-bold text-slate-900">
                                 {pages.data.length}
                             </div>
                             <div className="text-sm text-slate-600">
-                                Total des pages
+                                {t('dashboard_ui.pages.total')}
                             </div>
                         </div>
 
@@ -214,14 +218,14 @@ export default function Pages() {
                                 </div>
                                 <div className="flex items-center rounded-lg bg-slate-50 px-2 py-1 text-sm font-medium text-[#1E3A5F]">
                                     <Eye size={16} className="mr-1" />
-                                    Publiées
+                                    {t('dashboard_ui.pages.published_short')}
                                 </div>
                             </div>
                             <div className="text-2xl font-bold text-slate-900">
                                 {publishedPages}
                             </div>
                             <div className="text-sm text-slate-600">
-                                Pages publiées
+                                {t('dashboard_ui.pages.published')}
                             </div>
                         </div>
 
@@ -232,14 +236,14 @@ export default function Pages() {
                                 </div>
                                 <div className="flex items-center rounded-lg bg-slate-50 px-2 py-1 text-sm font-medium text-[#1E3A5F]">
                                     <Edit3 size={16} className="mr-1" />
-                                    Brouillons
+                                    {t('dashboard_ui.pages.drafts')}
                                 </div>
                             </div>
                             <div className="text-2xl font-bold text-slate-900">
                                 {draftPages}
                             </div>
                             <div className="text-sm text-slate-600">
-                                En brouillon
+                                {t('dashboard_ui.common.draft')}
                             </div>
                         </div>
                     </div>
@@ -254,19 +258,23 @@ export default function Pages() {
                                 <thead className="bg-slate-50">
                                     <tr>
                                         <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                            Titre
+                                            {t(
+                                                'dashboard_ui.pages.title_column',
+                                            )}
                                         </th>
                                         <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                            Slug
+                                            {t('dashboard_ui.pages.slug')}
                                         </th>
                                         <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                            Statut
+                                            {t('dashboard_ui.common.status')}
                                         </th>
                                         <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                            Date de création
+                                            {t(
+                                                'dashboard_ui.common.created_at',
+                                            )}
                                         </th>
                                         <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                            Actions
+                                            {t('dashboard_ui.common.actions')}
                                         </th>
                                     </tr>
                                 </thead>
@@ -274,7 +282,7 @@ export default function Pages() {
                                     {pages.data.map((page, index) => (
                                         <tr
                                             key={page.id}
-                                            className="transition-colors hover:bg-slate-50"
+                                            className="dashboard-data-row group transition-colors"
                                             style={{
                                                 animationDelay: `${index * 0.05}s`,
                                             }}
@@ -296,7 +304,7 @@ export default function Pages() {
                                                 {formatDate(page.created_at)}
                                             </td>
                                             <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                                                <div className="flex space-x-2">
+                                                <div className="dashboard-row-actions flex space-x-2 rounded-xl p-1 md:pointer-events-none md:translate-x-2 md:opacity-0 md:group-focus-within:pointer-events-auto md:group-focus-within:translate-x-0 md:group-focus-within:opacity-100 md:group-hover:pointer-events-auto md:group-hover:translate-x-0 md:group-hover:opacity-100">
                                                     <button
                                                         className="rounded p-1 text-[#1E3A5F] transition-colors hover:bg-slate-100 hover:text-[#1E3A5F]"
                                                         onClick={() =>
@@ -307,7 +315,15 @@ export default function Pages() {
                                                                 ),
                                                             )
                                                         }
-                                                        title="Modifier"
+                                                        title={t(
+                                                            'dashboard_ui.common.edit',
+                                                        )}
+                                                        aria-label={t(
+                                                            'dashboard_ui.pages.edit_label',
+                                                            {
+                                                                title: page.title,
+                                                            },
+                                                        )}
                                                     >
                                                         <Edit3 size={18} />
                                                     </button>
@@ -316,7 +332,15 @@ export default function Pages() {
                                                         onClick={() =>
                                                             deletePage(page.id)
                                                         }
-                                                        title="Supprimer"
+                                                        title={t(
+                                                            'dashboard_ui.common.delete',
+                                                        )}
+                                                        aria-label={t(
+                                                            'dashboard_ui.pages.delete_label',
+                                                            {
+                                                                title: page.title,
+                                                            },
+                                                        )}
                                                     >
                                                         <Trash2 size={18} />
                                                     </button>
@@ -349,7 +373,9 @@ export default function Pages() {
                                         <div className="mb-3 space-y-2">
                                             <div className="flex justify-between">
                                                 <span className="text-sm text-slate-500">
-                                                    Date de création
+                                                    {t(
+                                                        'dashboard_ui.common.created_at',
+                                                    )}
                                                 </span>
                                                 <span className="text-sm text-slate-900">
                                                     {formatDate(
@@ -370,7 +396,9 @@ export default function Pages() {
                                                         ),
                                                     )
                                                 }
-                                                title="Modifier"
+                                                title={t(
+                                                    'dashboard_ui.common.edit',
+                                                )}
                                             >
                                                 <Edit3 size={18} />
                                             </button>
@@ -379,7 +407,9 @@ export default function Pages() {
                                                 onClick={() =>
                                                     deletePage(page.id)
                                                 }
-                                                title="Supprimer"
+                                                title={t(
+                                                    'dashboard_ui.common.delete',
+                                                )}
                                             >
                                                 <Trash2 size={18} />
                                             </button>
@@ -396,12 +426,16 @@ export default function Pages() {
                                             />
                                         </div>
                                         <h3 className="mb-2 text-xl font-semibold text-slate-900">
-                                            Aucune page trouvée
+                                            {t('dashboard_ui.pages.empty')}
                                         </h3>
                                         <p className="text-slate-600">
                                             {query
-                                                ? 'Aucune page ne correspond à votre recherche'
-                                                : 'Commencez par créer votre première page'}
+                                                ? t(
+                                                      'dashboard_ui.pages.empty_search',
+                                                  )
+                                                : t(
+                                                      'dashboard_ui.pages.empty_description',
+                                                  )}
                                         </p>
                                         <button
                                             className="mx-auto mt-4 flex transform items-center gap-2 rounded-lg bg-gradient-to-r from-slate-100 to-slate-100 px-4 py-2 font-medium text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:from-slate-100 hover:to-slate-100 hover:shadow-xl"
@@ -414,7 +448,7 @@ export default function Pages() {
                                             }
                                         >
                                             <Plus size={18} />
-                                            Créer une page
+                                            {t('dashboard_ui.pages.create')}
                                         </button>
                                     </div>
                                 )}
@@ -428,9 +462,13 @@ export default function Pages() {
                     <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
                         <div className="text-sm text-slate-600">
                             {pages.data.length > 0 ? (
-                                <>Affichage de {pages.data.length} pages</>
+                                <>
+                                    {t('dashboard_ui.pages.displaying', {
+                                        count: pages.data.length,
+                                    })}
+                                </>
                             ) : (
-                                'Aucune page'
+                                t('dashboard_ui.pages.none')
                             )}
                         </div>
 

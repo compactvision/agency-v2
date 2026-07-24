@@ -4,23 +4,27 @@ namespace App\Domains\Locations\Services;
 
 use App\Domains\Locations\Models\City;
 use App\Domains\Locations\Resources\CityResource;
+use App\Support\ReferenceCache;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class CityService
 {
     public function all()
     {
-        return CityResource::collection(
-            City::with('country')->orderBy('name')->get()
+        $cities = ReferenceCache::remember(
+            ReferenceCache::CITIES,
+            fn () => City::with('country')->orderBy('name')->get(),
         );
+
+        return CityResource::collection($cities);
     }
 
     public function find(int $id)
     {
         $city = City::with('country')->find($id);
 
-        if (!$city) {
-            throw new ModelNotFoundException("City not found");
+        if (! $city) {
+            throw new ModelNotFoundException('City not found');
         }
 
         return new CityResource($city);
@@ -38,14 +42,14 @@ class CityService
     {
         $city = City::find($id);
 
-        if (!$city) {
-            throw new ModelNotFoundException("City not found");
+        if (! $city) {
+            throw new ModelNotFoundException('City not found');
         }
 
         $changes = [];
 
         foreach ($data as $field => $value) {
-            if ($city->$field !== $value) {
+            if ($value !== $city->$field) {
                 $changes[$field] = $value;
             }
         }
@@ -72,8 +76,8 @@ class CityService
     {
         $city = City::find($id);
 
-        if (!$city) {
-            throw new ModelNotFoundException("City not found");
+        if (! $city) {
+            throw new ModelNotFoundException('City not found');
         }
 
         return $city->delete();

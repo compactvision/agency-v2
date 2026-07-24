@@ -36,6 +36,7 @@ interface User {
 }
 
 interface PageProps {
+    [key: string]: unknown;
     auth: {
         user: User;
     };

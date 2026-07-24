@@ -4,6 +4,7 @@ import BackButton from '@/components/ui/BackButton';
 import { router, usePage } from '@inertiajs/react';
 import { Edit3, Layers, Plus, Search, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Category {
     id: number;
@@ -21,6 +22,7 @@ interface PageProps {
 }
 
 export default function Index() {
+    const { t } = useTranslation();
     const { categories = [], filters = {} } = usePage()
         .props as unknown as PageProps;
     const [searchQuery, setSearchQuery] = useState(filters.search || '');
@@ -34,7 +36,7 @@ export default function Index() {
     );
 
     const handleDelete = (id: number) => {
-        if (confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
+        if (confirm(t('confirm_delete_category'))) {
             router.delete(route('dashboard.categories.destroy', id));
         }
     };
@@ -53,11 +55,10 @@ export default function Index() {
                         <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                             <div>
                                 <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">
-                                    Catégories
+                                    {t('categories')}
                                 </h1>
                                 <p className="mt-2 text-gray-600">
-                                    Gérez les types de propriétés disponibles
-                                    sur votre plateforme.
+                                    {t('manage_categories_description')}
                                 </p>
                             </div>
                             <button
@@ -68,7 +69,7 @@ export default function Index() {
                                 className="inline-flex items-center rounded-2xl bg-gradient-to-r from-slate-100 to-slate-100 px-6 py-3 font-bold text-white shadow-lg shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
                             >
                                 <Plus size={20} className="mr-2" />
-                                Nouvelle Catégorie
+                                {t('new_category')}
                             </button>
                         </div>
                     </div>
@@ -80,7 +81,7 @@ export default function Index() {
                         />
                         <input
                             type="text"
-                            placeholder="Rechercher une catégorie..."
+                            placeholder={t('search_category')}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full rounded-2xl border border-gray-200 bg-white py-4 pr-4 pl-12 shadow-sm transition-all outline-none focus:border-transparent focus:ring-2 focus:ring-slate-200"
@@ -122,7 +123,7 @@ export default function Index() {
                                 </p>
                                 <p className="line-clamp-2 min-h-[2.5rem] text-sm text-gray-600">
                                     {category.description ||
-                                        'Aucune description fournie.'}
+                                        t('no_description_provided')}
                                 </p>
                             </div>
                         ))}
@@ -133,11 +134,10 @@ export default function Index() {
                                     <Layers size={40} />
                                 </div>
                                 <h3 className="text-lg font-bold text-gray-900">
-                                    Aucune catégorie trouvée
+                                    {t('no_category_found')}
                                 </h3>
                                 <p className="text-gray-500">
-                                    Essayez une autre recherche ou créez-en une
-                                    nouvelle.
+                                    {t('try_another_search_or_create')}
                                 </p>
                             </div>
                         )}

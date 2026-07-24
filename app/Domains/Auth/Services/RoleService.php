@@ -2,11 +2,17 @@
 
 namespace App\Domains\Auth\Services;
 
-use Spatie\Permission\Models\Role;
+use App\Support\AuditLogger;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Spatie\Permission\Models\Role;
 
 class RoleService
 {
+    public function __construct(
+        private readonly AuditLogger $auditLogger,
+    ) {}
+
     /**
      * List roles with filters and pagination.
      */
@@ -14,7 +20,7 @@ class RoleService
     {
         $query = Role::query()->with('permissions');
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $query->where('name', 'like', "%{$filters['search']}%");
         }
 
@@ -26,11 +32,27 @@ class RoleService
      */
     public function create(array $data): Role
     {
+        if (in_array($data['name'], ['admin', 'super-admin'], true)
+            && ! auth()->user()->hasRole('super-admin')) {
+            throw new AuthorizationException('Only a super administrator may create a privileged role.');
+        }
+
         $role = Role::create(['name' => $data['name']]);
-        
-        if (!empty($data['permissions'])) {
+
+        if (! empty($data['permissions'])) {
             $role->syncPermissions($data['permissions']);
         }
+
+        $this->auditLogger->record(
+            'role.created',
+            $role,
+            "Rôle {$role->name} créé.",
+            newValues: [
+                'name' => $role->name,
+                'permissions' => $role->getPermissionNames()->all(),
+            ],
+            level: 'warning',
+        );
 
         return $role;
     }
@@ -40,11 +62,42 @@ class RoleService
      */
     public function update(Role $role, array $data): Role
     {
+        $before = [
+            'name' => $role->name,
+            'permissions' => $role->getPermissionNames()->all(),
+        ];
+
+        if (in_array($role->name, ['admin', 'super-admin'], true)
+            && ! auth()->user()->hasRole('super-admin')) {
+            throw new AuthorizationException('Only a super administrator may edit a privileged role.');
+        }
+
+        if ($role->name === 'super-admin' && $data['name'] !== 'super-admin') {
+            throw new AuthorizationException('The super administrator role cannot be renamed.');
+        }
+
+        if ($data['name'] === 'super-admin' && $role->name !== 'super-admin') {
+            throw new AuthorizationException('Another role cannot be promoted by renaming it.');
+        }
+
         $role->update(['name' => $data['name']]);
-        
+
         if (isset($data['permissions'])) {
             $role->syncPermissions($data['permissions']);
         }
+
+        $role->refresh();
+        $this->auditLogger->record(
+            'role.updated',
+            $role,
+            "Rôle {$role->name} mis à jour.",
+            $before,
+            [
+                'name' => $role->name,
+                'permissions' => $role->getPermissionNames()->all(),
+            ],
+            'warning',
+        );
 
         return $role;
     }
@@ -58,6 +111,22 @@ class RoleService
             throw new \Exception('Impossible de supprimer un rôle système.');
         }
 
-        return $role->delete();
+        $before = [
+            'name' => $role->name,
+            'permissions' => $role->getPermissionNames()->all(),
+        ];
+        $deleted = $role->delete();
+
+        if ($deleted) {
+            $this->auditLogger->record(
+                'role.deleted',
+                $role,
+                "Rôle {$role->name} supprimé.",
+                oldValues: $before,
+                level: 'critical',
+            );
+        }
+
+        return $deleted;
     }
 }

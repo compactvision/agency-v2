@@ -15,7 +15,6 @@ export default function DeleteUser() {
         e.preventDefault();
     
         destroy(route('dashboard.users.profile.destroy'), {
-            data: { password: data.password },              
             preserveScroll: true,
             onSuccess: () => {
                 closeModal();

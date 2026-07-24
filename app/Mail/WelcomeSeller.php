@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\User;
+use App\Support\UsesMailLocale;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -11,17 +12,19 @@ use Illuminate\Queue\SerializesModels;
 
 class WelcomeSeller extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, UsesMailLocale;
 
     public function __construct(
         public User $user,
         public string $roleName
-    ) {}
+    ) {
+        $this->useMailLocale($user->language);
+    }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Bienvenue chez Agency DRC - Votre compte est prêt !',
+            subject: __('mail.subjects.welcome_seller'),
         );
     }
 
@@ -31,7 +34,8 @@ class WelcomeSeller extends Mailable
             markdown: 'emails.welcome_seller',
             with: [
                 'name' => $this->user->name,
-                'role' => $this->roleName === 'agency' ? 'Agence Immobilière' : 'Vendeur Particulier',
+                'role' => __('mail.roles.'.$this->roleName),
+                'dashboardUrl' => route('dashboard'),
             ],
         );
     }

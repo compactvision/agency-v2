@@ -2,13 +2,16 @@
 
 namespace App\Domains\Ads\Controllers;
 
-use App\Support\ApiResponse;
 use App\Domains\Ads\Models\Ad;
-use App\Domains\Ads\Services\AdService;
+use App\Domains\Ads\Requests\PublicAdFilterRequest;
 use App\Domains\Ads\Requests\StoreAdRequest;
+use App\Domains\Ads\Requests\SubmitAdRequest;
 use App\Domains\Ads\Requests\UpdateAdRequest;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Domains\Ads\Resources\AdResource;
+use App\Domains\Ads\Resources\AdSummaryResource;
+use App\Domains\Ads\Services\AdService;
+use App\Support\ApiResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class AdController
 {
@@ -20,60 +23,48 @@ class AdController
     {
         $ad = $this->service->create(
             $request->validated(),
-            Auth::id()
+            $request->user()->id
         );
 
-        return ApiResponse::success(new \App\Domains\Ads\Resources\AdResource($ad), 'Ad created');
+        return ApiResponse::success(new AdResource($ad), 'Ad created');
     }
 
     public function update(UpdateAdRequest $request, Ad $ad)
     {
-        if ($ad->status !== 'draft') {
-            return ApiResponse::error("Only draft ads can be updated", 403);
-        }
-
-        if ($ad->user_id !== Auth::id()) {
-            return ApiResponse::error("Forbidden", 403);
-        }
-
         $result = $this->service->update($ad, $request->validated());
 
         if ($result['no_changes']) {
-            return ApiResponse::success($result['ad'], "No changes detected");
+            return ApiResponse::success($result['ad'], 'No changes detected');
         }
 
-        return ApiResponse::success(new \App\Domains\Ads\Resources\AdResource($result['ad']), "Ad updated");
+        return ApiResponse::success(new AdResource($result['ad']), 'Ad updated');
     }
 
-    public function submit(Ad $ad)
+    public function submit(SubmitAdRequest $request, Ad $ad)
     {
-        if ($ad->user_id !== Auth::id()) {
-            abort(403);
-        }
-
         $ad = $this->service->submit($ad);
 
-        return ApiResponse::success(new \App\Domains\Ads\Resources\AdResource($ad), 'Ad submitted');
+        return ApiResponse::success(new AdResource($ad), 'Ad submitted');
     }
 
-    public function public(Request $request)
+    public function public(PublicAdFilterRequest $request)
     {
-        $ads = $this->service->publicList($request->all());
-        
-        $items = $ads instanceof \Illuminate\Pagination\LengthAwarePaginator 
-            ? $ads->items() 
+        $ads = $this->service->publicList($request->validated());
+
+        $items = $ads instanceof LengthAwarePaginator
+            ? $ads->items()
             : $ads;
 
         return ApiResponse::success(
             [
-                'data' => \App\Domains\Ads\Resources\AdResource::collection($items)->resolve(),
-                'meta' => $ads instanceof \Illuminate\Pagination\LengthAwarePaginator ? [
+                'data' => AdSummaryResource::collection($items)->resolve(),
+                'meta' => $ads instanceof LengthAwarePaginator ? [
                     'current_page' => $ads->currentPage(),
                     'last_page' => $ads->lastPage(),
                     'total' => $ads->total(),
                     'per_page' => $ads->perPage(),
                 ] : null,
-                'links' => $ads instanceof \Illuminate\Pagination\LengthAwarePaginator ? $ads->linkCollection()->toArray() : null,
+                'links' => $ads instanceof LengthAwarePaginator ? $ads->linkCollection()->toArray() : null,
             ],
             'Public ads retrieved'
         );
@@ -82,9 +73,9 @@ class AdController
     public function show($id)
     {
         $ad = $this->service->getPublicAd($id);
-        
+
         return ApiResponse::success(
-            new \App\Domains\Ads\Resources\AdResource($ad),
+            new AdResource($ad),
             'Ad details retrieved'
         );
     }

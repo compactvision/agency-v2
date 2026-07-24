@@ -2,9 +2,10 @@ import { Link, router, usePage } from '@inertiajs/react';
 import { Star, MapPin, Maximize2, Bath, Bed, Car, Heart, ArrowRight, Home, Calendar, TrendingUp, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
+import type { SharedData } from '@/types';
 
 export default function PopularPropertyCard({ property, favorites }: { property: any, favorites: number[] }) {
-    const user = usePage().props.auth?.user;
+    const user = usePage<SharedData>().props.auth?.user;
     const { t } = useTranslation();
     const [isFavorite, setIsFavorite] = useState(favorites.includes(property.id));
     const [isHovered, setIsHovered] = useState(false);
@@ -214,7 +215,7 @@ export default function PopularPropertyCard({ property, favorites }: { property:
                         
                         {/* Bouton principal */}
                         <Link
-                            href={route('property.show', property.id)}
+                            href={route('property.show', property.slug)}
                             className={`group/btn inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-amber-400 to-amber-600 text-white font-semibold rounded-xl hover:from-amber-500 hover:to-amber-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-amber-500/25 ${
                                 property.isFake ? 'opacity-50 cursor-not-allowed' : ''
                             }`}

@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface PageProps {
+    [key: string]: unknown;
     flash?: {
         success?: string;
         error?: string;

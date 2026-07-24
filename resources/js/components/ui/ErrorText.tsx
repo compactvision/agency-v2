@@ -2,25 +2,19 @@ import React from 'react';
 
 interface ErrorTextProps {
     readonly error?: string | string[];
+    readonly id?: string;
 }
 
-export default function ErrorText({ error }: ErrorTextProps) {
+export default function ErrorText({ error, id }: ErrorTextProps) {
     if (!error) return null;
 
     return (
-        <>
-            <span className="text-danger d-block mt-1 small">
-                {Array.isArray(error) ? error.join(', ') : error}
-            </span>
-
-            <style>{`
-                .text-danger {
-                    color: red;
-                    margin-top: 1px;
-                    display: block;
-                    font-size: small;
-                }
-            `}</style>
-        </>
+        <span
+            id={id}
+            role="alert"
+            className="mt-1 block text-sm font-medium text-red-700"
+        >
+            {Array.isArray(error) ? error.join(', ') : error}
+        </span>
     );
 }

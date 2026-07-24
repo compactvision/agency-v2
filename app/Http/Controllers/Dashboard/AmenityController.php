@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Http\Controllers\Controller;
-use App\Domains\Amenities\Services\AmenityService;
 use App\Domains\Amenities\Resources\AmenityResource;
+use App\Domains\Amenities\Services\AmenityService;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -24,26 +24,26 @@ class AmenityController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255|unique:amenities,name',
             'icon' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
 
-        $this->service->create($request->all());
+        $this->service->create($validated);
 
         return back()->with('success', 'Équipement créé avec succès.');
     }
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'required|string|max:255|unique:amenities,name,' . $id,
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:amenities,name,'.$id,
             'icon' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
 
-        $this->service->update($id, $request->all());
+        $this->service->update($id, $validated);
 
         return back()->with('success', 'Équipement mis à jour avec succès.');
     }

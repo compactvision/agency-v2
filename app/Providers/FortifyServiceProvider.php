@@ -4,19 +4,19 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Http\Responses\VerifyEmailResponse;
+use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use Laravel\Fortify\Contracts\VerifyEmailResponse as VerifyEmailResponseContract;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
-use Laravel\Fortify\Contracts\VerifyEmailResponse as VerifyEmailResponseContract;
-use App\Http\Responses\VerifyEmailResponse;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -103,15 +103,15 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::authenticateUsing(function (Request $request) {
             $user = User::where('email', $request->email)->first();
 
-            if (!$user) {
+            if (! $user) {
                 throw ValidationException::withMessages([
-                    'email' => ['email_not_found'],
+                    Fortify::username() => [__('auth.failed')],
                 ]);
             }
 
-            if (!Hash::check($request->password, $user->password)) {
+            if (! Hash::check($request->password, $user->password)) {
                 throw ValidationException::withMessages([
-                    'password' => ['password_incorrect'],
+                    Fortify::username() => [__('auth.failed')],
                 ]);
             }
 

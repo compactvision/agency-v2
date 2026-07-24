@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Domains\Auth\Resources\RoleResource;
+use App\Domains\Auth\Services\RoleService;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Dashboard\StoreRoleRequest;
+use App\Http\Requests\Dashboard\UpdateRoleRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-use App\Domains\Auth\Services\RoleService;
-use App\Domains\Auth\Resources\RoleResource;
+use Spatie\Permission\Models\Role;
+
 class RoleController extends Controller
 {
     protected $roleService;
@@ -23,6 +26,8 @@ class RoleController extends Controller
      */
     public function index(Request $request)
     {
+        abort_unless($request->user()?->can('role.view'), 403);
+
         $perPage = $request->input('per_page', 20);
         $roles = $this->roleService->list($request->only(['search']), $perPage);
 
@@ -35,21 +40,21 @@ class RoleController extends Controller
                     'last_page' => $roles->lastPage(),
                     'total' => $roles->total(),
                     'per_page' => $roles->perPage(),
-                ]
+                ],
             ],
-            'permissions' => Permission::all()->map(fn($p) => ['name' => $p->name]),
+            'permissions' => Permission::all()->map(fn ($p) => ['name' => $p->name]),
             'filters' => (object) $request->only(['search', 'per_page']),
         ]);
     }
 
-    public function store(\App\Http\Requests\Dashboard\StoreRoleRequest $request)
+    public function store(StoreRoleRequest $request)
     {
         $this->roleService->create($request->validated());
 
         return redirect()->back()->with('success', 'Rôle créé avec succès.');
     }
 
-    public function update(\App\Http\Requests\Dashboard\UpdateRoleRequest $request, $id)
+    public function update(UpdateRoleRequest $request, $id)
     {
         $role = Role::findOrFail($id);
         $this->roleService->update($role, $request->validated());
@@ -59,8 +64,10 @@ class RoleController extends Controller
 
     public function destroy($id)
     {
+        abort_unless(auth()->user()?->can('role.delete'), 403);
+
         $role = Role::findOrFail($id);
-        
+
         try {
             $this->roleService->delete($role);
         } catch (\Exception $e) {

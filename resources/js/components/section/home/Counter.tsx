@@ -21,14 +21,14 @@ const COUNTERS: CounterItem[] = [
         suffix: '+',
         label: 'biens_listes',
         icon: Home,
-        color: '#1E3A5F',
+        color: '#413D3C',
     },
     {
         value: 8,
         suffix: '',
         label: 'ventes_conclues',
         icon: Handshake,
-        color: '#C9A84C',
+        color: '#CF8E19',
     },
     {
         value: 12,
@@ -42,7 +42,7 @@ const COUNTERS: CounterItem[] = [
         suffix: '',
         label: 'agents_expérimentés',
         icon: UserCheck,
-        color: '#A8882E',
+        color: '#A96F0B',
     },
 ];
 

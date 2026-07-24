@@ -1,7 +1,37 @@
 import { useState } from 'react';
 
-const LocationInput = ({ data, handleInputChange, errors }) => {
-    const [coordinates, setCoordinates] = useState({
+interface LocationData {
+    latitude?: number | string;
+    longitude?: number | string;
+    mapLocation?: string;
+}
+
+interface LocationInputProps {
+    data: LocationData;
+    handleInputChange: (
+        field: keyof LocationData,
+        value: string | number,
+    ) => void;
+    errors: Partial<Record<keyof LocationData, string>>;
+}
+
+interface GeocodingResponse {
+    results?: Array<{
+        formatted_address: string;
+        geometry: { location: { lat: number; lng: number } };
+    }>;
+}
+
+const LocationInput = ({
+    data,
+    handleInputChange,
+    errors,
+}: LocationInputProps) => {
+    const [coordinates, setCoordinates] = useState<{
+        latitude: number | string;
+        longitude: number | string;
+        address: string;
+    }>({
         latitude: data.latitude || '',
         longitude: data.longitude || '',
         address: data.mapLocation || '',
@@ -42,14 +72,14 @@ const LocationInput = ({ data, handleInputChange, errors }) => {
     };
 
     // Géocodage inverse pour obtenir l'adresse à partir des coordonnées
-    const reverseGeocode = async (lat, lng) => {
+    const reverseGeocode = async (lat: number, lng: number) => {
         try {
             // Vous pouvez utiliser l'API Google Geocoding ou une autre API
             // Ici, je montre un exemple conceptuel
             const response = await fetch(
                 `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=YOUR_API_KEY`,
             );
-            const data = await response.json();
+            const data = (await response.json()) as GeocodingResponse;
 
             if (data.results && data.results[0]) {
                 const address = data.results[0].formatted_address;
@@ -65,7 +95,7 @@ const LocationInput = ({ data, handleInputChange, errors }) => {
     };
 
     // Fonction pour analyser l'input et extraire les coordonnées
-    const parseLocationInput = (value) => {
+    const parseLocationInput = (value: string) => {
         // Vérifier si c'est des coordonnées (format: "lat, lng" ou "lat,lng")
         const coordsRegex = /^(-?\d+\.?\d*),\s*(-?\d+\.?\d*)$/;
         const match = value.match(coordsRegex);
@@ -95,12 +125,12 @@ const LocationInput = ({ data, handleInputChange, errors }) => {
     };
 
     // Géocodage pour convertir une adresse en coordonnées
-    const geocodeAddress = async (address) => {
+    const geocodeAddress = async (address: string) => {
         try {
             const response = await fetch(
                 `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=YOUR_API_KEY`,
             );
-            const data = await response.json();
+            const data = (await response.json()) as GeocodingResponse;
 
             if (data.results && data.results[0]) {
                 const location = data.results[0].geometry.location;

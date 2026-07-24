@@ -3,6 +3,7 @@
 namespace App\Domains\Billing\Infrastructure\Mail;
 
 use App\Domains\Billing\Models\Subscription;
+use App\Support\UsesMailLocale;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -11,21 +12,21 @@ use Illuminate\Queue\SerializesModels;
 
 class SubscriptionExpiringMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, UsesMailLocale;
 
     public function __construct(
         public readonly Subscription $subscription,
-        public readonly int          $daysRemaining,
-    ) {}
+        public readonly int $daysRemaining,
+    ) {
+        $this->useMailLocale($subscription->user?->language);
+    }
 
     public function envelope(): Envelope
     {
-        $label = $this->daysRemaining === 0
-            ? "expire aujourd'hui"
-            : "expire dans {$this->daysRemaining} jour(s)";
-
         return new Envelope(
-            subject: "⚠️ Votre abonnement {$label}",
+            subject: trans_choice('mail.subjects.subscription_expiring', $this->daysRemaining, [
+                'count' => $this->daysRemaining,
+            ]),
         );
     }
 
@@ -33,6 +34,12 @@ class SubscriptionExpiringMail extends Mailable
     {
         return new Content(
             markdown: 'emails.billing.subscription-expiring',
+            with: [
+                'planName' => $this->subscription->plan_name
+                    ?: $this->subscription->plan?->name
+                    ?: __('mail.common.not_available'),
+                'subscriptionsUrl' => route('dashboard.subscriptions.index'),
+            ],
         );
     }
 }

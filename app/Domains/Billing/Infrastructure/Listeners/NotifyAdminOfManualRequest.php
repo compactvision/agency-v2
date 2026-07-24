@@ -11,11 +11,11 @@ class NotifyAdminOfManualRequest implements ShouldQueue
 {
     public function handle(ManualSubscriptionRequested $event): void
     {
-        $adminEmail = config('billing.admin_email', config('mail.from.address'));
+        $adminEmail = config('mail.admin_address', config('mail.from.address'));
 
         Mail::to($adminEmail)->send(new ManualSubscriptionAdminMail(
-            userId:         $event->userId,
-            planName:       $event->planName,
+            userId: $event->userId,
+            planName: $event->planName,
             subscriptionId: $event->subscriptionId,
         ));
     }

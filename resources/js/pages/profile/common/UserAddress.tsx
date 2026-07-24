@@ -6,19 +6,18 @@ type User = {
 };
 
 export default function UserAddress({ user }: { user: User }) {
+    const { t } = useTranslation();
+
     return (
         <div className="tab-pane fade show active">
-            <p className="account-alert">
-                The following address details will be used on the checkout page
-                by default.
-            </p>
+            <p className="account-alert">{t('checkout_address_description')}</p>
 
             <div className="row gy-4">
                 <div className="col-sm-12 col-md-8 col-lg-6 mx-auto">
                     <div className="card common-card shadow-sm">
                         <div className="card-body">
                             <h5 className="text-poppins fw-bold mb-3 text-primary">
-                                Address
+                                {t('address')}
                             </h5>
 
                             <div className="mb-3">
@@ -30,7 +29,7 @@ export default function UserAddress({ user }: { user: User }) {
                             {user.address ? (
                                 <div className="contact-info d-flex align-items-start mb-2 gap-2">
                                     <strong className="text-dark">
-                                        Location:
+                                        {t('location')}:
                                     </strong>
                                     <span className="text-muted">
                                         {user.address}
@@ -39,10 +38,10 @@ export default function UserAddress({ user }: { user: User }) {
                             ) : (
                                 <div className="contact-info d-flex align-items-start mb-2 gap-2">
                                     <strong className="text-dark">
-                                        Location:
+                                        {t('location')}:
                                     </strong>
                                     <span className="text-muted">
-                                        No address provided
+                                        {t('no_address_provided')}
                                     </span>
                                 </div>
                             )}
@@ -50,7 +49,7 @@ export default function UserAddress({ user }: { user: User }) {
                             {user.phone ? (
                                 <div className="contact-info d-flex align-items-start mb-2 gap-2">
                                     <strong className="text-dark">
-                                        Phone:
+                                        {t('phone')}:
                                     </strong>
                                     <span className="text-muted">
                                         {user.phone}
@@ -59,10 +58,10 @@ export default function UserAddress({ user }: { user: User }) {
                             ) : (
                                 <div className="contact-info d-flex align-items-start mb-2 gap-2">
                                     <strong className="text-dark">
-                                        Phone:
+                                        {t('phone')}:
                                     </strong>
                                     <span className="text-muted">
-                                        No phone provided
+                                        {t('no_phone_provided')}
                                     </span>
                                 </div>
                             )}
@@ -70,7 +69,7 @@ export default function UserAddress({ user }: { user: User }) {
                             {user.email ? (
                                 <div className="contact-info d-flex align-items-start gap-2">
                                     <strong className="text-dark">
-                                        Email:
+                                        {t('email')}:
                                     </strong>
                                     <span className="text-muted">
                                         {user.email}
@@ -79,10 +78,10 @@ export default function UserAddress({ user }: { user: User }) {
                             ) : (
                                 <div className="contact-info d-flex align-items-start gap-2">
                                     <strong className="text-dark">
-                                        Email:
+                                        {t('email')}:
                                     </strong>
                                     <span className="text-muted">
-                                        No email provided
+                                        {t('no_email_provided')}
                                     </span>
                                 </div>
                             )}
@@ -93,3 +92,4 @@ export default function UserAddress({ user }: { user: User }) {
         </div>
     );
 }
+import { useTranslation } from 'react-i18next';

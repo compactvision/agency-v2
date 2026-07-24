@@ -82,7 +82,7 @@ export default function Pagination({
                                     e.preventDefault();
                                     if (links[links.length - 2].url)
                                         router.visit(
-                                            links[links.length - 2].url,
+                                            links[links.length - 2].url!,
                                         );
                                 }}
                                 dangerouslySetInnerHTML={{
@@ -114,7 +114,7 @@ export default function Pagination({
                                     e.preventDefault();
                                     if (links[links.length - 1].url)
                                         router.visit(
-                                            links[links.length - 1].url,
+                                            links[links.length - 1].url!,
                                         );
                                 }}
                                 dangerouslySetInnerHTML={{

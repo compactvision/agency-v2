@@ -5,9 +5,9 @@ import LocationProperty from '@/components/section/home/LocationProperty';
 import RecentProperty from '@/components/section/home/RecentProperty';
 import WhyUs from '@/components/section/home/WhyUs';
 import Work from '@/components/section/home/Work';
-import { useAds } from '@/hooks/useAds';
 import { useLocations } from '@/hooks/useLocations';
 import { Head } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 
 export default function Home({
     properties: initialProperties,
@@ -18,21 +18,24 @@ export default function Home({
     municipalities: any[];
     favorites: number[];
 }) {
-    const { ads: properties, loading: adsLoading } = useAds();
-    const { municipalities, loading: locLoading } = useLocations();
+    const { t } = useTranslation();
+    const { municipalities } = useLocations(initialMunicipalities);
 
     // Favorites kept from prop (backend logic pending)
     const favorites = initialFavorites;
 
     return (
         <App>
-            <Head title="Accueil" />
+            <Head title={t('home')} />
 
             {/* 1. Hero avec barre de recherche */}
             <Hero />
 
             {/* 2. Biens récents */}
-            <RecentProperty favorites={favorites} />
+            <RecentProperty
+                favorites={favorites}
+                initialProperties={initialProperties}
+            />
 
             {/* 3. Avantages + Types de biens (fusion About + Service) */}
             <WhyUs />

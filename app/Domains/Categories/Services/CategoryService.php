@@ -4,6 +4,7 @@ namespace App\Domains\Categories\Services;
 
 use App\Domains\Categories\Models\Category;
 use App\Domains\Categories\Resources\CategoryResource;
+use App\Support\ReferenceCache;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
 
@@ -11,15 +12,20 @@ class CategoryService
 {
     public function all()
     {
-        return CategoryResource::collection(Category::orderBy('position')->orderBy('name')->get());
+        $categories = ReferenceCache::remember(
+            ReferenceCache::CATEGORIES,
+            fn () => Category::orderBy('position')->orderBy('name')->get(),
+        );
+
+        return CategoryResource::collection($categories);
     }
 
     public function find(int $id)
     {
         $category = Category::find($id);
 
-        if (!$category) {
-            throw new ModelNotFoundException("Category not found");
+        if (! $category) {
+            throw new ModelNotFoundException('Category not found');
         }
 
         return new CategoryResource($category);
@@ -32,20 +38,21 @@ class CategoryService
         }
 
         $category = Category::create($data);
+
         return new CategoryResource($category);
     }
 
     public function update(int $id, array $data)
     {
         $category = Category::find($id);
-        if (!$category) {
-            throw new ModelNotFoundException("Category not found");
+        if (! $category) {
+            throw new ModelNotFoundException('Category not found');
         }
 
         // detect changes
         $changes = [];
         foreach ($data as $k => $v) {
-            if ($v !== null && $category->$k !== $v) {
+            if ($v !== null && $v !== $category->$k) {
                 $changes[$k] = $v;
             }
         }
@@ -73,13 +80,13 @@ class CategoryService
     public function delete(int $id): bool
     {
         $category = Category::find($id);
-        if (!$category) {
-            throw new ModelNotFoundException("Category not found");
+        if (! $category) {
+            throw new ModelNotFoundException('Category not found');
         }
 
         // Optional: prevent deletion if ads exist
         if ($category->ads()->exists()) {
-            throw new \Exception("Cannot delete category with existing ads");
+            throw new \Exception('Cannot delete category with existing ads');
         }
 
         return $category->delete();

@@ -1,21 +1,22 @@
 <x-mail::message>
-    # Nouvelle propriété à valider
+# {{ __('mail.admin_property.title') }}
 
-    Une nouvelle annonce immobilière vient d'être soumise et nécessite votre approbation.
+{{ __('mail.admin_property.intro') }}
 
-    <x-mail::panel>
-        **Détails de l'annonce :**
-        * **Titre :** {{ $propertyTitle }}
-        * **Référence :** {{ $reference }}
-        * **Utilisateur :** {{ $userName }} ([{{ $userEmail }}](mailto:{{ $userEmail }}))
-    </x-mail::panel>
+<x-mail::table>
+| | |
+|:--|:--|
+| **{{ __('mail.admin_property.title_label') }}** | {{ $propertyTitle }} |
+| **{{ __('mail.common.reference') }}** | {{ $reference }} |
+| **{{ __('mail.admin_property.owner') }}** | {{ $userName }} |
+| **{{ __('mail.admin_property.email') }}** | [{{ $userEmail }}](mailto:{{ $userEmail }}) |
+</x-mail::table>
 
-    Veuillez l'examiner pour valider sa conformité avec nos standards de qualité.
+{{ __('mail.admin_property.instruction') }}
 
-    <x-mail::button :url="config('app.url') . '/dashboard/admin/ads/pending'">
-        Accéder à la console de validation
-    </x-mail::button>
+<x-mail::button :url="$validationUrl">
+{{ __('mail.admin_property.action') }}
+</x-mail::button>
 
-    Merci,<br>
-    Système automatisé {{ config('app.name') }}
+{{ __('mail.common.automated_notice') }}
 </x-mail::message>

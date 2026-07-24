@@ -67,7 +67,10 @@ export default function UserProfile({ user }: { user: User }) {
         });
     };
 
-    const handleQuickContact = (field: string, value: string) => {
+    const handleQuickContact = (
+        field: 'name' | 'email' | 'phone' | 'subject' | 'message',
+        value: string,
+    ) => {
         setData(field, value);
     };
 

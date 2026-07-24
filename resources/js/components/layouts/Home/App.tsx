@@ -1,11 +1,13 @@
 import { CircleFadingArrowUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Toaster } from 'sonner';
 // import ChatBot from './ChatBot';
 import Footer from '../../partials/Footer';
 import Header from '../../partials/Header';
 
 const App = ({ children }: { children: React.ReactNode }) => {
+    const { t } = useTranslation();
     const [showScrollTop, setShowScrollTop] = useState(false);
 
     // Gérer l'affichage du bouton "retour en haut"
@@ -20,18 +22,31 @@ const App = ({ children }: { children: React.ReactNode }) => {
 
     // Fonction pour remonter en haut de la page
     const scrollToTop = () => {
+        const reduceMotion = window.matchMedia(
+            '(prefers-reduced-motion: reduce)',
+        ).matches;
         window.scrollTo({
             top: 0,
-            behavior: 'smooth',
+            behavior: reduceMotion ? 'auto' : 'smooth',
         });
     };
 
     return (
-        <div className={`flex min-h-screen flex-col`}>
+        <div className="flex min-h-screen flex-col bg-background text-foreground">
+            <a
+                href="#main-content"
+                className="fixed top-3 left-3 z-[100] -translate-y-24 rounded-lg bg-card px-4 py-3 font-semibold text-foreground shadow-xl transition-transform focus:translate-y-0"
+            >
+                {t('skip_to_main_content')}
+            </a>
             <Header />
 
             {/* Contenu principal avec padding pour éviter le header fixe */}
-            <main className="flex-grow bg-gray-50 transition-colors duration-300">
+            <main
+                id="main-content"
+                tabIndex={-1}
+                className="flex-grow bg-background transition-colors duration-300"
+            >
                 <div className="animate-fadeIn">{children}</div>
             </main>
 
@@ -42,12 +57,12 @@ const App = ({ children }: { children: React.ReactNode }) => {
             {/* Bouton scroll-to-top */}
             <button
                 onClick={scrollToTop}
-                className={`fixed right-8 bottom-8 z-50 hidden rounded-full bg-[#0099cc] p-3 text-white shadow-lg transition-all duration-300 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none lg:flex ${
+                className={`fixed right-8 bottom-8 z-50 hidden rounded-full bg-[#CF8E19] p-3 text-[#292625] shadow-lg transition-all duration-300 hover:bg-[#E0A43A] focus:ring-2 focus:ring-[#CF8E19] focus:ring-offset-2 focus:outline-none lg:flex ${
                     showScrollTop
                         ? 'visible translate-y-0 opacity-100'
                         : 'invisible translate-y-4 opacity-0'
                 }`}
-                aria-label="Retour en haut de la page"
+                aria-label={t('back_to_top')}
             >
                 <CircleFadingArrowUp />
             </button>

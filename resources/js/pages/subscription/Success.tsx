@@ -11,10 +11,30 @@ import {
     Sparkles,
     Zap,
 } from 'lucide-react';
+import type { CSSProperties } from 'react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { route } from 'ziggy-js';
 
+interface Particle {
+    id: number;
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    size: number;
+    opacity: number;
+    color: string;
+}
+
+type ParticleStyle = CSSProperties & {
+    '--vx': string;
+    '--vy': string;
+    '--size': string;
+};
+
 export default function PaymentSuccess() {
+    const { t, i18n } = useTranslation();
     const { props } = usePage();
     const { payment, order } = props as any;
 
@@ -22,7 +42,7 @@ export default function PaymentSuccess() {
     const [copied, setCopied] = useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
     const [showBoom, setShowBoom] = useState(false);
-    const [particles, setParticles] = useState([]);
+    const [particles, setParticles] = useState<Particle[]>([]);
 
     useEffect(() => {
         setIsLoaded(true);
@@ -45,21 +65,27 @@ export default function PaymentSuccess() {
     }, []);
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('fr-FR', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
+        return new Date(dateString).toLocaleDateString(
+            i18n.resolvedLanguage === 'fr' ? 'fr-FR' : 'en-US',
+            {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            },
+        );
     };
 
     const formatPrice = (amount: number) => {
-        return new Intl.NumberFormat('fr-FR', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 2,
-        }).format(amount);
+        return new Intl.NumberFormat(
+            i18n.resolvedLanguage === 'fr' ? 'fr-FR' : 'en-US',
+            {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+            },
+        ).format(amount);
     };
 
     const copyToClipboard = async (text: string) => {
@@ -76,8 +102,10 @@ export default function PaymentSuccess() {
         if (navigator.share) {
             try {
                 await navigator.share({
-                    title: 'Paiement réussi !',
-                    text: `J'ai effectué un paiement de ${formatPrice(payment?.amount || 0)} avec succès !`,
+                    title: t('share_payment_title'),
+                    text: t('share_payment_text', {
+                        amount: formatPrice(payment?.amount || 0),
+                    }),
                     url: window.location.href,
                 });
             } catch (err) {
@@ -88,7 +116,7 @@ export default function PaymentSuccess() {
 
     return (
         <>
-            <Head title="Paiement Réussi - The AgencyDRC" />
+            <Head title={t('payment_successful')} />
 
             <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
                 {/* Subtle Background Pattern */}
@@ -101,16 +129,18 @@ export default function PaymentSuccess() {
                             <div
                                 key={particle.id}
                                 className="absolute h-2 w-2 rounded-full"
-                                style={{
-                                    backgroundColor: particle.color,
-                                    left: '50%',
-                                    top: '50%',
-                                    transform: `translate(-50%, -50%)`,
-                                    animation: `explode 1.5s ease-out forwards`,
-                                    '--vx': `${particle.vx}rem`,
-                                    '--vy': `${particle.vy}rem`,
-                                    '--size': `${particle.size}px`,
-                                }}
+                                style={
+                                    {
+                                        backgroundColor: particle.color,
+                                        left: '50%',
+                                        top: '50%',
+                                        transform: `translate(-50%, -50%)`,
+                                        animation: `explode 1.5s ease-out forwards`,
+                                        '--vx': `${particle.vx}rem`,
+                                        '--vy': `${particle.vy}rem`,
+                                        '--size': `${particle.size}px`,
+                                    } as ParticleStyle
+                                }
                             />
                         ))}
                     </div>
@@ -149,15 +179,12 @@ export default function PaymentSuccess() {
                                 <h1
                                     className={`mb-4 text-5xl font-bold text-slate-900 sm:text-6xl lg:text-7xl ${showBoom ? 'animate-slide-up' : ''}`}
                                 >
-                                    Paiement
-                                    <span className="block text-emerald-600">
-                                        Réussi
-                                    </span>
+                                    {t('payment_successful')}
                                 </h1>
                                 <p
                                     className={`mx-auto max-w-2xl text-xl text-slate-600 ${showBoom ? 'animate-slide-up animation-delay-200' : ''}`}
                                 >
-                                    Votre paiement a été traité avec succès
+                                    {t('payment_processed_successfully')}
                                 </p>
                             </div>
 
@@ -167,7 +194,7 @@ export default function PaymentSuccess() {
                             >
                                 <div className="text-center">
                                     <p className="mb-2 text-sm font-medium tracking-wider text-emerald-700 uppercase">
-                                        Montant payé
+                                        {t('amount_paid')}
                                     </p>
                                     <p className="text-5xl font-bold text-slate-900 lg:text-6xl">
                                         {formatPrice(payment?.amount || 29.99)}
@@ -175,7 +202,7 @@ export default function PaymentSuccess() {
                                     <div className="mt-4 flex items-center justify-center gap-2">
                                         <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></div>
                                         <span className="text-sm text-emerald-600">
-                                            Transaction sécurisée
+                                            {t('secure_transaction')}
                                         </span>
                                     </div>
                                 </div>
@@ -188,7 +215,7 @@ export default function PaymentSuccess() {
                                     className="flex w-full items-center justify-between rounded-xl bg-slate-50 p-4 transition-colors duration-200 hover:bg-slate-100"
                                 >
                                     <span className="font-semibold text-slate-800">
-                                        Détails de la transaction
+                                        {t('transaction_details')}
                                     </span>
                                     <ArrowRight
                                         className={`text-slate-600 transition-transform duration-200 ${showDetails ? 'rotate-90' : ''}`}
@@ -200,7 +227,7 @@ export default function PaymentSuccess() {
                                     <div className="animate-fade-in mt-4 space-y-4 rounded-xl bg-slate-50 p-6">
                                         <div className="flex justify-between">
                                             <span className="text-slate-600">
-                                                Référence
+                                                {t('reference')}
                                             </span>
                                             <span className="font-mono text-slate-900">
                                                 {payment?.reference || 'N/A'}
@@ -208,7 +235,7 @@ export default function PaymentSuccess() {
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-slate-600">
-                                                Date
+                                                {t('date')}
                                             </span>
                                             <span className="text-slate-900">
                                                 {formatDate(
@@ -219,7 +246,7 @@ export default function PaymentSuccess() {
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-slate-600">
-                                                Méthode
+                                                {t('payment_method_label')}
                                             </span>
                                             <span className="text-slate-900">
                                                 {payment?.method || 'RdCard'}
@@ -227,14 +254,14 @@ export default function PaymentSuccess() {
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-slate-600">
-                                                Statut
+                                                {t('status')}
                                             </span>
                                             <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800">
                                                 <CheckCircle
                                                     size={14}
                                                     className="mr-1"
                                                 />
-                                                Complété
+                                                {t('completed')}
                                             </span>
                                         </div>
                                     </div>
@@ -251,7 +278,7 @@ export default function PaymentSuccess() {
                                     className="flex transform items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3 font-medium text-white transition-all duration-200 hover:scale-105 hover:bg-slate-800 hover:shadow-lg"
                                 >
                                     <Home size={18} />
-                                    <span>Accueil</span>
+                                    <span>{t('dashboard')}</span>
                                 </button>
 
                                 <button
@@ -263,7 +290,9 @@ export default function PaymentSuccess() {
                                     className="flex transform items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-6 py-3 font-medium text-slate-700 transition-all duration-200 hover:scale-105 hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700"
                                 >
                                     <Receipt size={18} />
-                                    <span>{copied ? 'Copié!' : 'Copier'}</span>
+                                    <span>
+                                        {copied ? t('copied_short') : t('copy')}
+                                    </span>
                                 </button>
 
                                 <button
@@ -271,7 +300,7 @@ export default function PaymentSuccess() {
                                     className="flex transform items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-6 py-3 font-medium text-slate-700 transition-all duration-200 hover:scale-105 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700"
                                 >
                                     <Share2 size={18} />
-                                    <span>Partager</span>
+                                    <span>{t('share')}</span>
                                 </button>
 
                                 <button
@@ -279,7 +308,7 @@ export default function PaymentSuccess() {
                                     className="flex transform items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-6 py-3 font-medium text-slate-700 transition-all duration-200 hover:scale-105 hover:border-purple-500 hover:bg-purple-50 hover:text-purple-700"
                                 >
                                     <Download size={18} />
-                                    <span>Télécharger</span>
+                                    <span>{t('download')}</span>
                                 </button>
                             </div>
 
@@ -293,10 +322,10 @@ export default function PaymentSuccess() {
                                         />
                                     </div>
                                     <h4 className="mb-1 font-semibold text-slate-900">
-                                        Sécurisé
+                                        {t('secure')}
                                     </h4>
                                     <p className="text-sm text-slate-600">
-                                        Paiement 100% sécurisé
+                                        {t('secure_payment_description')}
                                     </p>
                                 </div>
 
@@ -308,10 +337,10 @@ export default function PaymentSuccess() {
                                         />
                                     </div>
                                     <h4 className="mb-1 font-semibold text-slate-900">
-                                        Rapide
+                                        {t('fast')}
                                     </h4>
                                     <p className="text-sm text-slate-600">
-                                        Transaction instantanée
+                                        {t('instant_transaction')}
                                     </p>
                                 </div>
 
@@ -323,10 +352,10 @@ export default function PaymentSuccess() {
                                         />
                                     </div>
                                     <h4 className="mb-1 font-semibold text-slate-900">
-                                        Efficace
+                                        {t('efficient')}
                                     </h4>
                                     <p className="text-sm text-slate-600">
-                                        Processus optimisé
+                                        {t('optimized_process')}
                                     </p>
                                 </div>
                             </div>

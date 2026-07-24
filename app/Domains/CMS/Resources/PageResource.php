@@ -19,6 +19,10 @@ class PageResource extends JsonResource
             'title' => $this->title,
             'slug' => $this->slug,
             'status' => $this->status,
+            'meta_title' => $this->meta_title,
+            'meta_description' => $this->meta_description,
+            'og_image' => $this->og_image,
+            'noindex' => (bool) $this->noindex,
             'sections' => PageSectionResource::collection($this->whenLoaded('sections')),
             'created_at' => $this->created_at?->toIso8601String(),
         ];

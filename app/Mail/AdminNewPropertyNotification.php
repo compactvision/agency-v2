@@ -2,9 +2,10 @@
 
 namespace App\Mail;
 
+use App\Domains\Ads\Models\Ad;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -17,13 +18,15 @@ class AdminNewPropertyNotification extends Mailable
      * Create a new message instance.
      */
     public function __construct(
-        public \App\Domains\Ads\Models\Ad $ad
+        public Ad $ad
     ) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Nouvelle propriété à valider - ' . $this->ad->reference,
+            subject: __('mail.subjects.admin_property_pending', [
+                'reference' => $this->ad->reference,
+            ]),
         );
     }
 
@@ -36,6 +39,10 @@ class AdminNewPropertyNotification extends Mailable
                 'reference' => $this->ad->reference,
                 'userName' => $this->ad->user->name,
                 'userEmail' => $this->ad->user->email,
+                'validationUrl' => route(
+                    'dashboard.properties.validation.show',
+                    $this->ad->id,
+                ),
             ],
         );
     }
@@ -43,7 +50,7 @@ class AdminNewPropertyNotification extends Mailable
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return array<int, Attachment>
      */
     public function attachments(): array
     {

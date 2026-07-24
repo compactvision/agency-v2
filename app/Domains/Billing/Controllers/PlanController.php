@@ -13,7 +13,10 @@ class PlanController
 {
     public function index()
     {
-        $plans = Plan::with('features')->orderBy('position')->get();
+        $plans = Plan::with('features')
+            ->where('is_active', true)
+            ->orderBy('position')
+            ->get();
 
         return ApiResponse::success(
             PlanResource::collection($plans),
@@ -63,25 +66,25 @@ class PlanController
             $changes = [];
 
             foreach ($data as $field => $value) {
-                if ($plan->$field !== $value) {
+                if ($value !== $plan->$field) {
                     $changes[$field] = $value;
                 }
             }
 
             if (empty($changes)) {
                 return ApiResponse::success([
-                    'no_changes'     => true,
+                    'no_changes' => true,
                     'changed_fields' => [],
-                    'plan'           => new PlanResource($plan),
+                    'plan' => new PlanResource($plan),
                 ], 'No changes detected');
             }
 
             $plan->update($changes);
 
             return ApiResponse::success([
-                'no_changes'     => false,
+                'no_changes' => false,
                 'changed_fields' => $changes,
-                'plan'           => new PlanResource($plan->fresh('features')),
+                'plan' => new PlanResource($plan->fresh('features')),
             ], 'Plan updated successfully');
         } catch (ModelNotFoundException $e) {
             return ApiResponse::error('Plan not found', 404);

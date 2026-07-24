@@ -7,10 +7,13 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::middleware('auth')->group(function () {
-    Route::redirect('settings', '/settings/profile');
+    Route::get('settings', fn () => redirect()->route('dashboard.users.profile'));
 
-    Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::post('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
+    // Legacy URL kept only as a redirect: the dashboard profile is the
+    // single profile screen.
+    Route::get('settings/profile', fn () => redirect()->route('dashboard.users.profile'))
+        ->name('profile.edit');
+    Route::match(['post', 'patch'], 'settings/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('settings/password', [PasswordController::class, 'edit'])->name('user-password.edit');

@@ -123,12 +123,12 @@ export default function NewsLetter() {
     ];
 
     return (
-        <section ref={sectionRef} className="relative py-20 lg:py-32 bg-gradient-to-br from-slate-50 via-white to-slate-50 overflow-hidden">
+        <section ref={sectionRef} className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-50 py-20 dark:bg-none dark:bg-[#292625] lg:py-32">
             {/* Formes décoratives de fond */}
             <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#C9A84C]/10 rounded-full filter blur-3xl"></div>
-                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-[#1E3A5F]/10 rounded-full filter blur-3xl"></div>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#C9A84C]/5 rounded-full filter blur-3xl"></div>
+                <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-[#CF8E19]/12 blur-3xl filter"></div>
+                <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-[#413D3C]/10 blur-3xl filter dark:bg-[#CF8E19]/6"></div>
+                <div className="absolute top-1/2 left-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-[#CF8E19]/5 blur-3xl filter"></div>
             </div>
 
             {/* Particules flottantes */}
@@ -136,7 +136,7 @@ export default function NewsLetter() {
                 {[...Array(20)].map((_, i) => (
                     <div
                         key={i}
-                        className="absolute w-2 h-2 bg-[#C9A84C]/20 rounded-full animate-float"
+                        className="animate-float absolute h-2 w-2 rounded-full bg-[#CF8E19]/20"
                         style={{
                             left: `${Math.random() * 100}%`,
                             top: `${Math.random() * 100}%`,
@@ -155,24 +155,24 @@ export default function NewsLetter() {
                     }`}>
                         {/* En-tête avec animation */}
                         <div className="mb-8">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#C9A84C]/10 text-[#A8882E] rounded-full text-sm font-semibold mb-4">
+                            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#CF8E19]/20 bg-[#CF8E19]/10 px-4 py-2 text-sm font-semibold text-[#A96F0B] dark:text-[#E0A43A]">
                                 <Bell className="w-4 h-4" />
                                 {t('newsletter') || 'Newsletter'}
                             </div>
                             
-                            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4">
+                            <h2 className="mb-4 text-4xl leading-tight font-bold text-[#413D3C] dark:text-[#EEEFE6] md:text-5xl">
                                 {i18n.language === 'fr' ? (
                                     <>
-                                        Restez <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C9A84C] to-[#A8882E]">connecté</span>
+                                        Restez <span className="text-[#CF8E19]">connecté</span>
                                     </>
                                 ) : (
                                     <>
-                                        Stay <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C9A84C] to-[#A8882E]">Connected</span>
+                                        Stay <span className="text-[#CF8E19]">Connected</span>
                                     </>
                                 )}
                             </h2>
                             
-                            <p className="text-lg text-gray-600 leading-relaxed">
+                            <p className="text-lg leading-relaxed text-gray-600 dark:text-[#EEEFE6]/70">
                                 {i18n.language === 'fr' 
                                     ? 'Recevez les dernières actualités immobilières et offres exclusives directement dans votre boîte mail.'
                                     : 'Get the latest real estate news and exclusive offers directly in your inbox.'
@@ -193,7 +193,7 @@ export default function NewsLetter() {
                                 }`}>
                                     <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
                                         <Mail className={`w-5 h-5 transition-colors duration-300 ${
-                                            emailFocused ? 'text-[#1E3A5F]' : 'text-gray-400'
+                                            emailFocused ? 'text-[#CF8E19]' : 'text-gray-400'
                                         }`} />
                                     </div>
                                     
@@ -204,8 +204,8 @@ export default function NewsLetter() {
                                         onFocus={() => setEmailFocused(true)}
                                         onBlur={() => setEmailFocused(false)}
                                         placeholder={t('enter_email') || 'Entrez votre email'}
-                                        className={`w-full px-12 py-4 bg-white border-2 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#1E3A5F]/20 focus:border-[#1E3A5F] transition-all duration-300 ${
-                                            error ? 'border-red-400' : 'border-gray-200'
+                                        className={`w-full rounded-xl border-2 bg-white px-12 py-4 text-gray-900 placeholder-gray-400 transition-all duration-300 focus:border-[#CF8E19] focus:ring-4 focus:ring-[#CF8E19]/20 focus:outline-none dark:bg-[#353130] dark:text-[#EEEFE6] ${
+                                            error ? 'border-red-400' : 'border-gray-200 dark:border-white/15'
                                         }`}
                                     />
                                     
@@ -239,7 +239,7 @@ export default function NewsLetter() {
                                 className={`w-full relative group/btn inline-flex items-center justify-center gap-3 px-8 py-4 font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 ${
                                     isSubscribed
                                         ? 'bg-green-500 text-white hover:bg-green-600'
-                                        : 'bg-gradient-to-r from-[#C9A84C] to-[#A8882E] text-white hover:from-[#A8882E] hover:to-[#8a6e22] shadow-lg hover:shadow-md'
+                                        : 'bg-gradient-to-r from-[#CF8E19] to-[#A96F0B] text-[#292625] hover:from-[#E0A43A] hover:to-[#CF8E19] shadow-lg hover:shadow-md'
                                 } ${
                                     isLoading || isSubscribed ? 'cursor-not-allowed' : ''
                                 }`}
@@ -268,7 +268,7 @@ export default function NewsLetter() {
 
                         {/* Avantages */}
                         <div className="mt-8 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                            <h3 className="mb-4 text-lg font-semibold text-[#413D3C] dark:text-[#EEEFE6]">
                                 {t('why_subscribe') || 'Pourquoi s\'abonner ?'}
                             </h3>
                             
@@ -277,16 +277,16 @@ export default function NewsLetter() {
                                 return (
                                     <div
                                         key={index}
-                                        className="flex items-start gap-3 p-3 bg-white rounded-xl border border-gray-100 hover:border-slate-200 hover:shadow-md transition-all duration-300"
+                                        className="flex items-start gap-3 rounded-xl border border-gray-100 bg-white p-3 transition-all duration-300 hover:border-[#CF8E19]/40 hover:shadow-md dark:border-white/10 dark:bg-[#353130]"
                                     >
-                                        <div className="w-10 h-10 bg-[#C9A84C]/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                                            <Icon className="w-5 h-5 text-[#C9A84C]" />
+                                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#CF8E19]/10">
+                                            <Icon className="h-5 w-5 text-[#CF8E19]" />
                                         </div>
                                         <div>
-                                            <h4 className="font-medium text-gray-900 text-sm">
+                                            <h4 className="text-sm font-medium text-gray-900 dark:text-[#EEEFE6]">
                                                 {benefit.title}
                                             </h4>
-                                            <p className="text-xs text-gray-600 mt-1">
+                                            <p className="mt-1 text-xs text-gray-600 dark:text-[#EEEFE6]/65">
                                                 {benefit.desc}
                                             </p>
                                         </div>
@@ -341,12 +341,12 @@ export default function NewsLetter() {
                             {stats.map((stat, index) => (
                                 <div
                                     key={index}
-                                    className="text-center p-4 bg-white rounded-xl border border-gray-100 hover:border-slate-200 hover:shadow-md transition-all duration-300"
+                                    className="rounded-xl border border-gray-100 bg-white p-4 text-center transition-all duration-300 hover:border-[#CF8E19]/40 hover:shadow-md dark:border-white/10 dark:bg-[#353130]"
                                 >
-                                    <div className="text-2xl font-bold text-[#C9A84C] mb-1">
+                                    <div className="mb-1 text-2xl font-bold text-[#CF8E19]">
                                         {stat.number}
                                     </div>
-                                    <div className="text-xs text-gray-600">
+                                    <div className="text-xs text-gray-600 dark:text-[#EEEFE6]/65">
                                         {stat.label}
                                     </div>
                                 </div>
@@ -354,16 +354,16 @@ export default function NewsLetter() {
                         </div>
 
                         {/* Témoignage */}
-                        <div className="mt-8 p-6 bg-gradient-to-r from-slate-50 to-slate-50 rounded-2xl border border-slate-200">
+                        <div className="mt-8 rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 to-slate-50 p-6 dark:border-white/10 dark:bg-none dark:bg-[#353130]">
                             <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0">
+                                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-white dark:bg-white/10">
                                     <Heart className="w-6 h-6 text-red-500 fill-current" />
                                 </div>
                                 <div>
-                                    <blockquote className="text-gray-700 italic text-sm leading-relaxed">
+                                    <blockquote className="text-sm leading-relaxed text-gray-700 italic dark:text-[#EEEFE6]/80">
                                         "{t('testimonial') || 'Meilleure décision que j\'ai prise ! J\'ai trouvé ma maison grâce à cette newsletter.'}"
                                     </blockquote>
-                                    <div className="mt-2 text-xs text-gray-600">
+                                    <div className="mt-2 text-xs text-gray-600 dark:text-[#EEEFE6]/60">
                                         - {t('happy_subscriber') || 'Abonné satisfait'}
                                     </div>
                                 </div>
@@ -376,16 +376,16 @@ export default function NewsLetter() {
                 <div className={`text-center mt-12 transition-all duration-1000 delay-500 transform ${
                     visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                 }`}>
-                    <div className="inline-flex items-center gap-4 px-6 py-3 bg-white rounded-full shadow-lg border border-gray-100">
+                    <div className="inline-flex items-center gap-4 rounded-full border border-gray-100 bg-white px-6 py-3 shadow-lg dark:border-white/10 dark:bg-[#353130]">
                         <div className="flex items-center gap-2">
-                            <Users className="w-5 h-5 text-[#1E3A5F]" />
-                            <span className="text-sm font-medium text-gray-700">
+                            <Users className="h-5 w-5 text-[#413D3C] dark:text-[#CF8E19]" />
+                            <span className="text-sm font-medium text-gray-700 dark:text-[#EEEFE6]/75">
                                 {t('join_community') || 'Rejoignez notre communauté de'}
                             </span>
-                            <span className="text-lg font-bold text-[#C9A84C]">
+                            <span className="text-lg font-bold text-[#CF8E19]">
                                 50,000+
                             </span>
-                            <span className="text-sm font-medium text-gray-700">
+                            <span className="text-sm font-medium text-gray-700 dark:text-[#EEEFE6]/75">
                                 {t('subscribers') || 'abonnés'}
                             </span>
                         </div>
@@ -394,7 +394,7 @@ export default function NewsLetter() {
             </div>
 
             {/* Forme décorative du bas */}
-            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-slate-50 to-transparent pointer-events-none"></div>
+            <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-32 bg-gradient-to-t from-slate-50 to-transparent dark:from-[#353130]"></div>
 
             {/* Styles personnalisés pour les animations */}
             <style>{`

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Domains\Billing\Models\Plan;
+use App\Domains\Billing\Resources\SubscriptionResource;
+use App\Domains\Billing\Services\SubscriptionManager;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Domains\Billing\Services\SubscriptionManager;
-use App\Domains\Billing\Resources\SubscriptionResource;
-use App\Domains\Billing\Models\Plan;
 
 class SubscriptionController extends Controller
 {
@@ -24,7 +24,7 @@ class SubscriptionController extends Controller
         $isAdmin = $user->hasRole(['admin', 'super-admin']);
 
         $filters = $request->only(['search', 'per_page']);
-        if (!$isAdmin) {
+        if (! $isAdmin) {
             $filters['user_id'] = $user->id;
         }
 
@@ -43,7 +43,7 @@ class SubscriptionController extends Controller
                 'links' => $subscriptions->linkCollection()->toArray(),
             ],
             'hasActiveSubscription' => $user->hasActiveSubscription(),
-            'currentPlan' => $user->subscription()->where('status', 'active')->first(),
+            'currentPlan' => $user->subscription()->first(),
             'plans' => Plan::where('is_active', true)->get(),
             'filters' => (object) $request->only(['search']),
         ]);

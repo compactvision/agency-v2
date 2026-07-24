@@ -282,24 +282,24 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
 
     return (
         <div
-            className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 transition-opacity duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}
+            className={`agency-modal-layer fixed inset-0 z-[9999] flex items-center justify-center p-4 transition-opacity duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="seller-popup__title"
             onKeyDown={handleKeyDown}
             onClick={handleOverlayClick}
         >
-            <div className="absolute inset-0 bg-[#0d2340]/80 backdrop-blur-sm" />
+            <div className="agency-modal-overlay absolute inset-0 bg-[#0d2340]/80 backdrop-blur-sm" />
 
             <div
-                className={`relative flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl shadow-2xl transition-all duration-300 ${
+                className={`agency-modal relative flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl shadow-2xl transition-all duration-300 ${
                     isAnimating
                         ? 'translate-y-4 scale-95 opacity-0'
                         : 'translate-y-0 scale-100 opacity-100'
                 }`}
             >
                 {/* Header navy */}
-                <div className="relative shrink-0 overflow-hidden bg-[#0d2340] px-6 pt-6 pb-0">
+                <div className="agency-modal-header relative shrink-0 overflow-hidden bg-[#0d2340] px-6 pt-6 pb-0">
                     <div className="pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full bg-[#C9A84C]/10 blur-2xl" />
                     <div className="relative flex items-start justify-between">
                         <div className="flex items-center gap-3">
@@ -374,7 +374,7 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                 </div>
 
                 {/* Form */}
-                <div className="overflow-y-auto bg-white p-6 md:p-8">
+                <div className="agency-modal-body overflow-y-auto bg-white p-6 md:p-8">
                     <form
                         id="seller-popup__form"
                         onSubmit={handleSubmit}
@@ -712,7 +712,7 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="flex shrink-0 items-center justify-between gap-3 border-t border-gray-100 bg-white px-6 py-4">
+                <div className="agency-modal-footer flex shrink-0 items-center justify-between gap-3 border-t border-gray-100 bg-white px-6 py-4">
                     <p className="hidden text-xs text-gray-400 sm:block">
                         Vos informations sont{' '}
                         <span className="font-semibold text-[#1E3A5F]">
@@ -722,7 +722,7 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                     <div className="flex w-full items-center justify-end gap-3 sm:w-auto">
                         <button
                             type="button"
-                            className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 transition-all hover:bg-gray-50"
+                            className="agency-btn-secondary rounded-xl px-5 py-2.5 text-sm font-semibold transition-all"
                             onClick={onClose}
                         >
                             Annuler
@@ -730,7 +730,7 @@ const SellerPopup: React.FC<SellerPopupProps> = ({ onClose, user, active }) => {
                         <button
                             type="submit"
                             form="seller-popup__form"
-                            className={`flex items-center gap-2 rounded-xl bg-[#C9A84C] px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#C9A84C]/25 transition-all hover:bg-[#A8882E] disabled:cursor-not-allowed disabled:opacity-60 ${processing ? 'cursor-wait' : ''}`}
+                            className={`agency-btn-primary flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-bold shadow-lg shadow-[#C9A84C]/25 transition-all disabled:cursor-not-allowed disabled:opacity-60 ${processing ? 'cursor-wait' : ''}`}
                             disabled={processing}
                         >
                             {processing ? (

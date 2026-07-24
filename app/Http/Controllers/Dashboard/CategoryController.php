@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Http\Controllers\Controller;
-use App\Domains\Categories\Services\CategoryService;
 use App\Domains\Categories\Resources\CategoryResource;
+use App\Domains\Categories\Services\CategoryService;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -24,28 +24,28 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name',
             'slug' => 'nullable|string|max:255|unique:categories,slug',
             'icon' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
 
-        $this->service->create($request->all());
+        $this->service->create($validated);
 
         return back()->with('success', 'Catégorie créée avec succès.');
     }
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'required|string|max:255|unique:categories,name,' . $id,
-            'slug' => 'nullable|string|max:255|unique:categories,slug,' . $id,
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:categories,name,'.$id,
+            'slug' => 'nullable|string|max:255|unique:categories,slug,'.$id,
             'icon' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
 
-        $this->service->update($id, $request->all());
+        $this->service->update($id, $validated);
 
         return back()->with('success', 'Catégorie mise à jour avec succès.');
     }

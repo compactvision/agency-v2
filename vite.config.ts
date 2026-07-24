@@ -24,4 +24,31 @@ export default defineConfig({
     esbuild: {
         jsx: 'automatic',
     },
+    build: {
+        cssCodeSplit: true,
+        sourcemap: false,
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    if (!id.includes('node_modules')) return;
+
+                    if (
+                        id.includes('/leaflet/') ||
+                        id.includes('/react-leaflet/')
+                    ) {
+                        return 'vendor-maps';
+                    }
+
+                    if (
+                        id.includes('/chart.js/') ||
+                        id.includes('/react-chartjs-2/')
+                    ) {
+                        return 'vendor-charts';
+                    }
+
+                    if (id.includes('/swiper/')) return 'vendor-carousel';
+                },
+            },
+        },
+    },
 });

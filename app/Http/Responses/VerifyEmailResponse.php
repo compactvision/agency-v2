@@ -19,9 +19,9 @@ class VerifyEmailResponse implements VerifyEmailResponseContract
         $user = Auth::user();
 
         if ($user && $user->hasRole('buyer')) {
-            return redirect('/profile');
+            return redirect('/profile?verified=1');
         }
 
-        return redirect(Fortify::redirects('email-verification', '/dashboard'));
+        return redirect(Fortify::redirects('email-verification', '/dashboard').'?verified=1');
     }
 }

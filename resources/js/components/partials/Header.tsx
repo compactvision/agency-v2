@@ -8,16 +8,19 @@ import {
     LucidePlus,
     LucideUser,
 } from 'lucide-react';
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { route } from 'ziggy-js';
+import BrandLogo from '../brand-logo';
 import SellerPopup from '../forms/SellerPopup';
 import MobileMenu from '../layouts/Home/MobileMenu';
+import ThemeToggle from '../theme-toggle';
 
 interface HeaderContextType {
     active: boolean;
     toggleActive: () => void;
     toggleSellerPopup: () => void;
+    menuButtonRef: React.RefObject<HTMLButtonElement | null>;
 }
 
 export const HeaderContext = createContext<HeaderContextType | undefined>(
@@ -28,6 +31,7 @@ export default function Header() {
     const [active, setActive] = useState(false);
     const [sellerPopup, setSellerPopup] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const menuButtonRef = useRef<HTMLButtonElement>(null);
     const { t, i18n } = useTranslation();
 
     const changeLanguage = async (lng: string) => {
@@ -39,17 +43,23 @@ export default function Header() {
         }
     };
 
-    const toggleActive = () => setActive(!active);
-    const toggleSellerPopup = () => setSellerPopup(!sellerPopup);
+    const toggleActive = useCallback(
+        () => setActive((current) => !current),
+        [],
+    );
+    const toggleSellerPopup = useCallback(
+        () => setSellerPopup((current) => !current),
+        [],
+    );
 
     const { url } = usePage<SharedData>();
     const isActive = (path: string) =>
         url === path || url.startsWith(path + '/');
     const user = usePage<SharedData>().props.auth?.user;
 
-    const userRoles =
-        user?.roles?.map((r: any) => (typeof r === 'string' ? r : r.name)) ??
-        [];
+    const userRoles = (
+        (user?.roles ?? []) as Array<string | { name: string }>
+    ).map((role) => (typeof role === 'string' ? role : role.name));
     const isBuyer = userRoles.includes('buyer');
     const isSeller =
         userRoles.includes('seller') ||
@@ -73,12 +83,14 @@ export default function Header() {
     const isHomePage = url === '/' || url === '/home' || url === '';
     const isScrolled = scrolled || !isHomePage;
 
-    const { settings } = usePage<SharedData>().props as any;
-    const numero = settings?.numero ?? '+1 234 567 890';
-
     return (
         <HeaderContext.Provider
-            value={{ active, toggleActive, toggleSellerPopup }}
+            value={{
+                active,
+                toggleActive,
+                toggleSellerPopup,
+                menuButtonRef,
+            }}
         >
             {/* Seller Popup */}
             <SellerPopup
@@ -87,23 +99,13 @@ export default function Header() {
                 user={user ?? undefined}
             />
 
-            {/* Overlay Mobile */}
-            <div
-                className={`fixed inset-0 z-40 bg-[#0d2340]/60 backdrop-blur-sm transition-opacity duration-300 ${
-                    active
-                        ? 'visible opacity-100'
-                        : 'pointer-events-none invisible opacity-0'
-                }`}
-                onClick={toggleActive}
-            />
-
             <MobileMenu />
 
             {/* Header Principal */}
             <header
                 className={`fixed top-0 right-0 left-0 z-50 border-b transition-all duration-300 ${
                     isScrolled
-                        ? 'border-gray-100 bg-white/95 py-3 shadow-sm backdrop-blur-md'
+                        ? 'border-[#413D3C]/10 bg-[#EEEFE6]/95 py-3 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-[#292625]/95'
                         : 'border-white/10 bg-transparent py-5'
                 }`}
             >
@@ -115,20 +117,10 @@ export default function Header() {
                                 href={route('home')}
                                 className="group flex items-center gap-2"
                             >
-                                {/* Pour simplifier, on utilise une icône/texte si logo manquant, ou l'image */}
-                                <div
-                                    className={`flex h-10 w-10 items-center justify-center rounded-xl bg-[#C9A84C] text-white shadow-lg`}
-                                >
-                                    <span className="text-xl font-black">
-                                        A
-                                    </span>
-                                </div>
-                                <span
-                                    className={`text-xl font-bold tracking-tight ${isScrolled ? 'text-[#1E3A5F]' : 'text-white'}`}
-                                >
-                                    Agency
-                                    <span className="text-[#C9A84C]">.</span>
-                                </span>
+                                <BrandLogo
+                                    variant={isScrolled ? 'auto' : 'on-dark'}
+                                    imageClassName="h-10 max-w-[10.5rem] drop-shadow-sm lg:h-11 lg:max-w-[12rem]"
+                                />
                             </Link>
                         </div>
 
@@ -148,11 +140,14 @@ export default function Header() {
                                     <Link
                                         key={item.path}
                                         href={route(item.path)}
+                                        aria-current={
+                                            activeLink ? 'page' : undefined
+                                        }
                                         className={`text-sm font-semibold transition-colors duration-200 ${
                                             activeLink
-                                                ? 'text-[#C9A84C]'
+                                                ? 'text-[#CF8E19]'
                                                 : isScrolled
-                                                  ? 'text-gray-600 hover:text-[#1E3A5F]'
+                                                  ? 'text-[#5D5755] hover:text-[#413D3C] dark:text-[#EEEFE6]/70 dark:hover:text-white'
                                                   : 'text-white/80 hover:text-white'
                                         }`}
                                     >
@@ -170,25 +165,26 @@ export default function Header() {
                                     className={`h-4 w-4 ${isScrolled ? 'text-gray-400' : 'text-white/60'}`}
                                 />
                                 <select
+                                    aria-label={t('language', 'Langue du site')}
                                     onChange={(e) =>
                                         changeLanguage(e.target.value)
                                     }
                                     value={i18n.language}
                                     className={`cursor-pointer appearance-none bg-transparent pr-4 text-sm font-semibold focus:outline-none ${
                                         isScrolled
-                                            ? 'text-gray-600'
+                                            ? 'text-[#5D5755] dark:text-[#EEEFE6]'
                                             : 'text-white'
                                     }`}
                                 >
                                     <option
                                         value="en"
-                                        className="bg-[#0d2340] text-white"
+                                        className="bg-[#413D3C] text-white"
                                     >
                                         EN
                                     </option>
                                     <option
                                         value="fr"
-                                        className="bg-[#0d2340] text-white"
+                                        className="bg-[#413D3C] text-white"
                                     >
                                         FR
                                     </option>
@@ -198,8 +194,16 @@ export default function Header() {
                                 />
                             </div>
 
+                            <ThemeToggle
+                                className={
+                                    isScrolled
+                                        ? 'border-[#413D3C]/15 text-[#413D3C] hover:bg-[#413D3C]/5 dark:text-[#EEEFE6] dark:hover:bg-white/10'
+                                        : 'border-white/15 text-white hover:bg-white/10'
+                                }
+                            />
+
                             <div
-                                className={`h-5 w-px ${isScrolled ? 'bg-gray-200' : 'bg-white/20'}`}
+                                className={`h-5 w-px ${isScrolled ? 'bg-[#413D3C]/15 dark:bg-white/15' : 'bg-white/20'}`}
                             />
 
                             {/* User Account / Auth */}
@@ -212,12 +216,12 @@ export default function Header() {
                                     }
                                     className={`flex items-center gap-2 text-sm font-semibold transition-colors ${
                                         isScrolled
-                                            ? 'text-[#1E3A5F] hover:text-[#C9A84C]'
-                                            : 'text-white hover:text-[#C9A84C]'
+                                            ? 'text-[#413D3C] hover:text-[#CF8E19] dark:text-[#EEEFE6]'
+                                            : 'text-white hover:text-[#CF8E19]'
                                     }`}
                                 >
                                     <div
-                                        className={`flex h-8 w-8 items-center justify-center rounded-full ${isScrolled ? 'bg-[#1E3A5F]/10' : 'bg-white/20'}`}
+                                        className={`flex h-8 w-8 items-center justify-center rounded-full ${isScrolled ? 'bg-[#413D3C]/10 dark:bg-white/10' : 'bg-white/20'}`}
                                     >
                                         <LucideUser className="h-4 w-4" />
                                     </div>
@@ -228,7 +232,7 @@ export default function Header() {
                                     href={route('login')}
                                     className={`text-sm font-semibold transition-colors ${
                                         isScrolled
-                                            ? 'text-gray-600 hover:text-[#1E3A5F]'
+                                            ? 'text-[#5D5755] hover:text-[#413D3C] dark:text-[#EEEFE6]/70 dark:hover:text-white'
                                             : 'text-white/80 hover:text-white'
                                     }`}
                                 >
@@ -242,8 +246,8 @@ export default function Header() {
                                     onClick={toggleSellerPopup}
                                     className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg ${
                                         isScrolled
-                                            ? 'bg-[#1E3A5F] text-white hover:bg-[#152C47]'
-                                            : 'bg-[#C9A84C] text-white hover:bg-[#A8882E]'
+                                            ? 'bg-[#413D3C] text-white hover:bg-[#292625] dark:bg-[#CF8E19] dark:text-[#292625] dark:hover:bg-[#E0A43A]'
+                                            : 'bg-[#CF8E19] text-[#292625] hover:bg-[#E0A43A]'
                                     }`}
                                 >
                                     {t('become_seller', 'Devenir vendeur')}
@@ -259,8 +263,8 @@ export default function Header() {
                                     }
                                     className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg ${
                                         isScrolled
-                                            ? 'bg-[#1E3A5F] text-white hover:bg-[#152C47]'
-                                            : 'bg-[#C9A84C] text-white hover:bg-[#A8882E]'
+                                            ? 'bg-[#413D3C] text-white hover:bg-[#292625] dark:bg-[#CF8E19] dark:text-[#292625] dark:hover:bg-[#E0A43A]'
+                                            : 'bg-[#CF8E19] text-[#292625] hover:bg-[#E0A43A]'
                                     }`}
                                 >
                                     {user ? (
@@ -279,11 +283,19 @@ export default function Header() {
                         {/* Hamburger Mobile */}
                         <div className="flex items-center md:hidden">
                             <button
+                                ref={menuButtonRef}
                                 onClick={toggleActive}
-                                className={`rounded-lg p-2 transition-colors ${
+                                type="button"
+                                aria-label={t(
+                                    'open_menu',
+                                    'Ouvrir le menu principal',
+                                )}
+                                aria-expanded={active}
+                                aria-controls="mobile-navigation"
+                                className={`flex h-11 w-11 items-center justify-center rounded-xl border transition-all duration-200 ${
                                     isScrolled
-                                        ? 'text-gray-600 hover:bg-gray-100'
-                                        : 'text-white hover:bg-white/10'
+                                        ? 'border-[#413D3C]/15 bg-[#EEEFE6] text-[#413D3C] shadow-sm hover:bg-white dark:border-white/15 dark:bg-[#353130] dark:text-[#EEEFE6]'
+                                        : 'border-white/20 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20'
                                 }`}
                             >
                                 <LucideMenu className="h-6 w-6" />

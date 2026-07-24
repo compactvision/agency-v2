@@ -2,14 +2,23 @@
 
 use App\Models\User;
 
-test('profile page is displayed', function () {
+test('legacy profile settings redirect to the dashboard profile', function () {
     $user = User::factory()->create();
 
     $response = $this
         ->actingAs($user)
         ->get(route('profile.edit'));
 
-    $response->assertOk();
+    $response->assertRedirect(route('dashboard.users.profile'));
+});
+
+test('dashboard profile is the single profile page', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->get(route('dashboard.users.profile'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->component('dashboard/profile/Profile'));
 });
 
 test('profile information can be updated', function () {
@@ -24,7 +33,7 @@ test('profile information can be updated', function () {
 
     $response
         ->assertSessionHasNoErrors()
-        ->assertRedirect(route('profile.edit'));
+        ->assertRedirect(route('dashboard.users.profile'));
 
     $user->refresh();
 
@@ -45,7 +54,7 @@ test('email verification status is unchanged when the email address is unchanged
 
     $response
         ->assertSessionHasNoErrors()
-        ->assertRedirect(route('profile.edit'));
+        ->assertRedirect(route('dashboard.users.profile'));
 
     expect($user->refresh()->email_verified_at)->not->toBeNull();
 });
@@ -64,7 +73,10 @@ test('user can delete their account', function () {
         ->assertRedirect(route('home'));
 
     $this->assertGuest();
-    expect($user->fresh())->toBeNull();
+    expect($user->fresh())
+        ->not->toBeNull()
+        ->anonymized_at->not->toBeNull()
+        ->email->toBe("deleted+{$user->id}@anonymized.invalid");
 });
 
 test('correct password must be provided to delete account', function () {
@@ -72,14 +84,14 @@ test('correct password must be provided to delete account', function () {
 
     $response = $this
         ->actingAs($user)
-        ->from(route('profile.edit'))
+        ->from(route('dashboard.users.profile'))
         ->delete(route('profile.destroy'), [
             'password' => 'wrong-password',
         ]);
 
     $response
         ->assertSessionHasErrors('password')
-        ->assertRedirect(route('profile.edit'));
+        ->assertRedirect(route('dashboard.users.profile'));
 
     expect($user->fresh())->not->toBeNull();
 });

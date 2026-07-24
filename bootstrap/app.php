@@ -6,18 +6,25 @@ use App\Http\Middleware\EnsureSeller;
 use App\Http\Middleware\EnsureSellerWithActiveSubscription;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\SecurityHeaders;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__ . '/../routes/web.php',
-        commands: __DIR__ . '/../routes/console.php',
+        web: __DIR__.'/../routes/web.php',
+        commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
@@ -27,7 +34,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             HandleAppearance::class,
             HandleInertiaRequests::class,
+            SecurityHeaders::class,
             AddLinkHeadersForPreloadedAssets::class,
+        ]);
+        $middleware->api(append: [
+            SecurityHeaders::class,
         ]);
 
         // ✅ Aliases
@@ -47,7 +58,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
 
         // 1) Validation JSON
-        $exceptions->render(function (\Illuminate\Validation\ValidationException $e, $request) {
+        $exceptions->render(function (ValidationException $e, $request) {
             if ($request->is('api/*')) {
                 return response()->json([
                     'success' => false,
@@ -58,7 +69,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         // 2) Model not found
-        $exceptions->render(function (\Illuminate\Database\Eloquent\ModelNotFoundException $e, $request) {
+        $exceptions->render(function (ModelNotFoundException $e, $request) {
             if ($request->is('api/*')) {
                 return response()->json([
                     'success' => false,
@@ -68,7 +79,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         // 3) 403
-        $exceptions->render(function (\Illuminate\Auth\Access\AuthorizationException $e, $request) {
+        $exceptions->render(function (AuthorizationException $e, $request) {
             if ($request->is('api/*')) {
                 return response()->json([
                     'success' => false,
@@ -78,7 +89,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         // 4) 401
-        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, $request) {
+        $exceptions->render(function (AuthenticationException $e, $request) {
             if ($request->is('api/*')) {
                 return response()->json([
                     'success' => false,
@@ -87,8 +98,20 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        // 5) 500
-        $exceptions->render(function (\Throwable $e, $request) {
+        // 5) Preserve HTTP status codes such as 404, 405 and 429
+        $exceptions->render(function (HttpExceptionInterface $e, $request) {
+            if ($request->is('api/*')) {
+                $status = $e->getStatusCode();
+
+                return response()->json([
+                    'success' => false,
+                    'message' => Response::$statusTexts[$status] ?? 'Request failed',
+                ], $status, $e->getHeaders());
+            }
+        });
+
+        // 6) Unexpected server errors
+        $exceptions->render(function (Throwable $e, $request) {
             if ($request->is('api/*')) {
                 return response()->json([
                     'success' => false,

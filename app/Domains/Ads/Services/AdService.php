@@ -5,58 +5,71 @@ namespace App\Domains\Ads\Services;
 use App\Domains\Ads\Models\Ad;
 use App\Domains\Ads\Models\AdDetail;
 use App\Domains\Quotas\Services\QuotaService;
-use App\Models\User;
+use App\Mail\AdminNewPropertyNotification;
+use App\Mail\PropertyApprovedMail;
+use App\Mail\PropertyRejectedMail;
+use App\Mail\PropertyValidationPending;
+use App\Support\AuditLogger;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class AdService
 {
     public function __construct(
         protected QuotaService $quota,
-        protected AdSchemaValidator $schemaValidator
-    ) {
-    }
-    
+        protected AdSchemaValidator $schemaValidator,
+        protected AuditLogger $auditLogger,
+    ) {}
+
     public function list(array $filters = [])
     {
         $query = Ad::query()->with(['category', 'images', 'details', 'user', 'municipality']);
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('reference', 'like', "%{$search}%");
+                    ->orWhere('reference', 'like', "%{$search}%");
             });
         }
 
-        if (!empty($filters['user_id'])) {
+        if (! empty($filters['user_id'])) {
             $query->where('user_id', $filters['user_id']);
         }
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
-        if (!empty($filters['category_id'])) {
+        if (! empty($filters['category_id'])) {
             $query->where('category_id', $filters['category_id']);
         }
 
-        $sortBy = $filters['sort_by'] ?? 'created_at';
-        $sortOrder = $filters['sort_order'] ?? 'desc';
+        $allowedSorts = ['created_at', 'updated_at', 'title', 'price', 'status'];
+        $sortBy = in_array($filters['sort_by'] ?? null, $allowedSorts, true)
+            ? $filters['sort_by']
+            : 'created_at';
+        $sortOrder = in_array($filters['sort_order'] ?? null, ['asc', 'desc'], true)
+            ? $filters['sort_order']
+            : 'desc';
         $query->orderBy($sortBy, $sortOrder);
 
-        return $query->paginate($filters['per_page'] ?? 12);
+        return $query->paginate(min(max((int) ($filters['per_page'] ?? 12), 1), 100));
     }
 
     public function count(array $filters = []): int
     {
         $query = Ad::query();
 
-        if (!empty($filters['user_id'])) {
+        if (! empty($filters['user_id'])) {
             $query->where('user_id', $filters['user_id']);
         }
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
@@ -77,7 +90,7 @@ class AdService
                 'user_id' => $userId,
                 'category_id' => $data['category_id'],
                 'ad_type' => $data['ad_type'],
-                'reference' => 'AD-' . strtoupper(Str::random(8)),
+                'reference' => 'AD-'.strtoupper(Str::random(8)),
                 'title' => $data['title'],
                 'description' => $data['description'] ?? null,
                 'price' => $data['price'],
@@ -98,7 +111,7 @@ class AdService
                 'details' => $data['details'] ?? [],
             ]);
 
-            if (!empty($data['amenities'])) {
+            if (! empty($data['amenities'])) {
                 $ad->amenities()->sync($data['amenities']);
             }
 
@@ -123,7 +136,14 @@ class AdService
             | 1. SIMPLE FIELDS (TYPE-SAFE COMPARISON)
             |------------------------------------------------------
             */
-            $adFields = collect($data)->except(['details', 'amenities', 'images', 'images_to_delete', 'image_positions'])->toArray();
+            $adFields = collect($data)->except([
+                'details',
+                'amenities',
+                'images',
+                'images_to_delete',
+                'image_positions',
+                'image_order',
+            ])->toArray();
 
             foreach ($adFields as $key => $value) {
                 $current = $ad->{$key};
@@ -132,6 +152,7 @@ class AdService
                     if ((float) $current !== (float) $value) {
                         $changes[$key] = $value;
                     }
+
                     continue;
                 }
 
@@ -139,6 +160,7 @@ class AdService
                     if ((bool) $current !== (bool) $value) {
                         $changes[$key] = $value;
                     }
+
                     continue;
                 }
 
@@ -147,7 +169,7 @@ class AdService
                 }
             }
 
-            if (!empty($changes)) {
+            if (! empty($changes)) {
                 $ad->update($changes);
                 $changed = true;
             }
@@ -179,7 +201,6 @@ class AdService
                 }
             }
 
-
             /*
             |--------------------------------------------------------------
             | 3. AMENITIES (PATCH SAFE + NO-OP DETECTION)
@@ -189,27 +210,27 @@ class AdService
 
                 $currentIds = $ad->amenities()
                     ->pluck('amenities.id')
-                    ->map(fn($id) => (int) $id)
+                    ->map(fn ($id) => (int) $id)
                     ->toArray();
 
                 $toAdd = collect($data['amenities']['add'] ?? [])
-                    ->map(fn($id) => (int) $id)
+                    ->map(fn ($id) => (int) $id)
                     ->diff($currentIds)
                     ->values()
                     ->toArray();
 
                 $toRemove = collect($data['amenities']['remove'] ?? [])
-                    ->map(fn($id) => (int) $id)
+                    ->map(fn ($id) => (int) $id)
                     ->intersect($currentIds)
                     ->values()
                     ->toArray();
 
-                if (!empty($toAdd)) {
+                if (! empty($toAdd)) {
                     $ad->amenities()->attach($toAdd);
                     $changed = true;
                 }
 
-                if (!empty($toRemove)) {
+                if (! empty($toRemove)) {
                     $ad->amenities()->detach($toRemove);
                     $changed = true;
                 }
@@ -224,13 +245,12 @@ class AdService
                 $changed = true;
             }
 
-
             /*
             |------------------------------------------------------
             | 5. NO CHANGES
             |------------------------------------------------------
             */
-            if (!$changed) {
+            if (! $changed) {
                 return [
                     'no_changes' => true,
                     'ad' => $ad->load(['details', 'amenities', 'images']),
@@ -249,10 +269,10 @@ class AdService
         $changed = false;
 
         // 1. Delete
-        if (!empty($data['images_to_delete'])) {
+        if (! empty($data['images_to_delete'])) {
             $imagesToDelete = $ad->images()->whereIn('id', $data['images_to_delete'])->get();
             foreach ($imagesToDelete as $img) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($img->path);
+                Storage::disk('public')->delete($img->path);
                 $img->delete();
                 $changed = true;
             }
@@ -260,10 +280,10 @@ class AdService
 
         // 2. Upload New
         $newUploadedImages = [];
-        if (!empty($data['images'])) {
+        if (! empty($data['images'])) {
             foreach ($data['images'] as $index => $file) {
-                if ($file instanceof \Illuminate\Http\UploadedFile) {
-                    $path = $file->store('ads/' . $ad->id, 'public');
+                if ($file instanceof UploadedFile) {
+                    $path = $file->store('ads/'.$ad->id, 'public');
                     $newImg = $ad->images()->create([
                         'path' => $path,
                         'position' => 999, // Temp position
@@ -276,7 +296,7 @@ class AdService
 
         // 3. Reorder using image_order
         // Payload 'image_order' format: ['existing:1', 'new:0', 'existing:5', ...]
-        if (!empty($data['image_order'])) {
+        if (! empty($data['image_order'])) {
             foreach ($data['image_order'] as $position => $orderItem) {
                 if (str_starts_with($orderItem, 'existing:')) {
                     $id = (int) str_replace('existing:', '', $orderItem);
@@ -296,7 +316,7 @@ class AdService
                     }
                 }
             }
-        } elseif (!empty($data['image_positions'])) {
+        } elseif (! empty($data['image_positions'])) {
             // Fallback for old logic if needed, or if only reordering existing
             $positions = array_flip($data['image_positions']);
             $images = $ad->images()->get();
@@ -323,6 +343,7 @@ class AdService
         }
 
         ksort($array);
+
         return $array;
     }
 
@@ -346,16 +367,24 @@ class AdService
             'is_published' => true,
         ]);
 
+        $this->auditLogger->record(
+            'ad.submitted',
+            $ad,
+            "Annonce {$ad->reference} soumise à validation.",
+            ['status' => 'draft', 'is_published' => false],
+            ['status' => 'pending_validation', 'is_published' => true],
+        );
+
         // Send Emails
         try {
-            \Illuminate\Support\Facades\Mail::to($ad->user->email)
-                ->send(new \App\Mail\PropertyValidationPending($ad));
+            Mail::to($ad->user->email)
+                ->send(new PropertyValidationPending($ad));
 
-            $adminEmail = config('mail.from.address'); // Or a specific admin email
-            \Illuminate\Support\Facades\Mail::to($adminEmail)
-                ->send(new \App\Mail\AdminNewPropertyNotification($ad));
+            $adminEmail = config('mail.admin_address', config('mail.from.address'));
+            Mail::to($adminEmail)
+                ->send(new AdminNewPropertyNotification($ad));
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("Failed to send property validation emails: " . $e->getMessage());
+            Log::error('Failed to send property validation emails: '.$e->getMessage());
         }
 
         return $ad;
@@ -376,11 +405,20 @@ class AdService
             'rejection_reason' => null,
         ]);
 
+        $this->auditLogger->record(
+            'ad.approved',
+            $ad,
+            "Annonce {$ad->reference} approuvée.",
+            ['status' => 'pending_validation', 'is_approved' => false],
+            ['status' => 'published', 'is_approved' => true],
+            'warning',
+        );
+
         try {
-            \Illuminate\Support\Facades\Mail::to($ad->user->email)
-                ->send(new \App\Mail\PropertyApprovedMail($ad));
+            Mail::to($ad->user->email)
+                ->send(new PropertyApprovedMail($ad));
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("Failed to send property approved email: " . $e->getMessage());
+            Log::error('Failed to send property approved email: '.$e->getMessage());
         }
 
         return $ad;
@@ -398,11 +436,20 @@ class AdService
             'is_approved' => false,
         ]);
 
+        $this->auditLogger->record(
+            'ad.rejected',
+            $ad,
+            "Annonce {$ad->reference} rejetée.",
+            ['status' => 'pending_validation'],
+            ['status' => 'rejected', 'rejection_reason' => $reason],
+            'warning',
+        );
+
         try {
-            \Illuminate\Support\Facades\Mail::to($ad->user->email)
-                ->send(new \App\Mail\PropertyRejectedMail($ad, $reason));
+            Mail::to($ad->user->email)
+                ->send(new PropertyRejectedMail($ad, $reason));
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("Failed to send property rejected email: " . $e->getMessage());
+            Log::error('Failed to send property rejected email: '.$e->getMessage());
         }
 
         return $ad;
@@ -416,70 +463,92 @@ class AdService
      |=========================================================*/
     public function publicList(array $filters = [])
     {
-        $query = Ad::where('is_published', true)
+        $query = Ad::query()
+            ->select([
+                'id',
+                'user_id',
+                'category_id',
+                'municipality_id',
+                'reference',
+                'slug',
+                'title',
+                'description',
+                'price',
+                'currency',
+                'surface',
+                'ad_type',
+                'created_at',
+            ])
+            ->where('is_published', true)
             ->where('is_approved', true)
-            ->with(['category', 'amenities', 'images', 'details', 'user', 'municipality', 'city', 'country']);
+            ->with([
+                'category:id,name,slug',
+                'municipality:id,name',
+                'details:id,ad_id,details',
+                'primaryImage',
+            ])
+            ->withCount('images');
 
         // 1. Search (Title, Description, Reference)
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('reference', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('reference', 'like', "%{$search}%");
             });
         }
 
         // 2. Filters
-        if (!empty($filters['sale_type'])) {
+        if (! empty($filters['sale_type'])) {
             $query->where('ad_type', $filters['sale_type']);
         }
 
-        if (!empty($filters['type'])) {
-            // Assuming 'type' maps to category name or similar. 
+        if (! empty($filters['type'])) {
+            // Assuming 'type' maps to category name or similar.
             // If it's category_id, use that. If it's a string looking up category, we need relation.
             // For now assuming strict mapping if passed, but frontend sends string names often.
             // Let's assume it matches a category name or slug if joined, or just ignored if not ID.
             // Given frontend usage, let's try to match category slug or name via relation if possible.
-            // Or if frontend sends ID? Frontend sends string. 
+            // Or if frontend sends ID? Frontend sends string.
             // Let's filter by category name for now.
-            $query->whereHas('category', function($q) use ($filters) {
+            $query->whereHas('category', function ($q) use ($filters) {
                 $q->where('name', $filters['type'])
-                  ->orWhere('slug', $filters['type']);
+                    ->orWhere('slug', $filters['type']);
             });
         }
 
-        if (!empty($filters['municipality_id'])) {
+        if (! empty($filters['municipality_id'])) {
             $query->where('municipality_id', $filters['municipality_id']);
         }
 
-        if (!empty($filters['price_min'])) {
+        if (! empty($filters['price_min'])) {
             $query->where('price', '>=', $filters['price_min']);
         }
 
-        if (!empty($filters['price_max'])) {
+        if (! empty($filters['price_max'])) {
             $query->where('price', '<=', $filters['price_max']);
         }
 
-        if (!empty($filters['bedrooms'])) {
+        if (! empty($filters['bedrooms'])) {
             // stored in json column 'details' -> 'bedrooms'? Or separate column?
-            // Ad model fillable has 'bedrooms' not listed explicitly as column, 
+            // Ad model fillable has 'bedrooms' not listed explicitly as column,
             // but Ad table likely has them or they are in details.
             // Looking at AdService create, it puts 'details' into AdDetail model.
             // So we need to query AdDetail.
-             $query->whereHas('details', function($q) use ($filters) {
+            $query->whereHas('details', function ($q) use ($filters) {
                 $q->where('details->bedrooms', '>=', $filters['bedrooms']);
             });
         }
 
-        if (!empty($filters['bathrooms'])) {
-             $query->whereHas('details', function($q) use ($filters) {
+        if (! empty($filters['bathrooms'])) {
+            $query->whereHas('details', function ($q) use ($filters) {
                 $q->where('details->bathrooms', '>=', $filters['bathrooms']);
             });
         }
 
-        if (!empty($filters['amenities']) && is_array($filters['amenities'])) {
-            $query->whereHas('amenities', function($q) use ($filters) {
+        if (! empty($filters['amenities']) && is_array($filters['amenities'])) {
+            $query->whereHas('amenities', function ($q) use ($filters) {
                 $q->whereIn('amenities.id', $filters['amenities']);
             });
         }
@@ -499,11 +568,11 @@ class AdService
                 break;
         }
 
-        if (!empty($filters['limit'])) {
-            return $query->take($filters['limit'])->get();
+        if (! empty($filters['limit'])) {
+            return $query->take(min((int) $filters['limit'], 24))->get();
         }
 
-        return $query->paginate(12);
+        return $query->paginate(min(max((int) ($filters['per_page'] ?? 12), 1), 48));
     }
 
     public function getPublicAd($id)

@@ -17,54 +17,52 @@ import { useTranslation } from 'react-i18next';
 import { route } from 'ziggy-js';
 
 const stats = [
-    { value: '15+', label: 'Biens listés', icon: LucideHome },
-    { value: '8', label: 'Ventes conclues', icon: LucideTrendingUp },
-    { value: '98%', label: 'Satisfaction client', icon: LucideCheckCircle },
-    { value: '24/7', label: 'Support disponible', icon: LucideZap },
+    { value: '15+', labelKey: 'listed_properties', icon: LucideHome },
+    { value: '8', labelKey: 'sales_completed', icon: LucideTrendingUp },
+    {
+        value: '98%',
+        labelKey: 'client_satisfaction',
+        icon: LucideCheckCircle,
+    },
+    { value: '24/7', labelKey: 'support_available', icon: LucideZap },
 ];
 
 const features = [
     {
         icon: LucideSearch,
-        title: 'Recherche Avancée',
-        description:
-            'Trouvez la propriété idéale grâce à nos filtres puissants et une recherche géolocalisée.',
-        color: '#1E3A5F',
+        titleKey: 'advanced_search',
+        descriptionKey: 'advanced_search_description',
+        color: '#413D3C',
     },
     {
         icon: LucideShield,
-        title: 'Annonces Vérifiées',
-        description:
-            'Toutes les annonces sont vérifiées pour garantir leur authenticité et leur exactitude.',
+        titleKey: 'verified_listings',
+        descriptionKey: 'verified_listings_description',
         color: '#2A4F7C',
     },
     {
         icon: LucideMessageSquare,
-        title: 'Contact Direct',
-        description:
-            'Communiquez directement avec les vendeurs via notre système de messagerie sécurisé.',
-        color: '#C9A84C',
+        titleKey: 'direct_contact',
+        descriptionKey: 'direct_contact_description',
+        color: '#CF8E19',
     },
     {
         icon: LucideSmartphone,
-        title: 'Expérience Mobile',
-        description:
-            'Consultez nos annonces confortablement depuis votre téléphone, où que vous soyez.',
-        color: '#1E3A5F',
+        titleKey: 'mobile_experience',
+        descriptionKey: 'mobile_experience_description',
+        color: '#413D3C',
     },
     {
         icon: LucideGlobe,
-        title: 'Support Multilingue',
-        description:
-            'Notre plateforme est disponible en français et en anglais pour un accès universel.',
+        titleKey: 'multilingual_support',
+        descriptionKey: 'multilingual_support_description',
         color: '#2A4F7C',
     },
     {
         icon: LucideBuilding,
-        title: 'Tous Types de Biens',
-        description:
-            'Maisons, appartements, terrains et locaux commerciaux — tout en un seul endroit.',
-        color: '#C9A84C',
+        titleKey: 'all_property_types',
+        descriptionKey: 'all_property_types_description',
+        color: '#CF8E19',
     },
 ];
 
@@ -72,25 +70,22 @@ const services = [
     {
         number: '01',
         icon: LucideHome,
-        title: 'Maisons Individuelles',
-        description:
-            'Un vaste choix de maisons à vendre, soigneusement sélectionnées pour répondre à vos attentes.',
+        titleKey: 'individual_houses',
+        descriptionKey: 'individual_houses_description',
         image: 'assets/images/thumbs/service-10-thumb1.png',
     },
     {
         number: '02',
         icon: LucideBuilding,
-        title: 'Appartements & Duplex',
-        description:
-            'Découvrez nos appartements et duplex disponibles à la vente ou à la location dans tout le pays.',
+        titleKey: 'apartments_duplex',
+        descriptionKey: 'apartments_duplex_description',
         image: 'assets/images/thumbs/service-10-thumb2.png',
     },
     {
         number: '03',
         icon: LucideZap,
-        title: 'Biens Modernes',
-        description:
-            'Des propriétés contemporaines alliant design, confort et excellence architecturale.',
+        titleKey: 'modern_properties',
+        descriptionKey: 'modern_properties_description',
         image: 'assets/images/thumbs/service-10-thumb3.png',
     },
 ];
@@ -114,7 +109,7 @@ function useIntersection(threshold = 0.15) {
 }
 
 export default function WhyUs() {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const { ref: statsRef, visible: statsVisible } = useIntersection();
     const { ref: featuresRef, visible: featuresVisible } = useIntersection();
     const { ref: servicesRef, visible: servicesVisible } = useIntersection();
@@ -123,11 +118,11 @@ export default function WhyUs() {
     return (
         <>
             {/* ══ Section 1 : Avantages ══ */}
-            <section className="relative overflow-hidden bg-[#F8F7F4] py-20 lg:py-28">
+            <section className="relative overflow-hidden bg-[#F8F7F4] py-20 lg:py-28 dark:bg-[#292625]">
                 {/* Blobs décoratifs (statiques) */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                    <div className="absolute -top-32 -right-32 h-64 w-64 rounded-full bg-[#C9A84C]/8 blur-3xl" />
-                    <div className="absolute -bottom-32 -left-32 h-64 w-64 rounded-full bg-[#1E3A5F]/8 blur-3xl" />
+                    <div className="absolute -top-32 -right-32 h-64 w-64 rounded-full bg-[#CF8E19]/8 blur-3xl" />
+                    <div className="absolute -bottom-32 -left-32 h-64 w-64 rounded-full bg-[#413D3C]/8 blur-3xl" />
                 </div>
 
                 <div className="relative z-10 mx-auto max-w-7xl px-4">
@@ -140,26 +135,24 @@ export default function WhyUs() {
                             <div className="group relative overflow-hidden rounded-2xl shadow-2xl">
                                 <img
                                     src="assets/images/thumbs/about-10-thumb2.jpg"
-                                    alt="À propos de nous"
+                                    alt={t('about_image_alt')}
                                     className="h-[480px] w-full object-cover transition-transform duration-700 group-hover:scale-105"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#0d2340]/30 via-transparent to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#292625]/35 via-transparent to-transparent" />
                             </div>
 
                             {/* Badge flottant */}
-                            <div className="absolute -top-4 -right-4 rounded-xl bg-[#C9A84C] px-5 py-3 text-white shadow-xl">
+                            <div className="absolute -top-4 -right-4 rounded-xl bg-[#CF8E19] px-5 py-3 text-[#292625] shadow-xl">
                                 <div className="flex items-center gap-2">
                                     <LucideTrendingUp className="h-4 w-4" />
                                     <span className="text-sm font-bold">
-                                        {i18n.language === 'en'
-                                            ? 'Since 2020'
-                                            : 'Depuis 2020'}
+                                        {t('since_2020')}
                                     </span>
                                 </div>
                             </div>
 
                             {/* Stats overlay card */}
-                            <div className="absolute right-6 -bottom-6 left-6 rounded-xl bg-white/95 p-4 shadow-xl backdrop-blur-sm">
+                            <div className="absolute right-6 -bottom-6 left-6 rounded-xl bg-white/95 p-4 shadow-xl backdrop-blur-sm dark:border dark:border-white/10 dark:bg-[#353130]/95">
                                 <div
                                     ref={statsRef}
                                     className="grid grid-cols-4 gap-2"
@@ -168,18 +161,18 @@ export default function WhyUs() {
                                         const Icon = stat.icon;
                                         return (
                                             <div
-                                                key={stat.label}
+                                                key={stat.labelKey}
                                                 className={`text-center transition-all duration-500 ${statsVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}
                                                 style={{
                                                     transitionDelay: `${i * 100}ms`,
                                                 }}
                                             >
-                                                <Icon className="mx-auto mb-1 h-4 w-4 text-[#C9A84C]" />
-                                                <div className="text-lg font-extrabold text-[#1E3A5F]">
+                                                <Icon className="mx-auto mb-1 h-4 w-4 text-[#CF8E19]" />
+                                                <div className="text-lg font-extrabold text-[#413D3C] dark:text-[#EEEFE6]">
                                                     {stat.value}
                                                 </div>
                                                 <div className="text-[10px] leading-tight font-medium text-gray-500">
-                                                    {stat.label}
+                                                    {t(stat.labelKey)}
                                                 </div>
                                             </div>
                                         );
@@ -194,25 +187,14 @@ export default function WhyUs() {
                         >
                             <div>
                                 <span className="section-label">
-                                    <span className="h-px w-8 bg-[#C9A84C]" />
+                                    <span className="h-px w-8 bg-[#CF8E19]" />
                                     {t('about_subtitle')}
                                 </span>
                                 <h2 className="section-title mt-2">
-                                    {i18n.language === 'en' ? (
-                                        <>
-                                            Dedicated to finding your{' '}
-                                            <span className="text-[#C9A84C]">
-                                                ideal property
-                                            </span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            Engagés à trouver votre{' '}
-                                            <span className="text-[#C9A84C]">
-                                                propriété idéale
-                                            </span>
-                                        </>
-                                    )}
+                                    {t('why_us_heading_prefix')}{' '}
+                                    <span className="text-[#CF8E19]">
+                                        {t('why_us_heading_accent')}
+                                    </span>
                                 </h2>
                             </div>
 
@@ -237,11 +219,11 @@ export default function WhyUs() {
                                                 <Icon className="h-5 w-5" />
                                             </div>
                                             <div>
-                                                <h3 className="mb-1 text-sm font-bold text-gray-900 transition-colors group-hover:text-[#1E3A5F]">
-                                                    {feat.title}
+                                                <h3 className="mb-1 text-sm font-bold text-gray-900 transition-colors group-hover:text-[#413D3C] dark:text-[#EEEFE6] dark:group-hover:text-[#CF8E19]">
+                                                    {t(feat.titleKey)}
                                                 </h3>
                                                 <p className="text-xs leading-relaxed text-gray-500">
-                                                    {feat.description}
+                                                    {t(feat.descriptionKey)}
                                                 </p>
                                             </div>
                                         </div>
@@ -266,7 +248,7 @@ export default function WhyUs() {
             {/* ══ Section 2 : Types de biens ══ */}
             <section
                 ref={servicesRef}
-                className="relative bg-white py-20 lg:py-28"
+                className="relative bg-white py-20 lg:py-28 dark:bg-[#353130]"
             >
                 <div className="mx-auto max-w-7xl px-4">
                     {/* Header */}
@@ -274,25 +256,14 @@ export default function WhyUs() {
                         className={`mb-14 text-center transition-all duration-700 ${servicesVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
                     >
                         <span className="section-label">
-                            <span className="h-px w-8 bg-[#C9A84C]" />
+                            <span className="h-px w-8 bg-[#CF8E19]" />
                             {t('properties_by_type')}
                         </span>
                         <h2 className="section-title mt-2">
-                            {i18n.language === 'fr' ? (
-                                <>
-                                    Découvrez votre maison de{' '}
-                                    <span className="text-[#C9A84C]">
-                                        rêves
-                                    </span>
-                                </>
-                            ) : (
-                                <>
-                                    Discover your{' '}
-                                    <span className="text-[#C9A84C]">
-                                        dream home
-                                    </span>
-                                </>
-                            )}
+                            {t('dream_home_heading_prefix')}{' '}
+                            <span className="text-[#CF8E19]">
+                                {t('dream_home_heading_accent')}
+                            </span>
                         </h2>
                     </div>
 
@@ -303,7 +274,7 @@ export default function WhyUs() {
                             return (
                                 <div
                                     key={service.number}
-                                    className={`group relative overflow-hidden rounded-2xl bg-white shadow-md transition-all duration-500 hover:-translate-y-2 hover:shadow-xl ${servicesVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+                                    className={`group relative overflow-hidden rounded-2xl border border-transparent bg-white shadow-md transition-all duration-500 hover:-translate-y-2 hover:shadow-xl dark:border-white/10 dark:bg-[#292625] ${servicesVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
                                     style={{ transitionDelay: `${i * 120}ms` }}
                                     onMouseEnter={() => setHoveredService(i)}
                                     onMouseLeave={() => setHoveredService(null)}
@@ -311,7 +282,7 @@ export default function WhyUs() {
                                     {/* Numéro */}
                                     <div className="absolute top-4 left-4 z-20">
                                         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/90 backdrop-blur-sm">
-                                            <span className="text-sm font-bold text-[#C9A84C]">
+                                            <span className="text-sm font-bold text-[#CF8E19]">
                                                 {service.number}
                                             </span>
                                         </div>
@@ -321,7 +292,7 @@ export default function WhyUs() {
                                     <div className="relative h-52 overflow-hidden">
                                         <img
                                             src={service.image}
-                                            alt={service.title}
+                                            alt={t(service.titleKey)}
                                             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
@@ -329,31 +300,29 @@ export default function WhyUs() {
                                         {/* Icon overlay */}
                                         <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-500 group-hover:opacity-100">
                                             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/95 shadow-lg backdrop-blur-sm">
-                                                <Icon className="h-7 w-7 text-[#1E3A5F]" />
+                                                <Icon className="h-7 w-7 text-[#413D3C] dark:text-[#EEEFE6]" />
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Contenu */}
                                     <div className="p-6">
-                                        <h3 className="mb-3 text-lg font-bold text-gray-900 transition-colors duration-300 group-hover:text-[#1E3A5F]">
-                                            {service.title}
+                                        <h3 className="mb-3 text-lg font-bold text-gray-900 transition-colors duration-300 group-hover:text-[#413D3C] dark:text-[#EEEFE6] dark:group-hover:text-[#CF8E19]">
+                                            {t(service.titleKey)}
                                         </h3>
                                         <p className="mb-4 text-sm leading-relaxed text-gray-500">
-                                            {service.description}
+                                            {t(service.descriptionKey)}
                                         </p>
                                         <div
-                                            className={`flex items-center gap-1.5 text-sm font-semibold text-[#C9A84C] transition-all duration-300 ${hoveredService === i ? 'translate-x-1 opacity-100' : 'opacity-0'}`}
+                                            className={`flex items-center gap-1.5 text-sm font-semibold text-[#CF8E19] transition-all duration-300 ${hoveredService === i ? 'translate-x-1 opacity-100' : 'opacity-0'}`}
                                         >
-                                            {i18n.language === 'fr'
-                                                ? 'En savoir plus'
-                                                : 'Learn more'}
+                                            {t('learn_more')}
                                             <LucideArrowRight className="h-4 w-4" />
                                         </div>
                                     </div>
 
                                     {/* Bord gold en bas au hover */}
-                                    <div className="absolute bottom-0 left-0 h-1 w-0 bg-gradient-to-r from-[#1E3A5F] to-[#C9A84C] transition-all duration-500 group-hover:w-full" />
+                                    <div className="absolute bottom-0 left-0 h-1 w-0 bg-gradient-to-r from-[#413D3C] to-[#CF8E19] transition-all duration-500 group-hover:w-full dark:from-[#EEEFE6]" />
                                 </div>
                             );
                         })}
@@ -367,9 +336,7 @@ export default function WhyUs() {
                             href={route('properties')}
                             className="btn-navy group inline-flex"
                         >
-                            {i18n.language === 'fr'
-                                ? 'Voir toutes les propriétés'
-                                : 'View all properties'}
+                            {t('view_all_properties')}
                             <LucideArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                         </Link>
                     </div>

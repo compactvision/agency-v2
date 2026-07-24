@@ -1,6 +1,7 @@
 import DashboardLayout from '@/components/layouts/Dashboard/Dashboard';
 import { Head, router } from '@inertiajs/react';
 import { Bell, CheckCircle, Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Notification {
     id: string;
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export default function Notifications({ notifications }: Props) {
+    const { t, i18n } = useTranslation();
     const markAsRead = (id: string) => {
         router.post(
             route('dashboard.notifications.mark-read', id),
@@ -41,15 +43,15 @@ export default function Notifications({ notifications }: Props) {
 
     return (
         <DashboardLayout>
-            <Head title="Notifications" />
+            <Head title={t('notifications')} />
 
             <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
                     <h1 className="text-3xl font-bold text-slate-900">
-                        Notifications
+                        {t('notifications')}
                     </h1>
                     <p className="mt-1 text-slate-500">
-                        Gérez vos alertes et mises à jour système.
+                        {t('manage_notifications_description')}
                     </p>
                 </div>
 
@@ -59,7 +61,7 @@ export default function Notifications({ notifications }: Props) {
                         className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-600 shadow-sm transition-all hover:bg-slate-50"
                     >
                         <CheckCircle size={18} className="text-[#C9A84C]" />
-                        Tout marquer comme lu
+                        {t('mark_all_as_read')}
                     </button>
                 </div>
             </div>
@@ -86,7 +88,11 @@ export default function Notifications({ notifications }: Props) {
                                             <Clock size={12} />
                                             {new Date(
                                                 notif.created_at,
-                                            ).toLocaleString()}
+                                            ).toLocaleString(
+                                                i18n.language === 'fr'
+                                                    ? 'fr-FR'
+                                                    : 'en-US',
+                                            )}
                                         </span>
                                     </div>
                                     <p className="mb-4 leading-relaxed text-slate-600">
@@ -103,7 +109,7 @@ export default function Notifications({ notifications }: Props) {
                                                 }
                                                 className="text-sm font-bold text-[#1E3A5F] hover:text-[#0d2340]"
                                             >
-                                                Voir les détails
+                                                {t('view_details')}
                                             </button>
                                         )}
                                         {!notif.read_at && (
@@ -113,7 +119,7 @@ export default function Notifications({ notifications }: Props) {
                                                 }
                                                 className="text-sm font-bold text-slate-400 hover:text-slate-600"
                                             >
-                                                Marquer comme lu
+                                                {t('mark_as_read')}
                                             </button>
                                         )}
                                     </div>
@@ -126,11 +132,10 @@ export default function Notifications({ notifications }: Props) {
                                 <Bell size={40} className="text-slate-200" />
                             </div>
                             <h2 className="mb-2 text-xl font-bold text-slate-800">
-                                Aucune notification
+                                {t('no_notifications')}
                             </h2>
                             <p className="text-slate-500">
-                                Vous êtes à jour ! Toutes vos notifications
-                                apparaîtront ici.
+                                {t('notifications_empty_description')}
                             </p>
                         </div>
                     )}

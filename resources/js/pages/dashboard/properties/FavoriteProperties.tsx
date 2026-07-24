@@ -19,18 +19,30 @@ import {
     TrendingUp,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type PropertyImage = { url: string };
 type Property = {
     id: number;
     title: string;
-    type: string;
+    type:
+        | 'house'
+        | 'apartment'
+        | 'studio'
+        | 'villa'
+        | 'land'
+        | 'office'
+        | 'shop'
+        | 'garage'
+        | 'warehouse'
+        | 'other';
+    sale_type: 'rent' | 'sale';
     price: number;
     is_published: boolean;
     is_approved: boolean;
     status?: string;
     image?: PropertyImage[];
-    images?: PropertyImage[];
+    images: PropertyImage[];
     views_count?: number;
     created_at?: string;
     location?: string;
@@ -43,6 +55,7 @@ type Property = {
 type PaginationLink = { url: string | null; label: string; active: boolean };
 
 export default function FavoriteProperties() {
+    const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedProperty, setSelectedProperty] = useState<Property | null>(
         null,
@@ -133,11 +146,7 @@ export default function FavoriteProperties() {
     };
 
     const deleteProperty = (id: number) => {
-        if (
-            confirm(
-                'Voulez-vous vraiment supprimer cette propriété de vos favoris ?',
-            )
-        ) {
+        if (confirm(t('dashboard_ui.favorites.remove_confirmation'))) {
             router.delete(route('dashboard.favorites.destroy', { id }), {
                 preserveScroll: true,
             });
@@ -205,7 +214,7 @@ export default function FavoriteProperties() {
         if (!property.is_approved) {
             return (
                 <span className="inline-flex items-center rounded-full border border-slate-200 bg-[#1E3A5F]/10 px-2 py-1 text-xs font-medium text-[#0d2340]">
-                    En attente
+                    {t('dashboard_ui.common.pending')}
                 </span>
             );
         }
@@ -213,14 +222,14 @@ export default function FavoriteProperties() {
         if (!property.is_published) {
             return (
                 <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
-                    Brouillon
+                    {t('dashboard_ui.common.draft')}
                 </span>
             );
         }
 
         return (
             <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800">
-                Publié
+                {t('dashboard_ui.common.published')}
             </span>
         );
     };
@@ -239,7 +248,7 @@ export default function FavoriteProperties() {
         <Dashboard>
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 {/* Header Section */}
-                <div className="sticky top-0 z-1 border-b border-slate-200 bg-white/80 shadow-lg shadow-sm backdrop-blur-xl">
+                <div className="dashboard-section-header sticky top-0 z-1 border-b border-slate-200 bg-white/80 shadow-lg shadow-sm backdrop-blur-xl">
                     <div className="px-4 py-4 sm:px-6 lg:px-8">
                         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                             <button
@@ -247,16 +256,15 @@ export default function FavoriteProperties() {
                                 className="flex items-center gap-2 rounded-xl bg-[#1E3A5F]/10 px-4 py-2 text-[#0d2340] transition-colors duration-200 hover:bg-slate-100"
                             >
                                 <ArrowLeft size={18} />
-                                <span>Retour</span>
+                                <span>{t('dashboard_ui.common.back')}</span>
                             </button>
 
                             <div className="flex-1 text-center sm:text-left">
-                                <h1 className="bg-gradient-to-r from-slate-100 to-slate-100 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
-                                    Propriétés Favorites
+                                <h1 className="dashboard-page-title text-2xl font-bold sm:text-3xl">
+                                    {t('dashboard_ui.favorites.title')}
                                 </h1>
                                 <p className="mt-1 text-sm text-slate-600 sm:text-base">
-                                    Gérez vos propriétés favorites et suivez
-                                    leurs performances
+                                    {t('dashboard_ui.favorites.description')}
                                 </p>
                             </div>
 
@@ -270,7 +278,9 @@ export default function FavoriteProperties() {
                                                 ? 'bg-slate-500 text-white'
                                                 : 'text-[#1E3A5F] hover:bg-slate-200'
                                         }`}
-                                        title="Vue grille"
+                                        title={t(
+                                            'dashboard_ui.properties.grid_view',
+                                        )}
                                     >
                                         <Filter size={16} />
                                     </button>
@@ -281,7 +291,9 @@ export default function FavoriteProperties() {
                                                 ? 'bg-slate-500 text-white'
                                                 : 'text-[#1E3A5F] hover:bg-slate-200'
                                         }`}
-                                        title="Vue liste"
+                                        title={t(
+                                            'dashboard_ui.properties.list_view',
+                                        )}
                                     >
                                         <BarChart3 size={16} />
                                     </button>
@@ -300,13 +312,15 @@ export default function FavoriteProperties() {
 
                                 <button
                                     onClick={handleOpenProperties}
-                                    className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-4 py-2.5 font-medium text-white shadow-lg shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22]"
+                                    className="dashboard-primary-action inline-flex transform items-center rounded-xl px-4 py-2.5 font-medium shadow-lg shadow-sm transition-all duration-300 hover:scale-105"
                                 >
                                     <Plus size={18} className="mr-2" />
                                     <span className="hidden sm:inline">
-                                        Explorer
+                                        {t('dashboard_ui.favorites.explore')}
                                     </span>
-                                    <span className="sm:hidden">Voir</span>
+                                    <span className="sm:hidden">
+                                        {t('dashboard_ui.favorites.view')}
+                                    </span>
                                 </button>
                             </div>
                         </div>
@@ -320,7 +334,9 @@ export default function FavoriteProperties() {
                                 />
                                 <input
                                     type="text"
-                                    placeholder="Rechercher par titre, type, localisation..."
+                                    placeholder={t(
+                                        'dashboard_ui.properties.search_placeholder',
+                                    )}
                                     className="w-full rounded-xl border border-slate-200 bg-white/80 py-3 pr-4 pl-10 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none"
                                     value={searchQuery}
                                     onChange={(e) =>
@@ -351,20 +367,26 @@ export default function FavoriteProperties() {
                                     className="cursor-pointer appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none"
                                 >
                                     <option value="created_at-desc">
-                                        Plus récentes
+                                        {t('dashboard_ui.properties.recent')}
                                     </option>
                                     <option value="created_at-asc">
-                                        Plus anciennes
+                                        {t('dashboard_ui.properties.oldest')}
                                     </option>
                                     <option value="price-asc">
-                                        Prix croissant
+                                        {t('dashboard_ui.properties.price_asc')}
                                     </option>
                                     <option value="price-desc">
-                                        Prix décroissant
+                                        {t(
+                                            'dashboard_ui.properties.price_desc',
+                                        )}
                                     </option>
-                                    <option value="title-asc">Titre A-Z</option>
+                                    <option value="title-asc">
+                                        {t('dashboard_ui.properties.title_asc')}
+                                    </option>
                                     <option value="title-desc">
-                                        Titre Z-A
+                                        {t(
+                                            'dashboard_ui.properties.title_desc',
+                                        )}
                                     </option>
                                 </select>
                                 <TrendingUp
@@ -384,18 +406,17 @@ export default function FavoriteProperties() {
                                 <Heart size={32} className="text-[#C9A84C]" />
                             </div>
                             <h3 className="mb-2 text-xl font-semibold text-slate-900">
-                                Aucune propriété favorite
+                                {t('dashboard_ui.favorites.empty')}
                             </h3>
                             <p className="mb-6 text-slate-600">
-                                Commencez par explorer et ajouter des propriétés
-                                à vos favoris
+                                {t('dashboard_ui.favorites.empty_description')}
                             </p>
                             <button
                                 onClick={handleOpenProperties}
                                 className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-6 py-3 font-medium text-white shadow-lg shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22]"
                             >
                                 <Plus size={20} className="mr-2" />
-                                Explorer les propriétés
+                                {t('dashboard_ui.favorites.explore_properties')}
                             </button>
                         </div>
                     ) : (
@@ -516,7 +537,9 @@ export default function FavoriteProperties() {
                                                                     )
                                                                 }
                                                                 className="rounded-lg p-2 text-[#1E3A5F] transition-colors hover:bg-slate-100"
-                                                                title="Voir détails"
+                                                                title={t(
+                                                                    'dashboard_ui.properties.view_details',
+                                                                )}
                                                             >
                                                                 <Eye
                                                                     size={16}
@@ -543,7 +566,9 @@ export default function FavoriteProperties() {
                                                                         )
                                                                     }
                                                                     className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100"
-                                                                    title="Plus d'options"
+                                                                    title={t(
+                                                                        'dashboard_ui.properties.more_actions',
+                                                                    )}
                                                                 >
                                                                     <MoreVertical
                                                                         size={
@@ -569,7 +594,9 @@ export default function FavoriteProperties() {
                                                                                 }
                                                                             />
                                                                             <span>
-                                                                                Modifier
+                                                                                {t(
+                                                                                    'dashboard_ui.common.edit',
+                                                                                )}
                                                                             </span>
                                                                         </button>
                                                                         <button
@@ -586,7 +613,9 @@ export default function FavoriteProperties() {
                                                                                 }
                                                                             />
                                                                             <span>
-                                                                                Statistiques
+                                                                                {t(
+                                                                                    'dashboard_ui.properties.statistics',
+                                                                                )}
                                                                             </span>
                                                                         </button>
                                                                         <button
@@ -603,7 +632,9 @@ export default function FavoriteProperties() {
                                                                                 }
                                                                             />
                                                                             <span>
-                                                                                Retirer
+                                                                                {t(
+                                                                                    'dashboard_ui.favorites.remove',
+                                                                                )}
                                                                                 des
                                                                                 favoris
                                                                             </span>
@@ -622,7 +653,9 @@ export default function FavoriteProperties() {
                                                                                 }
                                                                             />
                                                                             <span>
-                                                                                Supprimer
+                                                                                {t(
+                                                                                    'dashboard_ui.common.delete',
+                                                                                )}
                                                                             </span>
                                                                         </button>
                                                                     </div>
@@ -643,22 +676,34 @@ export default function FavoriteProperties() {
                                             <thead className="bg-slate-50">
                                                 <tr>
                                                     <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                                        Image
+                                                        {t(
+                                                            'dashboard_ui.properties.image',
+                                                        )}
                                                     </th>
                                                     <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                                        Propriété
+                                                        {t(
+                                                            'dashboard_ui.properties.property',
+                                                        )}
                                                     </th>
                                                     <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                                        Statut
+                                                        {t(
+                                                            'dashboard_ui.common.status',
+                                                        )}
                                                     </th>
                                                     <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                                        Prix
+                                                        {t(
+                                                            'dashboard_ui.properties.price',
+                                                        )}
                                                     </th>
                                                     <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                                        Vues
+                                                        {t(
+                                                            'dashboard_ui.properties.view_count',
+                                                        )}
                                                     </th>
                                                     <th className="px-6 py-4 text-left text-xs font-medium tracking-wider text-slate-700 uppercase">
-                                                        Actions
+                                                        {t(
+                                                            'dashboard_ui.common.actions',
+                                                        )}
                                                     </th>
                                                 </tr>
                                             </thead>
@@ -670,7 +715,7 @@ export default function FavoriteProperties() {
                                                     ) => (
                                                         <tr
                                                             key={property.id}
-                                                            className="transition-colors hover:bg-slate-50"
+                                                            className="dashboard-data-row group transition-colors"
                                                             style={{
                                                                 animationDelay: `${index * 0.05}s`,
                                                             }}
@@ -754,7 +799,7 @@ export default function FavoriteProperties() {
                                                                     0}
                                                             </td>
                                                             <td className="px-6 py-4">
-                                                                <div className="flex items-center gap-2">
+                                                                <div className="dashboard-row-actions flex items-center gap-2 rounded-xl p-1 md:pointer-events-none md:translate-x-2 md:opacity-0 md:group-focus-within:pointer-events-auto md:group-focus-within:translate-x-0 md:group-focus-within:opacity-100 md:group-hover:pointer-events-auto md:group-hover:translate-x-0 md:group-hover:opacity-100">
                                                                     <button
                                                                         onClick={() =>
                                                                             handleViewProperty(
@@ -762,7 +807,10 @@ export default function FavoriteProperties() {
                                                                             )
                                                                         }
                                                                         className="rounded-lg p-2 text-[#1E3A5F] transition-colors hover:bg-slate-100"
-                                                                        title="Voir détails"
+                                                                        title={t(
+                                                                            'dashboard_ui.properties.view_details',
+                                                                        )}
+                                                                        aria-label={`Voir les détails de ${property.title}`}
                                                                     >
                                                                         <Eye
                                                                             size={
@@ -792,7 +840,10 @@ export default function FavoriteProperties() {
                                                                                 )
                                                                             }
                                                                             className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100"
-                                                                            title="Plus d'options"
+                                                                            title={t(
+                                                                                'dashboard_ui.properties.more_actions',
+                                                                            )}
+                                                                            aria-label={`Afficher les actions pour ${property.title}`}
                                                                         >
                                                                             <MoreVertical
                                                                                 size={
@@ -818,7 +869,9 @@ export default function FavoriteProperties() {
                                                                                         }
                                                                                     />
                                                                                     <span>
-                                                                                        Modifier
+                                                                                        {t(
+                                                                                            'dashboard_ui.common.edit',
+                                                                                        )}
                                                                                     </span>
                                                                                 </button>
                                                                                 <button
@@ -835,7 +888,9 @@ export default function FavoriteProperties() {
                                                                                         }
                                                                                     />
                                                                                     <span>
-                                                                                        Statistiques
+                                                                                        {t(
+                                                                                            'dashboard_ui.properties.statistics',
+                                                                                        )}
                                                                                     </span>
                                                                                 </button>
                                                                                 <button
@@ -852,7 +907,9 @@ export default function FavoriteProperties() {
                                                                                         }
                                                                                     />
                                                                                     <span>
-                                                                                        Retirer
+                                                                                        {t(
+                                                                                            'dashboard_ui.favorites.remove',
+                                                                                        )}
                                                                                         des
                                                                                         favoris
                                                                                     </span>
@@ -871,7 +928,9 @@ export default function FavoriteProperties() {
                                                                                         }
                                                                                     />
                                                                                     <span>
-                                                                                        Supprimer
+                                                                                        {t(
+                                                                                            'dashboard_ui.common.delete',
+                                                                                        )}
                                                                                     </span>
                                                                                 </button>
                                                                             </div>

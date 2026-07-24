@@ -13,7 +13,7 @@ export default function ShareButton() {
 
     const shareData = {
         title: document.title,
-        text: t('share_text', 'Découvrez cette annonce sur DRC Agency'),
+        text: t('share_text', 'Découvrez cette annonce sur The Agency'),
         url: shareUrl,
     };
 

@@ -14,7 +14,7 @@ export default function Contact() {
 
     return (
         <App>
-            <Head title="Contact" />
+            <Head title={t('contact')} />
             <Breadcumb title={t('contact')} homeLink={route('home')} />
 
             {/* Section des informations de contact */}
@@ -48,7 +48,7 @@ export default function Contact() {
                                     href={`mailto:${settings?.app_email ?? ''}`}
                                     className="text-orange-600 transition-colors hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300"
                                 >
-                                    {settings?.app_email ?? 'Non défini'}
+                                    {settings?.app_email ?? t('not_defined')}
                                 </a>
                             </p>
                         </div>
@@ -65,7 +65,7 @@ export default function Contact() {
                                 {t('location')}
                             </h3>
                             <p className="text-gray-600 dark:text-zinc-400">
-                                {settings?.adresse ?? 'Non défini'}
+                                {settings?.adresse ?? t('not_defined')}
                             </p>
                         </div>
 
@@ -85,7 +85,7 @@ export default function Contact() {
                                     href={`tel:${settings?.numero ?? ''}`}
                                     className="text-orange-600 transition-colors hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300"
                                 >
-                                    {settings?.numero ?? 'Non défini'}
+                                    {settings?.numero ?? t('not_defined')}
                                 </a>
                             </p>
                         </div>
@@ -101,7 +101,7 @@ export default function Contact() {
                     allowFullScreen
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
-                    title="Carte de localisation"
+                    title={t('location_map')}
                 ></iframe>
             </div>
 
