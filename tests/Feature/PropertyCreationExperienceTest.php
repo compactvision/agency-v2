@@ -34,10 +34,12 @@ it('uses one global toast presenter for success and failed actions', function ()
     );
 
     expect($application)
-        ->toContain('<GlobalToasts />')
+        ->toContain('initialPageProps=')
         ->and($toasts)
         ->toContain('flash?.success ?? flash?.message')
         ->toContain('toast.error(errorMessage')
+        ->toContain("router.on('navigate'")
+        ->not->toContain('usePage')
         ->toContain("'verification-link-sent'")
         ->toContain("'passwords.reset'")
         ->and($homeLayout)

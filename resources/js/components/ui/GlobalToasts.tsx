@@ -1,10 +1,10 @@
-import { usePage } from '@inertiajs/react';
-import { useEffect, useMemo } from 'react';
+import { router } from '@inertiajs/react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast, Toaster } from 'sonner';
 import { useAppearance } from '@/hooks/use-appearance';
 
-type ToastPageProps = {
+export type ToastPageProps = {
     [key: string]: unknown;
     flash?: {
         success?: string | null;
@@ -29,13 +29,29 @@ const statusMessages: Record<string, { type: 'success' | 'info'; key: string }> 
         },
     };
 
-export default function GlobalToasts() {
+type GlobalToastsProps = {
+    initialPageProps: ToastPageProps;
+};
+
+export default function GlobalToasts({
+    initialPageProps,
+}: GlobalToastsProps) {
     const { t } = useTranslation();
     const { appearance } = useAppearance();
-    const { flash, errors, status } = usePage<ToastPageProps>().props;
+    const [pageProps, setPageProps] =
+        useState<ToastPageProps>(initialPageProps);
+    const { flash, errors, status } = pageProps;
     const errorMessage = useMemo(
         () => Object.values(errors ?? {}).find(Boolean),
         [errors],
+    );
+
+    useEffect(
+        () =>
+            router.on('navigate', (event) => {
+                setPageProps(event.detail.page.props as ToastPageProps);
+            }),
+        [],
     );
 
     useEffect(() => {
