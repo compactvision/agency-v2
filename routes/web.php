@@ -64,6 +64,7 @@ require __DIR__.'/settings.php';
 Route::middleware(['auth', 'verified'])->prefix('/dashboard')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/properties/generate-description', [PropertyDescriptionController::class, 'generate'])
+        ->middleware('throttle:10,1')
         ->name('description.ai.generate-description');
 
     Route::name('dashboard.')->group(function () {
@@ -122,7 +123,6 @@ Route::middleware(['auth', 'verified'])->prefix('/dashboard')->group(function ()
             Route::delete('/pages/{id}', [AdminPageController::class, 'destroy'])->name('pages.destroy');
 
             Route::get('/payment-requests', [TransactionController::class, 'index'])->name('payment-requests.index');
-            Route::post('/payment-requests/store', [TransactionController::class, 'store'])->name('payment-requests.store');
             Route::put('/payment-requests/{id}/approve', [TransactionController::class, 'approve'])->name('payment-requests.approve');
             Route::put('/payment-requests/{id}/reject', [TransactionController::class, 'reject'])->name('payment-requests.reject');
 
@@ -144,6 +144,9 @@ Route::middleware(['auth', 'verified'])->prefix('/dashboard')->group(function ()
 
         // Subscriptions
         Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+        Route::post('/subscriptions/request', [TransactionController::class, 'store'])
+            ->middleware('throttle:5,1')
+            ->name('subscriptions.store');
 
         // Notifications
         Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');

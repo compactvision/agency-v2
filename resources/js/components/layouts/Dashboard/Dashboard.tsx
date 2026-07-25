@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { toast, Toaster } from 'sonner';
+import { toast } from 'sonner';
 import Sidebar from './Sidebar';
 
 declare function route(name: string, params?: any): string;
@@ -48,6 +48,7 @@ interface PageProps {
     };
     recentNotifications?: Notification[];
     flash?: {
+        success?: string;
         message?: string;
         error?: string;
         info?: string;
@@ -71,7 +72,7 @@ const getSavedSidebarState = () => {
 
 const Dashboard = ({ children }: { children: ReactNode }) => {
     const { t, i18n } = useTranslation();
-    const { auth, recentNotifications, flash } = usePage<PageProps>().props;
+    const { auth, recentNotifications } = usePage<PageProps>().props;
     const { user } = auth;
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -186,11 +187,6 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
         document.addEventListener('click', handleClickOutside);
         return () => document.removeEventListener('click', handleClickOutside);
     }, [isProfileMenuOpen, isNotificationsOpen]);
-
-    useEffect(() => {
-        if (flash?.message) toast.success(flash.message);
-        if (flash?.error) toast.error(flash.error);
-    }, [flash]);
 
     return (
         <div className="dashboard-shell relative flex min-h-screen bg-slate-50 font-sans text-slate-900">
@@ -491,8 +487,6 @@ const Dashboard = ({ children }: { children: ReactNode }) => {
                     <div className="mx-auto max-w-[1600px]">{children}</div>
                 </main>
             </div>
-
-            <Toaster richColors position="top-right" />
         </div>
     );
 };

@@ -33,6 +33,7 @@ import {
     useMap,
     useMapEvents,
 } from 'react-leaflet';
+import { toast } from 'sonner';
 import { route } from 'ziggy-js';
 
 // Fix Leaflet marker icons
@@ -176,10 +177,11 @@ const PropertyForm: React.FC<Props> = ({
     hasActiveSubscription,
     property = null,
 }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { auth } = usePage().props as unknown as { auth: { user: any } };
     const isEditMode = !!property?.id;
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const formContentRef = useRef<HTMLDivElement>(null);
 
     // États pour l'UI responsive
     const [activeSection, setActiveSection] = useState('basic');
@@ -684,7 +686,32 @@ const PropertyForm: React.FC<Props> = ({
                     kitchens: data.kitchens,
                     condition: data.condition,
                     furnished: data.furnished,
+                    rental_guarantee: data.rental_guarantee,
+                    garages: data.garages,
+                    garage_size: data.garage_size,
+                    balconies: data.balconies,
+                    terraces: data.terraces,
+                    floor: data.floor,
+                    total_floors: data.total_floors,
+                    year_built: data.year_built,
+                    construction_year: data.construction_year,
+                    renovation_year: data.renovation_year,
+                    elevator: data.elevator,
+                    parking: data.parking,
+                    garden: data.garden,
+                    swimming_pool: data.swimming_pool,
+                    cellar: data.cellar,
+                    attic: data.attic,
+                    urgency: data.urgency,
+                    land_surface: data.land_surface,
+                    land_type: data.land_type,
                     amenities: selectedAmenities,
+                    previous_description: isDescriptionGenerated
+                        ? data.description
+                        : null,
+                    language: i18n.resolvedLanguage?.startsWith('en')
+                        ? 'en'
+                        : 'fr',
                 },
             );
 
@@ -693,16 +720,26 @@ const PropertyForm: React.FC<Props> = ({
                 description: response.data.description,
             }));
             setIsDescriptionGenerated(true);
+            toast.success('Description générée avec succès.');
         } catch (error: any) {
             const message =
                 error?.response?.data?.error ||
                 'Erreur lors de la génération de la description.';
             setSubmitStatus('error');
             setSubmitMessage(message);
+            toast.error(message);
         } finally {
             setLoading(false);
         }
-    }, [hasActiveSubscription, municipalities, amenities, data, setData]);
+    }, [
+        hasActiveSubscription,
+        municipalities,
+        amenities,
+        data,
+        setData,
+        isDescriptionGenerated,
+        i18n.resolvedLanguage,
+    ]);
 
     // Map search handler
     const handleMapSearch = useCallback((query: string) => {
@@ -920,12 +957,11 @@ const PropertyForm: React.FC<Props> = ({
             delete payload.image_positions;
 
             const onSuccessCallback = () => {
+                const message = isEditMode
+                    ? 'Propriété mise à jour avec succès !'
+                    : 'Propriété créée avec succès !';
                 setSubmitStatus('success');
-                setSubmitMessage(
-                    isEditMode
-                        ? 'Propriété mise à jour avec succès!'
-                        : 'Propriété créée avec succès!',
-                );
+                setSubmitMessage(message);
                 if (!isEditMode) {
                     reset();
                     setImagePreviews([]);
@@ -1007,6 +1043,8 @@ const PropertyForm: React.FC<Props> = ({
                 } catch {}
             }
         });
+        setActiveSection('basic');
+        toast.success('Le formulaire a été réinitialisé.');
     }, [reset, imagePreviews]);
 
     // Vérifier si la description peut être générée
@@ -1049,7 +1087,7 @@ const PropertyForm: React.FC<Props> = ({
         type: 'basic',
         ad_type: 'basic',
         sale_type: 'basic',
-        description: 'basic',
+        description: 'description',
         price: 'pricing',
         surface: 'features',
         details: 'features',
@@ -1130,6 +1168,12 @@ const PropertyForm: React.FC<Props> = ({
             fullLabel: 'Photos et médias',
         },
         {
+            id: 'description',
+            label: 'Description',
+            icon: FileText,
+            fullLabel: 'Description et rédaction',
+        },
+        {
             id: 'publication',
             label: 'Publication',
             icon: FileText,
@@ -1137,9 +1181,32 @@ const PropertyForm: React.FC<Props> = ({
         },
     ];
 
+    const activeSectionIndex = sections.findIndex(
+        (section) => section.id === activeSection,
+    );
+    const isFirstSection = activeSectionIndex <= 0;
+    const isLastSection = activeSectionIndex === sections.length - 1;
+
+    const goToSection = (index: number) => {
+        const nextSection = sections[index];
+        if (!nextSection) return;
+
+        setActiveSection(nextSection.id);
+        setIsMobileMenuOpen(false);
+        window.requestAnimationFrame(() => {
+            formContentRef.current?.scrollIntoView({
+                behavior: window.matchMedia('(prefers-reduced-motion: reduce)')
+                    .matches
+                    ? 'auto'
+                    : 'smooth',
+                block: 'start',
+            });
+        });
+    };
+
     return (
         <Dashboard>
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+            <div className="property-form-shell min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 {/* Header responsive */}
                 <div className="dashboard-section-header sticky top-0 z-10 border-b border-slate-200 bg-white/80 shadow-sm backdrop-blur-xl">
                     <div className="px-3 py-3 sm:px-4 sm:py-4 lg:px-8">
@@ -1237,7 +1304,10 @@ const PropertyForm: React.FC<Props> = ({
                     onSubmit={handleSubmit}
                     className="px-3 pb-8 sm:px-4 lg:px-8"
                 >
-                    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-sm sm:rounded-2xl">
+                    <div
+                        ref={formContentRef}
+                        className="property-form-card relative scroll-mt-28 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-sm sm:rounded-2xl"
+                    >
                         {/* Overlay de désactivation */}
                         {false && (
                             <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/90 backdrop-blur-sm">
@@ -1549,97 +1619,6 @@ const PropertyForm: React.FC<Props> = ({
                                                     {errors.urgency}
                                                 </div>
                                             )}
-                                        </div>
-
-                                        <div>
-                                            <label className="mb-2 block text-sm font-medium text-slate-700 sm:text-base">
-                                                Description détaillée
-                                            </label>
-                                            <div className="relative">
-                                                <textarea
-                                                    className="w-full resize-none rounded-lg border border-slate-200 bg-white/80 px-3 py-2.5 text-sm backdrop-blur-sm focus:border-slate-200 focus:ring-2 focus:ring-slate-200 focus:outline-none sm:text-base"
-                                                    placeholder="Décrivez votre propriété en détail..."
-                                                    value={data.description}
-                                                    onChange={(e) => {
-                                                        setIsDescriptionGenerated(
-                                                            false,
-                                                        );
-                                                        handleInputChange(
-                                                            'description',
-                                                            e.target.value,
-                                                        );
-                                                    }}
-                                                    rows={4}
-                                                    disabled={false}
-                                                />
-                                                {errors.description && (
-                                                    <div className="mt-1 text-sm text-red-600">
-                                                        {errors.description}
-                                                    </div>
-                                                )}
-
-                                                {/* Bouton de génération de description */}
-                                                <div className="mt-2 flex flex-col items-start gap-2 sm:flex-row sm:items-center">
-                                                    <button
-                                                        type="button"
-                                                        onClick={
-                                                            handleGenerateDescription
-                                                        }
-                                                        className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 sm:text-base ${
-                                                            !canGenerateDescription ||
-                                                            loading ||
-                                                            false
-                                                                ? 'cursor-not-allowed bg-gray-100 text-gray-400 opacity-50'
-                                                                : 'bg-[#1E3A5F]/10 text-[#0d2340] hover:bg-slate-200'
-                                                        }`}
-                                                        disabled={
-                                                            !canGenerateDescription ||
-                                                            loading ||
-                                                            false
-                                                        }
-                                                    >
-                                                        {loading ? (
-                                                            <>
-                                                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-transparent"></div>
-                                                                Génération en
-                                                                cours...
-                                                            </>
-                                                        ) : isDescriptionGenerated ? (
-                                                            <>
-                                                                <CheckCircle
-                                                                    size={16}
-                                                                />
-                                                                Régénérer la
-                                                                description
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <Zap
-                                                                    size={16}
-                                                                />
-                                                                Générer avec
-                                                                l'IA
-                                                            </>
-                                                        )}
-                                                    </button>
-
-                                                    {!canGenerateDescription &&
-                                                        !loading &&
-                                                        !isDescriptionGenerated && (
-                                                            <div className="mt-1 flex items-center gap-1 text-xs text-[#1E3A5F]">
-                                                                <AlertTriangle
-                                                                    size={12}
-                                                                />
-                                                                <span>
-                                                                    Remplissez
-                                                                    les champs
-                                                                    requis pour
-                                                                    générer
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -3074,6 +3053,112 @@ const PropertyForm: React.FC<Props> = ({
                                 </div>
                             )}
 
+                            {/* Section: Description, placée après toutes les informations du bien */}
+                            {activeSection === 'description' && (
+                                <div className="space-y-4 sm:space-y-6">
+                                    <div className="flex items-start gap-3">
+                                        <div className="rounded-xl bg-[#C9A84C]/15 p-2 text-[#C9A84C]">
+                                            <FileText size={20} />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
+                                                Description de l’annonce
+                                            </h2>
+                                            <p className="mt-1 text-sm text-slate-600">
+                                                Toutes les informations du bien
+                                                sont maintenant disponibles.
+                                                Vous pouvez rédiger votre texte
+                                                ou générer une proposition
+                                                complète.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
+                                        <label
+                                            htmlFor="property-description"
+                                            className="mb-2 block text-sm font-medium text-slate-700 sm:text-base"
+                                        >
+                                            Description détaillée
+                                        </label>
+                                        <textarea
+                                            id="property-description"
+                                            className="min-h-48 w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm leading-relaxed focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/25 focus:outline-none sm:text-base"
+                                            placeholder="Décrivez les points forts de la propriété, son environnement et les conditions de la transaction..."
+                                            value={data.description}
+                                            onChange={(e) => {
+                                                setIsDescriptionGenerated(
+                                                    false,
+                                                );
+                                                handleInputChange(
+                                                    'description',
+                                                    e.target.value,
+                                                );
+                                            }}
+                                            rows={8}
+                                        />
+                                        {errors.description && (
+                                            <div className="mt-2 text-sm text-red-600">
+                                                {errors.description}
+                                            </div>
+                                        )}
+
+                                        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                            <p className="text-xs text-slate-500 sm:text-sm">
+                                                La génération utilise le type,
+                                                le prix, la localisation, les
+                                                caractéristiques et les
+                                                équipements renseignés.
+                                            </p>
+                                            <button
+                                                type="button"
+                                                onClick={
+                                                    handleGenerateDescription
+                                                }
+                                                className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-[#1E3A5F] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#152d4a] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 sm:w-auto sm:text-base"
+                                                disabled={
+                                                    !canGenerateDescription ||
+                                                    loading
+                                                }
+                                            >
+                                                {loading ? (
+                                                    <>
+                                                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                                                        Génération…
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {isDescriptionGenerated ? (
+                                                            <CheckCircle
+                                                                size={16}
+                                                            />
+                                                        ) : (
+                                                            <Zap size={16} />
+                                                        )}
+                                                        {isDescriptionGenerated
+                                                            ? 'Régénérer'
+                                                            : 'Générer avec l’IA'}
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
+
+                                        {!canGenerateDescription && (
+                                            <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 sm:text-sm">
+                                                <AlertTriangle
+                                                    size={16}
+                                                    className="mt-0.5 shrink-0"
+                                                />
+                                                Renseignez au minimum le type,
+                                                la transaction, une localisation
+                                                et le prix, la surface ou le
+                                                titre.
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Section: Publication */}
                             {activeSection === 'publication' && (
                                 <div className="space-y-4 sm:space-y-6">
@@ -3137,49 +3222,99 @@ const PropertyForm: React.FC<Props> = ({
                                 </div>
                             )}
 
-                            {/* Boutons d'action - Ultra responsive */}
-                            <div className="sticky bottom-0 mt-6 border-t border-slate-200 bg-white/95 p-4 backdrop-blur-sm">
-                                <div className="flex flex-col justify-end gap-3 sm:flex-row">
-                                    <button
-                                        type="button"
-                                        onClick={resetForm}
-                                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-100 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-base"
-                                        disabled={processing || false}
-                                    >
-                                        <RotateCcw size={16} />
-                                        Réinitialiser
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={(e) => handleSubmit(e, false)}
-                                        className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-[#0d2340] transition-all duration-300 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-base"
-                                        disabled={processing || false}
-                                    >
-                                        <Save size={16} />
-                                        Enregistrer comme brouillon
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={(e) => handleSubmit(e, true)}
-                                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-4 py-2.5 text-sm text-white transition-all duration-300 hover:from-[#A8882E] hover:to-[#8a6e22] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-base"
-                                        disabled={
-                                            processing || !hasActiveSubscription
+                            {/* Navigation et actions du parcours */}
+                            <div className="sticky bottom-0 z-10 mt-6 border-t border-slate-200 bg-white/95 p-4 backdrop-blur-sm">
+                                <div className="mb-3 flex items-center justify-between text-xs font-medium text-slate-500 sm:text-sm">
+                                    <span>
+                                        Étape {activeSectionIndex + 1} sur{' '}
+                                        {sections.length}
+                                    </span>
+                                    <span>
+                                        {
+                                            sections[activeSectionIndex]
+                                                ?.fullLabel
                                         }
+                                    </span>
+                                </div>
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            goToSection(activeSectionIndex - 1)
+                                        }
+                                        className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-[#C9A84C] hover:text-[#8A6A1F] disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto sm:text-base"
+                                        disabled={isFirstSection || processing}
                                     >
-                                        {processing ? (
-                                            <>
-                                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                                                Traitement...
-                                            </>
+                                        <ArrowLeft size={16} />
+                                        Précédent
+                                    </button>
+
+                                    <div className="flex flex-col gap-3 sm:flex-row">
+                                        <button
+                                            type="button"
+                                            onClick={resetForm}
+                                            className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-100 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-base"
+                                            disabled={processing}
+                                        >
+                                            <RotateCcw size={16} />
+                                            Réinitialiser
+                                        </button>
+
+                                        {!isLastSection ? (
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    goToSection(
+                                                        activeSectionIndex + 1,
+                                                    )
+                                                }
+                                                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#1E3A5F] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#152d4a] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-base"
+                                                disabled={processing}
+                                            >
+                                                Suivant
+                                                <ArrowRight size={16} />
+                                            </button>
                                         ) : (
                                             <>
-                                                <Zap size={16} />
-                                                {isEditMode
-                                                    ? 'Mettre à jour & Publier'
-                                                    : 'Soumettre pour validation'}
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) =>
+                                                        handleSubmit(e, false)
+                                                    }
+                                                    className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-[#0d2340] transition-all duration-300 hover:border-[#C9A84C] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-base"
+                                                    disabled={processing}
+                                                >
+                                                    <Save size={16} />
+                                                    Enregistrer comme brouillon
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) =>
+                                                        handleSubmit(e, true)
+                                                    }
+                                                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:from-[#A8882E] hover:to-[#8a6e22] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-base"
+                                                    disabled={
+                                                        processing ||
+                                                        !hasActiveSubscription
+                                                    }
+                                                >
+                                                    {processing ? (
+                                                        <>
+                                                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                                                            Traitement…
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Zap size={16} />
+                                                            {isEditMode
+                                                                ? 'Mettre à jour & Publier'
+                                                                : 'Soumettre pour validation'}
+                                                        </>
+                                                    )}
+                                                </button>
                                             </>
                                         )}
-                                    </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

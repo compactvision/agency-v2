@@ -56,3 +56,17 @@ it('keeps contact errors programmatically associated with their fields', functio
         ->and($errors)
         ->toContain('role="alert"');
 });
+
+it('prevents automatic mobile input zoom without disabling user zoom', function () {
+    $styles = file_get_contents(resource_path('css/app.css'));
+    $document = file_get_contents(resource_path('views/app.blade.php'));
+
+    expect($styles)
+        ->toContain('@media (max-width: 767px)')
+        ->toContain("[contenteditable='true']")
+        ->toContain('font-size: 16px !important')
+        ->and($document)
+        ->toContain('width=device-width, initial-scale=1')
+        ->not->toContain('maximum-scale')
+        ->not->toContain('user-scalable=no');
+});

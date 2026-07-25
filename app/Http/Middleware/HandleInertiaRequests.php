@@ -68,8 +68,11 @@ class HandleInertiaRequests extends Middleware
             'settings' => SystemSetting::where('key', 'site_settings')->first()?->value ?? [],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
+                'message' => fn () => $request->session()->get('message'),
                 'error' => fn () => $request->session()->get('error'),
+                'info' => fn () => $request->session()->get('info'),
             ],
+            'status' => fn () => $request->session()->get('status'),
         ];
     }
 }

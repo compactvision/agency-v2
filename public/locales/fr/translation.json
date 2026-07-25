@@ -461,6 +461,7 @@
     "pages": "Pages",
     "password_protection_tip": "Utilisez un mot de passe fort",
     "password_reset": "Réinitialisation du mot de passe",
+    "password_reset_success": "Votre mot de passe a été réinitialisé avec succès.",
     "password_reset_subtitle": "Définissez un nouveau mot de passe",
     "password_security_tips": "Conseils de sécurité",
     "password_strength": "Force du mot de passe",

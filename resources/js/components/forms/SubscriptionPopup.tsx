@@ -48,7 +48,7 @@ export default function SubscriptionPopup({
         e.preventDefault();
 
         // On ne rajoute plus `243` ici
-        post(route('dashboard.payment-requests.store'), {
+        post(route('dashboard.subscriptions.store'), {
             onSuccess: () => {
                 onClose();
                 reset();

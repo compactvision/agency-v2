@@ -8,6 +8,7 @@ use App\Domains\Billing\Models\Subscription;
 use App\Domains\Billing\Resources\SubscriptionResource;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class TransactionController extends Controller
@@ -54,10 +55,20 @@ class TransactionController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(
+            $request->user()?->can('subscription.create'),
+            403,
+            'Vous n’êtes pas autorisé à souscrire un abonnement.'
+        );
+
         $request->validate([
-            'plan_id' => 'required|exists:plans,id',
-            'phone_number' => 'nullable|string|size:9',
-            'type' => 'required|in:new,switch',
+            'plan_id' => [
+                'required',
+                'integer',
+                Rule::exists('plans', 'id')->where('is_active', true),
+            ],
+            'phone_number' => ['nullable', 'regex:/^\d{9}$/'],
+            'type' => ['required', Rule::in(['new', 'switch'])],
         ]);
 
         $plan = Plan::findOrFail($request->plan_id);

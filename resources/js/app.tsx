@@ -4,6 +4,7 @@ import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import GlobalToasts from './components/ui/GlobalToasts';
 import { initializeTheme } from './hooks/use-appearance';
 import './i18n';
 
@@ -24,6 +25,7 @@ createInertiaApp({
         root.render(
             <StrictMode>
                 <App {...props} />
+                <GlobalToasts />
             </StrictMode>,
         );
     },

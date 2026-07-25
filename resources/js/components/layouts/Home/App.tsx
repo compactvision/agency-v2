@@ -1,7 +1,6 @@
 import { CircleFadingArrowUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Toaster } from 'sonner';
 // import ChatBot from './ChatBot';
 import Footer from '../../partials/Footer';
 import Header from '../../partials/Header';
@@ -52,7 +51,6 @@ const App = ({ children }: { children: React.ReactNode }) => {
 
             <Footer />
             {/* <ChatBot /> */}
-            <Toaster richColors position="top-right" />
 
             {/* Bouton scroll-to-top */}
             <button

@@ -1150,6 +1150,64 @@
     box-shadow: 0 0 0 3px rgba(207, 142, 25, 0.16) !important;
 }
 
+/* Parcours de création et modification d'une propriété. */
+.dark .dashboard-shell .property-form-shell {
+    background-color: transparent !important;
+    background-image: linear-gradient(
+        145deg,
+        rgba(53, 49, 48, 0.36),
+        rgba(33, 31, 30, 0.82)
+    ) !important;
+}
+
+.dark .dashboard-shell .property-form-card,
+.dark .dashboard-shell .property-form-shell .bg-white\/80,
+.dark .dashboard-shell .property-form-shell .bg-white\/95 {
+    border-color: var(--dashboard-border) !important;
+    background-color: var(--dashboard-surface) !important;
+}
+
+.dark .dashboard-shell .property-form-shell .bg-slate-50\/70 {
+    background-color: var(--dashboard-surface-raised) !important;
+}
+
+.dark .dashboard-shell .property-form-shell .bg-amber-50 {
+    border-color: rgba(224, 164, 58, 0.38) !important;
+    background-color: rgba(207, 142, 25, 0.13) !important;
+}
+
+.dark .dashboard-shell .property-form-shell .text-amber-800 {
+    color: #f0c775 !important;
+}
+
+.dark .dashboard-shell .property-form-shell input::placeholder,
+.dark .dashboard-shell .property-form-shell textarea::placeholder {
+    color: #928c85 !important;
+}
+
+.dark .dashboard-shell .property-form-shell option {
+    background-color: var(--dashboard-surface-raised);
+    color: var(--dashboard-text);
+}
+
+/*
+ * Safari iOS agrandit automatiquement la page quand un champ éditable
+ * utilise une police inférieure à 16 px. Cette règle conserve le zoom
+ * manuel accessible tout en supprimant le zoom indésirable au focus.
+ */
+@media (max-width: 767px) {
+    input:not([type='button']):not([type='checkbox']):not([type='color']):not(
+            [type='file']
+        ):not([type='hidden']):not([type='image']):not([type='radio']):not(
+            [type='range']
+        ):not([type='reset']):not([type='submit']),
+    select,
+    textarea,
+    [contenteditable='true'] {
+        font-size: 16px !important;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
