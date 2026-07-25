@@ -2,7 +2,9 @@
 
 use App\Domains\Ads\Models\Ad;
 use App\Domains\Categories\Models\Category;
+use App\Mail\PropertyApprovedMail;
 use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 use Spatie\Permission\Models\Role;
 
 function createAuthorizedTestAd(User $owner, string $status = 'draft'): Ad
@@ -58,6 +60,7 @@ test('a non admin cannot moderate a property', function () {
 });
 
 test('an admin can view and moderate any property', function () {
+    Mail::fake();
     Role::findOrCreate('admin', 'web');
     $owner = User::factory()->create();
     $admin = User::factory()->create();
@@ -70,9 +73,10 @@ test('an admin can view and moderate any property', function () {
 
     $this->actingAs($admin)
         ->patch(route('dashboard.properties.approve', $ad->id))
-        ->assertRedirect();
+        ->assertRedirect(route('dashboard.properties.validation'));
 
     expect($ad->fresh()->status)->toBe('published');
+    Mail::assertQueued(PropertyApprovedMail::class);
 });
 
 test('an unpublished property cannot be added to favorites by id', function () {

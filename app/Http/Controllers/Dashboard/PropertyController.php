@@ -7,6 +7,10 @@ use App\Domains\Ads\Requests\StoreAdRequest;
 use App\Domains\Ads\Requests\UpdateAdRequest;
 use App\Domains\Ads\Resources\AdResource;
 use App\Domains\Ads\Services\AdService;
+use App\Domains\Amenities\Models\Amenity;
+use App\Domains\Categories\Models\Category;
+use App\Domains\Locations\Models\Country;
+use App\Domains\Locations\Models\Municipality;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -202,14 +206,20 @@ class PropertyController extends Controller
                     'is_published' => false,
                 ]);
 
-                return redirect()->back()->with('success', 'Approbation retirée.');
+                return redirect()
+                    ->route('dashboard.properties.validation')
+                    ->with('success', 'Approbation retirée.');
             }
 
             $service->approve($property);
 
-            return redirect()->back()->with('success', 'Propriété approuvée.');
+            return redirect()
+                ->route('dashboard.properties.validation')
+                ->with('success', 'Propriété approuvée.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()
+                ->back()
+                ->with('error', $e->getMessage());
         }
     }
 
@@ -224,9 +234,13 @@ class PropertyController extends Controller
         try {
             $service->reject($property, $reason);
 
-            return redirect()->back()->with('success', 'Propriété rejetée.');
+            return redirect()
+                ->route('dashboard.properties.validation')
+                ->with('success', 'Propriété rejetée.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()
+                ->back()
+                ->with('error', $e->getMessage());
         }
     }
 
@@ -287,8 +301,8 @@ class PropertyController extends Controller
     protected function getLookupData()
     {
         return [
-            'countries' => \App\Domains\Locations\Models\Country::all()->pluck('name', 'id'),
-            'municipalities' => \App\Domains\Locations\Models\Municipality::with('city')->get()->map(function ($m) {
+            'countries' => Country::all()->pluck('name', 'id'),
+            'municipalities' => Municipality::with('city')->get()->map(function ($m) {
                 return [
                     'id' => $m->id,
                     'name' => $m->name,
@@ -296,13 +310,13 @@ class PropertyController extends Controller
                     'country' => $m->city?->country?->name,
                 ];
             }),
-            'amenities' => \App\Domains\Amenities\Models\Amenity::all()->map(function ($a) {
+            'amenities' => Amenity::all()->map(function ($a) {
                 return [
                     'id' => $a->id,
                     'name' => $a->name,
                 ];
             }),
-            'categories' => \App\Domains\Categories\Models\Category::all()->map(function ($c) {
+            'categories' => Category::all()->map(function ($c) {
                 return [
                     'id' => $c->id,
                     'name' => $c->name,

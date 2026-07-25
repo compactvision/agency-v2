@@ -29,6 +29,8 @@ export default function ValidationShow({
     >('details');
     const [isRejecting, setIsRejecting] = useState(false);
     const [rejectReason, setRejectReason] = useState('');
+    const [isApproving, setIsApproving] = useState(false);
+    const [isRejectSubmitting, setIsRejectSubmitting] = useState(false);
 
     const handleApprove = () => {
         if (
@@ -40,9 +42,8 @@ export default function ValidationShow({
                 route('dashboard.properties.approve', property.id),
                 {},
                 {
-                    onSuccess: () => {
-                        router.visit(route('dashboard.properties.validation'));
-                    },
+                    onStart: () => setIsApproving(true),
+                    onFinish: () => setIsApproving(false),
                 },
             );
         }
@@ -58,11 +59,12 @@ export default function ValidationShow({
             route('dashboard.properties.reject', property.id),
             { reason: rejectReason },
             {
+                onStart: () => setIsRejectSubmitting(true),
                 onSuccess: () => {
                     setIsRejecting(false);
                     setRejectReason('');
-                    router.visit(route('dashboard.properties.validation'));
                 },
+                onFinish: () => setIsRejectSubmitting(false),
             },
         );
     };
@@ -419,15 +421,20 @@ export default function ValidationShow({
                                 <div className="flex w-full gap-3 md:w-auto">
                                     <button
                                         onClick={() => setIsRejecting(false)}
+                                        disabled={isRejectSubmitting}
                                         className="flex-1 rounded-xl border border-slate-600/50 bg-slate-800 px-6 py-3 text-sm font-semibold text-slate-300 transition-colors hover:bg-slate-700 md:flex-none"
                                     >
                                         Annuler
                                     </button>
                                     <button
                                         onClick={handleReject}
-                                        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-red-900/20 transition-all hover:bg-red-500 active:scale-95 md:flex-none"
+                                        disabled={isRejectSubmitting}
+                                        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-red-900/20 transition-all hover:bg-red-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 md:flex-none"
                                     >
-                                        <XCircle size={18} /> Confirmer le rejet
+                                        <XCircle size={18} />{' '}
+                                        {isRejectSubmitting
+                                            ? 'Rejet en cours…'
+                                            : 'Confirmer le rejet'}
                                     </button>
                                 </div>
                             </div>
@@ -453,6 +460,7 @@ export default function ValidationShow({
                                 <div className="flex w-full items-center gap-3 sm:w-auto">
                                     <button
                                         onClick={() => setIsRejecting(true)}
+                                        disabled={isApproving}
                                         className="group flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-6 py-3.5 text-sm font-bold text-red-400 transition-all hover:border-red-900/30 hover:bg-slate-700/50 sm:flex-none"
                                     >
                                         <XCircle
@@ -463,10 +471,13 @@ export default function ValidationShow({
                                     </button>
                                     <button
                                         onClick={handleApprove}
-                                        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-900/30 transition-all hover:from-emerald-500 hover:to-teal-500 active:scale-95 sm:flex-none"
+                                        disabled={isApproving}
+                                        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-900/30 transition-all hover:from-emerald-500 hover:to-teal-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
                                     >
-                                        <CheckCircle size={18} /> Approuver la
-                                        publication
+                                        <CheckCircle size={18} />{' '}
+                                        {isApproving
+                                            ? 'Approbation en cours…'
+                                            : 'Approuver la publication'}
                                     </button>
                                 </div>
                             </div>

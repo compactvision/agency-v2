@@ -378,11 +378,11 @@ class AdService
         // Send Emails
         try {
             Mail::to($ad->user->email)
-                ->send(new PropertyValidationPending($ad));
+                ->queue(new PropertyValidationPending($ad));
 
             $adminEmail = config('mail.admin_address', config('mail.from.address'));
             Mail::to($adminEmail)
-                ->send(new AdminNewPropertyNotification($ad));
+                ->queue(new AdminNewPropertyNotification($ad));
         } catch (\Exception $e) {
             Log::error('Failed to send property validation emails: '.$e->getMessage());
         }
@@ -416,7 +416,7 @@ class AdService
 
         try {
             Mail::to($ad->user->email)
-                ->send(new PropertyApprovedMail($ad));
+                ->queue(new PropertyApprovedMail($ad));
         } catch (\Exception $e) {
             Log::error('Failed to send property approved email: '.$e->getMessage());
         }
@@ -447,7 +447,7 @@ class AdService
 
         try {
             Mail::to($ad->user->email)
-                ->send(new PropertyRejectedMail($ad, $reason));
+                ->queue(new PropertyRejectedMail($ad, $reason));
         } catch (\Exception $e) {
             Log::error('Failed to send property rejected email: '.$e->getMessage());
         }

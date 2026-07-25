@@ -299,8 +299,8 @@ export default function Validation({ properties, filters }: ValidationProps) {
                 </div>
 
                 {/* Pagination */}
-                {properties.data.length > 0 && properties.links && (
-                    <div className="border-t border-slate-100 p-4">
+                {properties.meta?.last_page > 1 && properties.links && (
+                    <div className="border-t border-slate-100 px-3 py-4 sm:px-6 sm:py-5 dark:border-white/10">
                         <Pagination links={properties.links} />
                     </div>
                 )}
