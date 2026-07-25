@@ -489,6 +489,7 @@
     "profile_updated_description": "Profile Updated Description",
     "profile_updated_success": "Profile Updated Success",
     "properties": "Properties",
+    "properties_short": "properties",
     "properties_found": "Properties Found",
     "properties_near_you": "Properties Near You",
     "property_details": "Property Details",

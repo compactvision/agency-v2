@@ -26,8 +26,12 @@ type Municipality = {
     id: number;
     name: string;
     city_id: number;
+    country_id?: number;
     country: string;
     city: string;
+    image?: string | null;
+    image_url?: string | null;
+    properties?: number;
     properties_count: number;
 };
 
@@ -38,13 +42,15 @@ type PageProps = {
         meta: { current_page: number; from: number; to: number; total: number };
     };
     filters?: { search?: string };
-    cities: { id: number; name: string }[];
+    cities: { id: number; name: string; country_id: number }[];
+    countries: { id: number; name: string; iso_code?: string }[];
 };
 
 export default function Municipalities({
     municipalities,
     filters,
     cities = [],
+    countries = [],
 }: PageProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
@@ -103,7 +109,8 @@ export default function Municipalities({
         municipalities?.meta?.total ?? municipalities?.data?.length ?? 0;
     const totalProperties =
         municipalities?.data?.reduce(
-            (total, commune) => total + (commune.properties_count || 0),
+            (total, commune) =>
+                total + (commune.properties_count ?? commune.properties ?? 0),
             0,
         ) ?? 0;
 
@@ -191,9 +198,22 @@ export default function Municipalities({
                                         >
                                             <td className="px-6 py-5">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 text-[#1E3A5F] transition-transform group-hover:scale-110">
-                                                        <Building size={24} />
-                                                    </div>
+                                                    {m.image_url || m.image ? (
+                                                        <img
+                                                            src={
+                                                                m.image_url ??
+                                                                `/storage/${m.image}`
+                                                            }
+                                                            alt=""
+                                                            className="h-12 w-12 rounded-xl object-cover shadow-sm transition-transform group-hover:scale-110"
+                                                        />
+                                                    ) : (
+                                                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 text-[#1E3A5F] transition-transform group-hover:scale-110">
+                                                            <Building
+                                                                size={24}
+                                                            />
+                                                        </div>
+                                                    )}
                                                     <div>
                                                         <div className="font-bold text-gray-900">
                                                             {m.name}
@@ -224,7 +244,9 @@ export default function Municipalities({
                                             </td>
                                             <td className="px-6 py-5 text-center">
                                                 <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-[#0d2340]">
-                                                    {m.properties_count || 0}
+                                                    {m.properties_count ??
+                                                        m.properties ??
+                                                        0}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-5 text-right">
@@ -299,6 +321,7 @@ export default function Municipalities({
                 initialData={selectedMunicipality}
                 editMode={editMode}
                 cities={cities}
+                countries={countries}
             />
         </Dashboard>
     );

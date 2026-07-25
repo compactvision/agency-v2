@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Domains\Locations\Models\City;
+use App\Domains\Locations\Models\Country;
+use App\Domains\Locations\Models\Municipality;
 use App\Domains\Locations\Resources\MunicipalityResource;
 use App\Domains\Locations\Services\MunicipalityService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class MunicipalityController extends Controller
@@ -33,7 +37,12 @@ class MunicipalityController extends Controller
                 ],
                 'links' => $municipalities->linkCollection()->toArray(),
             ],
-            'cities' => \App\Domains\Locations\Models\City::all()->map(fn ($c) => ['id' => $c->id, 'name' => $c->name]),
+            'countries' => Country::query()
+                ->orderBy('name')
+                ->get(['id', 'name', 'iso_code']),
+            'cities' => City::query()
+                ->orderBy('name')
+                ->get(['id', 'country_id', 'name']),
             'filters' => (object) $request->only(['search']),
         ]);
     }
@@ -43,7 +52,12 @@ class MunicipalityController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'city_id' => 'required|exists:cities,id',
+            'image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:4096'],
         ]);
+
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('municipalities', 'public');
+        }
 
         $this->municipalityService->create($validated);
 
@@ -55,16 +69,43 @@ class MunicipalityController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'city_id' => 'required|exists:cities,id',
+            'image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:4096'],
+            'remove_image' => ['nullable', 'boolean'],
         ]);
 
+        $municipality = Municipality::findOrFail($id);
+        $oldImage = $municipality->image;
+        $removeImage = $request->boolean('remove_image');
+
+        unset($validated['remove_image']);
+
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('municipalities', 'public');
+        } elseif ($removeImage) {
+            $validated['image'] = null;
+        } else {
+            unset($validated['image']);
+        }
+
         $this->municipalityService->update($id, $validated);
+
+        if (($request->hasFile('image') || $removeImage) && $oldImage) {
+            Storage::disk('public')->delete($oldImage);
+        }
 
         return back()->with('success', 'Commune mise à jour avec succès.');
     }
 
     public function destroy($id)
     {
+        $municipality = Municipality::findOrFail($id);
+        $image = $municipality->image;
+
         $this->municipalityService->delete($id);
+
+        if ($image) {
+            Storage::disk('public')->delete($image);
+        }
 
         return back()->with('success', 'Commune supprimée avec succès.');
     }

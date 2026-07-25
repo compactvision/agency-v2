@@ -14,7 +14,7 @@ class MunicipalityService
     public function list(array $filters = [], int $perPage = 10)
     {
         $query = Municipality::query()
-            ->with(['city'])
+            ->with(['city.country'])
             ->withCount(['properties' => function ($query) {
                 $query->where('is_published', true)
                     ->where('is_approved', true);
@@ -34,7 +34,7 @@ class MunicipalityService
     {
         $municipalities = ReferenceCache::remember(
             ReferenceCache::MUNICIPALITIES,
-            fn () => Municipality::with(['city'])
+            fn () => Municipality::with(['city.country'])
                 ->withCount(['properties' => function ($query) {
                     $query->where('is_published', true)
                         ->where('is_approved', true);
@@ -51,7 +51,7 @@ class MunicipalityService
     public function find($id)
     {
         return new MunicipalityResource(
-            Municipality::with(['city'])->findOrFail($id)
+            Municipality::with(['city.country'])->findOrFail($id)
         );
     }
 
@@ -61,7 +61,7 @@ class MunicipalityService
     public function create(array $data)
     {
         $municipality = Municipality::create($data);
-        $municipality->load('city');
+        $municipality->load('city.country');
 
         return new MunicipalityResource($municipality);
     }
@@ -89,7 +89,7 @@ class MunicipalityService
         }
 
         $municipality->update($changes);
-        $municipality->load('city');
+        $municipality->load('city.country');
 
         return [
             'no_changes' => false,

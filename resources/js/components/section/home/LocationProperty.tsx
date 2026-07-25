@@ -2,11 +2,13 @@ import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { Link } from '@inertiajs/react';
 import {
     ArrowRight,
+    Building2,
     ChevronLeft,
     ChevronRight,
     Home,
     MapPin,
     Search,
+    Sparkles,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +24,7 @@ type Municipality = {
     id: number;
     name: string;
     image?: string;
+    image_url?: string | null;
     properties?: number;
 };
 
@@ -38,7 +41,7 @@ export default function LocationProperty({
     const reducedMotion = useReducedMotion();
 
     // Trier les municipalités par nombre de propriétés par défaut
-    const sortedMunicipalities = [...municipalities].sort(
+    const sortedMunicipalities = [...(municipalities ?? [])].sort(
         (a, b) => (b.properties ?? 0) - (a.properties ?? 0),
     );
 
@@ -59,7 +62,7 @@ export default function LocationProperty({
     return (
         <section
             ref={sectionRef}
-            className="relative overflow-hidden bg-[#F8F7F4] py-20 lg:py-28"
+            className="relative overflow-hidden bg-[#F8F7F4] py-20 transition-colors lg:py-28 dark:bg-[#292625]"
         >
             <div className="relative z-10 mx-auto max-w-7xl px-4">
                 {/* En-tête */}
@@ -180,16 +183,51 @@ export default function LocationProperty({
                                     aria-label={`${t('explore_properties', 'Explorer les propriétés à')} ${municipality.name}`}
                                 >
                                     <div className="relative h-72 w-full overflow-hidden">
-                                        <img
-                                            src={
-                                                municipality.image
-                                                    ? `/storage/${municipality.image}`
-                                                    : '/assets/images/thumbs/location-default.jpg'
-                                            }
-                                            alt={municipality.name}
-                                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                            loading="lazy"
-                                        />
+                                        {municipality.image_url ||
+                                        municipality.image ? (
+                                            <img
+                                                src={
+                                                    municipality.image_url ??
+                                                    `/storage/${municipality.image}`
+                                                }
+                                                alt={municipality.name}
+                                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                loading="lazy"
+                                            />
+                                        ) : (
+                                            <div
+                                                className="absolute inset-0 overflow-hidden bg-[#292625]"
+                                                aria-hidden="true"
+                                            >
+                                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(207,142,25,0.42),transparent_30%),radial-gradient(circle_at_82%_68%,rgba(238,239,230,0.13),transparent_34%)] transition-transform duration-700 group-hover:scale-110" />
+                                                <div className="absolute inset-0 [background-image:linear-gradient(rgba(255,255,255,.3)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.3)_1px,transparent_1px)] [mask-image:linear-gradient(to_bottom,black,transparent_85%)] [background-size:28px_28px] opacity-[0.12]" />
+
+                                                <div className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-[58%] items-center justify-center">
+                                                    <span className="absolute h-44 w-44 rounded-full border border-[#CF8E19]/20 motion-safe:animate-[ping_3.5s_ease-out_infinite]" />
+                                                    <span className="absolute h-28 w-28 rounded-full border border-white/15 motion-safe:animate-[ping_3.5s_ease-out_1s_infinite]" />
+                                                    <span className="relative flex h-24 w-24 items-center justify-center rounded-[2rem] border border-white/20 bg-white/10 text-white shadow-2xl shadow-[#CF8E19]/20 backdrop-blur-sm transition-all duration-500 group-hover:-translate-y-2 group-hover:rotate-3 group-hover:bg-[#CF8E19]">
+                                                        <Building2 className="h-11 w-11 stroke-[1.4]" />
+                                                        <Sparkles className="absolute -top-2 -right-3 h-6 w-6 text-[#E0A43A] motion-safe:animate-pulse" />
+                                                    </span>
+                                                </div>
+
+                                                <div className="absolute right-6 bottom-16 left-6 flex items-end justify-center gap-1.5 opacity-25">
+                                                    {[
+                                                        32, 48, 38, 64, 44, 56,
+                                                        30,
+                                                    ].map((height, index) => (
+                                                        <span
+                                                            key={`${municipality.id}-${height}-${index}`}
+                                                            className="w-5 rounded-t-sm border border-white/40 bg-white/20 transition-all duration-500 group-hover:bg-[#CF8E19]/50"
+                                                            style={{
+                                                                height,
+                                                                transitionDelay: `${index * 35}ms`,
+                                                            }}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                         <div className="absolute inset-0 bg-gradient-to-t from-[#292625]/85 via-[#292625]/25 to-transparent opacity-90 transition-opacity duration-300 group-hover:opacity-100" />
 
                                         {/* Badge propriétés */}
@@ -199,7 +237,10 @@ export default function LocationProperty({
                                                 <span className="text-xs font-bold text-white">
                                                     {municipality.properties ??
                                                         0}{' '}
-                                                    biens
+                                                    {t(
+                                                        'properties_short',
+                                                        'biens',
+                                                    )}
                                                 </span>
                                             </div>
                                         </div>

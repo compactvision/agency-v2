@@ -14,6 +14,11 @@ class Municipality extends Model
     protected $fillable = [
         'city_id',
         'name',
+        'image',
+    ];
+
+    protected $appends = [
+        'image_url',
     ];
 
     protected static function booted(): void
@@ -35,5 +40,12 @@ class Municipality extends Model
     public function properties()
     {
         return $this->hasMany(Ad::class);
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image
+            ? asset('storage/'.ltrim($this->image, '/'))
+            : null;
     }
 }

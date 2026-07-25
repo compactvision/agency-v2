@@ -113,6 +113,9 @@ Route::middleware(['auth', 'verified'])->prefix('/dashboard')->group(function ()
 
             // Admin Tools
             Route::get('/municipalities', [MunicipalityController::class, 'index'])->name('municipalities.index');
+            Route::post('/municipalities', [MunicipalityController::class, 'store'])->name('municipalities.store');
+            Route::put('/municipalities/{id}', [MunicipalityController::class, 'update'])->name('municipalities.update');
+            Route::delete('/municipalities/{id}', [MunicipalityController::class, 'destroy'])->name('municipalities.destroy');
             Route::get('/plans', [PlanController::class, 'index'])->name('plans.index');
             Route::post('/plans', [PlanController::class, 'store'])->name('plans.store');
             Route::put('/plans/{id}', [PlanController::class, 'update'])->name('plans.update');
