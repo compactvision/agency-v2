@@ -5,6 +5,7 @@ import { router } from '@inertiajs/react';
 import {
     Calendar,
     CheckCircle,
+    Clock,
     ImageOff,
     Package as PackageIcon,
     Plus,
@@ -16,12 +17,15 @@ import { useEffect, useState } from 'react';
 
 type Subscription = {
     id: number;
-    plan: { name: string; price: string; duration: string };
+    plan: {
+        name: string;
+        price: string;
+        interval?: string | null;
+    };
     user: { name: string; email: string };
-    starts_at?: string | null;
-    ends_at?: string | null;
-    starts_at_formatted?: string | null;
-    ends_at_formatted?: string | null;
+    status: string;
+    started_at?: string | null;
+    expires_at?: string | null;
     is_active: boolean;
 };
 
@@ -74,13 +78,68 @@ export default function Package({
         setIsSubscribing(false);
     };
 
-    // format fallback si jamais tu envoies l'ISO
-    const fmt = (iso?: string | null) =>
-        iso
-            ? new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' }).format(
-                  new Date(iso),
-              )
-            : '—';
+    const formatDate = (iso?: string | null) => {
+        if (!iso) return null;
+
+        const date = new Date(iso);
+
+        return Number.isNaN(date.getTime())
+            ? null
+            : new Intl.DateTimeFormat('fr-FR', {
+                  dateStyle: 'long',
+              }).format(date);
+    };
+
+    const formatDuration = (interval?: string | null) => {
+        if (interval === 'monthly') return '1 mois';
+        if (interval === 'yearly') return '1 an';
+
+        return interval || 'Non définie';
+    };
+
+    const formatSubscriptionDate = (
+        subscription: Subscription,
+        field: 'started_at' | 'expires_at',
+    ) => {
+        const formatted = formatDate(subscription[field]);
+
+        if (formatted) return formatted;
+        if (subscription.status === 'pending') {
+            return field === 'started_at'
+                ? 'Après validation'
+                : "Calculée à l'activation";
+        }
+
+        if (['cancelled', 'failed', 'refunded'].includes(subscription.status)) {
+            return 'Non activé';
+        }
+
+        return 'Non renseignée';
+    };
+
+    const statusPresentation = (subscription: Subscription) => {
+        if (subscription.is_active) {
+            return {
+                label: 'Actif',
+                className: 'bg-emerald-100 text-emerald-800',
+                icon: CheckCircle,
+            };
+        }
+
+        if (subscription.status === 'pending') {
+            return {
+                label: 'En attente de validation',
+                className: 'bg-amber-100 text-amber-800',
+                icon: Clock,
+            };
+        }
+
+        return {
+            label: subscription.status === 'cancelled' ? 'Annulé' : 'Inactif',
+            className: 'bg-red-100 text-red-800',
+            icon: XCircle,
+        };
+    };
 
     // Debounce + reload partiel
     useEffect(() => {
@@ -238,195 +297,185 @@ export default function Package({
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-200">
-                                    {subscriptions.data.map((sub, index) => (
-                                        <tr
-                                            key={sub.id}
-                                            className="transition-colors hover:bg-slate-50"
-                                            style={{
-                                                animationDelay: `${index * 0.05}s`,
-                                            }}
-                                        >
-                                            <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
-                                                #{sub.id}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center">
-                                                    <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-[#1E3A5F]/10">
-                                                        <User
-                                                            size={16}
-                                                            className="text-[#1E3A5F]"
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-sm font-medium text-gray-900">
-                                                            {sub.user.name}
-                                                        </div>
-                                                        <div className="text-sm text-gray-500">
-                                                            {sub.user.email}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center">
-                                                    <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
-                                                        <PackageIcon
-                                                            size={16}
-                                                            className="text-blue-600"
-                                                        />
-                                                    </div>
-                                                    <span className="text-sm text-gray-900">
-                                                        {sub.plan.name}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
-                                                {sub.plan.duration}
-                                            </td>
-                                            <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
-                                                <div className="flex items-center">
-                                                    <Calendar
-                                                        size={16}
-                                                        className="mr-2 text-gray-400"
-                                                    />
-                                                    {sub.starts_at_formatted ??
-                                                        fmt(sub.starts_at)}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
-                                                <div className="flex items-center">
-                                                    <Calendar
-                                                        size={16}
-                                                        className="mr-2 text-gray-400"
-                                                    />
-                                                    {sub.ends_at_formatted ??
-                                                        fmt(sub.ends_at)}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span
-                                                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                                        sub.is_active
-                                                            ? 'bg-emerald-100 text-emerald-800'
-                                                            : 'bg-red-100 text-red-800'
-                                                    }`}
-                                                >
-                                                    {sub.is_active ? (
-                                                        <>
-                                                            <CheckCircle
-                                                                size={12}
-                                                                className="mr-1"
+                                    {subscriptions.data.map((sub, index) => {
+                                        const status = statusPresentation(sub);
+                                        const StatusIcon = status.icon;
+
+                                        return (
+                                            <tr
+                                                key={sub.id}
+                                                className="transition-colors hover:bg-slate-50"
+                                                style={{
+                                                    animationDelay: `${index * 0.05}s`,
+                                                }}
+                                            >
+                                                <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
+                                                    #{sub.id}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center">
+                                                        <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-[#1E3A5F]/10">
+                                                            <User
+                                                                size={16}
+                                                                className="text-[#1E3A5F]"
                                                             />
-                                                            Actif
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <XCircle
-                                                                size={12}
-                                                                className="mr-1"
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-sm font-medium text-gray-900">
+                                                                {sub.user.name}
+                                                            </div>
+                                                            <div className="text-sm text-gray-500">
+                                                                {sub.user.email}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center">
+                                                        <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
+                                                            <PackageIcon
+                                                                size={16}
+                                                                className="text-blue-600"
                                                             />
-                                                            Inactif
-                                                        </>
+                                                        </div>
+                                                        <span className="text-sm text-gray-900">
+                                                            {sub.plan.name}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
+                                                    {formatDuration(
+                                                        sub.plan.interval,
                                                     )}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
+                                                    <div className="flex items-center">
+                                                        <Calendar
+                                                            size={16}
+                                                            className="mr-2 text-gray-400"
+                                                        />
+                                                        {formatSubscriptionDate(
+                                                            sub,
+                                                            'started_at',
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
+                                                    <div className="flex items-center">
+                                                        <Calendar
+                                                            size={16}
+                                                            className="mr-2 text-gray-400"
+                                                        />
+                                                        {formatSubscriptionDate(
+                                                            sub,
+                                                            'expires_at',
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span
+                                                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${status.className}`}
+                                                    >
+                                                        <StatusIcon
+                                                            size={12}
+                                                            className="mr-1"
+                                                        />
+                                                        {status.label}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
 
                             {/* Mobile Cards */}
                             <div className="md:hidden">
-                                {subscriptions.data.map((sub, index) => (
-                                    <div
-                                        key={sub.id}
-                                        className="border-b border-slate-200 p-4 last:border-b-0"
-                                        style={{
-                                            animationDelay: `${index * 0.05}s`,
-                                        }}
-                                    >
-                                        <div className="mb-3 flex items-start justify-between">
-                                            <div className="flex items-center">
-                                                <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-full bg-[#1E3A5F]/10">
-                                                    <User
-                                                        size={20}
-                                                        className="text-[#1E3A5F]"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <h3 className="text-base font-medium text-gray-900">
-                                                        {sub.user.name}
-                                                    </h3>
-                                                    <p className="text-sm text-gray-500">
-                                                        {sub.user.email}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <span
-                                                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                                    sub.is_active
-                                                        ? 'bg-emerald-100 text-emerald-800'
-                                                        : 'bg-red-100 text-red-800'
-                                                }`}
-                                            >
-                                                {sub.is_active ? (
-                                                    <>
-                                                        <CheckCircle
-                                                            size={12}
-                                                            className="mr-1"
-                                                        />
-                                                        Actif
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <XCircle
-                                                            size={12}
-                                                            className="mr-1"
-                                                        />
-                                                        Inactif
-                                                    </>
-                                                )}
-                                            </span>
-                                        </div>
+                                {subscriptions.data.map((sub, index) => {
+                                    const status = statusPresentation(sub);
+                                    const StatusIcon = status.icon;
 
-                                        <div className="mb-3 space-y-2">
-                                            <div className="flex justify-between">
-                                                <span className="text-sm text-gray-500">
-                                                    Package
-                                                </span>
-                                                <span className="text-sm text-gray-900">
-                                                    {sub.plan.name}
+                                    return (
+                                        <div
+                                            key={sub.id}
+                                            className="border-b border-slate-200 p-4 last:border-b-0"
+                                            style={{
+                                                animationDelay: `${index * 0.05}s`,
+                                            }}
+                                        >
+                                            <div className="mb-3 flex items-start justify-between">
+                                                <div className="flex items-center">
+                                                    <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-full bg-[#1E3A5F]/10">
+                                                        <User
+                                                            size={20}
+                                                            className="text-[#1E3A5F]"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-base font-medium text-gray-900">
+                                                            {sub.user.name}
+                                                        </h3>
+                                                        <p className="text-sm text-gray-500">
+                                                            {sub.user.email}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <span
+                                                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${status.className}`}
+                                                >
+                                                    <StatusIcon
+                                                        size={12}
+                                                        className="mr-1"
+                                                    />
+                                                    {status.label}
                                                 </span>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-sm text-gray-500">
-                                                    Durée
-                                                </span>
-                                                <span className="text-sm text-gray-900">
-                                                    {sub.plan.duration}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-sm text-gray-500">
-                                                    Début
-                                                </span>
-                                                <span className="text-sm text-gray-900">
-                                                    {sub.starts_at_formatted ??
-                                                        fmt(sub.starts_at)}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-sm text-gray-500">
-                                                    Fin
-                                                </span>
-                                                <span className="text-sm text-gray-900">
-                                                    {sub.ends_at_formatted ??
-                                                        fmt(sub.ends_at)}
-                                                </span>
+
+                                            <div className="mb-3 space-y-2">
+                                                <div className="flex justify-between">
+                                                    <span className="text-sm text-gray-500">
+                                                        Package
+                                                    </span>
+                                                    <span className="text-sm text-gray-900">
+                                                        {sub.plan.name}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-sm text-gray-500">
+                                                        Durée
+                                                    </span>
+                                                    <span className="text-sm text-gray-900">
+                                                        {formatDuration(
+                                                            sub.plan.interval,
+                                                        )}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-sm text-gray-500">
+                                                        Début
+                                                    </span>
+                                                    <span className="text-sm text-gray-900">
+                                                        {formatSubscriptionDate(
+                                                            sub,
+                                                            'started_at',
+                                                        )}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-sm text-gray-500">
+                                                        Fin
+                                                    </span>
+                                                    <span className="text-sm text-gray-900">
+                                                        {formatSubscriptionDate(
+                                                            sub,
+                                                            'expires_at',
+                                                        )}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
 
                                 {subscriptions.data.length === 0 && (
                                     <div className="py-12 text-center">

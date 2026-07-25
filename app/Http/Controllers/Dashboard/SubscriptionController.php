@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Domains\Billing\Models\Plan;
+use App\Domains\Billing\Resources\PlanResource;
 use App\Domains\Billing\Resources\SubscriptionResource;
 use App\Domains\Billing\Services\SubscriptionManager;
 use App\Http\Controllers\Controller;
@@ -44,7 +45,12 @@ class SubscriptionController extends Controller
             ],
             'hasActiveSubscription' => $user->hasActiveSubscription(),
             'currentPlan' => $user->subscription()->first(),
-            'plans' => Plan::where('is_active', true)->get(),
+            'plans' => PlanResource::collection(
+                Plan::with('features')
+                    ->where('is_active', true)
+                    ->orderBy('position')
+                    ->get()
+            )->resolve(),
             'filters' => (object) $request->only(['search']),
         ]);
     }

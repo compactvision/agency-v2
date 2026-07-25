@@ -55,10 +55,7 @@ class PropertyDescriptionController extends Controller
         ]);
 
         try {
-            $description = $generator->generate(
-                $data,
-                hash('sha256', 'property-description:'.$request->user()->getAuthIdentifier())
-            );
+            $description = $generator->generate($data);
         } catch (RuntimeException $exception) {
             return response()->json(['error' => $exception->getMessage()], 503);
         }

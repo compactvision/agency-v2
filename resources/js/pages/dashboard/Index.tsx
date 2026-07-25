@@ -54,6 +54,7 @@ type Property = {
 type DashboardPageProps = {
     user: any;
     properties: Property[];
+    isBuyer?: boolean;
     logs: any[];
     metrics?: DashboardMetrics;
 };
@@ -62,6 +63,7 @@ export default function DashboardIndex() {
     const { t, i18n } = useTranslation();
     const {
         properties = [],
+        isBuyer = false,
         logs = [],
         metrics = {
             properties: { total: 0, unapproved: 0 },
@@ -404,12 +406,17 @@ export default function DashboardIndex() {
                                             <Link
                                                 key={property.id}
                                                 href={
-                                                    route
+                                                    isBuyer
                                                         ? route(
                                                               'property.show',
                                                               property.slug,
                                                           )
-                                                        : `/properties/${property.id}`
+                                                        : route(
+                                                              'dashboard.properties.show',
+                                                              {
+                                                                  id: property.id,
+                                                              },
+                                                          )
                                                 }
                                                 className="group block w-full transform rounded-xl border border-slate-100 bg-white p-3 transition-all duration-300 hover:-translate-y-1 hover:border-slate-200 hover:shadow-md sm:p-4"
                                             >

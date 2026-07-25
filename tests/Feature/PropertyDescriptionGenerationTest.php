@@ -20,7 +20,7 @@ class PropertyDescriptionGenerationTest extends TestCase
         ]);
 
         Http::fake([
-            'generativelanguage.googleapis.com/v1beta/interactions' => Http::response(
+            'generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent' => Http::response(
                 $this->geminiResponse(
                     'Villa familiale à Gombe, cette propriété de 220 m² propose quatre chambres et trois salles de bain dans un cadre pensé pour la vie quotidienne. La piscine et le parking complètent une configuration généreuse, tandis que la cuisine et les six pièces permettent une organisation confortable. Proposée à 250 000 USD, cette maison meublée en bon état constitue une option cohérente pour une famille recherchant de beaux volumes au Centre-ville.'
                 )
@@ -42,14 +42,16 @@ class PropertyDescriptionGenerationTest extends TestCase
         $this->assertStringContainsString('Gombe', $response->json('description'));
 
         Http::assertSent(function (Request $request) use ($payload) {
-            $input = json_decode($request['input'], true);
+            $input = json_decode(
+                $request['contents'][0]['parts'][0]['text'],
+                true
+            );
 
-            return $request->url() === 'https://generativelanguage.googleapis.com/v1beta/interactions'
+            return $request->url() === 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent'
                 && $request->hasHeader('x-goog-api-key', 'test-gemini-key')
-                && $request['model'] === 'gemini-3.5-flash-lite'
-                && $request['store'] === false
-                && $request['generation_config']['thinking_level'] === 'minimal'
-                && $request['response_format']['mime_type'] === 'text/plain'
+                && filled($request['systemInstruction']['parts'][0]['text'])
+                && $request['generationConfig']['maxOutputTokens'] === 700
+                && $request['generationConfig']['responseMimeType'] === 'text/plain'
                 && $input['langue'] === 'français'
                 && $input['donnees_propriete']['title'] === $payload['title']
                 && $input['donnees_propriete']['swimming_pool'] === true
@@ -100,8 +102,14 @@ class PropertyDescriptionGenerationTest extends TestCase
         );
 
         $requests = Http::recorded();
-        $firstInput = json_decode($requests[0][0]['input'], true);
-        $secondInput = json_decode($requests[1][0]['input'], true);
+        $firstInput = json_decode(
+            $requests[0][0]['contents'][0]['parts'][0]['text'],
+            true
+        );
+        $secondInput = json_decode(
+            $requests[1][0]['contents'][0]['parts'][0]['text'],
+            true
+        );
 
         $this->assertNotSame(
             $firstInput['identifiant_de_variation'],
@@ -137,7 +145,7 @@ class PropertyDescriptionGenerationTest extends TestCase
         config(['services.gemini.api_key' => 'test-gemini-key']);
 
         Http::fake([
-            'generativelanguage.googleapis.com/v1beta/interactions' => Http::response(
+            'generativelanguage.googleapis.com/v1beta/models/*' => Http::response(
                 ['error' => ['status' => 'RESOURCE_EXHAUSTED']],
                 429
             ),
@@ -153,6 +161,30 @@ class PropertyDescriptionGenerationTest extends TestCase
             ->assertStatus(503)
             ->assertJson([
                 'error' => 'Le quota gratuit de génération IA est momentanément atteint. Veuillez réessayer plus tard.',
+            ]);
+    }
+
+    public function test_generation_reports_an_invalid_gemini_key_clearly(): void
+    {
+        config(['services.gemini.api_key' => 'invalid-gemini-key']);
+
+        Http::fake([
+            'generativelanguage.googleapis.com/v1beta/models/*' => Http::response(
+                ['error' => ['status' => 'PERMISSION_DENIED']],
+                403
+            ),
+        ]);
+
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->postJson(
+                route('description.ai.generate-description'),
+                $this->propertyPayload()
+            )
+            ->assertStatus(503)
+            ->assertJson([
+                'error' => 'La clé Gemini est invalide ou non autorisée. Vérifiez GEMINI_API_KEY sur le serveur.',
             ]);
     }
 
@@ -188,15 +220,14 @@ class PropertyDescriptionGenerationTest extends TestCase
     private function geminiResponse(string $description): array
     {
         return [
-            'id' => 'interaction_test',
-            'status' => 'completed',
-            'steps' => [
+            'candidates' => [
                 [
-                    'type' => 'model_output',
                     'content' => [
-                        [
-                            'type' => 'text',
-                            'text' => $description,
+                        'role' => 'model',
+                        'parts' => [
+                            [
+                                'text' => $description,
+                            ],
                         ],
                     ],
                 ],

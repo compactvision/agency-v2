@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-
-use App\Domains\Ads\Services\AdService;
 use App\Domains\Ads\Resources\AdResource;
+use App\Domains\Ads\Services\AdService;
+use App\Http\Controllers\Controller;
+use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
@@ -17,6 +15,7 @@ class DashboardController extends Controller
     {
         $this->adService = $adService;
     }
+
     /**
      * Dashboard Home / Overview
      */
@@ -24,7 +23,7 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         $isStaff = $user->hasRole(['admin', 'super-admin']);
-        $isBuyer = $user->hasRole('buyer') && !$isStaff;
+        $isBuyer = $user->hasRole('buyer') && ! $isStaff;
 
         if ($isBuyer) {
             $recentAds = $user->favorites()->with(['category', 'images', 'details', 'user', 'municipality'])->latest()->take(6)->get();
@@ -36,13 +35,13 @@ class DashboardController extends Controller
             // Stats
             $totalAds = $this->adService->count($isStaff ? [] : ['user_id' => $user->id]);
             $unapprovedAds = $this->adService->count($isStaff ? ['status' => 'pending_validation'] : ['user_id' => $user->id, 'status' => 'pending_validation']);
-            
+
             // Recent Ads
             $recentAds = $this->adService->list([
                 'per_page' => 6,
                 'user_id' => $isStaff ? null : $user->id,
                 'sort_by' => 'created_at',
-                'sort_order' => 'desc'
+                'sort_order' => 'desc',
             ]);
 
             $totalViews = $recentAds->sum('views_count');
@@ -51,11 +50,12 @@ class DashboardController extends Controller
 
         return Inertia::render('dashboard/Index', [
             'properties' => AdResource::collection($isBuyer ? $recentAds : $recentAds->items())->resolve(),
+            'isBuyer' => $isBuyer,
             'logs' => [],
             'metrics' => [
                 'properties' => [
                     'total' => $totalAds,
-                    'unapproved' => $unapprovedAds
+                    'unapproved' => $unapprovedAds,
                 ],
                 'views' => ['total' => $totalViews],
                 'favorites' => ['total' => $totalFavorites],

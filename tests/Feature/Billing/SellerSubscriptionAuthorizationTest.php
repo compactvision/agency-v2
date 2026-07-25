@@ -5,6 +5,7 @@ use App\Domains\Billing\Models\Subscription;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
 
@@ -83,4 +84,38 @@ test('seller subscription access does not grant payment approval rights', functi
         ->assertForbidden();
 
     expect($subscription->fresh()->status)->toBe('pending');
+});
+
+test('seller sees the selected plan duration and subscription dates', function () {
+    $seller = User::factory()->create();
+    $seller->assignRole('seller');
+    $plan = manualSubscriptionPlan();
+    $startedAt = now()->startOfSecond();
+    $expiresAt = $startedAt->copy()->addMonth();
+
+    Subscription::create([
+        'user_id' => $seller->id,
+        'plan_id' => $plan->id,
+        'plan_name' => $plan->name,
+        'plan_interval' => $plan->interval,
+        'transaction_id' => 'active-subscription',
+        'status' => 'active',
+        'amount' => $plan->price,
+        'currency' => 'USD',
+        'interval' => $plan->interval,
+        'started_at' => $startedAt,
+        'expires_at' => $expiresAt,
+    ]);
+
+    $this->actingAs($seller)
+        ->get(route('dashboard.subscriptions.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('dashboard/subscriptions/Package')
+            ->where('subscriptions.data.0.plan.name', 'Plan vendeur')
+            ->where('subscriptions.data.0.plan.interval', 'monthly')
+            ->where('subscriptions.data.0.started_at', $startedAt->toIso8601String())
+            ->where('subscriptions.data.0.expires_at', $expiresAt->toIso8601String())
+            ->where('plans.0.duration', 'monthly')
+        );
 });
