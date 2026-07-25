@@ -26,6 +26,7 @@ use App\Support\Seo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class PageController extends Controller
@@ -112,22 +113,40 @@ class PageController extends Controller
     public function scheduleVisit(SchedulePropertyVisitRequest $request, Ad $ad)
     {
         abort_unless($ad->is_published && $ad->is_approved, 404);
-        abort_if($ad->user_id === $request->user()->id, 422, 'Vous ne pouvez pas programmer une visite pour votre propre annonce.');
+
+        if ($ad->user_id === $request->user()->id) {
+            throw ValidationException::withMessages([
+                'scheduled_at' => 'Vous ne pouvez pas programmer une visite pour votre propre annonce.',
+            ]);
+        }
 
         $ad->loadMissing('user');
         $data = $request->validated();
 
-        $visit = PropertyVisit::create([
-            'ad_id' => $ad->id,
-            'visitor_id' => $request->user()->id,
-            'owner_id' => $ad->user_id,
-            'visitor_name' => $request->user()->name,
-            'visitor_email' => $request->user()->email,
-            'visitor_phone' => $data['phone'],
-            'scheduled_at' => $data['scheduled_at'],
-            'status' => 'pending',
-            'message' => $data['message'] ?? null,
-        ])->load(['property', 'visitor', 'owner']);
+        try {
+            $visit = PropertyVisit::create([
+                'ad_id' => $ad->id,
+                'visitor_id' => $request->user()->id,
+                'owner_id' => $ad->user_id,
+                'visitor_name' => $request->user()->name,
+                'visitor_email' => $request->user()->email,
+                'visitor_phone' => $data['phone'],
+                'scheduled_at' => $data['scheduled_at'],
+                'status' => 'pending',
+                'message' => $data['message'] ?? null,
+            ])->load(['property', 'visitor', 'owner']);
+        } catch (\Throwable $exception) {
+            Log::error('Failed to record property visit.', [
+                'property_id' => $ad->id,
+                'visitor_id' => $request->user()->id,
+                'message' => $exception->getMessage(),
+            ]);
+
+            return back()->with(
+                'error',
+                'La demande de visite n’a pas pu être enregistrée. Veuillez réessayer dans quelques instants.',
+            );
+        }
 
         try {
             Mail::to($visit->owner->email)->send(new PropertyVisitRequestedMail($visit));

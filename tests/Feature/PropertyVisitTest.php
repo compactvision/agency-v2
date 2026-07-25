@@ -81,7 +81,7 @@ test('owners cannot schedule a visit for their own property', function () {
             'phone' => '+243 999 123 456',
             'scheduled_at' => now()->addDay()->format('Y-m-d H:i:s'),
         ])
-        ->assertUnprocessable();
+        ->assertSessionHasErrors(['scheduled_at']);
 
     expect(PropertyVisit::count())->toBe(0);
 });

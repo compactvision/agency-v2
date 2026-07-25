@@ -62,7 +62,7 @@ import { useTranslation } from 'react-i18next';
 type PropertyImage = { id?: number | string; url: string };
 type Amenity = { name: string };
 type Municipality = { name?: string };
-type PropertyOwner = { name?: string; phone?: string };
+type PropertyOwner = { id?: number; name?: string; phone?: string };
 
 interface PropertyRecord {
     id: number;
@@ -487,6 +487,7 @@ function PropertyDetailsContent({
     interface PageProps {
         auth: {
             user: {
+                id?: number;
                 name?: string;
                 email?: string;
                 phone?: string;
@@ -495,6 +496,7 @@ function PropertyDetailsContent({
     }
 
     const user = (usePage().props as unknown as PageProps).auth.user;
+    const isPropertyOwner = Boolean(user?.id) && user?.id === property.user?.id;
 
     const { data, setData, post, processing, errors, reset } = useForm({
         phone: user?.phone || '',
@@ -508,6 +510,8 @@ function PropertyDetailsContent({
         processing: visitProcessing,
         errors: visitErrors,
         reset: resetVisit,
+        setError: setVisitError,
+        clearErrors: clearVisitErrors,
     } = useForm({
         phone: user?.phone || '',
         scheduled_at: '',
@@ -864,7 +868,7 @@ function PropertyDetailsContent({
                                         <h3 className="mb-3 text-xl font-bold text-gray-900 dark:text-[#F7F2E8]">
                                             {t('description')}
                                         </h3>
-                                        <p className="line-clamp-3 leading-relaxed text-gray-700 dark:text-gray-300">
+                                        <p className="leading-relaxed break-words whitespace-pre-line text-gray-700 dark:text-gray-300">
                                             {property.description}
                                         </p>
                                     </div>
@@ -907,17 +911,24 @@ function PropertyDetailsContent({
                                         <button
                                             ref={visitTriggerRef}
                                             type="button"
+                                            disabled={isPropertyOwner}
                                             onClick={() =>
-                                                user
-                                                    ? setVisitModal(true)
-                                                    : router.visit(
-                                                          route('login'),
-                                                      )
+                                                isPropertyOwner
+                                                    ? undefined
+                                                    : user
+                                                      ? setVisitModal(true)
+                                                      : router.visit(
+                                                            route('login'),
+                                                        )
                                             }
-                                            className="flex items-center justify-center gap-2 rounded-xl border-2 border-[#C9A84C] bg-white px-6 py-4 text-sm font-bold text-[#9A6811] transition-all duration-300 hover:bg-[#C9A84C]/10 focus-visible:ring-2 focus-visible:ring-[#C9A84C] focus-visible:ring-offset-2 focus-visible:outline-none sm:col-span-2 md:col-span-1 dark:bg-[#211E1D] dark:text-[#E8B955] dark:hover:bg-[#C9A84C]/15 dark:focus-visible:ring-offset-[#12100F]"
+                                            className="flex items-center justify-center gap-2 rounded-xl border-2 border-[#C9A84C] bg-white px-6 py-4 text-sm font-bold text-[#9A6811] transition-all duration-300 hover:bg-[#C9A84C]/10 focus-visible:ring-2 focus-visible:ring-[#C9A84C] focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400 disabled:opacity-70 sm:col-span-2 md:col-span-1 dark:bg-[#211E1D] dark:text-[#E8B955] dark:hover:bg-[#C9A84C]/15 dark:focus-visible:ring-offset-[#12100F] dark:disabled:border-white/15 dark:disabled:text-gray-500"
                                         >
                                             <LucideCalendar size={18} />
-                                            {t('schedule_visit')}
+                                            {isPropertyOwner
+                                                ? t(
+                                                      'visit_unavailable_for_owner',
+                                                  )
+                                                : t('schedule_visit')}
                                         </button>
                                     </div>
                                 </div>
@@ -1844,8 +1855,39 @@ function PropertyDetailsContent({
 
                         <form
                             className="space-y-5"
+                            noValidate
                             onSubmit={(event) => {
                                 event.preventDefault();
+                                clearVisitErrors();
+
+                                if (!visitData.scheduled_at) {
+                                    setVisitError(
+                                        'scheduled_at',
+                                        t('visit_date_required'),
+                                    );
+                                    requestAnimationFrame(() =>
+                                        document
+                                            .getElementById(
+                                                'visit-scheduled-at',
+                                            )
+                                            ?.focus(),
+                                    );
+                                    return;
+                                }
+
+                                if (!visitData.phone.trim()) {
+                                    setVisitError(
+                                        'phone',
+                                        t('visit_phone_required'),
+                                    );
+                                    requestAnimationFrame(() =>
+                                        document
+                                            .getElementById('visit-phone')
+                                            ?.focus(),
+                                    );
+                                    return;
+                                }
+
                                 submitVisit(
                                     route(
                                         'property.visit.schedule',
@@ -1857,6 +1899,14 @@ function PropertyDetailsContent({
                                             setVisitModal(false);
                                             resetVisit();
                                         },
+                                        onError: () =>
+                                            requestAnimationFrame(() =>
+                                                visitDialogRef.current
+                                                    ?.querySelector<HTMLElement>(
+                                                        '[aria-invalid="true"]',
+                                                    )
+                                                    ?.focus(),
+                                            ),
                                     },
                                 );
                             }}

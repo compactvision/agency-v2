@@ -5,7 +5,7 @@ import { initReactI18next } from 'react-i18next';
 
 // Bump this value whenever a catalog changes so shared-hosting/browser caches
 // cannot serve an older JSON file alongside a newer JavaScript bundle.
-const translationCatalogVersion = '2026-07-25.2';
+const translationCatalogVersion = '2026-07-25.3';
 
 i18n.use(HttpBackend) // Charge les traductions depuis les fichiers JSON
     .use(LanguageDetector) // Détecte automatiquement la langue
