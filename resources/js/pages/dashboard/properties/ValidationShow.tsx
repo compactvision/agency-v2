@@ -38,7 +38,7 @@ export default function ValidationShow({
                 'Êtes-vous sûr de vouloir approuver cette propriété ? Elle sera visible publiquement.',
             )
         ) {
-            router.patch(
+            router.post(
                 route('dashboard.properties.approve', property.id),
                 {},
                 {
@@ -55,7 +55,7 @@ export default function ValidationShow({
             return;
         }
 
-        router.put(
+        router.post(
             route('dashboard.properties.reject', property.id),
             { reason: rejectReason },
             {

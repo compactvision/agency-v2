@@ -97,7 +97,7 @@ export default function ShowProperty({ property }: { property: Property }) {
     };
 
     const toggleApproval = () => {
-        router.patch(
+        router.post(
             route('dashboard.properties.approve', { id: property.id }),
             {},
             {

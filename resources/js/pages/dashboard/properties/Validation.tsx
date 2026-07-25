@@ -31,7 +31,7 @@ export default function Validation({ properties, filters }: ValidationProps) {
 
     const handleApprove = (id: number) => {
         if (confirm('Êtes-vous sûr de vouloir approuver cette propriété ?')) {
-            router.patch(
+            router.post(
                 route('dashboard.properties.approve', id),
                 {},
                 {
@@ -47,7 +47,7 @@ export default function Validation({ properties, filters }: ValidationProps) {
             return;
         }
 
-        router.put(
+        router.post(
             route('dashboard.properties.reject', id),
             { reason: rejectReason },
             {

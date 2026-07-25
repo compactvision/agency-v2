@@ -81,8 +81,8 @@ Route::middleware(['auth', 'verified'])->prefix('/dashboard')->group(function ()
             Route::get('/{id}/edit', [PropertyController::class, 'edit'])->name('edit');
             Route::put('/{id}/update', [PropertyController::class, 'update'])->name('update');
             Route::get('/validation/{id}', [PropertyController::class, 'validationShow'])->name('validation.show');
-            Route::patch('/{id}/approve', [PropertyController::class, 'approve'])->name('approve');
-            Route::put('/{id}/reject', [PropertyController::class, 'reject'])->name('reject');
+            Route::post('/{id}/approve', [PropertyController::class, 'approve'])->name('approve');
+            Route::post('/{id}/reject', [PropertyController::class, 'reject'])->name('reject');
         });
 
         // Personal Routes (accessible to all roles in dashboard)

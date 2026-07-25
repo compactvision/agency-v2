@@ -127,7 +127,7 @@ export default function FavoriteProperties() {
     }, [searchQuery, debouncedSearch]);
 
     const toggleApproval = (id: number) => {
-        router.patch(
+        router.post(
             route('dashboard.properties.approve', { id }),
             {},
             { preserveScroll: true },

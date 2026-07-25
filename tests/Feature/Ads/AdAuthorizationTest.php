@@ -55,7 +55,7 @@ test('a non admin cannot moderate a property', function () {
     $ad = createAuthorizedTestAd($user, 'pending_validation');
 
     $this->actingAs($user)
-        ->patch(route('dashboard.properties.approve', $ad->id))
+        ->post(route('dashboard.properties.approve', $ad->id))
         ->assertForbidden();
 });
 
@@ -72,7 +72,7 @@ test('an admin can view and moderate any property', function () {
         ->assertOk();
 
     $this->actingAs($admin)
-        ->patch(route('dashboard.properties.approve', $ad->id))
+        ->post(route('dashboard.properties.approve', $ad->id))
         ->assertRedirect(route('dashboard.properties.validation'));
 
     expect($ad->fresh()->status)->toBe('published');

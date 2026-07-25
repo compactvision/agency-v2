@@ -125,7 +125,7 @@ export default function Properties() {
     }, [searchQuery, debouncedSearch]);
 
     const toggleApproval = (id: number) => {
-        router.patch(
+        router.post(
             route('dashboard.properties.approve', { id }),
             {},
             { preserveScroll: true },
