@@ -76,7 +76,7 @@ test('an admin can view and moderate any property', function () {
         ->assertRedirect(route('dashboard.properties.validation'));
 
     expect($ad->fresh()->status)->toBe('published');
-    Mail::assertQueued(PropertyApprovedMail::class);
+    Mail::assertSent(PropertyApprovedMail::class, fn ($mail) => $mail->hasTo($owner->email));
 });
 
 test('an unpublished property cannot be added to favorites by id', function () {

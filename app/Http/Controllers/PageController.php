@@ -15,11 +15,16 @@ use App\Domains\Locations\Models\Municipality;
 use App\Domains\System\Models\SystemSetting;
 use App\Http\Requests\ContactOwnerRequest;
 use App\Http\Requests\ContactRequest;
+use App\Http\Requests\SchedulePropertyVisitRequest;
 use App\Mail\ContactMessage;
 use App\Mail\PropertyOwnerContactMessage;
+use App\Mail\PropertyVisitConfirmationMail;
+use App\Mail\PropertyVisitRequestedMail;
+use App\Models\PropertyVisit;
 use App\Support\ReferenceCache;
 use App\Support\Seo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
@@ -102,6 +107,39 @@ class PageController extends Controller
             'success',
             'Votre demande a été envoyée au propriétaire.',
         );
+    }
+
+    public function scheduleVisit(SchedulePropertyVisitRequest $request, Ad $ad)
+    {
+        abort_unless($ad->is_published && $ad->is_approved, 404);
+        abort_if($ad->user_id === $request->user()->id, 422, 'Vous ne pouvez pas programmer une visite pour votre propre annonce.');
+
+        $ad->loadMissing('user');
+        $data = $request->validated();
+
+        $visit = PropertyVisit::create([
+            'ad_id' => $ad->id,
+            'visitor_id' => $request->user()->id,
+            'owner_id' => $ad->user_id,
+            'visitor_name' => $request->user()->name,
+            'visitor_email' => $request->user()->email,
+            'visitor_phone' => $data['phone'],
+            'scheduled_at' => $data['scheduled_at'],
+            'status' => 'pending',
+            'message' => $data['message'] ?? null,
+        ])->load(['property', 'visitor', 'owner']);
+
+        try {
+            Mail::to($visit->owner->email)->send(new PropertyVisitRequestedMail($visit));
+            Mail::to($visit->visitor_email)->send(new PropertyVisitConfirmationMail($visit));
+        } catch (\Throwable $exception) {
+            Log::error('Failed to send property visit emails.', [
+                'visit_id' => $visit->id,
+                'message' => $exception->getMessage(),
+            ]);
+        }
+
+        return back()->with('success', 'Votre demande de visite a été enregistrée. Le propriétaire vous contactera pour la confirmer.');
     }
 
     public function tarifs(Request $request)

@@ -10,6 +10,8 @@ return [
         'property_approved' => 'Annonce :reference approuvée et publiée',
         'property_rejected' => 'Corrections requises pour l’annonce :reference',
         'property_enquiry' => 'Nouvelle demande pour l’annonce :reference',
+        'property_visit_requested' => 'Nouvelle demande de visite — annonce :reference',
+        'property_visit_confirmation' => 'Votre demande de visite — annonce :reference',
         'contact' => 'Nouveau message du site — :subject',
         'manual_subscription' => 'Action requise : demande d’abonnement :plan',
         'subscription_activated' => 'Votre abonnement :plan est actif',
@@ -28,6 +30,7 @@ return [
         'not_available' => 'Non disponible',
         'unlimited' => 'Sans échéance',
         'date_format' => 'd/m/Y',
+        'date_time_format' => 'd/m/Y à H:i',
         'view_dashboard' => 'Accéder au tableau de bord',
         'automated_notice' => 'Ce message transactionnel a été envoyé automatiquement. Pour toute question, utilisez la page de contact de notre site.',
     ],
@@ -114,6 +117,20 @@ return [
         'safety' => 'Pour votre sécurité, ne communiquez jamais de mot de passe, de code de validation ou d’information bancaire.',
         'reply' => 'Répondez directement à cet e-mail pour contacter le demandeur.',
         'action' => 'Consulter l’annonce',
+    ],
+
+    'property_visit' => [
+        'owner_title' => 'Une visite est demandée',
+        'owner_intro' => '**:name** souhaite visiter votre annonce **:title**.',
+        'owner_next' => 'Contactez le demandeur afin de confirmer l’horaire ou de proposer un autre créneau.',
+        'visitor_title' => 'Votre demande de visite est enregistrée',
+        'visitor_intro' => 'Votre demande pour visiter **:title** a bien été transmise au propriétaire.',
+        'visitor_next' => 'Le propriétaire vous contactera directement pour confirmer le rendez-vous. Le créneau reste en attente jusque-là.',
+        'date' => 'Créneau souhaité',
+        'phone' => 'Téléphone',
+        'email' => 'E-mail',
+        'message' => 'Message',
+        'action' => 'Voir l’annonce',
     ],
 
     'billing' => [

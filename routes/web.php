@@ -44,6 +44,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/properties/{ad:slug}/contact-owner', [FrontPageController::class, 'contactOwner'])
         ->middleware('throttle:5,1')
         ->name('contact.owner');
+    Route::post('/properties/{ad:slug}/schedule-visit', [FrontPageController::class, 'scheduleVisit'])
+        ->middleware('throttle:3,10')
+        ->name('property.visit.schedule');
     Route::post('/subscriptions/check-access', [BillingController::class, 'start'])
         ->middleware('throttle:5,1')
         ->name('subscriptions.checkAccess');

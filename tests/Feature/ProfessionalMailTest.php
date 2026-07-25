@@ -14,7 +14,10 @@ use App\Mail\PropertyApprovedMail;
 use App\Mail\PropertyOwnerContactMessage;
 use App\Mail\PropertyRejectedMail;
 use App\Mail\PropertyValidationPending;
+use App\Mail\PropertyVisitConfirmationMail;
+use App\Mail\PropertyVisitRequestedMail;
 use App\Mail\WelcomeSeller;
+use App\Models\PropertyVisit;
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -104,6 +107,17 @@ test('all business emails render with the brand and valid current links', functi
     ]);
     $property = createMailProperty($owner);
     $subscription = createMailSubscription($owner);
+    $visit = PropertyVisit::create([
+        'ad_id' => $property->id,
+        'visitor_id' => $sender->id,
+        'owner_id' => $owner->id,
+        'visitor_name' => $sender->name,
+        'visitor_email' => $sender->email,
+        'visitor_phone' => '+243 999 000 000',
+        'scheduled_at' => now()->addDay(),
+        'status' => 'pending',
+        'message' => 'I would like to arrange a private viewing.',
+    ])->load(['property', 'visitor', 'owner']);
     $contact = [
         'name' => 'Website Visitor',
         'email' => 'visitor@example.test',
@@ -115,6 +129,8 @@ test('all business emails render with the brand and valid current links', functi
     $mailables = [
         new ContactMessage($contact),
         new PropertyOwnerContactMessage($property, $sender, $contact),
+        new PropertyVisitRequestedMail($visit),
+        new PropertyVisitConfirmationMail($visit),
         new WelcomeSeller($owner, 'agency'),
         new PropertyValidationPending($property),
         new AdminNewPropertyNotification($property),

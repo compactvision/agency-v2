@@ -100,7 +100,7 @@ export default function PropertyGalleryDialog({
             role="dialog"
             aria-modal="true"
             aria-labelledby="property-gallery-title"
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-0 sm:p-4"
             onMouseDown={onMouseDown}
             onMouseMove={onMouseMove}
             onMouseUp={onMouseUp}
@@ -109,12 +109,12 @@ export default function PropertyGalleryDialog({
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
         >
-            <div className="absolute top-0 right-0 left-0 z-10 bg-gradient-to-b from-black/70 to-transparent p-4 md:p-6">
-                <div className="flex items-center justify-between">
+            <div className="absolute top-0 right-0 left-0 z-10 bg-gradient-to-b from-black/80 to-transparent p-2 sm:p-4 md:p-6">
+                <div className="flex items-start justify-between gap-2">
                     <h2 id="property-gallery-title" className="sr-only">
                         Galerie photos : {property.title}
                     </h2>
-                    <div className="flex items-center gap-2 md:gap-4">
+                    <div className="flex shrink-0 items-center gap-1.5 md:gap-4">
                         <button
                             type="button"
                             onClick={closeModal}
@@ -131,12 +131,12 @@ export default function PropertyGalleryDialog({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-1 md:gap-3">
+                    <div className="flex min-w-0 items-center gap-1 md:gap-3">
                         <button
                             type="button"
                             onClick={handleZoomOut}
                             aria-label={t('zoom_out', 'Dézoomer')}
-                            className={iconButton}
+                            className={`${iconButton} hidden sm:inline-flex`}
                         >
                             <LucideZoomOut aria-hidden="true" />
                         </button>
@@ -147,7 +147,7 @@ export default function PropertyGalleryDialog({
                             type="button"
                             onClick={handleZoomIn}
                             aria-label={t('zoom_in', 'Zoomer')}
-                            className={iconButton}
+                            className={`${iconButton} hidden sm:inline-flex`}
                         >
                             <LucideZoomIn aria-hidden="true" />
                         </button>
@@ -158,7 +158,7 @@ export default function PropertyGalleryDialog({
                                 'rotate_image',
                                 "Faire pivoter l'image",
                             )}
-                            className={iconButton}
+                            className={`${iconButton} hidden sm:inline-flex`}
                         >
                             <LucideRotateCw aria-hidden="true" />
                         </button>
@@ -169,7 +169,7 @@ export default function PropertyGalleryDialog({
                                 'reset_image',
                                 "Réinitialiser l'image",
                             )}
-                            className={iconButton}
+                            className={`${iconButton} hidden sm:inline-flex`}
                         >
                             <LucideMaximize2 aria-hidden="true" />
                         </button>
@@ -180,7 +180,7 @@ export default function PropertyGalleryDialog({
                                 'download_image',
                                 "Télécharger l'image",
                             )}
-                            className={iconButton}
+                            className={`${iconButton} hidden sm:inline-flex`}
                         >
                             <LucideDownload aria-hidden="true" />
                         </button>
@@ -237,7 +237,7 @@ export default function PropertyGalleryDialog({
                                     : 'grab'
                                 : 'default',
                         maxWidth: isMobile ? '100%' : '90vw',
-                        maxHeight: isMobile ? '70vh' : '80vh',
+                        maxHeight: isMobile ? '66dvh' : '80vh',
                     }}
                     draggable={false}
                 />
@@ -247,7 +247,7 @@ export default function PropertyGalleryDialog({
                 type="button"
                 onClick={prevImage}
                 aria-label={t('previous_image', 'Image précédente')}
-                className={`${iconButton} absolute top-1/2 left-2 -translate-y-1/2 md:left-6`}
+                className={`${iconButton} absolute top-1/2 left-1 -translate-y-1/2 sm:left-2 md:left-6`}
             >
                 <LucideChevronLeft aria-hidden="true" />
             </button>
@@ -255,13 +255,13 @@ export default function PropertyGalleryDialog({
                 type="button"
                 onClick={nextImage}
                 aria-label={t('next_image', 'Image suivante')}
-                className={`${iconButton} absolute top-1/2 right-2 -translate-y-1/2 md:right-6`}
+                className={`${iconButton} absolute top-1/2 right-1 -translate-y-1/2 sm:right-2 md:right-6`}
             >
                 <LucideChevronRight aria-hidden="true" />
             </button>
 
             {showThumbnails && (
-                <div className="absolute right-0 bottom-0 left-0 z-10 bg-gradient-to-t from-black/70 to-transparent p-4 md:p-6">
+                <div className="absolute right-0 bottom-0 left-0 z-10 bg-gradient-to-t from-black/80 to-transparent p-2 sm:p-4 md:p-6">
                     <div className="flex gap-2 overflow-x-auto pb-2">
                         {property.images.map((image, index) => (
                             <button

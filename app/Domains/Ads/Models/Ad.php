@@ -7,6 +7,7 @@ use App\Domains\Categories\Models\Category;
 use App\Domains\Locations\Models\City;
 use App\Domains\Locations\Models\Country;
 use App\Domains\Locations\Models\Municipality;
+use App\Models\PropertyVisit;
 use App\Models\User;
 use App\Support\ReferenceCache;
 use Illuminate\Database\Eloquent\Model;
@@ -115,5 +116,10 @@ class Ad extends Model
     public function favoritedBy()
     {
         return $this->belongsToMany(User::class, 'favorites', 'ad_id', 'user_id')->withTimestamps();
+    }
+
+    public function visits()
+    {
+        return $this->hasMany(PropertyVisit::class);
     }
 }

@@ -416,8 +416,8 @@ class AdService
 
         try {
             Mail::to($ad->user->email)
-                ->queue(new PropertyApprovedMail($ad));
-        } catch (\Exception $e) {
+                ->send(new PropertyApprovedMail($ad));
+        } catch (\Throwable $e) {
             Log::error('Failed to send property approved email: '.$e->getMessage());
         }
 

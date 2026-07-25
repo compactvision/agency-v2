@@ -143,4 +143,14 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     {
         return $this->hasMany(Ad::class);
     }
+
+    public function requestedPropertyVisits()
+    {
+        return $this->hasMany(PropertyVisit::class, 'visitor_id');
+    }
+
+    public function receivedPropertyVisits()
+    {
+        return $this->hasMany(PropertyVisit::class, 'owner_id');
+    }
 }
