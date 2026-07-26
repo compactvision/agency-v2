@@ -135,9 +135,12 @@ test('the municipality screen exposes system countries and their cities', functi
             ->has('countries', 1)
             ->where('countries.0.name', 'République démocratique du Congo')
             ->where('countries.0.iso_code', 'COD')
+            ->where('countries.0.cities_count', 1)
+            ->where('countries.0.municipalities_count', 1)
             ->has('cities', 1)
             ->where('cities.0.name', 'Kinshasa')
             ->where('cities.0.country_id', $city->country_id)
+            ->where('cities.0.municipalities_count', 1)
             ->where('municipalities.data.0.country', 'République démocratique du Congo')
             ->where('municipalities.data.0.city', 'Kinshasa'));
 });
