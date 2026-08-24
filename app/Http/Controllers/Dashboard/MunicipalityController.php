@@ -24,6 +24,19 @@ class MunicipalityController extends Controller
     public function index(Request $request)
     {
         $municipalities = $this->municipalityService->list($request->only(['search']));
+        $countries = Country::query()
+            ->with([
+                'cities' => fn ($query) => $query
+                    ->select(['id', 'country_id', 'name'])
+                    ->withCount('municipalities'),
+            ])
+            ->orderBy('name')
+            ->get(['id', 'name', 'iso_code']);
+        $cities = City::query()
+            ->with('country:id,name')
+            ->withCount('municipalities')
+            ->orderBy('name')
+            ->get(['id', 'country_id', 'name']);
 
         return Inertia::render('dashboard/municipalities/Municipalities', [
             'municipalities' => [
@@ -37,12 +50,20 @@ class MunicipalityController extends Controller
                 ],
                 'links' => $municipalities->linkCollection()->toArray(),
             ],
-            'countries' => Country::query()
-                ->orderBy('name')
-                ->get(['id', 'name', 'iso_code']),
-            'cities' => City::query()
-                ->orderBy('name')
-                ->get(['id', 'country_id', 'name']),
+            'countries' => $countries->map(fn (Country $country) => [
+                'id' => $country->id,
+                'name' => $country->name,
+                'iso_code' => $country->iso_code,
+                'cities_count' => $country->cities->count(),
+                'municipalities_count' => $country->cities->sum('municipalities_count'),
+            ]),
+            'cities' => $cities->map(fn (City $city) => [
+                'id' => $city->id,
+                'country_id' => $city->country_id,
+                'name' => $city->name,
+                'country' => $city->country?->name,
+                'municipalities_count' => $city->municipalities_count,
+            ]),
             'filters' => (object) $request->only(['search']),
         ]);
     }
