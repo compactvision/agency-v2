@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\User;
+use App\Services\BrevoNewsletter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -19,6 +20,10 @@ class UserAnonymizer
         $profilePhoto = $user->profile_photo;
         $originalEmail = $user->email;
         $anonymizedEmail = "deleted+{$user->id}@anonymized.invalid";
+
+        if ($user->newsletter_subscription?->is_active) {
+            app(BrevoNewsletter::class)->unsubscribe($user->newsletter_subscription->email);
+        }
 
         DB::transaction(function () use ($user, $originalEmail, $anonymizedEmail) {
             $user->tokens()->delete();

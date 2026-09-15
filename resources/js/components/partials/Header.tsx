@@ -130,6 +130,7 @@ export default function Header() {
                                 { path: 'home', label: t('home') },
                                 { path: 'properties', label: t('property') },
                                 { path: 'about', label: t('about') },
+                                { path: 'tarifs', label: t('pricing') },
                                 { path: 'contact', label: t('contact') },
                             ].map((item) => {
                                 const activeLink = isActive(

@@ -54,6 +54,7 @@ export default function Footer() {
 
     const handleSubscribe = (e: React.FormEvent) => {
         e.preventDefault();
+        if (loading) return;
         if (!email.trim()) return;
 
         setError('');
@@ -64,6 +65,7 @@ export default function Footer() {
             { email },
             {
                 preserveScroll: true,
+                onFinish: () => setLoading(false),
                 onSuccess: () => {
                     setLoading(false);
                     setSubscribed(true);

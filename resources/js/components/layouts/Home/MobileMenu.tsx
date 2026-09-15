@@ -150,12 +150,12 @@ export default function MobileMenu() {
                 aria-label={t('main_menu', 'Menu principal')}
                 aria-hidden={!active}
                 inert={!active ? true : undefined}
-                className={`fixed top-0 left-0 z-[70] flex h-[100dvh] w-[88vw] max-w-[22rem] flex-col overflow-hidden rounded-r-3xl bg-[#EEEFE6] text-[#413D3C] shadow-[20px_0_60px_rgba(65,61,60,0.28)] transition-transform duration-300 ease-out lg:hidden dark:bg-[#292625] dark:text-[#EEEFE6] ${
+                className={`fixed inset-0 z-[70] flex h-[100dvh] w-full flex-col overflow-hidden bg-[#EEEFE6] text-[#413D3C] transition-transform duration-300 ease-out lg:hidden dark:bg-[#292625] dark:text-[#EEEFE6] ${
                     active ? 'translate-x-0' : '-translate-x-full'
                 }`}
             >
                 {/* Header du Menu */}
-                <div className="relative z-10 flex min-h-[4.75rem] items-center justify-between gap-3 overflow-hidden bg-gradient-to-br from-[#292625] via-[#353130] to-[#413D3C] px-4 py-3 sm:px-5">
+                <div className="relative z-10 flex min-h-[4.75rem] shrink-0 items-center justify-between gap-3 overflow-hidden bg-gradient-to-br from-[#292625] via-[#353130] to-[#413D3C] px-4 py-3 sm:px-5">
                     <div className="pointer-events-none absolute -top-16 -left-12 h-36 w-36 rounded-full border border-white/10" />
                     <div className="pointer-events-none absolute -right-8 -bottom-16 h-32 w-32 rounded-full bg-[#CF8E19]/15 blur-2xl" />
 
@@ -183,8 +183,8 @@ export default function MobileMenu() {
                     <div className="absolute right-0 bottom-0 left-0 h-0.5 bg-gradient-to-r from-transparent via-[#CF8E19] to-transparent opacity-80" />
                 </div>
 
-                {/* Tout le contenu tient dans la hauteur disponible, sans scroll */}
-                <div className="relative z-10 flex min-h-0 flex-1 flex-col gap-3 px-4 py-3 sm:px-5 [@media(max-height:700px)]:gap-2 [@media(max-height:700px)]:py-2">
+                {/* Contenu défilant pour rester accessible sur les petits écrans */}
+                <div className="relative z-10 flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-4 py-3 sm:px-5 [@media(max-height:700px)]:gap-2 [@media(max-height:700px)]:py-2">
                     {/* Navigation Menu */}
                     <nav className="flex flex-col gap-1.5 [@media(max-height:700px)]:gap-1">
                         {[
@@ -364,7 +364,7 @@ export default function MobileMenu() {
                 </div>
 
                 {/* Pied compact */}
-                <div className="relative z-10 border-t border-[#413D3C]/10 bg-[#E6E5DB]/90 px-4 py-3 backdrop-blur-sm sm:px-5 dark:border-white/10 dark:bg-[#353130]/95">
+                <div className="relative z-10 shrink-0 border-t border-[#413D3C]/10 bg-[#E6E5DB]/90 px-4 py-3 backdrop-blur-sm sm:px-5 dark:border-white/10 dark:bg-[#353130]/95">
                     <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2 text-xs font-semibold text-[#6B6562] dark:text-[#EEEFE6]/70">
                             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/70 text-[#413D3C] shadow-sm dark:bg-white/10 dark:text-[#EEEFE6]">

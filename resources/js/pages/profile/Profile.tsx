@@ -8,7 +8,6 @@ import {
     Calendar,
     Camera,
     CheckCircle,
-    CircleFadingArrowUp,
     Edit3,
     Eye,
     FileText,
@@ -107,18 +106,6 @@ export default function Profile() {
     const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState<TabType>('home');
     const [isLoggingOut, setIsLoggingOut] = useState(false);
-    const [showMobileMenu, setShowMobileMenu] = useState(false);
-    const [showScrollTop, setShowScrollTop] = useState(false);
-
-    // Scroll listener pour l'animation du bouton profil
-    useEffect(() => {
-        const handleScroll = () => setShowScrollTop(window.scrollY > 300);
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
-
-    const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-
     // Récupération du tab actif depuis l'URL avec validation
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as TabType;
@@ -135,7 +122,6 @@ export default function Profile() {
         if (VALID_TABS.includes(tab)) {
             setActiveTab(tab);
             window.history.pushState(null, '', `#${tab}`);
-            setShowMobileMenu(false);
         }
     };
 
@@ -319,10 +305,10 @@ export default function Profile() {
                 return (
                     <div className="space-y-6">
                         {/* Welcome Section */}
-                        <div className="rounded-2xl bg-gradient-to-r from-[#1E3A5F] to-[#0d2340] p-8 text-white">
-                            <div className="flex flex-col items-center justify-between md:flex-row">
+                        <div className="rounded-2xl bg-gradient-to-r from-[#1E3A5F] to-[#0d2340] p-5 text-white sm:p-8">
+                            <div className="flex flex-col items-start justify-between gap-5 sm:flex-row sm:items-center">
                                 <div>
-                                    <h2 className="mb-2 text-3xl font-bold">
+                                    <h2 className="mb-2 text-2xl font-bold sm:text-3xl">
                                         {t('welcome_back') || 'Bienvenue'},{' '}
                                         {user?.name}!
                                     </h2>
@@ -331,9 +317,9 @@ export default function Profile() {
                                             'Depuis votre tableau de bord, vous pouvez gérer vos propriétés favorites, modifier vos informations personnelles et suivre vos activités.'}
                                     </p>
                                 </div>
-                                <div className="mt-6 md:mt-0">
-                                    <div className="rounded-2xl bg-white/20 p-6 text-center backdrop-blur-sm">
-                                        <div className="mb-1 text-4xl font-bold">
+                                <div className="shrink-0">
+                                    <div className="rounded-2xl bg-white/20 p-4 text-center backdrop-blur-sm">
+                                        <div className="mb-1 text-2xl font-bold sm:text-3xl">
                                             {user?.role || 'Acheteur'}
                                         </div>
                                         <div className="text-sm text-white/80">
@@ -345,7 +331,7 @@ export default function Profile() {
                         </div>
 
                         {/* Stats Cards */}
-                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+                        <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
                             {statCards.map((stat, index) => {
                                 const Icon = stat.icon;
                                 return (
@@ -353,10 +339,10 @@ export default function Profile() {
                                         key={index}
                                         className="overflow-hidden rounded-2xl bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl"
                                     >
-                                        <div className="p-6">
-                                            <div className="mb-4 flex items-center justify-between">
+                                        <div className="p-4 sm:p-6">
+                                            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                                                 <div
-                                                    className={`rounded-xl p-3 ${stat.iconBg}`}
+                                                    className={`rounded-xl p-2 sm:p-3 ${stat.iconBg}`}
                                                 >
                                                     <Icon
                                                         size={24}
@@ -380,7 +366,7 @@ export default function Profile() {
                                                     {stat.change}
                                                 </div>
                                             </div>
-                                            <div className="mb-1 text-3xl font-bold text-gray-900">
+                                            <div className="mb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
                                                 {stat.value}
                                             </div>
                                             <div className="text-sm text-gray-600">
@@ -392,10 +378,10 @@ export default function Profile() {
                             })}
                         </div>
 
-                        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                        <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
                             {/* Quick Actions */}
-                            <div className="lg:col-span-2">
-                                <div className="rounded-2xl bg-white p-6 shadow-lg">
+                            <div className="xl:col-span-2">
+                                <div className="rounded-2xl bg-white p-4 shadow-sm sm:p-6">
                                     <h3 className="mb-6 flex items-center text-xl font-bold text-gray-900">
                                         <Zap
                                             size={20}
@@ -404,7 +390,7 @@ export default function Profile() {
                                         {t('quick_actions') ||
                                             'Actions rapides'}
                                     </h3>
-                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 xl:grid-cols-1">
                                         {quickActions.map((action, index) => {
                                             const Icon = action.icon;
                                             return (
@@ -435,8 +421,8 @@ export default function Profile() {
                             </div>
 
                             {/* Recent Activities */}
-                            <div className="lg:col-span-1">
-                                <div className="rounded-2xl bg-white p-6 shadow-lg">
+                            <div className="xl:col-span-1">
+                                <div className="rounded-2xl bg-white p-4 shadow-sm sm:p-6">
                                     <h3 className="mb-6 flex items-center text-xl font-bold text-gray-900">
                                         <Activity
                                             size={20}
@@ -482,7 +468,7 @@ export default function Profile() {
                         </div>
 
                         {/* Account Info */}
-                        <div className="rounded-2xl bg-white p-6 shadow-lg">
+                        <div className="rounded-2xl bg-white p-4 shadow-sm sm:p-6">
                             <h3 className="mb-6 flex items-center text-xl font-bold text-gray-900">
                                 <Users
                                     size={20}
@@ -599,8 +585,6 @@ export default function Profile() {
         }
     };
 
-    console.log(user);
-
     return (
         <App>
             <Head title="Mon profil" />
@@ -609,8 +593,8 @@ export default function Profile() {
                 homeLink={route('home')}
             />
 
-            <section className="min-h-screen bg-gray-50 py-8">
-                <div className="container mx-auto px-4">
+            <section className="min-h-screen bg-gray-50 py-5 sm:py-8">
+                <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
                     {/* Messages flash */}
                     {flash?.success && (
                         <div className="mb-6 flex items-center justify-between rounded-xl border border-green-200 bg-green-50 p-4">
@@ -644,10 +628,66 @@ export default function Profile() {
                         </div>
                     )}
 
-                    <div className="flex flex-col gap-6 lg:flex-row">
+                    <div className="mb-5 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm lg:hidden">
+                        <div className="mb-4 flex min-w-0 items-center gap-3">
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#1E3A5F]/10 text-[#1E3A5F]">
+                                {user.profile_photo ? (
+                                    <img
+                                        src={'/storage/' + user.profile_photo}
+                                        alt=""
+                                        className="h-full w-full object-cover"
+                                    />
+                                ) : (
+                                    <User size={24} />
+                                )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <p className="truncate font-semibold text-gray-900">
+                                    {user.name}
+                                </p>
+                                <p className="truncate text-sm text-gray-500">
+                                    {user.email}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={handleLogout}
+                                disabled={isLoggingOut}
+                                aria-label={t('logout', 'Déconnexion')}
+                                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-red-600 hover:bg-red-50 disabled:opacity-50"
+                            >
+                                <LogOut size={20} />
+                            </button>
+                        </div>
+                        <label
+                            htmlFor="profile-section"
+                            className="mb-2 block text-xs font-semibold tracking-wide text-gray-500 uppercase"
+                        >
+                            Mon espace
+                        </label>
+                        <select
+                            id="profile-section"
+                            value={activeTab}
+                            onChange={(event) =>
+                                handleTabChange(event.target.value as TabType)
+                            }
+                            className="min-h-12 w-full min-w-0 rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base font-medium text-gray-900 focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/30"
+                        >
+                            {menuItems.map((item) => (
+                                <option key={item.id} value={item.id}>
+                                    {item.label}
+                                    {item.count !== null
+                                        ? ` (${item.count})`
+                                        : ''}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="grid min-w-0 grid-cols-1 items-start gap-5 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-6 xl:grid-cols-[18rem_minmax(0,1fr)]">
                         {/* Sidebar */}
-                        <div className="w-full lg:w-1/4">
-                            <div className="sticky top-6 overflow-hidden rounded-2xl bg-white shadow-lg">
+                        <div className="hidden min-w-0 lg:block">
+                            <div className="sticky top-24 overflow-hidden rounded-2xl bg-white shadow-lg">
                                 {/* User Profile Card */}
                                 <div className="bg-gradient-to-r from-[#1E3A5F] to-[#0d2340] p-6 text-white">
                                     <div className="flex flex-col items-center">
@@ -679,7 +719,7 @@ export default function Profile() {
                                         <h3 className="text-center text-xl font-bold">
                                             {user?.name}
                                         </h3>
-                                        <p className="text-center text-white/80">
+                                        <p className="text-center text-sm break-all text-white/80">
                                             {user?.email}
                                         </p>
                                         <div className="mt-4 rounded-full bg-white/20 px-3 py-1 text-center text-sm">
@@ -758,126 +798,14 @@ export default function Profile() {
                         </div>
 
                         {/* Main Content */}
-                        <div className="w-full lg:w-3/4">
-                            <div className="rounded-2xl bg-white p-6 shadow-lg">
+                        <div className="w-full min-w-0">
+                            <div className="min-w-0 [overflow-wrap:anywhere] [&_svg]:shrink-0">
                                 {renderTabContent()}
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
-
-            {/* Mobile Menu Toggle — se soulève quand scroll-to-top apparaît */}
-            <div
-                className="fixed right-6 z-50 lg:hidden"
-                style={{ bottom: '2rem' }}
-            >
-                {/* Bouton profil */}
-                <button
-                    onClick={() => setShowMobileMenu(!showMobileMenu)}
-                    className="flex h-12 w-12 items-center justify-center rounded-full bg-[#C9A84C] text-white shadow-xl ring-2 ring-white/20 transition-all active:scale-95"
-                    style={{
-                        transform: showScrollTop
-                            ? 'translateY(-64px)'
-                            : 'translateY(0)',
-                        transition:
-                            'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                    }}
-                >
-                    {showMobileMenu ? (
-                        <XCircle size={24} />
-                    ) : (
-                        <User size={24} />
-                    )}
-                </button>
-
-                {/* Scroll-to-top mobile — apparaît sous le bouton profil */}
-                <button
-                    onClick={scrollToTop}
-                    aria-label="Retour en haut de la page"
-                    className="absolute bottom-0 flex h-12 w-12 items-center justify-center rounded-full bg-[#0099cc] text-white shadow-xl ring-2 ring-white/20 active:scale-95"
-                    style={{
-                        opacity: showScrollTop ? 1 : 0,
-                        transform: showScrollTop
-                            ? 'translateY(0) scale(1)'
-                            : 'translateY(16px) scale(0.8)',
-                        pointerEvents: showScrollTop ? 'auto' : 'none',
-                        transition:
-                            'opacity 0.35s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                    }}
-                >
-                    <CircleFadingArrowUp size={20} />
-                </button>
-            </div>
-
-            {/* Mobile Menu */}
-            {showMobileMenu && (
-                <div className="fixed inset-0 z-40 flex items-end bg-black/50 lg:hidden">
-                    <div className="animate-slide-up w-full rounded-t-3xl bg-white p-6">
-                        <div className="mb-6 flex items-center justify-between">
-                            <h3 className="text-xl font-bold text-gray-900">
-                                {t('menu') || 'Menu'}
-                            </h3>
-                            <button
-                                onClick={() => setShowMobileMenu(false)}
-                                className="rounded-lg p-2 hover:bg-gray-100"
-                            >
-                                <XCircle size={20} />
-                            </button>
-                        </div>
-                        <ul className="space-y-2">
-                            {menuItems.map((item) => {
-                                const Icon = item.icon;
-                                return (
-                                    <li key={item.id}>
-                                        <button
-                                            onClick={() =>
-                                                handleTabChange(item.id)
-                                            }
-                                            className={`flex w-full items-center justify-between rounded-xl p-3 transition-colors ${
-                                                activeTab === item.id
-                                                    ? 'bg-slate-50 text-[#1E3A5F]'
-                                                    : 'text-gray-700 hover:bg-gray-100'
-                                            }`}
-                                        >
-                                            <div className="flex items-center">
-                                                <Icon
-                                                    size={18}
-                                                    className="mr-3"
-                                                />
-                                                <span>{item.label}</span>
-                                            </div>
-                                            {item.count !== null && (
-                                                <span className="rounded-full bg-gray-200 px-2 py-1 text-xs text-gray-700">
-                                                    {item.count}
-                                                </span>
-                                            )}
-                                        </button>
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                        <hr className="my-4 border-gray-200" />
-                        <button
-                            onClick={handleLogout}
-                            disabled={isLoggingOut}
-                            className="flex w-full items-center justify-between rounded-xl p-3 text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
-                        >
-                            <div className="flex items-center">
-                                <LogOut size={18} className="mr-3" />
-                                <span>
-                                    {isLoggingOut
-                                        ? t('logging_out') || 'Déconnexion...'
-                                        : t('logout') || 'Déconnexion'}
-                                </span>
-                            </div>
-                            {isLoggingOut && (
-                                <div className="h-5 w-5 animate-spin rounded-full border-2 border-red-600 border-t-transparent"></div>
-                            )}
-                        </button>
-                    </div>
-                </div>
-            )}
 
             <NewsLetter />
         </App>

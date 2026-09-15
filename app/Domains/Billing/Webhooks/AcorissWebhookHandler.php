@@ -2,6 +2,7 @@
 
 namespace App\Domains\Billing\Webhooks;
 
+use App\Domains\Billing\Models\Subscription;
 use App\Domains\Billing\Models\WebhookLog;
 use App\Domains\Billing\Services\StatusUpdater;
 use DomainException;
@@ -25,6 +26,22 @@ class AcorissWebhookHandler
             'type' => ['required', 'string', 'max:100'],
             'data' => ['sometimes', 'array'],
         ]);
+
+        // Legacy notifications must never modify an RDCard subscription.
+        $transactionId = $event['data']['transactionId'] ?? null;
+        $paymentId = $event['data']['paymentId'] ?? null;
+        if (Subscription::where('payment_method', 'RDCard')
+            ->where(function ($query) use ($transactionId, $paymentId) {
+                $query->whereRaw('1 = 0');
+                if (is_string($transactionId)) {
+                    $query->orWhere('transaction_id', $transactionId);
+                }
+                if (is_string($paymentId)) {
+                    $query->orWhere('payment_id', $paymentId);
+                }
+            })->exists()) {
+            return response()->json(['message' => 'Use the RDCard webhook endpoint'], 422);
+        }
 
         WebhookLog::create([
             'event_type' => $event['type'],

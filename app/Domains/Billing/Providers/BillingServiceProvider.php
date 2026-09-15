@@ -19,7 +19,7 @@ class BillingServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Bind the PaymentGatewayInterface to the unified PaymentGatewayService
-        // (which handles Mock vs Acoriss internally based on environment)
+        // RDCard is used in every environment; tests fake HTTP explicitly.
         $this->app->bind(PaymentGatewayInterface::class, function () {
             return app(PaymentGatewayService::class);
         });

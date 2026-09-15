@@ -137,7 +137,7 @@ export default function UserProfile({ user }: { user: User }) {
     return (
         <div className="space-y-6">
             {/* Profile Header */}
-            <div className="rounded-2xl bg-gradient-to-r from-[#1E3A5F] to-[#0d2340] p-8 text-white">
+            <div className="rounded-2xl bg-gradient-to-r from-[#1E3A5F] to-[#0d2340] p-5 text-white sm:p-8">
                 <div className="flex flex-col items-center gap-6 md:flex-row">
                     <div className="relative">
                         {user?.avatar ? (
@@ -156,11 +156,11 @@ export default function UserProfile({ user }: { user: User }) {
                         </button>
                     </div>
 
-                    <div className="flex-1 text-center md:text-left">
-                        <h2 className="mb-2 text-3xl font-bold">
+                    <div className="min-w-0 flex-1 text-center md:text-left">
+                        <h2 className="mb-2 text-2xl font-bold sm:text-3xl">
                             {user?.name}
                         </h2>
-                        <div className="mb-4 flex items-center justify-center gap-2 md:justify-start">
+                        <div className="mb-4 flex flex-wrap items-center justify-center gap-2 md:justify-start">
                             <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-medium">
                                 {user?.role || 'Acheteur'}
                             </span>
@@ -250,14 +250,14 @@ export default function UserProfile({ user }: { user: User }) {
 
             {/* Tabs Navigation */}
             <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
-                <div className="flex border-b border-gray-200">
+                <div className="flex overflow-x-auto border-b border-gray-200">
                     {tabs.map((tab) => {
                         const Icon = tab.icon;
                         return (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex flex-1 items-center justify-center gap-2 px-6 py-4 font-medium transition-colors ${
+                                className={`flex min-h-12 flex-1 shrink-0 items-center justify-center gap-2 px-3 py-3 text-sm font-medium whitespace-nowrap transition-colors sm:px-6 sm:py-4 sm:text-base ${
                                     activeTab === tab.id
                                         ? 'border-b-2 border-[#1E3A5F] bg-slate-50 text-[#1E3A5F]'
                                         : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'

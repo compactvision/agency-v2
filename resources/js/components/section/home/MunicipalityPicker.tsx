@@ -106,13 +106,13 @@ export default function MunicipalityPicker({
 
             {open && (
                 <div
-                    className={`absolute z-[200] overflow-hidden border border-gray-100 bg-white shadow-2xl ${
+                    className={`z-[200] flex flex-col overflow-hidden border border-gray-100 bg-white ${
                         mobile
-                            ? 'top-full right-0 left-0 max-h-64 rounded-b-2xl'
-                            : 'top-[calc(100%+8px)] left-0 w-72 rounded-2xl'
+                            ? 'relative mx-3 mb-3 max-h-[min(20rem,60dvh)] rounded-xl shadow-sm'
+                            : 'absolute top-[calc(100%+8px)] left-0 w-72 rounded-2xl shadow-2xl'
                     }`}
                 >
-                    <div className="border-b border-gray-100 p-2">
+                    <div className="shrink-0 border-b border-gray-100 p-2">
                         <label
                             htmlFor={`${listboxId}-search`}
                             className="sr-only"
@@ -132,7 +132,7 @@ export default function MunicipalityPicker({
                                 onChange={(event) =>
                                     setQuery(event.target.value)
                                 }
-                                className="w-full rounded-lg border border-gray-300 py-2 pr-3 pl-9 text-sm"
+                                className="w-full rounded-lg border border-gray-300 py-2 pr-3 pl-9 text-base md:text-sm"
                             />
                         </div>
                     </div>
@@ -140,7 +140,7 @@ export default function MunicipalityPicker({
                         id={listboxId}
                         role="listbox"
                         aria-label={t('location')}
-                        className="max-h-48 overflow-y-auto p-1"
+                        className="max-h-60 min-h-0 overflow-y-auto overscroll-contain p-1 md:max-h-48"
                     >
                         <button
                             type="button"

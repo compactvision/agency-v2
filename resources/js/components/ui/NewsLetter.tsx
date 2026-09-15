@@ -51,20 +51,9 @@ export default function NewsLetter() {
         };
     }, []);
 
-    // Animation de frappe au clavier
-    useEffect(() => {
-        const handleKeyPress = (e: KeyboardEvent) => {
-            if (e.key === 'Enter' && emailFocused && !isLoading) {
-                handleSubmit();
-            }
-        };
-
-        window.addEventListener('keypress', handleKeyPress);
-        return () => window.removeEventListener('keypress', handleKeyPress);
-    }, [email, emailFocused, isLoading]);
-
     const handleSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
+        if (isLoading) return;
         
         if (!email.trim()) {
             setError(t('email_required') || 'Veuillez entrer votre email');
@@ -80,6 +69,7 @@ export default function NewsLetter() {
         router.post(route('newsletter.subscribe'), { email }, {
             preserveScroll: true,
             onStart: () => setIsLoading(true),
+            onFinish: () => setIsLoading(false),
             onSuccess: () => {
                 setIsSubscribed(true);
                 setEmail('');

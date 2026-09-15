@@ -13,7 +13,16 @@ class NewsletterSubscription extends Model
         'email',
         'user_id',
         'is_active',
+        'welcome_sent_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+            'welcome_sent_at' => 'datetime',
+        ];
+    }
 
     public function user()
     {

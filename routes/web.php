@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Billing\Controllers\BillingController;
+use App\Domains\Billing\Controllers\RdcardReturnController;
 use App\Http\Controllers\Auth\BecomeSellerController;
 use App\Http\Controllers\Dashboard\AmenityController;
 use App\Http\Controllers\Dashboard\AnalyticsController;
@@ -161,3 +162,7 @@ Route::middleware(['auth', 'verified'])->prefix('/dashboard')->group(function ()
     });
 });
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->middleware('throttle:5,1')->name('newsletter.subscribe');
+
+Route::get('/billing/return', RdcardReturnController::class)
+    ->middleware(['auth', 'throttle:20,1'])
+    ->name('billing.return');

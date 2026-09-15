@@ -153,7 +153,7 @@ export default function FavoriteProperties({
         <>
             <div className="space-y-6">
                 {/* Header Section */}
-                <div className="rounded-2xl bg-gradient-to-r from-[#1E3A5F] to-[#0d2340] p-6 text-white">
+                <div className="rounded-2xl bg-gradient-to-r from-[#1E3A5F] to-[#0d2340] p-4 text-white sm:p-6">
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div>
                             <h2 className="mb-2 flex items-center gap-2 text-2xl font-bold">
@@ -194,7 +194,7 @@ export default function FavoriteProperties({
                 </div>
 
                 {/* Search and Filters */}
-                <div className="rounded-2xl bg-white p-6 shadow-lg">
+                <div className="rounded-2xl bg-white p-4 shadow-lg sm:p-6">
                     <div className="flex flex-col gap-4 md:flex-row">
                         <div className="relative flex-1">
                             <Search
@@ -212,7 +212,7 @@ export default function FavoriteProperties({
                                 className="w-full rounded-xl border border-gray-300 py-3 pr-4 pl-10 focus:border-transparent focus:ring-2 focus:ring-[#C9A84C]"
                             />
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                             <button
                                 onClick={() => handleSort('date')}
                                 className={`flex items-center gap-2 rounded-xl border px-4 py-3 transition-colors ${
@@ -293,7 +293,7 @@ export default function FavoriteProperties({
                     <div
                         className={
                             viewMode === 'grid'
-                                ? 'grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'
+                                ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 2xl:grid-cols-3'
                                 : 'space-y-4'
                         }
                     >
@@ -301,12 +301,14 @@ export default function FavoriteProperties({
                             <div
                                 key={property.id}
                                 className={`overflow-hidden rounded-2xl bg-white shadow-lg transition-all duration-300 hover:shadow-xl ${
-                                    viewMode === 'grid' ? '' : 'flex gap-6'
+                                    viewMode === 'grid'
+                                        ? ''
+                                        : 'flex flex-col gap-0 sm:flex-row sm:gap-4'
                                 }`}
                             >
                                 {/* Property Image */}
                                 <div
-                                    className={`relative ${viewMode === 'grid' ? 'h-48' : 'h-32 w-48 flex-shrink-0'}`}
+                                    className={`relative ${viewMode === 'grid' ? 'h-48' : 'h-48 w-full shrink-0 sm:h-auto sm:w-40'}`}
                                 >
                                     <img
                                         src={`/storage/${property.images[0]?.url}`}
@@ -376,7 +378,7 @@ export default function FavoriteProperties({
                                     className={`p-4 ${viewMode === 'grid' ? '' : 'flex-1'}`}
                                 >
                                     <div className="mb-2 flex items-start justify-between">
-                                        <div className="flex-1">
+                                        <div className="min-w-0 flex-1">
                                             <h3 className="mb-1 line-clamp-2 font-bold text-gray-900">
                                                 <a
                                                     href={route(
@@ -408,7 +410,7 @@ export default function FavoriteProperties({
                                     </div>
 
                                     {/* Property Features */}
-                                    <div className="mb-3 flex items-center gap-4 text-sm text-gray-600">
+                                    <div className="mb-3 flex flex-wrap items-center gap-3 text-sm text-gray-600">
                                         {property.bedrooms && (
                                             <div className="flex items-center gap-1">
                                                 <Bed size={14} />
@@ -434,7 +436,7 @@ export default function FavoriteProperties({
                                     </div>
 
                                     {/* Additional Info */}
-                                    <div className="flex items-center justify-between text-xs text-gray-500">
+                                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500">
                                         <div className="flex items-center gap-1">
                                             <Clock size={12} />
                                             <span>
@@ -487,7 +489,7 @@ export default function FavoriteProperties({
             {/* Delete Confirmation Modal */}
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+                    <div className="w-full max-w-md rounded-2xl bg-white p-4 shadow-2xl sm:p-6">
                         <div className="mb-4 flex items-center justify-between">
                             <h3 className="text-xl font-bold text-gray-900">
                                 {t('remove_from_favorites') ||

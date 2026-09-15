@@ -42,7 +42,7 @@ export function useSubscription({ currentPlanId }: UseSubscriptionProps) {
             );
 
             const data = response.data.data || response.data;
-            const checkoutUrl = data?.checkoutUrl;
+            const checkoutUrl = data?.checkoutUrl ?? data?.checkout_url;
 
             if (checkoutUrl) {
                 window.location.href = checkoutUrl;
@@ -55,7 +55,10 @@ export function useSubscription({ currentPlanId }: UseSubscriptionProps) {
                 setServerErrors(responseData.errors);
             }
 
-            if (responseData?.code === 'ALREADY_HAS_SUBSCRIPTION') {
+            if (
+                (responseData?.error_code ?? responseData?.code) ===
+                'ALREADY_HAS_SUBSCRIPTION'
+            ) {
                 // Special code handled by the UI
                 return {
                     error_code: 'ALREADY_HAS_SUBSCRIPTION',

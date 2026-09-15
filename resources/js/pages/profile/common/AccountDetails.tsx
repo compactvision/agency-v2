@@ -248,7 +248,7 @@ export default function AccountDetails() {
             )}
 
             {/* Carte d'informations du compte */}
-            <div className="rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100 p-6">
+            <div className="rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100 p-4 sm:p-6">
                 <div className="mb-4 flex items-center gap-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#C9A84C]">
                         <Shield size={24} className="text-white" />
@@ -317,7 +317,7 @@ export default function AccountDetails() {
             {/* Formulaire de mise à jour */}
             <form onSubmit={handleSubmit} noValidate>
                 <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
-                    <div className="bg-gradient-to-r from-[#C9A84C] to-slate-600 p-6 text-white">
+                    <div className="bg-gradient-to-r from-[#C9A84C] to-slate-600 p-4 text-white sm:p-6">
                         <h3 className="flex items-center gap-2 text-2xl font-bold">
                             <Edit3 size={24} />
                             {t('personal_information') ||
@@ -329,7 +329,7 @@ export default function AccountDetails() {
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-6 border-b border-gray-100 p-6">
+                    <div className="flex items-center gap-6 border-b border-gray-100 p-4 sm:p-6">
                         <div className="group relative">
                             <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-4 border-slate-100 bg-gray-100">
                                 {photoPreview ? (
@@ -372,7 +372,7 @@ export default function AccountDetails() {
                         </div>
                     </div>
 
-                    <div className="space-y-6 p-6">
+                    <div className="space-y-6 p-4 sm:p-6">
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             {/* Champ Nom */}
                             <div>
@@ -613,7 +613,7 @@ export default function AccountDetails() {
 
             {/* Carte d'informations supplémentaires */}
             <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white">
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 text-white sm:p-6">
                     <h3 className="flex items-center gap-2 text-2xl font-bold">
                         <Zap size={24} />
                         {t('quick_actions') || 'Actions rapides'}

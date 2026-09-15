@@ -80,8 +80,8 @@ function PreferenceRow({
     children: React.ReactNode;
 }) {
     return (
-        <div className="flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
-            <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm transition-shadow hover:shadow-md sm:p-5">
+            <div className="flex min-w-0 items-start gap-3">
                 <div
                     className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${iconBg}`}
                 >
@@ -104,7 +104,7 @@ export default function Settings() {
     const [activeTab, setActiveTab] = useState<SettingsTab>('password');
     const [showSuccess, setShowSuccess] = useState(false);
 
-    const { data, setData, post, processing } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         // Required by ProfileUpdateRequest
         name: user.name ?? '',
         email: user.email ?? '',
@@ -158,6 +158,11 @@ export default function Settings() {
 
     return (
         <div className="space-y-6">
+            {errors.newsletter && (
+                <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">
+                    {errors.newsletter}
+                </p>
+            )}
             {/* Success Toast */}
             {showSuccess && (
                 <div className="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-4 shadow-sm">
@@ -180,19 +185,19 @@ export default function Settings() {
             )}
 
             {/* Tab Navigation */}
-            <div className="flex gap-1 rounded-2xl bg-gray-100 p-1.5">
+            <div className="flex gap-1 overflow-x-auto rounded-2xl bg-gray-100 p-1.5">
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
+                        className={`flex min-h-12 flex-1 shrink-0 flex-col items-center justify-center gap-2 rounded-xl px-2 py-2.5 text-sm font-medium transition-all duration-200 sm:flex-row sm:px-4 ${
                             activeTab === tab.id
                                 ? 'bg-white text-slate-600 shadow-sm'
                                 : 'text-gray-500 hover:text-gray-700'
                         }`}
                     >
                         {tab.icon}
-                        <span className="hidden sm:inline">{tab.label}</span>
+                        <span className="text-xs sm:text-sm">{tab.label}</span>
                     </button>
                 ))}
             </div>
@@ -224,7 +229,7 @@ export default function Settings() {
                         </div>
 
                         {/* Language Cards */}
-                        <div className="grid grid-cols-2 gap-4 p-6">
+                        <div className="grid grid-cols-2 gap-4 p-4 sm:p-6">
                             {[
                                 {
                                     code: 'fr',
@@ -245,7 +250,7 @@ export default function Settings() {
                                     onClick={() =>
                                         setData('language', lang.code)
                                     }
-                                    className={`relative flex flex-col items-center gap-3 rounded-2xl border-2 p-6 transition-all duration-200 ${
+                                    className={`relative flex flex-col items-center gap-3 rounded-2xl border-2 p-4 transition-all duration-200 sm:p-6 ${
                                         data.language === lang.code
                                             ? 'border-[#C9A84C] bg-slate-50 shadow-md'
                                             : 'border-gray-200 hover:border-slate-200 hover:bg-gray-50'
@@ -320,7 +325,7 @@ export default function Settings() {
                             </div>
                         </div>
 
-                        <div className="space-y-3 p-6">
+                        <div className="space-y-3 p-4 sm:p-6">
                             {/* Push Notifications */}
                             <PreferenceRow
                                 icon={

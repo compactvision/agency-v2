@@ -160,7 +160,7 @@ export default function SubscriptionPopup({
                                 />
                                 <p className="text-sm text-blue-700">
                                     Ce plan sera activé automatiquement après le
-                                    paiement via la passerelle sécurisée.
+                                    paiement via la passerelle sécurisée RDCard.
                                 </p>
                             </div>
                         )}

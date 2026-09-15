@@ -42,7 +42,7 @@ class SubscriptionManager
                 ->map(fn ($feature) => $feature->only(['name', 'value']))
                 ->values()
                 ->all(),
-            'transaction_id' => 'sub_'.$userId.'_'.$plan->id.'_'.Str::uuid(),
+            'transaction_id' => 'sub_'.Str::uuid(),
             'status' => 'pending',
             'amount' => $plan->price,
             'currency' => 'USD',

@@ -424,7 +424,7 @@ export default function Transactions() {
                                                         )}
                                                     </td>
                                                     <td className="px-6 py-4 text-right whitespace-nowrap">
-                                                        {isAdmin ? (
+                                                        {isAdmin && pay.payment_method !== 'RDCard' ? (
                                                             <div className="dashboard-row-actions flex items-center justify-end gap-2 rounded-xl p-1 md:pointer-events-none md:translate-x-2 md:opacity-0 md:group-focus-within:pointer-events-auto md:group-focus-within:translate-x-0 md:group-focus-within:opacity-100 md:group-hover:pointer-events-auto md:group-hover:translate-x-0 md:group-hover:opacity-100">
                                                                 {pay.status ===
                                                                 'pending' ? (
@@ -564,6 +564,7 @@ export default function Transactions() {
                                             </div>
 
                                             {isAdmin &&
+                                                pay.payment_method !== 'RDCard' &&
                                                 pay.status === 'pending' && (
                                                     <div className="flex gap-3 border-t border-dashed border-slate-200 pt-3">
                                                         <button

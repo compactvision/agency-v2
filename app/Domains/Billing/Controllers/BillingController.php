@@ -20,6 +20,14 @@ class BillingController
      */
     public function start(StartSubscriptionRequest $request)
     {
+        if (! $request->user()->hasAnyRole(['seller', 'agency', 'admin'])) {
+            return ApiResponse::error(
+                'Vous devez d’abord devenir vendeur pour pouvoir souscrire un abonnement.',
+                403,
+                'SELLER_REQUIRED'
+            );
+        }
+
         try {
             $userId = $request->user()->id;
             $planId = $request->validated()['plan_id'];
@@ -29,7 +37,7 @@ class BillingController
             if ($result['status'] === 'manual_pending') {
                 return ApiResponse::success([
                     'status' => 'manual_pending',
-                    'message' => 'Votre demande d’abonnement est en cours de vérification par l’administrateur.'
+                    'message' => 'Votre demande d’abonnement est en cours de vérification par l’administrateur.',
                 ], 'Manual subscription requested', 201);
             }
 
@@ -43,11 +51,13 @@ class BillingController
                 );
             }
 
-            if (app()->isLocal()) {
-                return ApiResponse::error($e->getMessage(), 500, 'START_PAYMENT_ERROR');
-            }
+            report($e);
 
-            return ApiResponse::error('Unable to start payment', 500, 'START_PAYMENT_ERROR');
+            return ApiResponse::error(
+                'Le paiement est momentanément indisponible. Veuillez réessayer.',
+                503,
+                'START_PAYMENT_ERROR',
+            );
         }
     }
 
@@ -74,7 +84,7 @@ class BillingController
     {
         $sub = $request->user()->subscription;
 
-        if (!$sub) {
+        if (! $sub) {
             return ApiResponse::success(null, 'No active subscription');
         }
 

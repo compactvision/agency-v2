@@ -4,6 +4,7 @@ use App\Domains\Billing\Controllers\BillingController;
 use App\Domains\Billing\Controllers\MockPaymentController;
 use App\Domains\Billing\Controllers\PlanController;
 use App\Domains\Billing\Webhooks\AcorissWebhookHandler;
+use App\Domains\Billing\Webhooks\RdcardWebhookHandler;
 use Illuminate\Support\Facades\Route;
 
 // 👇 Public: liste des plans pour le front (pas besoin d’être connecté)
@@ -42,3 +43,7 @@ if (app()->environment('local')) {
         Route::post('webhook', [MockPaymentController::class, 'webhook']);
     });
 }
+
+Route::post('webhooks/rdcard', RdcardWebhookHandler::class)
+    ->middleware('throttle:120,1')
+    ->name('webhooks.rdcard');

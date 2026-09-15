@@ -184,7 +184,7 @@ export default function ChangePassword() {
 
             {/* Carte principale */}
             <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
-                <div className="bg-gradient-to-r from-[#C9A84C] to-[#A8882E] p-6 text-white">
+                <div className="bg-gradient-to-r from-[#C9A84C] to-[#A8882E] p-4 text-white sm:p-6">
                     <h3 className="flex items-center gap-2 text-2xl font-bold">
                         <Lock size={24} />
                         {t('change_password')}
@@ -194,7 +194,7 @@ export default function ChangePassword() {
                     </p>
                 </div>
 
-                <div className="space-y-6 p-6">
+                <div className="space-y-6 p-4 sm:p-6">
                     <form onSubmit={handlePasswordSubmit} className="space-y-6">
                         {/* Champ mot de passe actuel */}
                         <div>
@@ -553,7 +553,7 @@ export default function ChangePassword() {
             </div>
 
             {/* Conseils de sécurité */}
-            <div className="rounded-xl border border-blue-200 bg-blue-50 p-6">
+            <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 sm:p-6">
                 <div className="flex items-start gap-3">
                     <Info size={20} className="mt-0.5 text-blue-600" />
                     <div>

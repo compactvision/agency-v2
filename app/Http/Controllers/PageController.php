@@ -46,6 +46,8 @@ class PageController extends Controller
         return Inertia::render('Home', [
             'properties' => AdSummaryResource::collection($properties)->resolve(),
             'municipalities' => $municipalities,
+            'plans' => Plan::with('features')->where('is_active', true)->orderBy('position')->get(),
+            'currentPlanId' => auth()->user()?->subscription?->plan_id,
             'favorites' => auth()->user()?->favorites()->pluck('ads.id')->all() ?? [],
             'seo' => Seo::page(
                 'Immobilier à Kinshasa',

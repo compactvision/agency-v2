@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Models\NewsletterSubscription;
+use App\Services\BrevoNewsletter;
 use App\Support\UserAnonymizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,6 +29,21 @@ class ProfileController extends Controller
         // Remove newsletter from user fill data (it's not a user column)
         $newsletter = isset($data['newsletter']) ? (bool) $data['newsletter'] : null;
         unset($data['newsletter']);
+
+        $subscription = $user->newsletter_subscription;
+        $email = $data['email'];
+        $emailChanged = $subscription && $subscription->email !== $email;
+        $active = $newsletter ?? (bool) $subscription?->is_active;
+        $brevo = app(BrevoNewsletter::class);
+
+        if ($subscription?->is_active && (! $active || $emailChanged)) {
+            $brevo->unsubscribe($subscription->email);
+            $subscription->update(['is_active' => false]);
+        }
+
+        if ($active && (! $subscription?->is_active || $emailChanged)) {
+            $brevo->subscribe($email, 'newsletter');
+        }
 
         if ($request->hasFile('profile_photo')) {
             $oldProfilePhoto = $user->profile_photo;
@@ -52,11 +69,18 @@ class ProfileController extends Controller
             Storage::disk('public')->delete($oldProfilePhoto);
         }
 
-        if ($newsletter !== null) {
-            $user->newsletter_subscription()->updateOrCreate(
-                ['email' => $user->email],
-                ['is_active' => $newsletter]
+        if ($newsletter !== null || $emailChanged) {
+            if ($emailChanged) {
+                $subscription->update(['user_id' => null]);
+            }
+            $subscription = NewsletterSubscription::updateOrCreate(
+                ['email' => $email],
+                ['user_id' => $user->id, 'is_active' => $active]
             );
+
+            if ($active) {
+                $brevo->sendWelcome($subscription, 'newsletter');
+            }
         }
 
         return to_route('dashboard.users.profile')->with('success', __('profile_updated_success'));
@@ -112,9 +136,9 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        Auth::logout();
-
         $this->userAnonymizer->anonymize($user);
+
+        Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

@@ -51,7 +51,7 @@ class SubscriptionRepository
             'plan_name' => $plan->name,
             'plan_interval' => $plan->interval,
             'plan_features' => $this->snapshotFeatures($plan),
-            'transaction_id' => 'sub_'.$userId.'_'.$plan->id.'_'.Str::uuid(),
+            'transaction_id' => 'sub_'.Str::uuid(),
             'status' => 'pending',
             'amount' => $plan->price,
             'currency' => 'USD',

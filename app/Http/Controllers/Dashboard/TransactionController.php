@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Domains\Billing\Application\Commands\StartAutomaticSubscriptionCommand;
+use App\Domains\Billing\Application\UseCases\StartAutomaticSubscription;
 use App\Domains\Billing\Domain\ValueObjects\BillingInterval;
 use App\Domains\Billing\Models\Plan;
 use App\Domains\Billing\Models\Subscription;
@@ -56,6 +58,12 @@ class TransactionController extends Controller
     public function store(Request $request)
     {
         abort_unless(
+            $request->user()?->hasAnyRole(['seller', 'agency', 'admin']),
+            403,
+            'Vous devez d’abord devenir vendeur pour pouvoir souscrire un abonnement.'
+        );
+
+        abort_unless(
             $request->user()?->can('subscription.create'),
             403,
             'Vous n’êtes pas autorisé à souscrire un abonnement.'
@@ -74,9 +82,18 @@ class TransactionController extends Controller
         $plan = Plan::findOrFail($request->plan_id);
 
         if ($plan->payment_method === 'automatic') {
-            // For now, redirect to a fake checkout page or external gateway
-            // return Inertia::location('https://payment-gateway.com/checkout?plan=' . $plan->id);
-            return back()->with('info', 'Redirection vers la plateforme de paiement sécurisée...');
+            try {
+                $url = app(StartAutomaticSubscription::class)
+                    ->execute(new StartAutomaticSubscriptionCommand(
+                        $request->user()->id, $plan->id,
+                    ));
+
+                return Inertia::location($url);
+            } catch (\Throwable $exception) {
+                report($exception);
+
+                return back()->withErrors(['plan_id' => 'Le paiement est momentanément indisponible. Veuillez réessayer.']);
+            }
         }
 
         if (! $request->phone_number) {
@@ -108,6 +125,7 @@ class TransactionController extends Controller
     {
 
         $sub = Subscription::findOrFail($id);
+        abort_if($sub->payment_method === 'RDCard', 422, 'Ce paiement est confirmé automatiquement par RDCard.');
         $interval = BillingInterval::from(
             $sub->plan_interval ?: $sub->interval ?: $sub->plan->interval
         );
@@ -125,6 +143,7 @@ class TransactionController extends Controller
     {
 
         $sub = Subscription::findOrFail($id);
+        abort_if($sub->payment_method === 'RDCard', 422, 'Ce paiement est confirmé automatiquement par RDCard.');
         $sub->update([
             'status' => 'cancelled',
             'failure_reason' => $request->admin_note,

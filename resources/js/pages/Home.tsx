@@ -2,6 +2,7 @@ import App from '@/components/layouts/Home/App';
 import Counter from '@/components/section/home/Counter';
 import Hero from '@/components/section/home/Hero';
 import LocationProperty from '@/components/section/home/LocationProperty';
+import Pricing from '@/components/section/home/Pricing';
 import RecentProperty from '@/components/section/home/RecentProperty';
 import WhyUs from '@/components/section/home/WhyUs';
 import Work from '@/components/section/home/Work';
@@ -13,10 +14,14 @@ export default function Home({
     properties: initialProperties,
     municipalities: initialMunicipalities,
     favorites: initialFavorites,
+    plans = [],
+    currentPlanId = null,
 }: {
     properties: any[];
     municipalities: any[];
     favorites: number[];
+    plans: any[];
+    currentPlanId: number | null;
 }) {
     const { t } = useTranslation();
     const { municipalities } = useLocations(initialMunicipalities);
@@ -46,7 +51,10 @@ export default function Home({
             {/* 5. Recherche par localisation */}
             <LocationProperty municipalities={municipalities} />
 
-            {/* 6. Comment ça marche + CTA final */}
+            {/* 6. Tarifs et abonnements */}
+            <Pricing plans={plans} currentPlanId={currentPlanId} />
+
+            {/* 7. Comment ça marche + CTA final */}
             <Work />
         </App>
     );
