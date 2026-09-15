@@ -48,7 +48,7 @@ class BillingService
         $subscription = $this->subscriptionManager->createPending($userId, $plan);
 
         $successUrl = route('billing.return', ['transaction' => $subscription->transaction_id]);
-        $cancelUrl = route('billing.return', ['transaction' => $subscription->transaction_id, 'cancelled' => 1]);
+        $cancelUrl = route('billing.cancel.return', ['transaction' => $subscription->transaction_id]);
         $callbackUrl = route('webhooks.rdcard');
 
         $subscription->update(['payment_method' => 'RDCard']);

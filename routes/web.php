@@ -166,3 +166,11 @@ Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])
 Route::get('/billing/return', RdcardReturnController::class)
     ->middleware(['auth', 'throttle:20,1'])
     ->name('billing.return');
+
+Route::get('/billing/cancel', RdcardReturnController::class)
+    ->middleware(['auth', 'throttle:20,1'])
+    ->name('billing.cancel.return');
+
+Route::get('/billing/result', [RdcardReturnController::class, 'result'])
+    ->middleware(['auth', 'throttle:20,1'])
+    ->name('billing.result');

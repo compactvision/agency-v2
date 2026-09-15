@@ -76,6 +76,7 @@ test('dashboard automatic checkout sends signed dollar amounts and redirects to 
         && $request['customer']['email'] === $this->seller->email
         && $request['amount'] === 25.99 && $request['services'][0]['price'] === 25.99
         && $request['callbackUrl'] === route('webhooks.rdcard')
+        && $request['cancelUrl'] === route('billing.cancel.return', ['transaction' => $sub->transaction_id])
         && $request['redirectUrl'] === $request['successUrl']
         && str_contains($request['successUrl'], $sub->transaction_id));
 });
@@ -135,7 +136,7 @@ test('invalid signature or mismatched payment cannot activate', function (array 
 test('failed or cancelled attempts may be retried successfully', function (string $event) {
     $sub = rdcardSubscription($this);
     postRdcardWebhook($this, rdcardPayload($event))->assertOk();
-    expect($sub->fresh()->status)->toBe('failed');
+    expect($sub->fresh()->status)->toBe($event === 'payment.canceled' ? 'cancelled' : 'failed');
     postRdcardWebhook($this, rdcardPayload())->assertOk();
     expect($sub->fresh()->status)->toBe('active');
 })->with(['payment.failed', 'payment.canceled']);
@@ -147,12 +148,12 @@ test('return checks RDCard server status and ignores browser success claims', fu
     ])]);
     $this->actingAs($this->seller)->get(route('billing.return', [
         'transaction' => $sub->transaction_id, 'status' => 'S',
-    ]))->assertRedirect(route('dashboard.subscriptions.index'));
+    ]))->assertRedirect(route('billing.result', ['transaction' => $sub->transaction_id]));
     expect($sub->fresh()->status)->toBe($expected);
     Http::assertSent(fn ($request) => $request->method() === 'GET'
         && $request->body() === ''
         && $request->hasHeader('X-SIGNATURE', hash_hmac('sha256', 'pay-test', 'test-secret')));
-})->with([['P', 'pending'], ['S', 'active'], ['C', 'failed']]);
+})->with([['P', 'pending'], ['S', 'active'], ['C', 'cancelled']]);
 
 test('another user cannot access a payment return', function () {
     $sub = rdcardSubscription($this);
@@ -273,3 +274,77 @@ test('a fifteen dollar plan sends fifteen dollars through both checkout entry po
     ]))->assertOk();
     expect($sub->fresh()->status)->toBe('active');
 })->with(['pricing', 'dashboard']);
+
+test('cancellation return closes the attempt even when provider status is pending or unavailable', function (string $entry, bool $unavailable) {
+    $sub = rdcardSubscription($this);
+    Http::fake(['*' => $unavailable
+        ? Http::response([], 503)
+        : Http::response([...rdcardPayload()['data']['payment'], 'status' => 'P'])]);
+    $parameters = ['transaction' => $sub->transaction_id];
+    if ($entry === 'billing.return') {
+        $parameters['cancelled'] = 1;
+    }
+
+    $this->actingAs($this->seller)->get(route($entry, $parameters))
+        ->assertRedirect(route('billing.result', ['transaction' => $sub->transaction_id]));
+    expect($sub->fresh())->status->toBe('cancelled')->cancelled_at->not->toBeNull();
+
+    // Delayed initialization/failure must not undo the cancellation.
+    postRdcardWebhook($this, rdcardPayload('payment.initialized'))->assertOk();
+    postRdcardWebhook($this, rdcardPayload('payment.failed'))->assertOk();
+    expect($sub->fresh()->status)->toBe('cancelled');
+
+    // The transaction list receives the same cancelled status.
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+    $this->actingAs($admin)->get(route('dashboard.payment-requests.index'))
+        ->assertInertia(fn ($page) => $page
+            ->component('dashboard/transactions/Transactions')
+            ->where('paymentRequests.data.0.status', 'cancelled'));
+
+    // A verified success arriving later must still credit the customer.
+    postRdcardWebhook($this, rdcardPayload())->assertOk();
+    expect($sub->fresh())->status->toBe('active')->cancelled_at->toBeNull();
+})->with(['billing.cancel.return', 'billing.return'])->with([false, true]);
+
+test('cancellation cannot overwrite a confirmed payment', function (bool $alreadyConfirmed) {
+    $sub = rdcardSubscription($this);
+    if ($alreadyConfirmed) {
+        postRdcardWebhook($this, rdcardPayload())->assertOk();
+    }
+    Http::fake(['*' => Http::response([
+        ...rdcardPayload()['data']['payment'], 'status' => $alreadyConfirmed ? 'P' : 'S',
+    ])]);
+    $this->actingAs($this->seller)->get(route('billing.cancel.return', ['transaction' => $sub->transaction_id]))
+        ->assertRedirect(route('billing.result', ['transaction' => $sub->transaction_id]));
+    postRdcardWebhook($this, rdcardPayload('payment.canceled'))->assertOk();
+    expect($sub->fresh())->status->toBe('active')->cancelled_at->toBeNull();
+})->with([false, true]);
+
+test('cancellation return requires the owner of the RDCard attempt', function () {
+    $sub = rdcardSubscription($this);
+    $url = route('billing.cancel.return', ['transaction' => $sub->transaction_id]);
+    $this->get($url)->assertRedirect(route('login'));
+    $this->actingAs(User::factory()->create())->get($url)->assertNotFound();
+    $sub->update(['payment_method' => 'manual']);
+    $this->actingAs($this->seller)->get($url)->assertNotFound();
+    expect($sub->fresh()->status)->toBe('pending');
+    Http::assertNothingSent();
+});
+
+test('payment result shows only the stored status and the owners payment summary', function (string $status) {
+    $sub = rdcardSubscription($this);
+    $sub->update(['status' => $status]);
+    $url = route('billing.result', ['transaction' => $sub->transaction_id, 'status' => 'active']);
+    $this->get($url)->assertRedirect(route('login'));
+    $this->actingAs(User::factory()->create())->get($url)->assertNotFound();
+    $response = $this->actingAs($this->seller)->get($url);
+    $response->assertOk()->assertInertia(fn ($page) => $page
+        ->component('billing/Result')
+        ->where('payment.status', $status)
+        ->where('payment.reference', $sub->transaction_id)
+        ->where('payment.plan', $this->plan->name)
+        ->where('payment.amount', '25.99')
+        ->missing('payment.payment_session_id'));
+    Http::assertNothingSent();
+})->with(['active', 'cancelled', 'pending', 'failed']);

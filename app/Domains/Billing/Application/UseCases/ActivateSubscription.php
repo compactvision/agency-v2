@@ -40,7 +40,10 @@ class ActivateSubscription
             if (! in_array($sub->status, [
                 SubscriptionStatus::Pending->value,
                 SubscriptionStatus::Failed->value,
-            ], true)) {
+            ], true) && ! ($sub->status === SubscriptionStatus::Cancelled->value
+                && $sub->payment_method === 'RDCard'
+                && ($paymentData['paymentMethod'] ?? null) === 'RDCard'
+                && $sub->payment_id === null)) {
                 throw new DomainException('The subscription state does not allow activation.');
             }
 
@@ -64,6 +67,7 @@ class ActivateSubscription
                 'payment_id' => $paymentId,
                 'payment_method' => $paymentData['paymentMethod'] ?? null,
                 'failure_reason' => null,
+                'cancelled_at' => null,
                 'started_at' => $startedAt,
                 'expires_at' => $expiresAt,
             ]);

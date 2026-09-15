@@ -9,6 +9,20 @@ use Illuminate\Support\Facades\DB;
 
 class RdcardPaymentService
 {
+    public function cancelAttempt(Subscription $subscription): void
+    {
+        // Only close an unpaid attempt; a concurrent confirmed payment wins.
+        Subscription::whereKey($subscription->id)
+            ->where('payment_method', 'RDCard')
+            ->whereNull('payment_id')
+            ->whereIn('status', ['pending', 'failed'])
+            ->update([
+                'status' => 'cancelled',
+                'failure_reason' => 'Paiement annulé.',
+                'cancelled_at' => now(),
+            ]);
+    }
+
     public function apply(Subscription $subscription, array $payment, string $event): void
     {
         if ($subscription->payment_method !== 'RDCard'
@@ -32,7 +46,8 @@ class RdcardPaymentService
                 && in_array($sub->status, ['pending', 'failed'], true)) {
                 // An unsuccessful attempt can still be followed by a successful retry.
                 $sub->update([
-                    'status' => 'failed',
+                    'status' => $event === 'payment.canceled' ? 'cancelled' : 'failed',
+                    'cancelled_at' => $event === 'payment.canceled' ? now() : null,
                     'failure_reason' => $event === 'payment.canceled' ? 'Paiement annulé.' : 'Paiement refusé.',
                 ]);
             }

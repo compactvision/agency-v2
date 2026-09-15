@@ -26,7 +26,9 @@ Après configuration, exécuter `php artisan config:cache`. Dans le dashboard RD
 - GET `/api/v1/sessions/:id` au retour du navigateur, avec signature de l’identifiant de paiement, comme dans le SDK utilisé par `skv-community` : `P` en attente, `S` réussi, `C` annulé. Les paramètres du navigateur ne prouvent jamais un paiement.
 - Le webhook vérifie `X-Signature` sur le corps brut et lit `data.payment`. Avant toute modification, il contrôle la session enregistrée, la référence, le montant et la devise.
 - Un succès active une seule fois l'abonnement, ses quotas et sa date d'expiration. Les notifications répétées ne prolongent pas sa durée. Une notification d'échec tardive ne désactive pas un abonnement payé.
-- Les échecs et annulations sont affichés comme tentatives échouées et permettent un nouvel essai. Les erreurs réseau laissent la demande en attente, sans activation.
+- `cancelUrl` pointe vers `/billing/cancel?transaction=…`, accessible au propriétaire connecté. Après vérification RDCard, ce retour ferme la tentative impayée avec le statut `cancelled`, la date d’annulation et le message « Votre paiement a été annulé. Vous pouvez réessayer. ». Les anciennes sessions utilisant `/billing/return?transaction=…&cancelled=1` restent compatibles.
+- Les annulations du webhook ou du statut RDCard `C` sont également enregistrées comme `cancelled`, distinctes des échecs `failed`. La liste des transactions affiche « Annulé ». Un retour explicite d’annulation ferme la tentative même si RDCard répond encore `P` ou est indisponible ; cela ne révoque pas la session chez RDCard. Un succès vérifié tardif peut toujours activer cette tentative et efface la date d’annulation. Un paiement déjà confirmé ne peut pas être annulé par le retour navigateur.
+- Sur un retour normal, les erreurs réseau laissent la demande en attente, sans activation.
 - Si le webhook arrive avant l'enregistrement de l'identifiant de session, une réponse 503 demande à RDCard de réessayer. Le retour du navigateur vérifie aussi le paiement côté serveur.
 - Les administrateurs ne valident/rejettent pas manuellement les paiements RDCard. Les journaux de webhook conservent uniquement les références, montants et devises.
 
@@ -41,3 +43,9 @@ Les tests utilisent `Http::fake` et aucune transaction réelle. Avec les clés R
 Documentation consultée : [référence API](https://docs.checkout.rdcard.net/fr/api-reference), [webhooks](https://docs.checkout.rdcard.net/fr/guides/webhooks), [sécurité](https://docs.checkout.rdcard.net/fr/guides/security).
 
 Vérification sandbox effectuée avec les clés locales : création de session réussie et consultation signée retournant `P` (en attente), sans effectuer de paiement.
+
+## Pages de résultat
+
+Les retours succès et annulation redirigent vers `/billing/result?transaction=…`. Cette page authentifiée affiche le statut enregistré en base, le forfait, le montant et la référence copiable, avec un écran animé adapté au succès ou à l’annulation. Un paiement en attente propose une vérification explicite via le retour serveur. Les paramètres du navigateur ne peuvent pas transformer un paiement en succès. Le récapitulatif est réservé au propriétaire de la transaction. Les animations respectent la préférence de réduction des mouvements.
+
+Pour déployer les pages, compiler et publier les assets avec `npm run build`, puis rafraîchir les routes avec `php artisan route:cache`.
