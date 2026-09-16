@@ -41,7 +41,7 @@ test('a seller can request a manual subscription', function () {
 
     $response
         ->assertRedirect(route('dashboard.subscriptions.index'))
-        ->assertSessionHas('success', 'Votre demande a été envoyée avec succès.');
+        ->assertSessionHas('success', 'Votre demande a été envoyée. Votre abonnement sera actif après validation par un administrateur.');
 
     expect(Subscription::query()
         ->where('user_id', $seller->id)

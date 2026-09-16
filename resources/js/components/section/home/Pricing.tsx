@@ -1,3 +1,4 @@
+import ManualSubscriptionDialog from '@/components/forms/ManualSubscriptionDialog';
 import SellerPopup from '@/components/forms/SellerPopup';
 import {
     Dialog,
@@ -9,7 +10,7 @@ import {
 import { useSubscription } from '@/hooks/useSubscription';
 import { Link, usePage } from '@inertiajs/react';
 import { Check, Crown, Shield, Star, TrendingUp, Zap } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 declare const route: any;
@@ -23,6 +24,11 @@ export default function Pricing({
 }) {
     const { t } = useTranslation();
     const { auth } = (usePage().props as unknown as any) || {};
+    const [manualPlanId, setManualPlanId] = useState<number | null>(null);
+    const [manualSent, setManualSent] = useState(false);
+    const [manualAttempted, setManualAttempted] = useState(false);
+    const [manualError, setManualError] = useState<string | null>(null);
+    const manualSending = useRef(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [pendingPlanId, setPendingPlanId] = useState<number | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -50,6 +56,18 @@ export default function Pricing({
             return;
         }
 
+        if (
+            plans.find((plan) => plan.id === planId)?.payment_method ===
+            'manual'
+        ) {
+            setManualSent(false);
+            setManualAttempted(false);
+            setManualError(null);
+            setManualPlanId(planId);
+            setShowConfirmModal(false);
+            return;
+        }
+
         if (currentPlanId && !force) {
             setPendingPlanId(planId);
             setShowConfirmModal(true);
@@ -66,6 +84,26 @@ export default function Pricing({
                 setShowConfirmModal(true);
             }
         });
+    };
+
+    const submitManual = async () => {
+        if (!manualPlanId || manualSending.current || manualSent) return;
+        manualSending.current = true;
+        setManualAttempted(true);
+        setManualError(null);
+        try {
+            const result = await subscribe(manualPlanId);
+            if (result?.status === 'manual_pending') {
+                setManualSent(true);
+            } else if (result?.error_code) {
+                setManualError(
+                    result.message ||
+                        'Vous avez déjà un abonnement actif. Consultez votre espace avant de changer de plan.',
+                );
+            }
+        } finally {
+            manualSending.current = false;
+        }
     };
 
     const confirmSwitch = () => {
@@ -93,6 +131,23 @@ export default function Pricing({
 
     return (
         <>
+            <ManualSubscriptionDialog
+                plan={plans.find((plan) => plan.id === manualPlanId) ?? null}
+                sent={manualSent}
+                busy={submittingPlan !== null}
+                error={
+                    manualAttempted
+                        ? manualError ||
+                          globalError ||
+                          Object.values(serverErrors).flat().join(' ') ||
+                          null
+                        : null
+                }
+                onClose={() => {
+                    if (!manualSending.current) setManualPlanId(null);
+                }}
+                onConfirm={submitManual}
+            />
             <Dialog
                 open={showSellerRequired}
                 onOpenChange={setShowSellerRequired}
@@ -270,6 +325,16 @@ export default function Pricing({
                                             )}
                                         </p>
 
+                                        {plan.payment_method === 'manual' && (
+                                            <p className="mb-4 flex items-center gap-2 text-xs font-medium text-amber-800 dark:text-amber-300">
+                                                <Shield
+                                                    size={15}
+                                                    aria-hidden="true"
+                                                />
+                                                Activation après validation par
+                                                un administrateur
+                                            </p>
+                                        )}
                                         <button
                                             onClick={() =>
                                                 handleGetStarted(plan.id)

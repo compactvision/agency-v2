@@ -96,6 +96,18 @@ export default function SubscriptionPopup({
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Champ du numéro de téléphone - Conditionnel */}
+                        {isManual && selectedPlan && (
+                            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-relaxed text-amber-900">
+                                <p className="mb-1 font-semibold">
+                                    Activation après validation manuelle
+                                </p>
+                                Votre demande sera examinée par un
+                                administrateur. Les avantages du plan seront
+                                disponibles uniquement après son approbation.
+                                Vous pourrez suivre le statut dans vos
+                                abonnements.
+                            </div>
+                        )}
                         {isManual && (
                             <div>
                                 <label

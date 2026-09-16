@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Billing\Controllers\BillingController;
+use App\Domains\Billing\Controllers\RdcardResultController;
 use App\Domains\Billing\Controllers\RdcardReturnController;
 use App\Http\Controllers\Auth\BecomeSellerController;
 use App\Http\Controllers\Dashboard\AmenityController;
@@ -171,6 +172,6 @@ Route::get('/billing/cancel', RdcardReturnController::class)
     ->middleware(['auth', 'throttle:20,1'])
     ->name('billing.cancel.return');
 
-Route::get('/billing/result', [RdcardReturnController::class, 'result'])
+Route::get('/billing/result', RdcardResultController::class)
     ->middleware(['auth', 'throttle:20,1'])
     ->name('billing.result');

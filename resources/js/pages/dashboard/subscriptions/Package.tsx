@@ -1,7 +1,7 @@
 import SubscriptionPopup from '@/components/forms/SubscriptionPopup';
 import Dashboard from '@/components/layouts/Dashboard/Dashboard';
 import BackButton from '@/components/ui/BackButton';
-import { router } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import {
     Calendar,
     CheckCircle,
@@ -65,10 +65,6 @@ export default function Package({
     const [searchQuery, setSearchQuery] = useState(filters?.search ?? '');
     const [isSearching, setIsSearching] = useState(false);
 
-    const openSubscribePopup = () => {
-        setIsSubscribing(false);
-        setIsPopupOpen(true);
-    };
     const openChangeSubscribePopup = () => {
         setIsSubscribing(true);
         setIsPopupOpen(true);
@@ -253,13 +249,13 @@ export default function Package({
                                             <span>Changer le plan</span>
                                         </button>
                                     ) : (
-                                        <button
+                                        <Link
                                             className="inline-flex transform items-center rounded-lg bg-gradient-to-r from-[#C9A84C] to-[#A8882E] px-4 py-3 font-medium text-white shadow-lg shadow-sm transition-all duration-300 hover:scale-105 hover:from-[#A8882E] hover:to-[#8a6e22]"
-                                            onClick={openSubscribePopup}
+                                            href={route('tarifs')}
                                         >
                                             <Plus size={18} className="mr-2" />
                                             <span>Souscrire à un plan</span>
-                                        </button>
+                                        </Link>
                                     )}
                                 </div>
                             </div>
