@@ -118,7 +118,7 @@ class TransactionController extends Controller
             'payment_method' => 'Orange Money / M-Pesa ('.$request->phone_number.')',
         ]);
 
-        return back()->with('success', 'Votre demande a été envoyée avec succès.');
+        return back()->with('success', 'Votre demande a été envoyée. Votre abonnement sera actif après validation par un administrateur.');
     }
 
     public function approve($id)
