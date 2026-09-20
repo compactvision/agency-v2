@@ -195,6 +195,12 @@ const PropertyForm: React.FC<Props> = ({
     const [submitMessage, setSubmitMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const [isDescriptionGenerated, setIsDescriptionGenerated] = useState(false);
+    const [isDescriptionEditable, setIsDescriptionEditable] =
+        useState(isEditMode);
+    const [generatedFor, setGeneratedFor] = useState<string | null>(null);
+    const [descriptionError, setDescriptionError] = useState('');
+    const generationInFlight = useRef(false);
+    const attemptedDescription = useRef<string | null>(null);
     const [imagePreviews, setImagePreviews] = useState<any[]>([]);
     const [imagesToDelete, setImagesToDelete] = useState<number[]>([]);
     const [isMobile, setIsMobile] = useState(false);
@@ -657,8 +663,58 @@ const PropertyForm: React.FC<Props> = ({
         [imagePreviews],
     );
 
+    // Only facts used by the writer invalidate a generated description.
+    const descriptionFacts = JSON.stringify([
+        data.title,
+        data.type,
+        data.sale_type,
+        data.municipality_id,
+        data.quarter,
+        data.address,
+        data.price,
+        data.surface,
+        data.bedrooms,
+        data.bathrooms,
+        data.rooms,
+        data.kitchens,
+        data.condition,
+        data.furnished,
+        data.rental_guarantee,
+        data.garages,
+        data.garage_size,
+        data.balconies,
+        data.terraces,
+        data.floor,
+        data.total_floors,
+        data.year_built,
+        data.construction_year,
+        data.renovation_year,
+        data.elevator,
+        data.parking,
+        data.garden,
+        data.swimming_pool,
+        data.cellar,
+        data.attic,
+        data.urgency,
+        data.land_surface,
+        data.land_type,
+        data.amenities,
+        i18n.resolvedLanguage,
+    ]);
+    const currentDescriptionFacts = useRef(descriptionFacts);
+    currentDescriptionFacts.current = descriptionFacts;
+    const descriptionReady =
+        isEditMode ||
+        (isDescriptionGenerated &&
+            generatedFor === descriptionFacts &&
+            data.description.trim().length > 0);
+
     const handleGenerateDescription = useCallback(async () => {
-        if (false) return;
+        if (generationInFlight.current) return;
+        generationInFlight.current = true;
+        attemptedDescription.current = descriptionFacts;
+        setDescriptionError('');
+        setIsDescriptionEditable(false);
 
         setLoading(true);
         try {
@@ -715,6 +771,14 @@ const PropertyForm: React.FC<Props> = ({
                 },
             );
 
+            if (currentDescriptionFacts.current !== descriptionFacts) return;
+            if (
+                typeof response.data.description !== 'string' ||
+                !response.data.description.trim()
+            ) {
+                throw new Error('Empty description');
+            }
+            setGeneratedFor(descriptionFacts);
             setData((prev) => ({
                 ...prev,
                 description: response.data.description,
@@ -725,10 +789,11 @@ const PropertyForm: React.FC<Props> = ({
             const message =
                 error?.response?.data?.error ||
                 'Erreur lors de la génération de la description.';
-            setSubmitStatus('error');
-            setSubmitMessage(message);
+            if (currentDescriptionFacts.current !== descriptionFacts) return;
+            setDescriptionError(message);
             toast.error(message);
         } finally {
+            generationInFlight.current = false;
             setLoading(false);
         }
     }, [
@@ -738,6 +803,7 @@ const PropertyForm: React.FC<Props> = ({
         data,
         setData,
         isDescriptionGenerated,
+        descriptionFacts,
         i18n.resolvedLanguage,
     ]);
 
@@ -800,7 +866,13 @@ const PropertyForm: React.FC<Props> = ({
         (e: React.FormEvent, shouldPublish: boolean = false) => {
             if (e) e.preventDefault();
 
-            if (false) return;
+            if (loading || !descriptionReady) {
+                setActiveSection('description');
+                toast.error(
+                    'Attendez la génération de la description avant de continuer.',
+                );
+                return;
+            }
 
             setSubmitStatus('idle');
             setSubmitMessage('');
@@ -1017,6 +1089,8 @@ const PropertyForm: React.FC<Props> = ({
         },
         [
             hasActiveSubscription,
+            descriptionReady,
+            loading,
             data,
             imagesToDelete,
             isEditMode,
@@ -1033,6 +1107,10 @@ const PropertyForm: React.FC<Props> = ({
         setImagePreviews([]);
         setImagesToDelete([]);
         setIsDescriptionGenerated(false);
+        setGeneratedFor(null);
+        setIsDescriptionEditable(isEditMode);
+        setDescriptionError('');
+        attemptedDescription.current = null;
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
@@ -1045,14 +1123,37 @@ const PropertyForm: React.FC<Props> = ({
         });
         setActiveSection('basic');
         toast.success('Le formulaire a été réinitialisé.');
-    }, [reset, imagePreviews]);
+    }, [reset, imagePreviews, isEditMode]);
 
     // Vérifier si la description peut être générée
     const canGenerateDescription =
         data.type &&
         data.sale_type &&
-        (data.municipality_id || data.quarter || data.address) &&
-        (data.price || data.surface || data.title);
+        data.municipality_id &&
+        data.title.trim() &&
+        Number(data.price) > 0 &&
+        Number(data.surface) > 0;
+
+    useEffect(() => {
+        if (
+            !isEditMode &&
+            activeSection === 'description' &&
+            canGenerateDescription &&
+            generatedFor !== descriptionFacts &&
+            !loading &&
+            attemptedDescription.current !== descriptionFacts
+        ) {
+            void handleGenerateDescription();
+        }
+    }, [
+        activeSection,
+        canGenerateDescription,
+        descriptionFacts,
+        generatedFor,
+        handleGenerateDescription,
+        isEditMode,
+        loading,
+    ]);
 
     const fieldLabels: Record<string, string> = {
         title: 'Titre de la propriété',
@@ -1187,11 +1288,22 @@ const PropertyForm: React.FC<Props> = ({
     const isFirstSection = activeSectionIndex <= 0;
     const isLastSection = activeSectionIndex === sections.length - 1;
 
+    const selectSection = (section: string) => {
+        if (section === 'publication' && (loading || !descriptionReady)) {
+            setActiveSection('description');
+            toast.error(
+                'La description doit être générée avant de passer à la publication.',
+            );
+            return;
+        }
+        setActiveSection(section);
+    };
+
     const goToSection = (index: number) => {
         const nextSection = sections[index];
         if (!nextSection) return;
 
-        setActiveSection(nextSection.id);
+        selectSection(nextSection.id);
         setIsMobileMenuOpen(false);
         window.requestAnimationFrame(() => {
             formContentRef.current?.scrollIntoView({
@@ -1346,7 +1458,7 @@ const PropertyForm: React.FC<Props> = ({
                                         key={section.id}
                                         type="button"
                                         onClick={() =>
-                                            setActiveSection(section.id)
+                                            selectSection(section.id)
                                         }
                                         className={`flex items-center gap-2 rounded-lg px-3 py-2 font-medium whitespace-nowrap transition-all duration-200 ${
                                             activeSection === section.id
@@ -1369,7 +1481,7 @@ const PropertyForm: React.FC<Props> = ({
                                         key={section.id}
                                         type="button"
                                         onClick={() =>
-                                            setActiveSection(section.id)
+                                            selectSection(section.id)
                                         }
                                         className={`flex flex-col items-center gap-1 rounded-lg px-3 py-2 font-medium whitespace-nowrap transition-all duration-200 ${
                                             activeSection === section.id
@@ -1436,9 +1548,7 @@ const PropertyForm: React.FC<Props> = ({
                                                 key={section.id}
                                                 type="button"
                                                 onClick={() => {
-                                                    setActiveSection(
-                                                        section.id,
-                                                    );
+                                                    selectSection(section.id);
                                                     setIsMobileMenuOpen(false);
                                                 }}
                                                 className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 font-medium transition-all duration-200 ${
@@ -3065,11 +3175,9 @@ const PropertyForm: React.FC<Props> = ({
                                                 Description de l’annonce
                                             </h2>
                                             <p className="mt-1 text-sm text-slate-600">
-                                                Toutes les informations du bien
-                                                sont maintenant disponibles.
-                                                Vous pouvez rédiger votre texte
-                                                ou générer une proposition
-                                                complète.
+                                                {isEditMode
+                                                    ? 'Relisez votre description ou générez une nouvelle proposition.'
+                                                    : 'L’IA rédige automatiquement votre description à partir des informations renseignées. Relisez-la avant de continuer, puis cliquez sur Modifier si nécessaire.'}
                                             </p>
                                         </div>
                                     </div>
@@ -3084,12 +3192,21 @@ const PropertyForm: React.FC<Props> = ({
                                         <textarea
                                             id="property-description"
                                             className="min-h-48 w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm leading-relaxed focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/25 focus:outline-none sm:text-base"
-                                            placeholder="Décrivez les points forts de la propriété, son environnement et les conditions de la transaction..."
+                                            placeholder={
+                                                loading
+                                                    ? 'Rédaction de votre description en cours…'
+                                                    : 'La description générée apparaîtra ici.'
+                                            }
+                                            readOnly={
+                                                loading ||
+                                                !isDescriptionEditable ||
+                                                (!isEditMode &&
+                                                    generatedFor !==
+                                                        descriptionFacts)
+                                            }
+                                            aria-busy={loading}
                                             value={data.description}
                                             onChange={(e) => {
-                                                setIsDescriptionGenerated(
-                                                    false,
-                                                );
                                                 handleInputChange(
                                                     'description',
                                                     e.target.value,
@@ -3097,6 +3214,34 @@ const PropertyForm: React.FC<Props> = ({
                                             }}
                                             rows={8}
                                         />
+                                        {(isEditMode ||
+                                            generatedFor ===
+                                                descriptionFacts) &&
+                                            !loading && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setIsDescriptionEditable(
+                                                            (value) => !value,
+                                                        )
+                                                    }
+                                                    className="mt-3 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-[#1E3A5F]"
+                                                >
+                                                    {isDescriptionEditable
+                                                        ? 'Terminer les modifications'
+                                                        : 'Modifier'}
+                                                </button>
+                                            )}
+                                        {descriptionError && (
+                                            <p
+                                                role="alert"
+                                                className="mt-3 text-sm text-red-700"
+                                            >
+                                                {descriptionError} La génération
+                                                est nécessaire pour continuer.
+                                                Réessayez dans un instant.
+                                            </p>
+                                        )}
                                         {errors.description && (
                                             <div className="mt-2 text-sm text-red-600">
                                                 {errors.description}
@@ -3137,7 +3282,9 @@ const PropertyForm: React.FC<Props> = ({
                                                         )}
                                                         {isDescriptionGenerated
                                                             ? 'Régénérer'
-                                                            : 'Générer avec l’IA'}
+                                                            : descriptionError
+                                                              ? 'Réessayer'
+                                                              : 'Générer avec l’IA'}
                                                     </>
                                                 )}
                                             </button>
@@ -3149,10 +3296,11 @@ const PropertyForm: React.FC<Props> = ({
                                                     size={16}
                                                     className="mt-0.5 shrink-0"
                                                 />
-                                                Renseignez au minimum le type,
-                                                la transaction, une localisation
-                                                et le prix, la surface ou le
-                                                titre.
+                                                Renseignez le titre, le type de
+                                                bien, la transaction, la
+                                                commune, un prix et une surface
+                                                supérieurs à zéro pour lancer la
+                                                génération automatique.
                                             </div>
                                         )}
                                     </div>
@@ -3269,7 +3417,13 @@ const PropertyForm: React.FC<Props> = ({
                                                     )
                                                 }
                                                 className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#1E3A5F] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#152d4a] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:text-base"
-                                                disabled={processing}
+                                                disabled={
+                                                    processing ||
+                                                    (activeSection ===
+                                                        'description' &&
+                                                        (loading ||
+                                                            !descriptionReady))
+                                                }
                                             >
                                                 Suivant
                                                 <ArrowRight size={16} />
