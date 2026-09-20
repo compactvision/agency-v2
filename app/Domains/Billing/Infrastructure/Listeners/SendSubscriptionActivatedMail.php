@@ -3,23 +3,16 @@
 namespace App\Domains\Billing\Infrastructure\Listeners;
 
 use App\Domains\Billing\Domain\Events\SubscriptionActivated;
-use App\Domains\Billing\Infrastructure\Mail\SubscriptionActivatedMail;
-use App\Domains\Billing\Models\Subscription;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Support\Facades\Mail;
+use App\Domains\Billing\Infrastructure\Jobs\SendSubscriptionNotice;
+use App\Domains\Billing\Models\SubscriptionNotice;
 
-class SendSubscriptionActivatedMail implements ShouldQueue
+class SendSubscriptionActivatedMail
 {
     public function handle(SubscriptionActivated $event): void
     {
-        $sub = Subscription::with(['user', 'plan'])
-            ->where('user_id', $event->userId)
-            ->where('plan_id', $event->planId)
-            ->latest()
-            ->first();
-
-        if ($sub?->user?->email) {
-            Mail::to($sub->user->email)->send(new SubscriptionActivatedMail($sub));
+        if ($event->subscriptionId === null) {
+            return;
         }
+        SubscriptionNotice::where('subscription_id', $event->subscriptionId)->where('kind', 'activated')->whereNull('sent_at')->each(fn ($notice) => SendSubscriptionNotice::dispatch($notice->id)->afterCommit());
     }
 }

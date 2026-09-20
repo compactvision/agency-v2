@@ -44,7 +44,7 @@ function rdcardPayload(string $type = 'payment.succeeded', array $overrides = []
         'data' => ['payment' => array_merge([
             'id' => 'pay-test', 'transactionId' => 'tx-rdcard',
             'amount' => 25.99, 'currency' => 'USD',
-            'customer' => ['email' => 'private@example.com'],
+            'customer' => ['email' => test()->seller->email],
         ], $overrides)],
     ];
 }
@@ -75,7 +75,7 @@ test('dashboard automatic checkout sends signed dollar amounts and redirects to 
         && strlen($request['transactionId']) <= 50
         && $request['customer']['email'] === $this->seller->email
         && $request['amount'] === 25.99 && $request['services'][0]['price'] === 25.99
-        && $request['callbackUrl'] === route('webhooks.rdcard')
+        && $request['callbackUrl'] === route('webhooks.rdcard', ['transaction' => $sub->transaction_id])
         && $request['cancelUrl'] === route('billing.cancel.return', ['transaction' => $sub->transaction_id])
         && $request['redirectUrl'] === $request['successUrl']
         && str_contains($request['successUrl'], $sub->transaction_id));
@@ -88,6 +88,65 @@ test('billing service also starts RDCard checkout', function () {
     $result = app(BillingService::class)->startSubscription($this->seller->id, $this->plan->id);
     expect($result['status'])->toBe('automatic_redirect');
     expect(Subscription::sole()->payment_session_id)->toBe('pay-test');
+    Http::assertSent(fn ($request) => $request['callbackUrl'] === route('webhooks.rdcard', [
+        'transaction' => Subscription::sole()->transaction_id,
+    ]));
+});
+
+test('browser callback without a reference returns to history without changing a payment', function () {
+    $sub = rdcardSubscription($this);
+    $this->actingAs($this->seller)->get('/api/webhooks/rdcard')
+        ->assertRedirect(route('dashboard.subscriptions.index'));
+    expect($sub->fresh()->status)->toBe('pending');
+    Http::assertNothingSent();
+});
+
+test('browser callback checks the trusted status before showing a result', function (string $status, string $expected) {
+    $sub = rdcardSubscription($this);
+    Http::fake(['*/v1/sessions/pay-test' => Http::response([
+        ...rdcardPayload()['data']['payment'], 'status' => $status,
+    ])]);
+    $response = $this->actingAs($this->seller)->get(route('webhooks.rdcard', [
+        'transaction' => $sub->transaction_id, 'cancelled' => 1, 'status' => 'S',
+    ]));
+    $response->assertRedirect(route('billing.return', ['transaction' => $sub->transaction_id]));
+    expect($sub->fresh()->status)->toBe('pending');
+    $this->get($response->headers->get('Location'))
+        ->assertRedirect(route('billing.result', ['transaction' => $sub->transaction_id]));
+    expect($sub->fresh()->status)->toBe($expected);
+})->with([['C', 'cancelled'], ['P', 'pending'], ['S', 'active']]);
+
+test('browser callback cannot expose another users payment', function () {
+    $sub = rdcardSubscription($this);
+    $response = $this->actingAs(User::factory()->create())->get(route('webhooks.rdcard', [
+        'transaction' => $sub->transaction_id,
+    ]));
+    $this->get($response->headers->get('Location'))->assertNotFound();
+    Http::assertNothingSent();
+});
+
+test('browser callback requires login', function () {
+    $response = $this->get('/api/webhooks/rdcard');
+    $response->assertRedirect(route('dashboard.subscriptions.index'));
+    $this->get($response->headers->get('Location'))->assertRedirect(route('login'));
+
+    $response = $this->get(route('webhooks.rdcard', ['transaction' => 'tx-rdcard']));
+    $response->assertRedirect(route('billing.return', ['transaction' => 'tx-rdcard']));
+    $this->get($response->headers->get('Location'))->assertRedirect(route('login'));
+});
+
+test('POST callback still requires a signature and uses the signed transaction', function () {
+    $sub = rdcardSubscription($this);
+    $url = route('webhooks.rdcard', ['transaction' => 'untrusted-query-reference']);
+    $body = json_encode(rdcardPayload(), JSON_THROW_ON_ERROR);
+    $this->call('POST', $url, [], [], [], ['CONTENT_TYPE' => 'application/json'], $body)
+        ->assertUnauthorized();
+    expect($sub->fresh()->status)->toBe('pending');
+    $this->call('POST', $url, [], [], [], [
+        'CONTENT_TYPE' => 'application/json',
+        'HTTP_X_SIGNATURE' => hash_hmac('sha256', $body, 'test-secret'),
+    ], $body)->assertOk();
+    expect($sub->fresh()->status)->toBe('active');
 });
 
 test('missing credentials do not break manual payments and automatic errors are visible', function () {
@@ -348,3 +407,9 @@ test('payment result shows only the stored status and the owners payment summary
         ->missing('payment.payment_session_id'));
     Http::assertNothingSent();
 })->with(['active', 'cancelled', 'pending', 'failed']);
+
+test('a signed payment for a different customer is rejected', function () {
+    $sub = rdcardSubscription($this);
+    postRdcardWebhook($this, rdcardPayload(overrides: ['customer' => ['email' => 'different@example.test']]))->assertStatus(422);
+    expect($sub->fresh()->status)->toBe('pending');
+});

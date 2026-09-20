@@ -3,6 +3,7 @@ import Pagination from '@/components/pagination/home/Pagination';
 import Breadcumb from '@/components/ui/Breadcumb';
 import NewsLetter from '@/components/ui/NewsLetter';
 import PropertyCard from '@/components/ui/PropertyCard';
+import PropertySearchAlert from '@/components/ui/PropertySearchAlert';
 import { useAds } from '@/hooks/useAds';
 import { useLocations } from '@/hooks/useLocations';
 import { Head, usePage } from '@inertiajs/react';
@@ -87,6 +88,9 @@ export default function Properties() {
     const { t } = useTranslation();
 
     // Filtres
+    const [alertZones, setAlertZones] = useState<number[]>(
+        (props.searchAlertMunicipalityIds || []) as number[],
+    );
     const [search, setSearch] = useState(filterString('search'));
     const [saleType, setSaleType] = useState(filterString('sale_type'));
     const [type, setType] = useState(filterString('type'));
@@ -569,6 +573,30 @@ export default function Properties() {
                             </div>
                         </div>
                     </div>
+
+                    {municipalityId && (
+                        <div hidden={loading}>
+                            <PropertySearchAlert
+                                key={municipalityId}
+                                zoneId={municipalityId}
+                                zoneName={
+                                    municipalities.find(
+                                        (m: { id: number; name: string }) =>
+                                            String(m.id) === municipalityId,
+                                    )?.name || municipalityId
+                                }
+                                subscribed={alertZones.some(
+                                    (id) => String(id) === municipalityId,
+                                )}
+                                onEnabled={() =>
+                                    setAlertZones((zones) => [
+                                        ...zones,
+                                        Number(municipalityId),
+                                    ])
+                                }
+                            />
+                        </div>
+                    )}
 
                     {/* ── Grille de propriétés ── */}
                     <div

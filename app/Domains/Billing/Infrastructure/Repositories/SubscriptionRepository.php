@@ -4,6 +4,7 @@ namespace App\Domains\Billing\Infrastructure\Repositories;
 
 use App\Domains\Billing\Models\Plan;
 use App\Domains\Billing\Models\Subscription;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 
@@ -47,6 +48,7 @@ class SubscriptionRepository
     {
         return Subscription::create([
             'user_id' => $userId,
+            'payment_customer_email' => User::findOrFail($userId)->email,
             'plan_id' => $plan->id,
             'plan_name' => $plan->name,
             'plan_interval' => $plan->interval,
@@ -74,11 +76,7 @@ class SubscriptionRepository
     {
         return Subscription::with('plan')
             ->where('user_id', $userId)
-            ->where('status', 'active')
-            ->where(function ($q) {
-                $q->whereNull('expires_at')
-                    ->orWhere('expires_at', '>', now());
-            })
+            ->usable()
             ->latest()
             ->first();
     }

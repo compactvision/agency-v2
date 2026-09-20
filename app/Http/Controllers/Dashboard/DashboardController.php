@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Domains\Ads\Resources\AdResource;
 use App\Domains\Ads\Services\AdService;
+use App\Domains\Billing\Services\SubscriptionEntitlements;
 use App\Http\Controllers\Controller;
 use Inertia\Inertia;
 
@@ -51,6 +52,7 @@ class DashboardController extends Controller
         return Inertia::render('dashboard/Index', [
             'properties' => AdResource::collection($isBuyer ? $recentAds : $recentAds->items())->resolve(),
             'isBuyer' => $isBuyer,
+            'subscriptionSummary' => app(SubscriptionEntitlements::class)->summary($user->id),
             'logs' => [],
             'metrics' => [
                 'properties' => [

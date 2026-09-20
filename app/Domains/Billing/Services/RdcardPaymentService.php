@@ -4,6 +4,7 @@ namespace App\Domains\Billing\Services;
 
 use App\Domains\Billing\Application\UseCases\ActivateSubscription;
 use App\Domains\Billing\Models\Subscription;
+use App\Models\User;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
@@ -35,7 +36,14 @@ class RdcardPaymentService
             throw new DomainException('RDCard payment does not match the subscription.');
         }
 
+        $customerEmail = $payment['customer']['email'] ?? null;
+        if ($customerEmail !== null && (! is_string($customerEmail)
+            || strcasecmp($customerEmail, $subscription->payment_customer_email ?? $subscription->user->email) !== 0)) {
+            throw new DomainException('RDCard customer does not match the checkout owner.');
+        }
+
         DB::transaction(function () use ($subscription, $payment, $event) {
+            User::whereKey($subscription->user_id)->lockForUpdate()->firstOrFail();
             $sub = Subscription::query()->lockForUpdate()->findOrFail($subscription->id);
             if ($event === 'payment.succeeded') {
                 app(ActivateSubscription::class)->execute($sub->id, [

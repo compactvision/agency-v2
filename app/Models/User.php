@@ -106,11 +106,7 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     {
         return $this->hasOne(Subscription::class)
             ->ofMany(['id' => 'max'], function ($query) {
-                $query->where('status', 'active')
-                    ->where(function ($expiry) {
-                        $expiry->whereNull('expires_at')
-                            ->orWhere('expires_at', '>', now());
-                    });
+                $query->usable();
             });
     }
 

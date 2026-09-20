@@ -84,6 +84,25 @@ class AuditBusinessIntegrity extends Command
             }
         }
 
+        $invalidActive = DB::table('subscriptions')->whereNull('deleted_at')->where('status', 'active')
+            ->where(function ($q) {
+                $q->whereNull('started_at')->orWhereNull('expires_at')
+                    ->orWhereColumn('expires_at', '<=', 'started_at')
+                    ->orWhere(fn ($proof) => $proof->whereNull('payment_id')->whereNull('approved_by'));
+            })->count();
+        if ($invalidActive) {
+            $errors[] = "{$invalidActive} abonnement(s) actifs sans preuve de paiement ou période cohérente ; aucun droit ne sera accordé";
+        }
+        $duplicates = DB::table('subscriptions')->whereNull('deleted_at')->where('status', 'active')
+            ->select('user_id')->groupBy('user_id')->havingRaw('COUNT(*) > 1')->get()->count();
+        if ($duplicates) {
+            $warnings[] = "{$duplicates} compte(s) avec plusieurs abonnements actifs ; le cycle de vie les réconciliera";
+        }
+        $overdue = DB::table('subscriptions')->whereNull('deleted_at')->where('status', 'active')->where('expires_at', '<=', now())->count();
+        if ($overdue) {
+            $warnings[] = "{$overdue} abonnement(s) à expirer ; vérifier le scheduler";
+        }
+
         if ($this->option('media')) {
             $missingMedia = 0;
 

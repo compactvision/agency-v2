@@ -3,28 +3,29 @@
 namespace App\Domains\Billing\Application\UseCases;
 
 use App\Domains\Billing\Application\Commands\RejectSubscriptionCommand;
-use App\Domains\Billing\Domain\ValueObjects\SubscriptionStatus;
-use App\Domains\Billing\Infrastructure\Repositories\SubscriptionRepository;
-use Illuminate\Support\Facades\Log;
+use App\Domains\Billing\Models\Subscription;
+use App\Models\User;
+use App\Support\AuditLogger;
+use DomainException;
+use Illuminate\Support\Facades\DB;
 
 class RejectManualSubscription
 {
-    public function __construct(
-        private readonly SubscriptionRepository $subscriptions,
-    ) {}
-
     public function execute(RejectSubscriptionCommand $cmd): void
     {
-        $sub = $this->subscriptions->findOrFail($cmd->subscriptionId);
-
-        if ($sub->status !== SubscriptionStatus::Pending->value) {
-            Log::warning("Tried to reject non-pending subscription #{$cmd->subscriptionId}");
-            return;
+        if (! User::find($cmd->adminId)?->hasRole(['admin', 'super-admin'])) {
+            throw new DomainException('Administrator confirmation is required.');
         }
-
-        $sub->update([
-            'status'         => SubscriptionStatus::Failed->value,
-            'failure_reason' => $cmd->reason ?: 'Rejected by admin',
-        ]);
+        $candidate = Subscription::findOrFail($cmd->subscriptionId);
+        DB::transaction(function () use ($cmd, $candidate) {
+            User::whereKey($candidate->user_id)->lockForUpdate()->firstOrFail();
+            $sub = Subscription::whereKey($candidate->id)->lockForUpdate()->firstOrFail();
+            if ($sub->payment_method === 'RDCard' || ! in_array($sub->status, ['pending', 'failed'])) {
+                throw new DomainException('This subscription cannot be manually rejected.');
+            }
+            $before = $sub->only(['status', 'failure_reason']);
+            $sub->update(['status' => 'cancelled', 'failure_reason' => $cmd->reason ?: 'Rejected by administrator', 'cancelled_at' => now()]);
+            app(AuditLogger::class)->record('subscription.rejected', $sub, $cmd->reason, $before, $sub->only(['status', 'failure_reason']), 'warning');
+        }, 3);
     }
 }

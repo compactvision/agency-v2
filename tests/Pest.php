@@ -1,5 +1,12 @@
 <?php
 
+use App\Domains\Billing\Models\Plan;
+use App\Domains\Billing\Models\Subscription;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
+use Tests\TestCase;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -11,8 +18,8 @@
 |
 */
 
-pest()->extend(Tests\TestCase::class)
-    ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+pest()->extend(TestCase::class)
+    ->use(RefreshDatabase::class)
     ->in('Feature');
 
 /*
@@ -44,4 +51,17 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+/** Explicit paid fixture for tests exercising public listings. */
+function grantTestPublicationRights(User $user, string $limit = 'Unlimited'): Subscription
+{
+    $plan = Plan::create(['name' => 'Test paid plan', 'price' => 25, 'interval' => 'monthly', 'payment_method' => 'manual', 'is_active' => true]);
+    $plan->features()->createMany([['name' => 'Listings per month', 'value' => $limit], ['name' => 'Images per ad', 'value' => 'Unlimited']]);
+
+    return Subscription::create([
+        'user_id' => $user->id, 'plan_id' => $plan->id, 'transaction_id' => (string) Str::uuid(),
+        'payment_id' => (string) Str::uuid(), 'status' => 'active', 'amount' => 25,
+        'currency' => 'USD', 'started_at' => now()->subDay(), 'expires_at' => now()->addMonth(),
+    ]);
 }

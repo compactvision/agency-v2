@@ -1143,5 +1143,18 @@
             "remove": "Remove",
             "remove_confirmation": "Are you sure you want to remove this property from your favorites?"
         }
+    },
+    "social_auth_not_configured": "Sign-in with {{provider}} is not configured yet. Please use the form below.",
+    "search_alert": {
+        "label": "Property alert",
+        "question": "Would you like to hear about new properties in {{zone}}?",
+        "description": "One email for each new property published in this area, regardless of other filters. Unsubscribe from any email.",
+        "yes": "Yes, notify me",
+        "no": "No, thanks",
+        "enabled": "Your alert for {{zone}} is active.",
+        "login": "Sign in to receive alerts",
+        "verify": "Verify my email address",
+        "saving": "Enabling…",
+        "error": "Unable to enable this alert. Check your connection and try again."
     }
 }

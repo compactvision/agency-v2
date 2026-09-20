@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Domains\Billing\Application\Commands\ApproveSubscriptionCommand;
 use App\Domains\Billing\Application\Commands\StartAutomaticSubscriptionCommand;
+use App\Domains\Billing\Application\UseCases\ApproveManualSubscription;
 use App\Domains\Billing\Application\UseCases\StartAutomaticSubscription;
-use App\Domains\Billing\Domain\ValueObjects\BillingInterval;
 use App\Domains\Billing\Models\Plan;
 use App\Domains\Billing\Models\Subscription;
 use App\Domains\Billing\Resources\SubscriptionResource;
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Support\AuditLogger;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -124,17 +128,15 @@ class TransactionController extends Controller
     public function approve($id)
     {
 
+        $this->authorize('manage', Subscription::class);
         $sub = Subscription::findOrFail($id);
         abort_if($sub->payment_method === 'RDCard', 422, 'Ce paiement est confirmé automatiquement par RDCard.');
-        $interval = BillingInterval::from(
-            $sub->plan_interval ?: $sub->interval ?: $sub->plan->interval
-        );
-        $sub->update([
-            'status' => 'active',
-            'started_at' => now(),
-            'expires_at' => $interval->addTo(now()),
-            'approved_by' => auth()->id(),
-        ]);
+        try {
+            app(ApproveManualSubscription::class)
+                ->execute(new ApproveSubscriptionCommand($sub->id, auth()->id()));
+        } catch (\DomainException $exception) {
+            return back()->withErrors(['subscription' => $exception->getMessage()]);
+        }
 
         return back()->with('success', 'Demande approuvée.');
     }
@@ -142,14 +144,19 @@ class TransactionController extends Controller
     public function reject($id, Request $request)
     {
 
-        $sub = Subscription::findOrFail($id);
-        abort_if($sub->payment_method === 'RDCard', 422, 'Ce paiement est confirmé automatiquement par RDCard.');
-        $sub->update([
-            'status' => 'cancelled',
-            'failure_reason' => $request->admin_note,
-            'cancelled_at' => now(),
-            'approved_by' => auth()->id(),
-        ]);
+        $this->authorize('manage', Subscription::class);
+        abort_if(Subscription::findOrFail($id)->payment_method === 'RDCard', 422);
+        $data = $request->validate(['admin_note' => ['required', 'string', 'max:1000']]);
+        $candidate = Subscription::findOrFail($id);
+        DB::transaction(function () use ($id, $data, $candidate) {
+            User::whereKey($candidate->user_id)->lockForUpdate()->firstOrFail();
+            $sub = Subscription::whereKey($id)->lockForUpdate()->firstOrFail();
+            abort_if($sub->payment_method === 'RDCard' || ! in_array($sub->status, ['pending', 'failed']), 422);
+            $before = $sub->only(['status', 'failure_reason']);
+            $sub->update(['status' => 'cancelled', 'failure_reason' => $data['admin_note'],
+                'cancelled_at' => now(), 'approved_by' => null]);
+            app(AuditLogger::class)->record('subscription.rejected', $sub, $data['admin_note'], $before, $sub->only(['status', 'failure_reason']), 'warning');
+        }, 3);
 
         return back()->with('success', 'Demande rejetée.');
     }

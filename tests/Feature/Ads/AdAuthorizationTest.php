@@ -65,7 +65,9 @@ test('an admin can view and moderate any property', function () {
     $owner = User::factory()->create();
     $admin = User::factory()->create();
     $admin->assignRole('admin');
+    grantTestPublicationRights($owner);
     $ad = createAuthorizedTestAd($owner, 'pending_validation');
+    $ad->details()->create(['details' => ['bedrooms' => 2, 'bathrooms' => 1, 'kitchens' => 1]]);
 
     $this->actingAs($admin)
         ->get(route('dashboard.properties.show', $ad->id))

@@ -20,6 +20,7 @@ use App\Mail\ContactMessage;
 use App\Mail\PropertyOwnerContactMessage;
 use App\Mail\PropertyVisitConfirmationMail;
 use App\Mail\PropertyVisitRequestedMail;
+use App\Models\PropertySearchAlert;
 use App\Models\PropertyVisit;
 use App\Support\ReferenceCache;
 use App\Support\Seo;
@@ -95,7 +96,7 @@ class PageController extends Controller
 
     public function contactOwner(ContactOwnerRequest $request, Ad $ad)
     {
-        abort_unless($ad->is_published && $ad->is_approved, 404);
+        abort_unless($ad->isPubliclyVisible(), 404);
 
         $ad->loadMissing('user');
         Mail::to($ad->user->email)->send(
@@ -114,7 +115,7 @@ class PageController extends Controller
 
     public function scheduleVisit(SchedulePropertyVisitRequest $request, Ad $ad)
     {
-        abort_unless($ad->is_published && $ad->is_approved, 404);
+        abort_unless($ad->isPubliclyVisible(), 404);
 
         if ($ad->user_id === $request->user()->id) {
             throw ValidationException::withMessages([
@@ -215,6 +216,9 @@ class PageController extends Controller
             : route('properties');
 
         return Inertia::render('properties/Properties', [
+            'searchAlertMunicipalityIds' => $request->user()
+                ? PropertySearchAlert::where('user_id', $request->user()->id)->where('active', true)->pluck('municipality_id')
+                : [],
             'properties' => [
                 'data' => AdSummaryResource::collection($properties->items())->resolve(),
                 'meta' => [
@@ -297,7 +301,7 @@ class PageController extends Controller
 
     public function property(Ad $ad)
     {
-        abort_unless($ad->is_published && $ad->is_approved, 404);
+        abort_unless($ad->isPubliclyVisible(), 404);
         $property = $ad->load([
             'category',
             'amenities',
@@ -329,8 +333,7 @@ class PageController extends Controller
             fn () => Municipality::query()
                 ->withCount([
                     'properties as properties' => fn ($query) => $query
-                        ->where('is_published', true)
-                        ->where('is_approved', true),
+                        ->publiclyVisible(),
                 ])
                 ->orderByDesc('properties')
                 ->get(),

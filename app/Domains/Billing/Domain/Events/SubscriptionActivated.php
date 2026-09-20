@@ -7,8 +7,9 @@ use Carbon\Carbon;
 final class SubscriptionActivated
 {
     public function __construct(
-        public readonly int    $userId,
-        public readonly int    $planId,
+        public readonly int $userId,
+        public readonly int $planId,
         public readonly Carbon $expiresAt,
+        public readonly ?int $subscriptionId = null,
     ) {}
 }

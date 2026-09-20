@@ -2,9 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Domains\Billing\Models\Subscription;
 use App\Domains\Billing\Models\Plan;
+use App\Domains\Billing\Models\Subscription;
+use App\Domains\Categories\Models\Category;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,21 +18,21 @@ class SubscriptionCheckTest extends TestCase
         parent::setUp();
         // Setup Plan
         Plan::create([
-             'id' => 1,
-             'name' => 'Basic Plan',
-             'slug' => 'basic',
-             'stripe_price_id' => 'price_123',
-             'price' => 1000,
-             'interval' => 'month',
-             'description' => 'Test plan'
+            'id' => 1,
+            'name' => 'Basic Plan',
+            'slug' => 'basic',
+            'stripe_price_id' => 'price_123',
+            'price' => 1000,
+            'interval' => 'monthly',
+            'description' => 'Test plan',
         ]);
 
         // Setup Category
-        \App\Domains\Categories\Models\Category::create([
+        Category::create([
             'id' => 1,
             'name' => 'House',
             'slug' => 'house',
-            'type' => 'property'
+            'type' => 'property',
         ]);
     }
 
@@ -43,7 +44,7 @@ class SubscriptionCheckTest extends TestCase
             ->get(route('dashboard.properties.create'));
 
         $response->assertStatus(200);
-        
+
         $page = $response->viewData('page');
         $this->assertFalse($page['props']['hasActiveSubscription']);
     }
@@ -57,7 +58,9 @@ class SubscriptionCheckTest extends TestCase
             'stripe_id' => 'sub_123',
             'stripe_status' => 'active',
             'status' => 'active',
-            'ends_at' => now()->addMonth(),
+            'started_at' => now()->subDay(),
+            'expires_at' => now()->addMonth(),
+            'payment_id' => 'confirmed-test-payment',
             'transaction_id' => 'tx_123',
             'amount' => 1000, // Added
         ]);
@@ -66,7 +69,7 @@ class SubscriptionCheckTest extends TestCase
             ->get(route('dashboard.properties.create'));
 
         $response->assertStatus(200);
-        
+
         $page = $response->viewData('page');
         $this->assertTrue($page['props']['hasActiveSubscription']);
     }

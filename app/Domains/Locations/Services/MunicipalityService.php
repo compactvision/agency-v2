@@ -16,8 +16,7 @@ class MunicipalityService
         $query = Municipality::query()
             ->with(['city.country'])
             ->withCount(['properties' => function ($query) {
-                $query->where('is_published', true)
-                    ->where('is_approved', true);
+                $query->publiclyVisible();
             }]);
 
         if (! empty($filters['search'])) {
@@ -36,8 +35,7 @@ class MunicipalityService
             ReferenceCache::MUNICIPALITIES,
             fn () => Municipality::with(['city.country'])
                 ->withCount(['properties' => function ($query) {
-                    $query->where('is_published', true)
-                        ->where('is_approved', true);
+                    $query->publiclyVisible();
                 }])
                 ->get(),
         );

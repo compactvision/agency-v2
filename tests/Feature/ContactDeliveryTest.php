@@ -50,6 +50,7 @@ it('delivers a property enquiry only for a public property', function () {
         'email_verified_at' => now(),
     ]);
     $sender = User::factory()->create(['email_verified_at' => now()]);
+    grantTestPublicationRights($owner);
     $category = Category::create([
         'name' => 'Appartement test',
         'slug' => 'appartement-test',

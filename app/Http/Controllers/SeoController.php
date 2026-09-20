@@ -3,15 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Domains\Ads\Models\Ad;
+use App\Domains\Billing\Models\Subscription;
 use App\Domains\CMS\Models\Page;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 
 class SeoController extends Controller
 {
     public function sitemap(): Response
     {
-        $entries = Cache::remember('seo.sitemap.entries', now()->addHour(), function () {
+        $nextExpiry = Subscription::usable()->min('expires_at');
+        $cacheUntil = $nextExpiry ? now()->addHour()->min(Carbon::parse($nextExpiry)) : now()->addHour();
+        $entries = Cache::remember('seo.sitemap.entries', $cacheUntil, function () {
             $static = collect([
                 ['loc' => route('home'), 'lastmod' => null, 'priority' => '1.0'],
                 ['loc' => route('properties'), 'lastmod' => null, 'priority' => '0.9'],
@@ -34,8 +38,7 @@ class SeoController extends Controller
                 ]);
 
             $ads = Ad::query()
-                ->where('is_published', true)
-                ->where('is_approved', true)
+                ->publiclyVisible()
                 ->whereNotNull('slug')
                 ->with(['images' => fn ($query) => $query->orderBy('position')->limit(1)])
                 ->latest('updated_at')

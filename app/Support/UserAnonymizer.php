@@ -26,6 +26,7 @@ class UserAnonymizer
         }
 
         DB::transaction(function () use ($user, $originalEmail, $anonymizedEmail) {
+            User::whereKey($user->id)->lockForUpdate()->firstOrFail();
             $user->tokens()->delete();
             $user->favorites()->detach();
             $user->notifications()->delete();

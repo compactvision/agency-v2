@@ -2,15 +2,14 @@
 
 namespace App\Domains\Billing\Infrastructure\Jobs;
 
-use App\Domains\Billing\Infrastructure\Mail\SubscriptionExpiringMail;
 use App\Domains\Billing\Infrastructure\Repositories\SubscriptionRepository;
+use App\Domains\Billing\Services\SubscriptionLifecycle;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Mail;
 
 class SendSubscriptionExpiringReminder implements ShouldBeUnique, ShouldQueue
 {
@@ -33,19 +32,8 @@ class SendSubscriptionExpiringReminder implements ShouldBeUnique, ShouldQueue
 
     public function handle(SubscriptionRepository $repo): void
     {
-        $targetDate = now()->addDays($this->daysBeforeExpiry)->toDateString();
-
-        $subscriptions = $repo->findExpiringOn($targetDate);
-
-        foreach ($subscriptions as $sub) {
-            if (! $sub->user?->email) {
-                continue;
-            }
-
-            Mail::to($sub->user->email)->queue(
-                new SubscriptionExpiringMail($sub, $this->daysBeforeExpiry)
-            );
-        }
+        // Compatibility entry point: the durable lifecycle outbox owns reminder deduplication.
+        app(SubscriptionLifecycle::class)->process();
     }
 
     public function uniqueId(): string

@@ -8,6 +8,7 @@ use App\Domains\Billing\Services\RdcardPaymentService;
 use DomainException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 
 class RdcardWebhookHandler
 {
@@ -40,7 +41,9 @@ class RdcardWebhookHandler
 
         try {
             $payments->apply($subscription, $payment, $event['type']);
-        } catch (DomainException) {
+        } catch (DomainException $exception) {
+            Log::warning('Rejected RDCard payment event', ['subscription_id' => $subscription->id, 'event_type' => $event['type'], 'reason' => $exception->getMessage()]);
+
             return response()->json(['message' => 'Payment payload rejected'], 422);
         }
 

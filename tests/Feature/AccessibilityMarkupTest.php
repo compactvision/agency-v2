@@ -20,7 +20,9 @@ it('keeps the public layout keyboard accessible', function () {
         ->toContain('inert={!active ? true : undefined}')
         ->toContain('h-11 w-11')
         ->toContain('h-[100dvh]')
-        ->not->toContain('overflow-y-auto');
+        // Inner scrolling keeps navigation reachable on small screens.
+        ->toContain('min-h-0 flex-1')
+        ->toContain('overflow-y-auto overscroll-contain');
 });
 
 it('keeps carousel controls and filters named and stateful', function () {

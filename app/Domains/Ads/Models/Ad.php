@@ -10,6 +10,7 @@ use App\Domains\Locations\Models\Municipality;
 use App\Models\PropertyVisit;
 use App\Models\User;
 use App\Support\ReferenceCache;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
@@ -44,6 +45,10 @@ class Ad extends Model
     protected static function booted(): void
     {
         static::saving(function (Ad $ad) {
+            if ($ad->is_published && $ad->is_approved && ! $ad->first_published_at) {
+                $ad->first_published_at = now()->format('Y-m-d H:i:s.u');
+            }
+
             if ($ad->slug === null) {
                 $ad->slug = Str::slug("{$ad->title}-{$ad->reference}");
             }
@@ -56,6 +61,18 @@ class Ad extends Model
 
         static::saved($flush);
         static::deleted($flush);
+    }
+
+    public function scopePubliclyVisible(Builder $query): Builder
+    {
+        return $query->where('status', 'published')->where('is_published', true)->where('is_approved', true)
+            ->whereNull('hidden_reason')
+            ->whereHas('user', fn ($q) => $q->whereNull('anonymized_at')->whereHas('subscriptions', fn ($s) => $s->usable()));
+    }
+
+    public function isPubliclyVisible(): bool
+    {
+        return static::whereKey($this->id)->publiclyVisible()->exists();
     }
 
     /* RELATIONS */

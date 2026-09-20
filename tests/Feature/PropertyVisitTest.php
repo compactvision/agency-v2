@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Mail;
 
 function createVisitableProperty(User $owner, bool $published = true): Ad
 {
+    grantTestPublicationRights($owner);
     $category = Category::create([
         'name' => 'Visit category '.fake()->uuid(),
         'slug' => fake()->uuid(),

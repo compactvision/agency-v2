@@ -139,6 +139,8 @@ test('a newer pending checkout does not hide an active subscription', function (
         'user_id' => $user->id,
         'plan_id' => $plan->id,
         'transaction_id' => 'active-first',
+        'payment_id' => 'paid-active-first',
+        'started_at' => now()->subDay(),
         'status' => 'active',
         'amount' => 10,
         'currency' => 'USD',

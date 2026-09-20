@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Billing\Controllers\BillingController;
+use App\Domains\Billing\Controllers\RdcardCallbackReturnController;
 use App\Domains\Billing\Controllers\RdcardResultController;
 use App\Domains\Billing\Controllers\RdcardReturnController;
 use App\Http\Controllers\Auth\BecomeSellerController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\Dashboard\TransactionController;
 use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\PageController as FrontPageController;
+use App\Http\Controllers\PropertySearchAlertController;
 use App\Http\Controllers\SeoController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -36,6 +38,12 @@ Route::post('/contact', [FrontPageController::class, 'contactSend'])->middleware
 Route::get('/tarifs', [FrontPageController::class, 'tarifs'])->name('tarifs');
 Route::get('/faq', [FrontPageController::class, 'faq'])->name('faq');
 Route::get('/properties', [FrontPageController::class, 'properties'])->name('properties');
+Route::post('/search-alerts', [PropertySearchAlertController::class, 'store'])
+    ->middleware(['auth', 'verified', 'throttle:10,1'])->name('search-alerts.store');
+Route::get('/search-alerts/{alert}/unsubscribe', [PropertySearchAlertController::class, 'unsubscribe'])
+    ->middleware('signed')->name('search-alerts.unsubscribe');
+Route::post('/search-alerts/{alert}/unsubscribe', [PropertySearchAlertController::class, 'destroy'])
+    ->middleware(['signed', 'throttle:10,1']);
 Route::get('/properties/{ad:slug}', [FrontPageController::class, 'property'])->name('property.show');
 Route::get('/property/{id}', [FrontPageController::class, 'legacyProperty'])
     ->whereNumber('id')
@@ -152,6 +160,7 @@ Route::middleware(['auth', 'verified'])->prefix('/dashboard')->group(function ()
 
         // Subscriptions
         Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+        Route::patch('/subscriptions/{subscription}', [SubscriptionController::class, 'update'])->middleware('admin')->name('subscriptions.update');
         Route::post('/subscriptions/request', [TransactionController::class, 'store'])
             ->middleware('throttle:5,1')
             ->name('subscriptions.store');
@@ -167,6 +176,12 @@ Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])
 Route::get('/billing/return', RdcardReturnController::class)
     ->middleware(['auth', 'throttle:20,1'])
     ->name('billing.return');
+
+// RDCard also navigates the browser to callbackUrl when leaving its OTP dialog.
+// POST notifications remain handled separately by the signed API webhook.
+Route::get('/api/webhooks/rdcard', RdcardCallbackReturnController::class)
+    ->middleware('throttle:20,1')
+    ->name('billing.callback.return');
 
 Route::get('/billing/cancel', RdcardReturnController::class)
     ->middleware(['auth', 'throttle:20,1'])

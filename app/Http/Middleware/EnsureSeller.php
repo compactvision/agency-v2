@@ -11,8 +11,8 @@ class EnsureSeller
     {
         $user = $request->user();
 
-        if (!$user || !$user->hasRole('seller')) {
-            if ($request->expectsJson() && !$request->header('X-Inertia')) {
+        if (! $user || ! $user->hasRole(['seller', 'agency', 'admin', 'super-admin'])) {
+            if ($request->expectsJson() && ! $request->header('X-Inertia')) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Seller access required',

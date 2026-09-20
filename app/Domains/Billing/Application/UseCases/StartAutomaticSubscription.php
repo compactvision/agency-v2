@@ -38,7 +38,7 @@ class StartAutomaticSubscription
                 'email' => $subscription->user->email,
             ],
             'transactionId' => $subscription->transaction_id,
-            'callbackUrl' => route('webhooks.rdcard'),
+            'callbackUrl' => route('webhooks.rdcard', ['transaction' => $subscription->transaction_id]),
             'successUrl' => route('billing.return', ['transaction' => $subscription->transaction_id]),
             'cancelUrl' => route('billing.cancel.return', ['transaction' => $subscription->transaction_id]),
             'services' => [

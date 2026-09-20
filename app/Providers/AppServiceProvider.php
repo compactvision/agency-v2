@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Domains\Ads\Models\Ad;
+use App\Domains\Billing\Models\Subscription;
 use App\Policies\AdPolicy;
+use App\Policies\SubscriptionPolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -65,5 +67,6 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::policy(Ad::class, AdPolicy::class);
+        Gate::policy(Subscription::class, SubscriptionPolicy::class);
     }
 }

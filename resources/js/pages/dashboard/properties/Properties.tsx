@@ -35,6 +35,8 @@ type Property = {
     is_published: boolean;
     is_approved: boolean;
     status?: string;
+    hidden_reason?: string | null;
+    hidden_message?: string | null;
     images?: PropertyImage[];
     views_count?: number;
     created_at?: string;
@@ -188,6 +190,12 @@ export default function Properties() {
     };
 
     const getStatusBadge = (property: Property) => {
+        if (property.hidden_message)
+            return (
+                <span className="inline-block max-w-xs rounded-lg bg-amber-50 p-2 text-xs text-amber-900">
+                    {property.hidden_message}
+                </span>
+            );
         switch (property.status) {
             case 'pending_validation':
                 return (

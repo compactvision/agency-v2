@@ -465,7 +465,8 @@ export default function TarifPopup({
                                             htmlFor="listing_limit"
                                             className="mb-2 block text-sm font-medium text-gray-700"
                                         >
-                                            Limite d'annonces
+                                            Biens publiés simultanément (0 =
+                                            illimité)
                                         </label>
                                         <div className="relative">
                                             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -501,7 +502,7 @@ export default function TarifPopup({
                                             htmlFor="image_limit"
                                             className="mb-2 block text-sm font-medium text-gray-700"
                                         >
-                                            Limite d'images
+                                            Images par bien (0 = illimité)
                                         </label>
                                         <div className="relative">
                                             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">

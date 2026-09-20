@@ -1,9 +1,9 @@
 <?php
 
-use App\Domains\Billing\Infrastructure\Jobs\ExpireSubscriptionsJob;
-use App\Domains\Billing\Infrastructure\Jobs\SendSubscriptionExpiringReminder;
 use App\Domains\Billing\Models\WebhookLog;
+use App\Jobs\SendPropertySearchAlerts;
 use App\Models\AuditLog;
+use App\Models\PropertySearchAlert;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -14,21 +14,19 @@ Artisan::command('inspire', function () {
 
 // ─── Subscription Management ─────────────────────────────────────────────────
 
-// Expire subscriptions whose expires_at has passed
-Schedule::job(new ExpireSubscriptionsJob)
-    ->dailyAt('00:10')
-    ->name('subscriptions-expire')
-    ->withoutOverlapping();
-
-// Send renewal reminders: 7 days, 3 days and on the day of expiry
-foreach ([7, 3, 0] as $daysBeforeExpiry) {
-    Schedule::job(new SendSubscriptionExpiringReminder($daysBeforeExpiry))
-        ->dailyAt('08:00')
-        ->name("subscriptions-reminder-{$daysBeforeExpiry}")
-        ->withoutOverlapping();
-}
+Schedule::command('subscriptions:process-lifecycle')
+    ->everyMinute()->timezone(config('app.timezone'))
+    ->name('subscriptions-lifecycle')->withoutOverlapping(10)->onOneServer();
 
 // Shared hosting: a single `schedule:run` cron also drains the database queue.
+Schedule::call(function () {
+    PropertySearchAlert::where('active', true)->select('id')->chunkById(200, function ($alerts) {
+        foreach ($alerts as $alert) {
+            SendPropertySearchAlerts::dispatch($alert->id)->onConnection('database');
+        }
+    });
+})->everyMinute()->name('property-search-alerts')->withoutOverlapping();
+
 Schedule::command(
     'queue:work database --queue=default --stop-when-empty --max-time=50 --tries=3',
 )

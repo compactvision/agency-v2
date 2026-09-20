@@ -15,8 +15,8 @@ class EnsureSellerWithActiveSubscription
     {
         $user = $request->user();
 
-        if (!$user || !$user->hasRole('seller')) {
-            if ($request->expectsJson() && !$request->header('X-Inertia')) {
+        if (! $user || ! $user->hasRole(['seller', 'agency', 'admin', 'super-admin'])) {
+            if ($request->expectsJson() && ! $request->header('X-Inertia')) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Seller access required',
@@ -29,8 +29,8 @@ class EnsureSellerWithActiveSubscription
         $sub = $user->subscription;
 
         // Check status AND expiry date — previously only checked status
-        if (!$sub || $sub->status !== 'active' || ($sub->expires_at && $sub->expires_at->isPast())) {
-            if ($request->expectsJson() && !$request->header('X-Inertia')) {
+        if (! $sub || ! $sub->isActive()) {
+            if ($request->expectsJson() && ! $request->header('X-Inertia')) {
                 return response()->json([
                     'success' => false,
                     'message' => 'An active subscription is required to perform this action.',

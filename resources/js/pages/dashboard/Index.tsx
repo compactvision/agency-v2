@@ -1,4 +1,7 @@
 import Dashboard from '@/components/layouts/Dashboard/Dashboard';
+import SubscriptionSummary, {
+    type SubscriptionSummaryData,
+} from '@/components/subscriptions/SubscriptionSummary';
 import { Link, router, usePage } from '@inertiajs/react';
 import {
     AlertCircle,
@@ -55,6 +58,7 @@ type DashboardPageProps = {
     user: any;
     properties: Property[];
     isBuyer?: boolean;
+    subscriptionSummary?: SubscriptionSummaryData;
     logs: any[];
     metrics?: DashboardMetrics;
 };
@@ -64,6 +68,7 @@ export default function DashboardIndex() {
     const {
         properties = [],
         isBuyer = false,
+        subscriptionSummary,
         logs = [],
         metrics = {
             properties: { total: 0, unapproved: 0 },
@@ -257,6 +262,9 @@ export default function DashboardIndex() {
     return (
         <Dashboard>
             <div className="h-full w-full space-y-4 px-2 sm:space-y-6 sm:px-4 lg:space-y-8 lg:px-0">
+                {subscriptionSummary && (
+                    <SubscriptionSummary summary={subscriptionSummary} />
+                )}
                 {/* Stats Section - Responsive Parfait */}
                 <section ref={statsRef} className="w-full">
                     <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4 lg:gap-6">

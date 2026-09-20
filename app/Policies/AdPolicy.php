@@ -27,6 +27,11 @@ class AdPolicy
         return $ad->user_id === $user->id;
     }
 
+    public function publish(User $user, Ad $ad): bool
+    {
+        return $ad->user_id === $user->id && $user->hasActiveSubscription();
+    }
+
     public function manageImages(User $user, Ad $ad): bool
     {
         return $ad->user_id === $user->id;

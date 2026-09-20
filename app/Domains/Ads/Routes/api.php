@@ -12,7 +12,7 @@ Route::prefix('ads')->group(function () {
     Route::get('/public/{id}', [AdController::class, 'show'])->middleware('throttle:120,1');
 
     // 🟢 SELLER + SUBSCRIPTION ACTIVE
-    Route::middleware(['auth:sanctum', 'maintenance', 'seller.active'])->group(function () {
+    Route::middleware(['auth:sanctum', 'maintenance', 'seller'])->group(function () {
 
         Route::post('/', [AdController::class, 'store']);
         Route::put('/{ad}', [AdController::class, 'update']);

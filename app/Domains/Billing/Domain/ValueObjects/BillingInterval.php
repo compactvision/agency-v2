@@ -7,29 +7,29 @@ use Carbon\Carbon;
 enum BillingInterval: string
 {
     case Monthly = 'monthly';
-    case Yearly  = 'yearly';
+    case Yearly = 'yearly';
 
     public function toMonths(): int
     {
-        return match($this) {
+        return match ($this) {
             self::Monthly => 1,
-            self::Yearly  => 12,
+            self::Yearly => 12,
         };
     }
 
     public function addTo(Carbon $date): Carbon
     {
-        return match($this) {
-            self::Monthly => $date->copy()->addMonth(),
-            self::Yearly  => $date->copy()->addYear(),
+        return match ($this) {
+            self::Monthly => $date->copy()->addMonthNoOverflow(),
+            self::Yearly => $date->copy()->addYearNoOverflow(),
         };
     }
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::Monthly => 'Mensuel',
-            self::Yearly  => 'Annuel',
+            self::Yearly => 'Annuel',
         };
     }
 }

@@ -33,6 +33,13 @@ class PropertyController extends Controller
             $query->where('user_id', auth()->id());
         }
 
+        if (in_array($request->input('hidden_reason'), ['subscription_expired', 'plan_limit', 'subscription_cancelled', 'manual', 'admin_suspended'], true)) {
+            $query->where('hidden_reason', $request->input('hidden_reason'));
+        }
+        if ($user->hasRole(['admin', 'super-admin']) && $request->filled('user_id')) {
+            $query->where('user_id', (int) $request->input('user_id'));
+        }
+
         // Search filter
         if ($request->filled('search')) {
             $search = $request->search;
@@ -199,12 +206,7 @@ class PropertyController extends Controller
 
         try {
             if ($property->status === 'published') {
-                // If already published, we toggle it back to pending or draft?
-                // Let's assume for now admin wants to "un-approve" it.
-                $property->update([
-                    'status' => 'pending_validation',
-                    'is_published' => false,
-                ]);
+                $service->suspend($property);
 
                 return redirect()
                     ->route('dashboard.properties.validation')
@@ -290,8 +292,7 @@ class PropertyController extends Controller
     {
         $user = auth()->user();
         $property = Ad::query()
-            ->where('is_published', true)
-            ->where('is_approved', true)
+            ->publiclyVisible()
             ->findOrFail($id);
         $user->favorites()->toggle($property->id);
 

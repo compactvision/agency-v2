@@ -5,7 +5,11 @@ namespace App\Domains\Billing\Services;
 use App\Domains\Billing\Application\UseCases\ActivateSubscription;
 use App\Domains\Billing\Domain\ValueObjects\SubscriptionStatus;
 use App\Domains\Billing\Infrastructure\Repositories\SubscriptionRepository;
+use App\Domains\Billing\Models\Subscription;
+use App\Models\User;
+use App\Support\AuditLogger;
 use DomainException;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Handles payment gateway webhook events and delegates to Use Cases.
@@ -41,11 +45,15 @@ class StatusUpdater
         $multiplier = max((int) config('billing.acoriss.webhook_amount_multiplier', 100), 1);
         $expectedAmount = (int) round((float) $sub->amount * $multiplier);
 
-        if ((int) round((float) $amount) !== $expectedAmount
+        if ((float) $amount !== (float) $expectedAmount
             || strtoupper($currency) !== strtoupper($sub->currency)) {
             throw new DomainException('Payment amount or currency does not match the subscription.');
         }
 
+        $email = $data['customer']['email'] ?? null;
+        if ($email !== null && (! is_string($email) || strcasecmp($email, $sub->payment_customer_email ?? $sub->user->email) !== 0)) {
+            throw new DomainException('Payment customer does not match the subscription.');
+        }
         $this->activateSubscription->execute($sub->id, $data);
     }
 
@@ -60,7 +68,7 @@ class StatusUpdater
             SubscriptionStatus::Pending->value,
             SubscriptionStatus::Failed->value,
         ], true)) {
-            $sub->update([
+            Subscription::whereKey($sub->id)->whereIn('status', ['pending', 'failed'])->update([
                 'status' => SubscriptionStatus::Failed->value,
                 'failure_reason' => $reason,
             ]);
@@ -81,11 +89,17 @@ class StatusUpdater
         $paymentId = $event['data']['paymentId'] ?? null;
         $sub = $this->subscriptions->findByPaymentId($paymentId);
 
-        if ($sub && $sub->status === SubscriptionStatus::Active->value) {
-            $sub->update([
-                'status' => SubscriptionStatus::Refunded->value,
-                'expires_at' => now(),
-            ]);
+        if ($sub) {
+            DB::transaction(function () use ($sub) {
+                User::whereKey($sub->user_id)->lockForUpdate()->firstOrFail();
+                $sub = Subscription::whereKey($sub->id)->lockForUpdate()->firstOrFail();
+                if ($sub->status !== 'active') {
+                    return;
+                }
+                app(SubscriptionLifecycle::class)->cancel($sub, true, 'Paiement remboursé.');
+                $sub->refresh()->update(['status' => 'refunded']);
+                app(AuditLogger::class)->record('subscription.refunded', $sub, 'Remboursement confirmé.', ['status' => 'active'], ['status' => 'refunded'], 'warning');
+            }, 3);
         }
     }
 }

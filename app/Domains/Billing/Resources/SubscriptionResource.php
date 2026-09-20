@@ -34,6 +34,12 @@ class SubscriptionResource extends JsonResource
             'expires_at' => $this->expires_at?->toIso8601String(),
             'created_at' => $this->created_at->toIso8601String(),
             'failure_reason' => $this->failure_reason,
+            'hidden_count' => $this->user?->hidden_ads_count ?? 0,
+            'notices' => $this->whenLoaded('notices', fn () => $this->notices->map(fn ($n) => [
+                'id' => $n->id, 'kind' => $n->kind, 'sent_at' => $n->sent_at?->toIso8601String(),
+                'skipped_at' => $n->skipped_at?->toIso8601String(), 'attempts' => $n->attempts,
+                'error' => $n->last_error,
+            ])),
         ];
     }
 }

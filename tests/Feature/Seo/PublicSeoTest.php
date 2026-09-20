@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Cache;
 function createPublishedSeoAd(array $overrides = []): Ad
 {
     $user = User::factory()->create();
+    grantTestPublicationRights($user);
     $category = Category::create([
         'name' => 'Appartement',
         'slug' => 'apartment',

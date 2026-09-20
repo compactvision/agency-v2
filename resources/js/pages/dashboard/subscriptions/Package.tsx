@@ -1,5 +1,11 @@
 import SubscriptionPopup from '@/components/forms/SubscriptionPopup';
 import Dashboard from '@/components/layouts/Dashboard/Dashboard';
+import SubscriptionAdminDetails, {
+    type Notice,
+} from '@/components/subscriptions/SubscriptionAdminDetails';
+import SubscriptionSummary, {
+    type SubscriptionSummaryData,
+} from '@/components/subscriptions/SubscriptionSummary';
 import BackButton from '@/components/ui/BackButton';
 import { Link, router } from '@inertiajs/react';
 import {
@@ -27,6 +33,9 @@ type Subscription = {
     started_at?: string | null;
     expires_at?: string | null;
     is_active: boolean;
+    transaction_id?: string;
+    hidden_count?: number;
+    notices?: Notice[];
 };
 
 type Plan = {
@@ -43,10 +52,12 @@ type PageProps = {
         meta: { current_page: number; last_page: number; total: number };
         links: { url: string | null; label: string; active: boolean }[];
     };
+    subscriptionSummary?: SubscriptionSummaryData;
+    isAdmin?: boolean;
     hasActiveSubscription: boolean;
     currentPlan?: { plan_id: number } | null;
     plans: Plan[];
-    filters?: { search?: string };
+    filters?: { search?: string; status?: string };
 };
 
 export default function Package({
@@ -59,10 +70,13 @@ export default function Package({
     currentPlan = null,
     plans = [],
     filters = {},
+    subscriptionSummary,
+    isAdmin = false,
 }: PageProps) {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [isSubscribing, setIsSubscribing] = useState(false);
     const [searchQuery, setSearchQuery] = useState(filters?.search ?? '');
+    const [statusFilter, setStatusFilter] = useState(filters.status || '');
     const [isSearching, setIsSearching] = useState(false);
 
     const openChangeSubscribePopup = () => {
@@ -131,7 +145,15 @@ export default function Package({
         }
 
         return {
-            label: subscription.status === 'cancelled' ? 'Annulé' : 'Inactif',
+            label:
+                (
+                    {
+                        expired: 'Expiré',
+                        failed: 'Échoué',
+                        cancelled: 'Annulé',
+                        refunded: 'Remboursé',
+                    } as Record<string, string>
+                )[subscription.status] || 'Inactif',
             className: 'bg-red-100 text-red-800',
             icon: XCircle,
         };
@@ -142,7 +164,10 @@ export default function Package({
         const t = setTimeout(() => {
             router.get(
                 route('dashboard.subscriptions.index'),
-                { search: searchQuery || undefined },
+                {
+                    search: searchQuery || undefined,
+                    status: statusFilter || undefined,
+                },
                 {
                     only: ['subscriptions', 'plans', 'filters'],
                     preserveState: true,
@@ -154,12 +179,13 @@ export default function Package({
             );
         }, 300);
         return () => clearTimeout(t);
-    }, [searchQuery]);
+    }, [searchQuery, statusFilter]);
 
     // Pagination qui conserve le search
     const goTo = (url: string | null) => {
         if (!url) return;
         const u = new URL(url, window.location.origin);
+        if (statusFilter) u.searchParams.set('status', statusFilter);
         if (searchQuery) u.searchParams.set('search', searchQuery);
         else u.searchParams.delete('search');
         router.visit(u.toString(), {
@@ -184,11 +210,11 @@ export default function Package({
                                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                                     <div className="mb-6 lg:mb-0">
                                         <h1 className="text-2xl font-bold text-gray-900">
-                                            Package
+                                            Abonnements
                                         </h1>
                                         <p className="mt-1 text-gray-600">
-                                            Gérez vos packages et leurs
-                                            informations
+                                            Consultez vos droits de publication
+                                            et vos échéances
                                         </p>
                                     </div>
                                     <div className="flex gap-4">
@@ -197,7 +223,7 @@ export default function Package({
                                                 {subscriptions.data.length}
                                             </span>
                                             <span className="text-sm text-gray-600">
-                                                Package
+                                                Abonnements
                                             </span>
                                         </div>
                                         <div className="min-w-[120px] rounded-lg bg-emerald-50 p-4 text-center">
@@ -218,6 +244,30 @@ export default function Package({
                         </div>
                     </div>
 
+                    {subscriptionSummary && (
+                        <SubscriptionSummary
+                            summary={subscriptionSummary}
+                            onRenew={openChangeSubscribePopup}
+                        />
+                    )}
+                    <label className="mb-4 block text-sm font-medium">
+                        Filtrer les abonnements
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="ml-3 rounded-lg border border-slate-300 bg-white p-2"
+                        >
+                            <option value="">Tous</option>
+                            <option value="active">Actifs</option>
+                            <option value="expiring">
+                                Échéance dans 7 jours
+                            </option>
+                            <option value="expired">Expirés</option>
+                            <option value="pending">Paiement en attente</option>
+                            <option value="failed">Échoués</option>
+                            <option value="cancelled">Annulés</option>
+                        </select>
+                    </label>
                     {/* Controls Section */}
                     <div className="mb-6">
                         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -337,6 +387,20 @@ export default function Package({
                                                         <span className="text-sm text-gray-900">
                                                             {sub.plan.name}
                                                         </span>
+                                                        {isAdmin && (
+                                                            <SubscriptionAdminDetails
+                                                                id={sub.id}
+                                                                notices={
+                                                                    sub.notices
+                                                                }
+                                                                transaction={
+                                                                    sub.transaction_id
+                                                                }
+                                                                hidden={
+                                                                    sub.hidden_count
+                                                                }
+                                                            />
+                                                        )}
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
@@ -427,10 +491,20 @@ export default function Package({
                                                 </span>
                                             </div>
 
+                                            {isAdmin && (
+                                                <SubscriptionAdminDetails
+                                                    id={sub.id}
+                                                    notices={sub.notices}
+                                                    transaction={
+                                                        sub.transaction_id
+                                                    }
+                                                    hidden={sub.hidden_count}
+                                                />
+                                            )}
                                             <div className="mb-3 space-y-2">
                                                 <div className="flex justify-between">
                                                     <span className="text-sm text-gray-500">
-                                                        Package
+                                                        Abonnements
                                                     </span>
                                                     <span className="text-sm text-gray-900">
                                                         {sub.plan.name}

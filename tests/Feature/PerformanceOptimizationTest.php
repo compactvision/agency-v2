@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Cache;
 
 it('returns lightweight public ads with only the primary image', function () {
     $owner = User::factory()->create();
+    grantTestPublicationRights($owner);
     $category = Category::create([
         'name' => 'Performance',
         'slug' => 'performance',

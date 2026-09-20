@@ -4,98 +4,78 @@ namespace App\Domains\Billing\Application\UseCases;
 
 use App\Domains\Billing\Domain\Events\SubscriptionActivated;
 use App\Domains\Billing\Domain\ValueObjects\BillingInterval;
-use App\Domains\Billing\Domain\ValueObjects\SubscriptionStatus;
-use App\Domains\Billing\Infrastructure\Repositories\SubscriptionRepository;
 use App\Domains\Billing\Models\Subscription;
+use App\Domains\Billing\Services\SubscriptionEntitlements;
+use App\Domains\Billing\Services\SubscriptionLifecycle;
 use App\Domains\Quotas\Services\QuotaEnforcer;
+use App\Models\User;
 use App\Support\AuditLogger;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Activates a subscription after payment confirmation (webhook).
- */
 class ActivateSubscription
 {
-    public function __construct(
-        private readonly SubscriptionRepository $subscriptions,
-        private readonly QuotaEnforcer $quotaEnforcer,
-        private readonly AuditLogger $auditLogger,
-    ) {}
-
     public function execute(int $subscriptionId, array $paymentData = []): bool
     {
-        $activated = DB::transaction(function () use ($subscriptionId, $paymentData) {
-            $sub = $this->subscriptions->findForUpdate($subscriptionId);
-            $paymentId = $paymentData['paymentId'];
+        $candidate = Subscription::findOrFail($subscriptionId);
 
-            if ($sub->status === SubscriptionStatus::Active->value) {
-                if (hash_equals((string) $sub->payment_id, (string) $paymentId)) {
-                    return false;
-                }
-
-                throw new DomainException('An active subscription cannot be activated with another payment.');
+        return DB::transaction(function () use ($subscriptionId, $paymentData, $candidate) {
+            $owner = User::whereKey($candidate->user_id)->lockForUpdate()->firstOrFail();
+            if ($owner->anonymized_at) {
+                throw new DomainException('Cannot activate a deleted account.');
             }
-
-            if (! in_array($sub->status, [
-                SubscriptionStatus::Pending->value,
-                SubscriptionStatus::Failed->value,
-            ], true) && ! ($sub->status === SubscriptionStatus::Cancelled->value
-                && $sub->payment_method === 'RDCard'
-                && ($paymentData['paymentMethod'] ?? null) === 'RDCard'
-                && $sub->payment_id === null)) {
+            $sub = Subscription::with('plan.features')->lockForUpdate()->findOrFail($subscriptionId);
+            $paymentId = $paymentData['paymentId'] ?? null;
+            $adminId = $paymentData['approvedBy'] ?? null;
+            if ($adminId !== null && (! User::find($adminId)?->hasRole(['admin', 'super-admin']) || $sub->payment_method === 'RDCard')) {
+                throw new DomainException('Manual confirmation is not permitted.');
+            }
+            if ($adminId === null && (! is_string($paymentId) || $paymentId === '')) {
+                throw new DomainException('A confirmed payment is required.');
+            }
+            // A late duplicate stays harmless even after expiry or replacement.
+            if (($paymentId && $sub->payment_id === $paymentId) || ($adminId && $sub->approved_by !== null)) {
+                return false;
+            }
+            if (! in_array($sub->status, ['pending', 'failed'], true)
+                && ! ($sub->status === 'cancelled' && $sub->payment_method === 'RDCard' && $sub->payment_id === null)) {
                 throw new DomainException('The subscription state does not allow activation.');
             }
-
-            $paymentAlreadyUsed = Subscription::query()
-                ->where('payment_id', $paymentId)
-                ->whereKeyNot($sub->id)
-                ->exists();
-
-            if ($paymentAlreadyUsed) {
+            if ($paymentId && Subscription::withTrashed()->where('payment_id', $paymentId)->whereKeyNot($sub->id)->exists()) {
                 throw new DomainException('The payment is already linked to another subscription.');
             }
-
-            $interval = BillingInterval::from(
-                $sub->plan_interval ?: $sub->interval ?: $sub->plan->interval
-            );
-            $startedAt = now();
-            $expiresAt = $interval->addTo($startedAt);
-
+            $rights = app(SubscriptionEntitlements::class);
+            $lifecycle = app(SubscriptionLifecycle::class);
+            $current = $rights->current($sub->user_id);
+            // Carry forward all remaining time; the purchased period starts at the old expiry.
+            $base = $current?->expires_at?->copy() ?? now();
+            $expires = BillingInterval::from($sub->plan_interval ?: $sub->interval ?: $sub->plan->interval)->addTo($base);
+            $previous = $sub->only(['status', 'started_at', 'expires_at']);
+            // Resolve even pre-existing duplicate active rows under the same owner lock.
+            Subscription::where('user_id', $sub->user_id)->where('status', 'active')->whereKeyNot($sub->id)
+                ->get()->each(function ($old) {
+                    $before = $old->only(['status', 'expires_at']);
+                    $old->update(['status' => $old->expires_at?->lte(now()) ? 'expired' : 'cancelled', 'failure_reason' => 'Replaced by a confirmed subscription.']);
+                    app(AuditLogger::class)->record('subscription.replaced', $old, 'Remplacement après paiement confirmé.', $before, $old->only(['status', 'expires_at']));
+                });
             $sub->update([
-                'status' => SubscriptionStatus::Active->value,
-                'payment_id' => $paymentId,
-                'payment_method' => $paymentData['paymentMethod'] ?? null,
-                'failure_reason' => null,
-                'cancelled_at' => null,
-                'started_at' => $startedAt,
-                'expires_at' => $expiresAt,
+                'status' => 'active', 'payment_id' => $paymentId, 'approved_by' => $adminId,
+                'payment_method' => $paymentData['paymentMethod'] ?? $sub->payment_method,
+                'failure_reason' => null, 'cancelled_at' => null,
+                'started_at' => now(), 'expires_at' => $expires,
             ]);
-
-            $this->quotaEnforcer->applyPlanLimits($sub->user_id, $sub->plan);
-
-            $this->auditLogger->record(
-                'subscription.activated',
-                $sub,
-                "Abonnement {$sub->id} activé après confirmation du paiement.",
-                ['status' => $sub->getOriginal('status')],
-                [
-                    'status' => SubscriptionStatus::Active->value,
-                    'payment_id' => $paymentId,
-                    'expires_at' => $expiresAt->toISOString(),
-                ],
-                'warning',
-            );
-
-            DB::afterCommit(fn () => event(new SubscriptionActivated(
-                userId: $sub->user_id,
-                planId: $sub->plan_id,
-                expiresAt: $expiresAt,
-            )));
+            app(QuotaEnforcer::class)->applyPlanLimits($sub->user_id, $sub->plan);
+            // Catch up expiration masking if renewal arrives while the scheduler was offline.
+            if (! $current) {
+                $lifecycle->hide($sub->user_id, 'subscription_expired');
+            }
+            $result = $lifecycle->reconcile($sub);
+            $lifecycle->recordNotice($sub, 'activated', $expires->toIso8601String(), $result);
+            app(AuditLogger::class)->record('subscription.activated', $sub, 'Abonnement activé après confirmation du paiement.',
+                $previous, array_merge($sub->only(['status', 'started_at', 'expires_at', 'approved_by']), $result), 'warning');
+            DB::afterCommit(fn () => event(new SubscriptionActivated($sub->user_id, $sub->plan_id, $expires, $sub->id)));
 
             return true;
         }, 3);
-
-        return $activated;
     }
 }

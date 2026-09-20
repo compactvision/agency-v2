@@ -4,11 +4,13 @@ namespace App\Domains\Ads\Services;
 
 use App\Domains\Ads\Models\Ad;
 use App\Domains\Ads\Models\AdDetail;
+use App\Domains\Billing\Services\SubscriptionEntitlements;
 use App\Domains\Quotas\Services\QuotaService;
 use App\Mail\AdminNewPropertyNotification;
 use App\Mail\PropertyApprovedMail;
 use App\Mail\PropertyRejectedMail;
 use App\Mail\PropertyValidationPending;
+use App\Models\User;
 use App\Support\AuditLogger;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class AdService
 {
@@ -127,6 +130,24 @@ class AdService
     public function update(Ad $ad, array $data): array
     {
         return DB::transaction(function () use ($ad, $data) {
+            User::whereKey($ad->user_id)->lockForUpdate()->firstOrFail();
+            $ad->refresh();
+            if (array_key_exists('is_published', $data)) {
+                if ($data['is_published'] && $ad->status !== 'draft') {
+                    if ($ad->status !== 'published' || ! $ad->is_approved || $ad->hidden_reason === 'admin_suspended') {
+                        throw ValidationException::withMessages(['is_published' => 'Ce bien doit être validé par un administrateur.']);
+                    }
+                    app(SubscriptionEntitlements::class)->assertCanPublish($ad);
+                    $ad->forceFill(['hidden_reason' => null, 'subscription_hidden_at' => null]);
+                } elseif (! $data['is_published']) {
+                    // Explicit owner withdrawal must override an automatic expiry hide.
+                    $ad->forceFill(['hidden_reason' => 'manual', 'subscription_hidden_at' => null]);
+                }
+                if ($ad->status === 'draft') {
+                    $data['is_published'] = false; // Submission has its own guarded transition.
+                }
+            }
+            $ad->save();
 
             $changed = false;
             $changes = [];
@@ -250,6 +271,10 @@ class AdService
             | 5. NO CHANGES
             |------------------------------------------------------
             */
+            if ($ad->status === 'published' && $ad->is_published) {
+                $ad->unsetRelation('details');
+                app(SubscriptionEntitlements::class)->assertListingReady($ad);
+            }
             if (! $changed) {
                 return [
                     'no_changes' => true,
@@ -352,20 +377,18 @@ class AdService
      |=========================================================*/
     public function submit(Ad $ad): Ad
     {
-        if ($ad->status !== 'draft') {
-            throw new \Exception('Only draft ads can be submitted');
-        }
-
-        $this->quota->consume(
-            $ad->user_id,
-            $ad->user->subscription,
-            1
-        );
-
-        $ad->update([
-            'status' => 'pending_validation',
-            'is_published' => true,
-        ]);
+        DB::transaction(function () use ($ad) {
+            User::whereKey($ad->user_id)->lockForUpdate()->firstOrFail();
+            $ad->refresh();
+            if ($ad->status !== 'draft') {
+                throw ValidationException::withMessages(['is_published' => 'Seul un brouillon peut être soumis.']);
+            }
+            app(SubscriptionEntitlements::class)->assertCanPublish($ad, true);
+            $this->schemaValidator->validate(['category_id' => $ad->category_id, 'ad_type' => $ad->ad_type,
+                'is_published' => true, 'details' => $ad->details?->details ?? []], 'create');
+            $ad->forceFill(['status' => 'pending_validation', 'is_published' => true, 'is_approved' => false,
+                'hidden_reason' => null, 'subscription_hidden_at' => null])->save();
+        }, 3);
 
         $this->auditLogger->record(
             'ad.submitted',
@@ -395,15 +418,17 @@ class AdService
      |=========================================================*/
     public function approve(Ad $ad): Ad
     {
-        if ($ad->status !== 'pending_validation') {
-            throw new \Exception('Only pending ads can be approved');
-        }
-
-        $ad->update([
-            'status' => 'published',
-            'is_approved' => true,
-            'rejection_reason' => null,
-        ]);
+        DB::transaction(function () use ($ad) {
+            User::whereKey($ad->user_id)->lockForUpdate()->firstOrFail();
+            $ad->refresh();
+            if ($ad->status !== 'pending_validation' || $ad->hidden_reason === 'manual') {
+                throw ValidationException::withMessages(['is_published' => 'Ce bien ne peut pas être approuvé dans son état actuel.']);
+            }
+            app(SubscriptionEntitlements::class)->assertCanPublish($ad);
+            app(SubscriptionEntitlements::class)->assertListingReady($ad);
+            $ad->forceFill(['status' => 'published', 'is_published' => true, 'is_approved' => true,
+                'rejection_reason' => null, 'hidden_reason' => null, 'subscription_hidden_at' => null])->save();
+        }, 3);
 
         $this->auditLogger->record(
             'ad.approved',
@@ -424,17 +449,30 @@ class AdService
         return $ad;
     }
 
+    public function suspend(Ad $ad): void
+    {
+        DB::transaction(function () use ($ad) {
+            User::whereKey($ad->user_id)->lockForUpdate()->firstOrFail();
+            $ad->refresh();
+            $before = $ad->only(['status', 'is_published', 'hidden_reason']);
+            $ad->forceFill(['status' => 'pending_validation', 'is_published' => false, 'is_approved' => false,
+                'hidden_reason' => 'admin_suspended', 'subscription_hidden_at' => null])->save();
+            $this->auditLogger->record('ad.suspended', $ad, 'Publication suspendue par un administrateur.', $before,
+                $ad->only(['status', 'is_published', 'hidden_reason']), 'warning');
+        }, 3);
+    }
+
     public function reject(Ad $ad, string $reason): Ad
     {
-        if ($ad->status !== 'pending_validation') {
-            throw new \Exception('Only pending ads can be rejected');
-        }
-
-        $ad->update([
-            'status' => 'rejected',
-            'rejection_reason' => $reason,
-            'is_approved' => false,
-        ]);
+        DB::transaction(function () use ($ad, $reason) {
+            User::whereKey($ad->user_id)->lockForUpdate()->firstOrFail();
+            $ad->refresh();
+            if ($ad->status !== 'pending_validation') {
+                throw new \DomainException('Only pending ads can be rejected');
+            }
+            $ad->forceFill(['status' => 'rejected', 'rejection_reason' => $reason, 'is_published' => false,
+                'is_approved' => false, 'hidden_reason' => null, 'subscription_hidden_at' => null])->save();
+        }, 3);
 
         $this->auditLogger->record(
             'ad.rejected',
@@ -479,8 +517,7 @@ class AdService
                 'ad_type',
                 'created_at',
             ])
-            ->where('is_published', true)
-            ->where('is_approved', true)
+            ->publiclyVisible()
             ->with([
                 'category:id,name,slug',
                 'municipality:id,name',
@@ -577,8 +614,7 @@ class AdService
 
     public function getPublicAd($id)
     {
-        return Ad::where('is_published', true)
-            ->where('is_approved', true)
+        return Ad::query()->publiclyVisible()
             ->where('id', $id)
             ->with(['category', 'amenities', 'images', 'details', 'user', 'municipality', 'city', 'country'])
             ->firstOrFail();

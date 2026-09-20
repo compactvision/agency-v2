@@ -20,11 +20,8 @@ class BillingService
     {
         $plan = Plan::findOrFail($planId);
 
-        // Check for existing active subscription
-        $user = User::find($userId);
-        if ($user->subscription && $user->subscription->is_active) {
-            throw new \Exception('ALREADY_HAS_SUBSCRIPTION');
-        }
+        abort_unless($plan->is_active, 422, 'Cette formule est inactive.');
+        $user = User::findOrFail($userId);
 
         // If manual payment method
         if ($plan->payment_method === 'manual') {
@@ -49,7 +46,7 @@ class BillingService
 
         $successUrl = route('billing.return', ['transaction' => $subscription->transaction_id]);
         $cancelUrl = route('billing.cancel.return', ['transaction' => $subscription->transaction_id]);
-        $callbackUrl = route('webhooks.rdcard');
+        $callbackUrl = route('webhooks.rdcard', ['transaction' => $subscription->transaction_id]);
 
         $subscription->update(['payment_method' => 'RDCard']);
 
